@@ -1,0 +1,21 @@
+name: elec
+description: A collection of elec functionality
+version: 0.0.1
+author: Tony Humbert <tony.humbert@yahoo.com>
+#homepage: https://www.example.com
+
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+
+dependencies:
+  date:
+    git:
+        url: git://github.com/thumbert/date.git
+        ref: '0.0.3'
+  mongo_dart: '0.2.4'
+  intl: '>=0.12.4 <0.13.0'
+  rpc: '0.5.4'
+  timezone: '^0.3.1'
+
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
