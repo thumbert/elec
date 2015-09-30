@@ -9,7 +9,7 @@ abstract class Iso {
 }
 
 class Nepool implements Iso {
-  static final Location location = getLocation('America/New_York');
+  static final Location location = getLocation('US/Eastern');
 
   static final bucket5x16    = new Bucket5x16(location);
   static final bucket2x16H   = new Bucket2x16H(location);

@@ -1,7 +1,7 @@
 library time.calendar;
 
-import 'package:timeseries/time/date.dart';
-import 'package:timeseries/time/holiday.dart';
+import 'package:date/date.dart';
+import 'package:elec/src/time/calendar/holiday.dart';
 
 
 abstract class Calendar {

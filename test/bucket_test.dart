@@ -6,52 +6,33 @@ import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:date/date.dart';
 
-
-List<DateTime> seqHours(TZDateTime start, TZDateTime end) {
-  Duration H1 = new Duration(hours: 1);
-  List<DateTime> res = [];
-  var dt = start;
-  while (dt.isBefore(end) || dt.isAtSameMomentAs(end)) {
-    res.add(dt);
-    dt = dt.add(H1);
-  }
-
-  return res;
-}
-
 List<int> countByMonth(int year, Bucket bucket) {
-  List res = [];
-  for (int mon in new List.generate(12, (i) => i + 1)) {
-    Month next = new Month(year, mon).next;
-    TZDateTime start = new TZDateTime(Nepool.location, year, mon, 1);
-    TZDateTime end = new TZDateTime(Nepool.location, next.year, next.month).subtract(new Duration(hours: 1));
-    List<DateTime> hrs = seqHours(start, end);
-    int count = hrs.where((hour) => bucket.containsHourBeginning(hour)).length;
-    res.add(count);
-    //print('start: $start, end: $end, count: $count');
-  }
-
-  return res;
+  var months = new TimeIterable(new Month(year,1), new Month(year, 12));
+  return months.map((Month m) {
+    Hour start = new Hour.beginning(new TZDateTime(Nepool.location, m.year, m.month));
+    Hour end = new Hour.ending(new TZDateTime(Nepool.location, m.next.year, m.next.month));
+    return new TimeIterable(start, end).where((hour) => bucket.containsHour(hour)).length;
+  }).toList();
 }
 
 List<String> daysInBucket(int year, int month, Bucket bucket) {
   Month next = new Month(year, month).next;
-  TZDateTime start = new TZDateTime(Nepool.location, year, month, 1);
-  TZDateTime end = new TZDateTime(Nepool.location, next.year, next.month).subtract(new Duration(hours: 1));
-  List<DateTime> hrs = seqHours(start, end);
-  List days = hrs.where((hour) => bucket.containsHourBeginning(hour))
-    .map((dt) => new Date(dt.year, dt.month, dt.day).toString()).toSet().toList();
+  Hour start = new Hour.beginning(new TZDateTime(Nepool.location, year, month));
+  Hour end = new Hour.ending(new TZDateTime(Nepool.location, next.year, next.month));
+  Iterable<Hour> hrs = new TimeIterable(start, end);
+  List days = hrs.where((hour) => bucket.containsHour(hour))
+    .map((hour) => hour.currentDate.toString()).toSet().toList();
 
   return days;
 }
 
-showHourBeginning(int year, int month, Bucket bucket) {
-  Month next = new Month(year, month).next;
-  TZDateTime start = new TZDateTime(Nepool.location, year, month, 1);
-  TZDateTime end = new TZDateTime(Nepool.location, next.year, next.month).subtract(new Duration(hours: 1));
-  List<DateTime> hrs = seqHours(start, end);
-  hrs.where((hour) => bucket.containsHourBeginning(hour)).forEach((hr) => print(hr));
-}
+//showHourBeginning(int year, int month, Bucket bucket) {
+//  Month next = new Month(year, month).next;
+//  TZDateTime start = new TZDateTime(Nepool.location, year, month, 1);
+//  TZDateTime end = new TZDateTime(Nepool.location, next.year, next.month).subtract(new Duration(hours: 1));
+//  List<DateTime> hrs = seqHours(start, end);
+//  hrs.where((hour) => bucket.containsHourBeginning(hour)).forEach((hr) => print(hr));
+//}
 
 
 
@@ -62,8 +43,10 @@ test_bucket() {
     test("peak hours by year", () {
       List res = [];
       for (int year in [2012, 2013, 2014, 2015, 2016]) {
-        List<DateTime> hrs = seqHours(new TZDateTime(Nepool.location, year, 1, 1), new TZDateTime(Nepool.location, year, 12, 31, 23));
-        res.add(hrs.where((hour) => b5x16.containsHourBeginning(hour)).length);
+        Hour start = new Hour.beginning(new TZDateTime(Nepool.location, year));
+        Hour end = new Hour.ending(new TZDateTime(Nepool.location, year+1));
+        var hrs = new TimeIterable(start, end);
+        res.add(hrs.where((hour) => b5x16.containsHour(hour)).length);
       }
       expect(res, [4080, 4080, 4080, 4096, 4080]);
     });

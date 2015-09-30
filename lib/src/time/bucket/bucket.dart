@@ -1,43 +1,19 @@
 library elec.bucket;
 
+import 'package:date/date.dart';
 import 'package:timezone/standalone.dart';
-import 'package:timeseries/time/calendar.dart';
-import 'package:timeseries/time/date.dart';
-import 'package:timeseries/elec/iso.dart';
+import 'package:elec/src/time/calendar/calendar.dart';
+import 'package:elec/src/iso/iso.dart';
 
 abstract class Bucket {
-  static final Duration H1 = new Duration(hours: 1);
   Calendar calendar;
   String name;
-  //Iso iso;
+  Iso iso;
 
   /**
-   * Does this bucket contains the HourEnding dt?
-   * [dt] needs to be an hour ending DateTime (0 min, 0 seconds, 0 millis)
-   * If the location of [dt] is not the same as the [iso] location, error.
+   * Is this hour in the bucket?
    */
-  bool containsHourEnding(TZDateTime dt) => containsHourBeginning(dt.subtract(Bucket.H1));
-
-  /**
-   * Does this bucket contains the HourBeginning dt?
-   */
-  bool containsHourBeginning(TZDateTime dt);
-
-  /**
-   * Count the number of Hour Ending hours between start and end that belong to this bucket.
-   * [start] is an HourEnding DateTime
-   * [end] is an HourEnding DateTime
-   */
-//  int hoursIn(DateTime start, DateTime end) {
-//    int hrs = 0;
-//    var current = start;
-//    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
-//      if (containsHourEnding(current))
-//        hrs += 1;
-//    }
-//
-//    return hrs;
-//  }
+  bool containsHour(Hour hour);
 }
 
 
@@ -48,8 +24,7 @@ class Bucket7x24 extends Bucket {
 
   Bucket7x24(Iso this.iso);
 
-  bool containsHourEnding(DateTime dt) => true;
-  bool containsHourBeginning(DateTime dt) => true;
+  bool containsHour(Hour hour) => true;
 }
 
 class Bucket7x8 extends Bucket {
@@ -59,10 +34,10 @@ class Bucket7x8 extends Bucket {
 
   Bucket7x8(Location this.location);
 
-  bool containsHourBeginning(TZDateTime dt) {
-    if (dt.location != location)
-      throw new ArgumentError('dt location doesn\'t match iso location');
-    if (dt.hour <= 6 || dt.hour == 23)
+  bool containsHour(Hour hour) {
+    if (hour.start.location != location)
+      throw new ArgumentError('Hour location doesn\'t match Iso location');
+    if (hour.start.hour <= 6 || hour.start.hour == 23)
       return true;
 
     return false;
@@ -76,19 +51,19 @@ class Bucket5x16 extends Bucket {
 
   Bucket5x16(Location this.location);
 
-  bool containsHourBeginning(TZDateTime dt) {
-    if (dt.location != location)
-      throw new ArgumentError('dt location doesn\'t match iso location');
-    int dayOfWeek = dt.weekday;
+  bool containsHour(Hour hour) {
+    if (hour.start.location != location)
+      throw new ArgumentError('Hour location doesn\'t match iso location');
+    int dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (dt.hour < 7 || dt.hour == 23) {
+      if (hour.start.hour < 7 || hour.start.hour == 23) {
         /// not at the right hour of the day
         return false;
       } else {
-        if (calendar.isHoliday(new Date(dt.year, dt.month, dt.day)))
+        if (calendar.isHoliday(hour.currentDate))
           /// it's a holiday
           return false;
         else
@@ -107,16 +82,16 @@ class Bucket2x16H extends Bucket {
 
   Bucket2x16H(Location this.location);
 
-  bool containsHourBeginning(TZDateTime dt) {
-    if (dt.location != location)
-      throw new ArgumentError('dt location doesn\'t match iso location');
-    int dayOfWeek = dt.weekday;
-    if (dt.hour < 7 || dt.hour == 23)
+  bool containsHour(Hour hour) {
+    if (hour.start.location != location)
+      throw new ArgumentError('Hour location doesn\'t match iso location');
+    int dayOfWeek = hour.currentDate.weekday;
+    if (hour.start.hour < 7 || hour.start.hour == 23)
       return false;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(new Date(dt.year, dt.month, dt.day)))
+      if (calendar.isHoliday(hour.currentDate))
         return true;
       else
         return false;
@@ -133,16 +108,16 @@ class BucketOffpeak extends Bucket {
 
   BucketOffpeak(Location this.location);
 
-  bool containsHourBeginning(TZDateTime dt) {
-    if (dt.location != location)
-      throw new ArgumentError('dt location doesn\'t match iso location');
-    int dayOfWeek = dt.weekday;
+  bool containsHour(Hour hour) {
+    if (hour.start.location != location)
+      throw new ArgumentError('Hour location doesn\'t match Iso location');
+    int dayOfWeek = hour.start.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (dt.hour < 7 || dt.hour == 23)
+      if (hour.start.hour < 7 || hour.start.hour == 23)
         return true;
-      if (calendar.isHoliday(new Date(dt.year, dt.month, dt.day)))
+      if (calendar.isHoliday(hour.currentDate))
         return true;
     }
 

@@ -1,6 +1,6 @@
 library holiday;
 
-import 'package:timeseries/time/date.dart';
+import 'package:date/date.dart';
 
 /**
  *  http://en.wikipedia.org/wiki/Federal_holidays_in_the_United_States
