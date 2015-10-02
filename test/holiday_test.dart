@@ -1,12 +1,10 @@
 library test_holiday;
 
-import 'package:unittest/unittest.dart';
-import 'package:timeseries/time/holiday.dart';
+import 'package:test/test.dart';
+import 'package:elec/src/time/calendar/holiday.dart';
 import 'package:intl/intl.dart';
 
 test_holiday() {
-  var fmt = new DateFormat("yyyy-MM-dd");
-
   group("Test Holidays: ", (){
     
     test("Thanksgiving", () {

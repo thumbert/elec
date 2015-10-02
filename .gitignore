@@ -9,7 +9,6 @@ build/
 packages
 pubspec.lock
 
-bin
 out
 docs
 

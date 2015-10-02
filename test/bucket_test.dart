@@ -104,6 +104,7 @@ test_bucket() {
 
 }
 
-main() {
-  initializeTimeZone().then((_) => test_bucket());
+main() async {
+  await initializeTimeZone();
+  test_bucket();
 }

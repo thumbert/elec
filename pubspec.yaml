@@ -11,6 +11,8 @@ dependencies:
   date:
     git:
         url: git://github.com/thumbert/date.git
+  logging: '^0.11.2'
+  logging_handlers: ">=0.8.0 <0.9.0"
   mongo_dart: '0.2.4'
   intl: '>=0.12.4 <0.13.0'
   rpc: '0.5.4'
