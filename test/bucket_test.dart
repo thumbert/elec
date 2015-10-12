@@ -26,13 +26,6 @@ List<String> daysInBucket(int year, int month, Bucket bucket) {
   return days;
 }
 
-//showHourBeginning(int year, int month, Bucket bucket) {
-//  Month next = new Month(year, month).next;
-//  TZDateTime start = new TZDateTime(Nepool.location, year, month, 1);
-//  TZDateTime end = new TZDateTime(Nepool.location, next.year, next.month).subtract(new Duration(hours: 1));
-//  List<DateTime> hrs = seqHours(start, end);
-//  hrs.where((hour) => bucket.containsHourBeginning(hour)).forEach((hr) => print(hr));
-//}
 
 
 

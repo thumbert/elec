@@ -4,16 +4,17 @@ import 'dart:io';
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:intl/intl.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/standalone.dart' as tz;
 import 'package:date/date.dart';
 import 'package:rpc/rpc.dart';
 
+//import 'package:elec/elec.dart';
 import 'package:elec/src/iso/nepool/iso_timestamp.dart';
 import 'package:elec/src/iso/nepool/archive.dart';
 import 'package:elec/src/iso/nepool/config.dart';
 
 
-
+Config config;
 
 /**
  * +0400 for EDT, +0500 for EST
@@ -30,7 +31,7 @@ class DaLmp extends ComponentConfig {
 
   DaLmp({ComponentConfig component}) {
     if (component == null) {
-      Config config = new LocalConfig();
+      Config config = new TestConfig();
       component = config.components[''];
     }
     dbName = component.dbName;
@@ -38,8 +39,8 @@ class DaLmp extends ComponentConfig {
     collectionName = component.collectionName;
 
     coll = db.collection(collectionName);
-    initializeTimeZoneSync();
-    location = getLocation('America/New_York');
+    tz.initializeTimeZoneSync();
+    //location = getLocation('America/New_York');
   }
 
   /**
@@ -313,20 +314,21 @@ class DaLmp extends ComponentConfig {
 /**
  * Deal with downloading the data, massaging it, and loading it into mongo.
  */
-class DamArchive extends Config with DailyArchive {
+class DamArchive extends ComponentConfig with DailyArchive {
   DbCollection coll;
-  Location location;
+  tz.Location location;
 
-  DamArchive({Config config}) {
-    if (config == null) config = new DefaultConfig();
-    dbName = config.dbName;
-    DIR = config.DIR;
-    collectionName = config.collectionName;
-    db = config.db;
+  DamArchive() {
+    if (config == null) config = new TestConfig();
+    ComponentConfig component = config.nepool_dam_lmp_hourly;
+    dbName = component.dbName;
+    DIR = component.DIR;
+    collectionName = component.collectionName;
+    Db db = component.db;
 
     coll = db.collection(collectionName);
-    initializeTimeZoneSync();
-    location = getLocation('America/New_York');
+    tz.initializeTimeZoneSync();
+    location = tz.getLocation('America/New_York');
   }
 
   String yyyymmdd(Date date) {
@@ -350,7 +352,7 @@ class DamArchive extends Config with DailyArchive {
           .where((List row) => row.first == '"D"')
           .map((List row) {
         return new Map.fromIterables(keys, [
-          parseHourEndingStamp(_unquote(row[1]), _unquote(row[2]), location),
+          parseHourEndingStamp(_unquote(row[1]), _unquote(row[2])),
           int.parse(_unquote(row[3])), // ptid
           [
             num.parse(row[6]),
@@ -401,7 +403,7 @@ class DamArchive extends Config with DailyArchive {
       HttpClientRequest request = await client.getUrl(Uri.parse(URL));
       HttpClientResponse response = await request.close();
       await response.pipe(fileout.openWrite());
-      print('Downloaded short term outages for day $date.');
+      print('Downloaded nepool da prices for $date.');
     }
   }
 
@@ -434,11 +436,11 @@ class DamArchive extends Config with DailyArchive {
   removeDataForDay(Date date) async {
     SelectorBuilder sb = where;
 
-    TZDateTime start = new TZDateTime(location, date.year, date.month, date.day).toUtc();
+    tz.TZDateTime start = new tz.TZDateTime(location, date.year, date.month, date.day).toUtc();
     sb = sb.gte('hourBeginning', start);
 
     Date next = date.next;
-    TZDateTime end = new TZDateTime(location, next.year, next.month, next.day).toUtc();
+    tz.TZDateTime end = new tz.TZDateTime(location, next.year, next.month, next.day).toUtc();
     sb = sb.lt('hourBeginning', end);
 
     await coll.remove(sb);
@@ -475,7 +477,7 @@ class DamArchive extends Config with DailyArchive {
     // TODO: make start/end dependent on the data.
     await db.open();
     Date day = start;
-    while (day < end) {
+    while (day.isBefore(end)) {
       await oneDayDownload(day);
       await oneDayMongoInsert(day);
       day = day.next;
