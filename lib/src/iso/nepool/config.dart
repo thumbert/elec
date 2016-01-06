@@ -1,7 +1,9 @@
 library iso.nepool.config;
 
 import 'dart:io';
+import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:timezone/standalone.dart';
 
 
 class ComponentConfig {
@@ -30,16 +32,23 @@ abstract class Config {
   ComponentConfig nepool_binding_constraints_da;
   ComponentConfig nepool_dam_lmp_hourly;
 
+  Future open() async {
+    initializeTimeZoneSync();
+    await nepool_dam_lmp_hourly.db.open();
+    await nepool_binding_constraints_da.db.open();
+  }
+
+  Future close() async {
+    await nepool_dam_lmp_hourly.db.close();
+    await nepool_binding_constraints_da.db.close();
+  }
+
 }
 
 
-class TestConfig implements Config {
+class TestConfig extends Config {
   String configName = 'test';
   String host = '127.0.0.1';
-
-  ComponentConfig nepool_binding_constraints_da;
-  ComponentConfig nepool_dam_lmp_hourly;
-
 
   TestConfig() {
     Map env = Platform.environment;
@@ -56,7 +65,7 @@ class TestConfig implements Config {
       ..collectionName = 'lmp_hourly'
       ..DIR = env['HOME'] + '/Downloads/Archive/DA_LMP/Raw/Csv';
 
-
-
   }
+
+
 }

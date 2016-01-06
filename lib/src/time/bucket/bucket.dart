@@ -19,10 +19,9 @@ abstract class Bucket {
 
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
-  Iso iso;
-  Calendar calendar = new NercCalendar();
+  Location location;
 
-  Bucket7x24(Iso this.iso);
+  Bucket7x24(Location this.location);
 
   bool containsHour(Hour hour) => true;
 }

@@ -14,8 +14,6 @@ abstract class Location {
   int ptid;
   String name;
   Iso iso;
-  Future<List<Map<Hour, num>>> getHourlyCongestionPrice(
-      TZDateTime start, TZDateTime end);
 
   factory Location() {
 
@@ -31,22 +29,4 @@ class NepoolLocation implements Location {
   NepoolLocation.fromPtid(this.ptid);
   NepoolLocation.fromName(this.name);
 
-  /// Return the hourly congestion prices for this location.
-  Future<List<Map<Hour, num>>> getHourlyCongestionPrice(
-      TZDateTime start, TZDateTime end) async {
-    DbCollection coll = config.nepool_dam_lmp_hourly.coll;
-    SelectorBuilder sb = where;
-    sb.eq('ptid', ptid);
-    sb.gte('hourBeginning', start);
-    sb.lt('hourBeginning', end);
-
-    return await coll
-    .find(sb.excludeFields(['_id', 'ptid']).sortBy('hourBeginning'))
-    .map((Map row) => {
-      'hour': new Hour.beginning(
-          new TZDateTime.from(row['hourBeginning'], Nepool.location)),
-      'congestion': row['Lmp_Cong_Loss'][1]
-    })
-    .toList();
-  }
 }

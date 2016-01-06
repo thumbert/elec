@@ -5,13 +5,15 @@ import 'package:logging/logging.dart';
 import 'package:logging_handlers/server_logging_handlers.dart';
 import 'package:rpc/rpc.dart';
 
-import 'package:elec/src/iso/nepool/nepool_da_lmp.dart';
+import 'package:elec/src/api/nepool_lmp.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
 
-registerApis() {
-  _apiServer.addApi(new DaLmp());
+registerApis() async {
+  DaLmp dalmp = new DaLmp();
+  await dalmp.db.open();
+  _apiServer.addApi(dalmp);
 }
 
 main() async {
@@ -20,7 +22,8 @@ main() async {
   if (stdout.hasTerminal)
   Logger.root.onRecord.listen(new LogPrintHandler());
 
-  registerApis();
+  await registerApis();
+
   _apiServer.enableDiscoveryApi();
 
   HttpServer server = await HttpServer.bind(InternetAddress.ANY_IP_V4, 8080);
