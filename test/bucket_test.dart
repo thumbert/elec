@@ -7,18 +7,20 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:date/date.dart';
 
 List<int> countByMonth(int year, Bucket bucket) {
+  Location tzLocation = bucket.location;
+
   var months = new TimeIterable(new Month(year,1), new Month(year, 12));
   return months.map((Month m) {
-    Hour start = new Hour.beginning(new TZDateTime(Nepool.location, m.year, m.month));
-    Hour end = new Hour.ending(new TZDateTime(Nepool.location, m.next.year, m.next.month));
+    Hour start = new Hour.beginning(new TZDateTime(tzLocation, m.year, m.month));
+    Hour end = new Hour.ending(new TZDateTime(tzLocation, m.next.year, m.next.month));
     return new TimeIterable(start, end).where((hour) => bucket.containsHour(hour)).length;
   }).toList();
 }
 
 List<String> daysInBucket(int year, int month, Bucket bucket) {
   Month next = new Month(year, month).next;
-  Hour start = new Hour.beginning(new TZDateTime(Nepool.location, year, month));
-  Hour end = new Hour.ending(new TZDateTime(Nepool.location, next.year, next.month));
+  Hour start = new Hour.beginning(new TZDateTime(bucket.location, year, month));
+  Hour end = new Hour.ending(new TZDateTime(bucket.location, next.year, next.month));
   Iterable<Hour> hrs = new TimeIterable(start, end);
   List days = hrs.where((hour) => bucket.containsHour(hour))
     .map((hour) => hour.currentDate.toString()).toSet().toList();
@@ -36,8 +38,8 @@ test_bucket() {
     test("peak hours by year", () {
       List res = [];
       for (int year in [2012, 2013, 2014, 2015, 2016]) {
-        Hour start = new Hour.beginning(new TZDateTime(Nepool.location, year));
-        Hour end = new Hour.ending(new TZDateTime(Nepool.location, year+1));
+        Hour start = new Hour.beginning(new TZDateTime(b5x16.location, year));
+        Hour end = new Hour.ending(new TZDateTime(b5x16.location, year+1));
         var hrs = new TimeIterable(start, end);
         res.add(hrs.where((hour) => b5x16.containsHour(hour)).length);
       }
@@ -60,8 +62,6 @@ test_bucket() {
 
   group("Test the 2x16H bucket NEPOOL", () {
     test("2x16H hours by month in 2012", () {
-//      daysInBucket(2012, 1, Nepool.bucket2x16H).forEach((e) => print(e));
-//      showHourBeginning(2012, 2, Nepool.bucket2x16H);
       expect(countByMonth(2012, Nepool.bucket2x16H),
       [160, 128, 144, 144, 144, 144, 160, 128, 176, 128, 144,	176]);
     });

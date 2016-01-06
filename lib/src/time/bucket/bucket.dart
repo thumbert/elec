@@ -7,8 +7,8 @@ import 'package:elec/src/iso/iso.dart';
 
 abstract class Bucket {
   Calendar calendar;
-  String name;
-  Iso iso;
+  String get name;
+  Location location;
 
   /**
    * Is this hour in the bucket?
@@ -21,7 +21,7 @@ class Bucket7x24 extends Bucket {
   final String name = '7x24';
   Location location;
 
-  Bucket7x24(Location this.location);
+  Bucket7x24(this.location);
 
   bool containsHour(Hour hour) => true;
 }
