@@ -21,32 +21,35 @@ import 'package:elec/src/api/nepool_lmp.dart';
  *
  */
 Future<List<Map>> summaryByBucketMonth(
-    List<Tuple2<Hour,num>> hourlyData, List<Bucket> buckets,
+    List<Tuple2<Hour, num>> hourlyData, List<Bucket> buckets,
     {Function f}) async {
+  /// TODO: What if the data is 5-min intervals?!  Bad design.
+
   if (f == null) {
     f = (Iterable x) {
-      if (x.isEmpty) return null;
-      else return x.reduce((a,b) => a + b) / x.length;
+      if (x.isEmpty)
+        return null;
+      else
+        return x.reduce((a, b) => a + b) / x.length;
     };
   }
 
   /// group by month first (better if you have more buckets)
-  Map mData = _groupBy(
-      hourlyData, (Tuple2<Hour,num> e) => new Month.fromDateTime(e.i1.start));
+  Map mData = _groupBy(hourlyData,
+      (Tuple2<Hour, num> e) => new Month.fromDateTime(e.item1.start));
 
   List res = [];
   mData.forEach((Month k, List v) {
     buckets.forEach((Bucket bucket) {
       var value = f(v
-      .where((Tuple2<Hour,num> e) => bucket.containsHour(e.i1))
-      .map((e) => e.i2));
+          .where((Tuple2<Hour, num> e) => bucket.containsHour(e.item1))
+          .map((e) => e.i2));
       res.add({'bucket': bucket, 'month': k, 'value': value});
     });
   });
 
   return res;
 }
-
 
 Map _groupBy(Iterable x, Function f) {
   Map result = new Map();

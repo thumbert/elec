@@ -394,7 +394,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
     // TODO: make start/end dependent on the data.
     await db.open();
     Date day = start;
-    while (day < end) {
+    while (day.isBefore(end)) {
       await oneDayDownload(day);
       await oneDayMongoInsert(day);
       day = day.next;

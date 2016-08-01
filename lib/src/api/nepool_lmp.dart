@@ -78,8 +78,8 @@ class DaLmp {
   }
 
   Map _mccMessage(Tuple2<Hour,num> e) => {
-    'HB': e.i1.start.toString(),
-    'mcc': e.i2
+    'HB': e.item1.start.toString(),
+    'mcc': e.item2
   };
 
   /**
