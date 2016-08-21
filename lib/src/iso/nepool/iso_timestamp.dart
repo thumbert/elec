@@ -5,8 +5,8 @@ import 'package:timezone/standalone.dart';
 Location _eastern = getLocation('US/Eastern');
 
 /**
- * Convert from an ISO tuple.
- * [localDate] is 'mm/dd/yyyy'
+ * Convert from an ISONE tuple.
+ * [localDate] is a String in format 'mm/dd/yyyy'
  * [hourEnding] is of the form '01', '02', '02X', '03', ... '24'
  * [Location] is the 'America/New York' location
  * Return an hour beginning UTC DateTime

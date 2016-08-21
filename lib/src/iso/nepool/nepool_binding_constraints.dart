@@ -68,8 +68,8 @@ class NepoolBindingConstraints {
    */
   updateDb() {
     return db.open().then((_) => lastDayInserted().then((DateTime lastDay) {
-          DateTime start = nextDay(from: lastDay);
-          DateTime end = nextDay();
+          Date start = new Date.fromDateTime(lastDay).next;;
+          Date end = Date.today();
           print('Updating the db from $start to $end.');
           return insertDaysStartEnd(start, end);
         }));
@@ -80,12 +80,12 @@ class NepoolBindingConstraints {
    * Parameters start and end are midnight UTC DateTime objects.
    * For each day in the range of days, download and insert the data into the db.
    */
-  insertDaysStartEnd(DateTime start, DateTime end) {
-    List<DateTime> days = seqDays(start, end);
-    DateFormat fmtDay = new DateFormat('yyyyMMdd');
+  insertDaysStartEnd(Date start, Date end) {
+    List<Date> days = new TimeIterable(start, end).toList();
+    Date.fmt = new DateFormat('yyyyMMdd');
 
     return Future.forEach(days, (day) {
-      String yyyymmdd = fmtDay.format(day);
+      String yyyymmdd = day.toString();
       return oneDayDownload(yyyymmdd).then((_) {
         return oneDayMongoInsert(yyyymmdd);
       });
