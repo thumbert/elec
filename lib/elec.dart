@@ -6,10 +6,6 @@
 /// This is an awesome library. More dartdocs go here.
 library elec;
 
-// TODO: Export any libraries intended for clients of this package.
-
-
-
 
 export 'src/elec_base.dart';
 export 'src/iso/iso.dart';
