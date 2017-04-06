@@ -45,20 +45,20 @@ class Auction {
   }
 
   /// Return the first hour of the Auction
-  Hour firstHour() => new Hour.beginning(new TZDateTime(Iso.location, start.year, start.month));
-
-  /// Return the last hour of the Auction
-  Hour lastHour() {
-    var aux = new Month(start.year, start.month).add(noMonths);
-    TZDateTime end = new TZDateTime(Iso.location, aux.year, aux.month);
-    return new Hour.ending(end);
-  }
+//  Hour firstHour() => new Hour.beginning(new TZDateTime(Iso.location, start.year, start.month));
+//
+//  /// Return the last hour of the Auction
+//  Hour lastHour() {
+//    var aux = new Month(start.year, start.month).add(noMonths);
+//    TZDateTime end = new TZDateTime(Iso.location, aux.year, aux.month);
+//    return new Hour.ending(end);
+//  }
 
   /// Calculate the number of hours in this auction
-  int get noHours {
-    if (_noHours == null)
-      _noHours = new TimeIterable(firstHour(), lastHour()).length;
-    return _noHours;
-  }
+//  int get noHours {
+//    if (_noHours == null)
+//      _noHours = new TimeIterable(firstHour(), lastHour()).length;
+//    return _noHours;
+//  }
 
 }

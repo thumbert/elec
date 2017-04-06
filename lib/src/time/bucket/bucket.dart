@@ -34,8 +34,6 @@ class Bucket7x8 extends Bucket {
   Bucket7x8(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.location != location)
-      throw new ArgumentError('Hour location doesn\'t match Iso location');
     if (hour.start.hour <= 6 || hour.start.hour == 23)
       return true;
 
@@ -51,8 +49,6 @@ class Bucket5x16 extends Bucket {
   Bucket5x16(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.location != location)
-      throw new ArgumentError('Hour location doesn\'t match iso location');
     int dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
@@ -82,8 +78,6 @@ class Bucket2x16H extends Bucket {
   Bucket2x16H(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.location != location)
-      throw new ArgumentError('Hour location doesn\'t match iso location');
     int dayOfWeek = hour.currentDate.weekday;
     if (hour.start.hour < 7 || hour.start.hour == 23)
       return false;
@@ -108,8 +102,6 @@ class BucketOffpeak extends Bucket {
   BucketOffpeak(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.location != location)
-      throw new ArgumentError('Hour location doesn\'t match Iso location');
     int dayOfWeek = hour.start.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;

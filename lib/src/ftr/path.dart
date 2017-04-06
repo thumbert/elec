@@ -30,30 +30,30 @@ class Path {
   }
 
   /// get the hourly settle price for this path
-  Future<List<Map<Hour, num>>> getSettlePrice(
-      tz.TZDateTime start, tz.TZDateTime end) async {
-
-    var sourcePrices = source.getHourlyCongestionPrice(start, end);
-    var sinkPrices = sink.getHourlyCongestionPrice(start, end);
-    List<List> data = await Future.wait([sourcePrices, sinkPrices]);
-    if (data[0].length != data[1].length)
-      throw 'Sink and source data have different lengths.';
-
-    List res = [];
-    for (int i=0; i<data[1].length; i++) {
-      Hour hour = data[1][i]['hour'];
-      if (data[0][i]['hour'] != hour)
-        throw 'Misaligned data, results will be wrong';
-      if (bucket.containsHour(hour)) {
-        res.add({
-          'hour': hour,
-          'value': data[1][i]['congestion'] - data[0][i]['congestion']
-        });
-      }
-    }
-
-    return res;
-  }
+//  Future<List<Map<Hour, num>>> getSettlePrice(
+//      tz.TZDateTime start, tz.TZDateTime end) async {
+//
+//    var sourcePrices = source.getHourlyCongestionPrice(start, end);
+//    var sinkPrices = sink.getHourlyCongestionPrice(start, end);
+//    List<List> data = await Future.wait([sourcePrices, sinkPrices]);
+//    if (data[0].length != data[1].length)
+//      throw 'Sink and source data have different lengths.';
+//
+//    List res = [];
+//    for (int i=0; i<data[1].length; i++) {
+//      Hour hour = data[1][i]['hour'];
+//      if (data[0][i]['hour'] != hour)
+//        throw 'Misaligned data, results will be wrong';
+//      if (bucket.containsHour(hour)) {
+//        res.add({
+//          'hour': hour,
+//          'value': data[1][i]['congestion'] - data[0][i]['congestion']
+//        });
+//      }
+//    }
+//
+//    return res;
+//  }
 
 
 
