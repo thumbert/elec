@@ -7,16 +7,18 @@
 library elec;
 
 
+export 'src/api/temperature_noaa.dart';
+
 export 'src/elec_base.dart';
 export 'src/iso/iso.dart';
-export 'src/iso/nepool/config.dart';
+export 'src/iso/isone/config.dart';
 export 'src/ftr/auction.dart';
 //export 'src/iso/location.dart';
 export 'src/time/bucket/bucket.dart';
 
 
 
-import 'package:elec/src/iso/nepool/config.dart';
+import 'package:elec/src/iso/isone/config.dart';
 
 Config config;
 

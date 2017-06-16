@@ -8,9 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 
-import 'package:elec/src/iso/nepool/iso_timestamp.dart';
-import 'package:elec/src/iso/nepool/archive.dart';
-import 'package:elec/src/iso/nepool/config.dart';
+import 'package:elec/src/iso/isone/iso_timestamp.dart';
+import 'package:elec/src/iso/isone/archive.dart';
+import 'package:elec/src/iso/isone/config.dart';
 
 Config config;
 
@@ -230,7 +230,7 @@ class DaBindingConstraintArchive extends ComponentConfig with DailyArchive {
 
   DaBindingConstraintArchive() {
     if (config == null) config = new TestConfig();
-    ComponentConfig component = config.nepool_binding_constraints_da;
+    ComponentConfig component = config.isone_binding_constraints_da;
     dbName = component.dbName;
     DIR = component.DIR;
     collectionName = component.collectionName;

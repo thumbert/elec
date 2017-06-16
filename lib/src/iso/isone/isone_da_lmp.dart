@@ -7,9 +7,9 @@ import 'package:timezone/standalone.dart' as tz;
 import 'package:date/date.dart';
 
 //import 'package:elec/elec.dart';
-import 'package:elec/src/iso/nepool/iso_timestamp.dart';
-import 'package:elec/src/iso/nepool/archive.dart';
-import 'package:elec/src/iso/nepool/config.dart';
+import 'package:elec/src/iso/isone/iso_timestamp.dart';
+import 'package:elec/src/iso/isone/archive.dart';
+import 'package:elec/src/iso/isone/config.dart';
 
 //Config config;
 
@@ -22,14 +22,14 @@ class DamArchive extends ComponentConfig with DailyArchive {
 
   DamArchive({Config config}) {
     if (config == null) config = new TestConfig();
-    ComponentConfig component = config.nepool_dam_lmp_hourly;
+    ComponentConfig component = config.isone_dam_lmp_hourly;
     host = component.host;
     dbName = component.dbName;
     DIR = component.DIR;
     collectionName = component.collectionName;
 
     coll = db.collection(collectionName);
-    tz.initializeTimeZoneSync();
+    tz.initializeTimeZoneSync(config.tzdb);
     location = tz.getLocation('America/New_York');
   }
 
@@ -46,7 +46,13 @@ class DamArchive extends ComponentConfig with DailyArchive {
   List<Map> oneDayRead(Date date) {
     File file = new File(DIR + "/WW_DALMP_ISO_${yyyymmdd(date)}.csv");
     if (file.existsSync()) {
-      List<String> keys = ['hourBeginning', 'ptid', 'price'];
+      List<String> keys = [
+        'hourBeginning',
+        'ptid',
+        'lmp',
+        'congestion',
+        'loss'
+      ];
 
       List<Map> data = file
           .readAsLinesSync()
@@ -56,11 +62,9 @@ class DamArchive extends ComponentConfig with DailyArchive {
         return new Map.fromIterables(keys, [
           parseHourEndingStamp(_unquote(row[1]), _unquote(row[2])),
           int.parse(_unquote(row[3])), // ptid
-          {
-            'lmp': num.parse(row[6]),
-            'cong': num.parse(row[8]),
-            'loss': num.parse(row[9])
-          } // LMP, Congestion, Losses
+          num.parse(row[6]),
+          num.parse(row[8]),
+          num.parse(row[9])
         ]);
       }).toList();
 
@@ -153,8 +157,8 @@ class DamArchive extends ComponentConfig with DailyArchive {
    * Recreate the collection from scratch.
    */
   setup() async {
-    if (!new Directory(DIR).existsSync()) new Directory(DIR)
-        .createSync(recursive: true);
+    if (!new Directory(DIR).existsSync())
+      new Directory(DIR).createSync(recursive: true);
     await oneDayDownload(new Date(2014, 1, 1));
 
     await db.open();
@@ -167,8 +171,7 @@ class DamArchive extends ComponentConfig with DailyArchive {
     // this indexing assures that I don't insert the same data twice
     await db.createIndex(collectionName,
         keys: {'hourBeginning': 1, 'ptid': 1}, unique: true);
-    await db.createIndex(collectionName,
-        keys: {'ptid': 1});
+    await db.createIndex(collectionName, keys: {'ptid': 1});
 
     await db.close();
   }

@@ -9,7 +9,7 @@ import 'package:date/date.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:elec/elec.dart';
-import 'package:elec/src/iso/nepool/config.dart';
+import 'package:elec/src/iso/isone/config.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 
 
@@ -27,7 +27,7 @@ class DaLmp {
   final DateFormat fmt = new DateFormat("yyyy-MM-ddTHH:00:00.000-ZZZZ");
 
   DaLmp() {
-    ComponentConfig component = config.nepool_dam_lmp_hourly;
+    ComponentConfig component = config.isone_dam_lmp_hourly;
     coll = component.db.collection(component.collectionName);
     _location = getLocation('US/Eastern');
   }

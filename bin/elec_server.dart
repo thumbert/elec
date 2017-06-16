@@ -6,14 +6,20 @@ import 'package:logging_handlers/server_logging_handlers.dart';
 import 'package:rpc/rpc.dart';
 
 import 'package:elec/src/api/nepool_lmp.dart';
+import 'package:elec/src/api/temperature_noaa.dart';
 
 const String _API_PREFIX = '';
 final ApiServer _apiServer = new ApiServer(apiPrefix: _API_PREFIX, prettyPrint: true);
 
+
 registerApis() async {
-  DaLmp dalmp = new DaLmp();
-  await dalmp.db.open();
-  _apiServer.addApi(dalmp);
+//  DaLmp dalmp = new DaLmp();
+//  await dalmp.db.open();
+//  _apiServer.addApi(dalmp);
+
+  var api = new ApiTemperatureNoaa();
+  await api.init();
+  _apiServer.addApi(api);
 }
 
 main() async {

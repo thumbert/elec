@@ -7,12 +7,12 @@ import 'package:elec/src/iso/location.dart';
 
 abstract class Iso {
   String get name;
-  static final NewEngland = new Nepool();
+  //static final IsoNewEngland = new NewEngland();
 }
 
 
 
-class Nepool implements Iso {
+class IsoNewEngland implements Iso {
   final String name = 'ISONE';
   static tz.Location location = tz.getLocation('US/Eastern');
 

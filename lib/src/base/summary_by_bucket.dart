@@ -8,7 +8,7 @@ import 'package:tuple/tuple.dart';
 
 import 'package:elec/elec.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:elec/src/iso/nepool/config.dart';
+import 'package:elec/src/iso/isone/config.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/api/nepool_lmp.dart';
 

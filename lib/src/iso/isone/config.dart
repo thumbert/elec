@@ -1,4 +1,4 @@
-library iso.nepool.config;
+library iso.isone.config;
 
 import 'dart:io';
 import 'dart:async';
@@ -28,19 +28,20 @@ class ComponentConfig {
 abstract class Config {
   String configName; // prod, test, etc.
   String host;
+  String tzdb;
 
-  ComponentConfig nepool_binding_constraints_da;
-  ComponentConfig nepool_dam_lmp_hourly;
+  ComponentConfig isone_binding_constraints_da;
+  ComponentConfig isone_dam_lmp_hourly;
 
   Future open() async {
-    initializeTimeZoneSync();
-    await nepool_dam_lmp_hourly.db.open();
-    await nepool_binding_constraints_da.db.open();
+    initializeTimeZoneSync(tzdb);
+    await isone_dam_lmp_hourly.db.open();
+    await isone_binding_constraints_da.db.open();
   }
 
   Future close() async {
-    await nepool_dam_lmp_hourly.db.close();
-    await nepool_binding_constraints_da.db.close();
+    await isone_dam_lmp_hourly.db.close();
+    await isone_binding_constraints_da.db.close();
   }
 
 }
@@ -52,16 +53,17 @@ class TestConfig extends Config {
 
   TestConfig() {
     Map env = Platform.environment;
+    tzdb = env['HOME'] + '/.pub-cache/hosted/pub.dartlang.org/timezone-0.4.3/lib/data/2015b.tzf';
 
-    nepool_binding_constraints_da = new ComponentConfig()
+    isone_binding_constraints_da = new ComponentConfig()
       ..host = host
-      ..dbName = 'nepool'
+      ..dbName = 'isone'
       ..collectionName = 'binding_constraints'
       ..DIR = env['HOME'] + '/Downloads/Archive/DA_BindingConstraints/Raw/';
 
-    nepool_dam_lmp_hourly = new ComponentConfig()
+    isone_dam_lmp_hourly = new ComponentConfig()
       ..host = host
-      ..dbName = 'nepool_dam'
+      ..dbName = 'isone_dam'
       ..collectionName = 'lmp_hourly'
       ..DIR = env['HOME'] + '/Downloads/Archive/DA_LMP/Raw/Csv';
 
