@@ -41,8 +41,8 @@ testMonthlyLmp () async {
 
   List ptids = await daLmp.allPtids();
   print(ptids);
-  List buckets = [Nepool.bucket5x16, Nepool.bucket2x16H, Nepool.bucket7x8,
-    Nepool.bucketOffpeak, Nepool.bucket7x24];
+  List buckets = [IsoNewEngland.bucket5x16, IsoNewEngland.bucket2x16H, IsoNewEngland.bucket7x8,
+    IsoNewEngland.bucketOffpeak, IsoNewEngland.bucket7x24];
 
   Future _calcOne(int ptid) async {
     List hourlyData = await daLmp.getHourlyCongestionData(ptid).toList();
@@ -61,11 +61,11 @@ testMonthlyLmp () async {
 
 main() async {
 
-  config = new TestConfig();
-  await config.open();
+//  config = new TestConfig();
+//  await config.open();
 
   await setupArchive();
-  await config.close();
+//  await config.close();
 
   //await testNepoolDamArchive();
 
