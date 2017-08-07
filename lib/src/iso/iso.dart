@@ -23,7 +23,7 @@ class IsoNewEngland implements Iso {
   static final bucketOffpeak = new BucketOffpeak(location);
   static final bucketPeak    = new Bucket5x16(location);
 
-  static final Location hub = new NepoolLocation.fromPtid(4000)..name='Hub';
+  //static final Location hub = new NepoolLocation.fromPtid(4000)..name='Hub';
 
 }
 
