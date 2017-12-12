@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:date/date.dart';
+import 'package:elec_server/src/utils/timezone_utils.dart';
 
 List<int> countByMonth(int year, Bucket bucket) {
   Location tzLocation = bucket.location;
@@ -95,6 +96,6 @@ test_bucket() {
 }
 
 main() async {
-  await initializeTimeZone();
+  await initializeTimeZone(getLocationTzdb());
   test_bucket();
 }
