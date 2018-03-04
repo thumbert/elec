@@ -3,7 +3,6 @@ library test_all;
 import 'bucket_test.dart' as bucket_test;
 import 'holiday_test.dart' as holiday_test;
 
-import 'package:elec/src/iso/nepool/config.dart';
 
 
 

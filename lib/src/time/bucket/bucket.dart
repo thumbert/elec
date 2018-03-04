@@ -10,10 +10,9 @@ abstract class Bucket {
   String get name;
   Location location;
 
-  /**
-   * Is this hour in the bucket?
-   */
+  ///Is this hour in the bucket?
   bool containsHour(Hour hour);
+  String toString() => name;
 }
 
 
@@ -65,8 +64,6 @@ class Bucket5x16 extends Bucket {
           return true;
       }
     }
-
-    return false;
   }
 }
 
@@ -89,8 +86,6 @@ class Bucket2x16H extends Bucket {
       else
         return false;
     }
-
-    return false;
   }
 }
 
@@ -111,7 +106,6 @@ class BucketOffpeak extends Bucket {
       if (calendar.isHoliday(hour.currentDate))
         return true;
     }
-
     return false;
   }
 }
