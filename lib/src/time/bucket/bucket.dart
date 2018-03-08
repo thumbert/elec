@@ -13,7 +13,30 @@ abstract class Bucket {
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
   String toString() => name;
+
+  /// Return a bucket from a String, for now, from IsoNewEngland only.
+  static Bucket parse(String bucket) {
+    bucket = bucket.toUpperCase();
+    Bucket out;
+    if (['PEAK', 'ONPEAK', '5X16'].contains(bucket)) {
+      out = IsoNewEngland.bucket5x16;
+    } else if (['OFFPEAK', 'WRAP'].contains(bucket)) {
+      out = IsoNewEngland.bucketOffpeak;
+    } else if (['FLAT', '7X24'].contains(bucket)) {
+      out = IsoNewEngland.bucket7x24;
+    } else if (bucket == '2X16H') {
+      out = IsoNewEngland.bucket2x16H;
+    } else if (bucket == '7X8') {
+      out = IsoNewEngland.bucket7x8;
+    } else {
+      throw new ArgumentError('Unknown bucket $bucket');
+    }
+    return out;
+  }
+
 }
+
+
 
 
 class Bucket7x24 extends Bucket {

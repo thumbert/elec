@@ -1,5 +1,6 @@
 library test_bucket;
 
+import 'dart:math' show pow;
 import 'package:timezone/standalone.dart';
 import 'package:test/test.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
@@ -8,6 +9,9 @@ import 'package:date/date.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'package:table/table.dart';
 import 'data.dart';
+
+num round(num x, {int digits: 2}) =>
+    (x * pow(10, digits)).round() / pow(10, digits);
 
 aggregateByBucketMonth() {
   List<Bucket> buckets = [
@@ -21,11 +25,16 @@ aggregateByBucketMonth() {
     ..key((Map e) => new Month.fromDateTime(e['hourBeginning']))
     ..key((Map e) => buckets.firstWhere((bucket) =>
         bucket.containsHour(new Hour.beginning(e['hourBeginning']))))
-    ..rollup((Iterable x) => x.map((e) => e['lmp']).reduce((a,b) => a+b)/x.length);
+    ..rollup((Iterable x) =>
+        x.map((e) => e['lmp']).reduce((a, b) => a + b) / x.length);
 
   var res = nest.map(lmp);
   var out = flattenMap(res, levelNames: ['month', 'bucket', 'lmp']);
-  out.forEach(print);
+  test('monthly hub da price', () {
+    expect(round(out[0]['lmp'], digits: 3), 18.993);
+    expect(round(out[1]['lmp'], digits: 3), 26.950);
+    expect(round(out[2]['lmp'], digits: 3), 34.638);
+  });
 }
 
 List<int> countByMonth(int year, Bucket bucket) {
@@ -112,6 +121,17 @@ test_bucket() {
     test("Offpeak hours by month in 2013", () {
       expect(countByMonth(2013, IsoNewEngland.bucketOffpeak),
           [392, 352, 407, 368, 392, 400, 392, 392, 400, 376, 401, 408]);
+    });
+  });
+
+  group('Test Bucket.parse()', () {
+    test('5x16, Peak', () {
+      expect(Bucket.parse('5x16'), IsoNewEngland.bucket5x16);
+      expect(Bucket.parse('Peak'), IsoNewEngland.bucket5x16);
+    });
+    test('Wrap, OffPeak', () {
+      expect(Bucket.parse('Wrap'), IsoNewEngland.bucketOffpeak);
+      expect(Bucket.parse('OffPeak'), IsoNewEngland.bucketOffpeak);
     });
   });
 }
