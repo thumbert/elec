@@ -28,6 +28,8 @@ abstract class Bucket {
       out = IsoNewEngland.bucket2x16H;
     } else if (bucket == '7X8') {
       out = IsoNewEngland.bucket7x8;
+    } else if (bucket == '7X16') {
+      out = IsoNewEngland.bucket7x16;
     } else {
       throw new ArgumentError('Unknown bucket $bucket');
     }
@@ -62,6 +64,24 @@ class Bucket7x8 extends Bucket {
     return false;
   }
 }
+
+
+class Bucket7x16 extends Bucket {
+  final String name = '7x16';
+  Location location;
+  Calendar calendar = new NercCalendar();
+
+  Bucket7x16(Location this.location);
+
+  bool containsHour(Hour hour) {
+    if (hour.start.hour >= 7 || hour.start.hour < 23)
+      return true;
+
+    return false;
+  }
+}
+
+
 
 class Bucket5x16 extends Bucket {
   final String name = '5x16';
