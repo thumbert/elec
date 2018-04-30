@@ -35,6 +35,14 @@ test_holiday() {
       expect(Holiday.laborDay(2014).name, "Labor Day");
     });
 
+    test("Lincoln\'s Birthday", (){
+      expect("2017-02-13", Holiday.lincolnBirthday(2017).day.toString() );
+      expect("2016-02-12", Holiday.lincolnBirthday(2016).day.toString() );
+      expect("2015-02-12", Holiday.lincolnBirthday(2015).day.toString() );
+      expect(Holiday.lincolnBirthday(2014).name, "Lincoln\'s Birthday");
+    });
+
+
   });
   
   
