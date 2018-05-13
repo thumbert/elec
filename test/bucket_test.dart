@@ -22,14 +22,14 @@ aggregateByBucketMonth() {
   var lmp = hourlyHubPrices();
 
   Nest nest = new Nest()
-    ..key((Map e) => new Month.fromDateTime(e['hourBeginning']))
+    ..key((Map e) => new Month.fromTZDateTime(e['hourBeginning']))
     ..key((Map e) => buckets.firstWhere((bucket) =>
         bucket.containsHour(new Hour.beginning(e['hourBeginning']))))
     ..rollup((Iterable x) =>
         x.map((e) => e['lmp']).reduce((a, b) => a + b) / x.length);
 
   var res = nest.map(lmp);
-  var out = flattenMap(res, levelNames: ['month', 'bucket', 'lmp']);
+  var out = flattenMap(res, ['month', 'bucket', 'lmp']);
   test('monthly hub da price', () {
     expect(round(out[0]['lmp'], digits: 3), 18.993);
     expect(round(out[1]['lmp'], digits: 3), 26.950);
