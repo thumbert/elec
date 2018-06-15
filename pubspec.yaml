@@ -24,6 +24,9 @@ dependencies:
   table:
       git:
           url: git://github.com/thumbert/table.git
+  timeseries:
+      git:
+          url: git://github.com/thumbert/timeseries.git
   timezone: '>=0.4.3 <0.5.0'
   tuple: '>=1.0.0 <2.0.0'
 
