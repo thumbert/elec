@@ -3,7 +3,6 @@ import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 
-enum DayType {weekday, weekend, holiday}
 
 class LoadModel {
 
@@ -47,7 +46,14 @@ class LoadModel {
   }
 
 
+  DayType getDayType(Date day) {
+
+  }
+
 }
+
+
+
 
 /// Return the subset of days that fall in a given band around a fixed day.
 /// So if fixedDay = 1/1/2018,  return days from Dec and Jan of previous years.
