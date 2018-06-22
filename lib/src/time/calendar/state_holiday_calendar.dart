@@ -13,7 +13,10 @@ class CtHolidayCalendar extends Calendar {
 class LincolnBirthday {
   /// Get Lincoln's birthday for this year
   static Date forYear(int year) {
-    return new Date(year, 2, 14);
+    var candidate = new Date(year, 2, 12);
+    if (candidate.weekday == 7)
+      candidate = candidate.add(1);
+    return candidate;
   }
   static bool isDate(Date date) {
     var candidate = LincolnBirthday.forYear(date.year);
