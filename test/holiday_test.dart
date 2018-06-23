@@ -1,53 +1,89 @@
 library test_holiday;
 
 import 'package:test/test.dart';
+import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
-import 'package:intl/intl.dart';
+import 'package:elec/src/time/calendar/holidays/lincoln_birthday.dart';
+import 'package:elec/src/time/calendar/holidays/good_friday.dart';
+import 'package:elec/src/time/calendar/holidays/labor_day.dart';
+import 'package:elec/src/time/calendar/holidays/memorial_day.dart';
+import 'package:elec/src/time/calendar/holidays/thanksgiving.dart';
+import 'package:elec/src/time/calendar/holidays/mlk_birthday.dart';
+import 'package:elec/src/time/calendar/holidays/washington_birthday.dart';
+import 'package:elec/src/time/calendar/holidays/columbus_day.dart';
+import 'package:elec/src/time/calendar/holidays/veterans_day.dart';
 
 test_holiday() {
-  group("Test Holidays: ", (){
+  group("Test Holidays:", (){
     
+    test("Columbus day", () {
+      expect("2017-10-09", new ColumbusDay().forYear(2017).toString());
+      expect("2018-10-08", new ColumbusDay().forYear(2018).toString());
+      expect("2019-10-14", new ColumbusDay().forYear(2019).toString());
+      expect(new ColumbusDay().isDate(new Date(2017, 10, 9)), true);
+    });
+
     test("Thanksgiving", () {
-      expect("2012-11-22", Holiday.thanksgiving(2012).day.toString() );
-      expect("2013-11-28", Holiday.thanksgiving(2013).day.toString() );
-      expect("2014-11-27", Holiday.thanksgiving(2014).day.toString() );
-      expect(Holiday.thanksgiving(2014).name, "Thanksgiving");
+      expect("2012-11-22", new Thanksgiving().forYear(2012).toString());
+      expect("2013-11-28", new Thanksgiving().forYear(2013).toString());
+      expect("2014-11-27", new Thanksgiving().forYear(2014).toString());
+      expect(new Thanksgiving().isDate(new Date(2012, 11, 22)), true);
     });
-    
-    test("MLK", (){
-      expect("2012-01-16", Holiday.martinLutherKing(2012).day.toString() );
-      expect("2013-01-21", Holiday.martinLutherKing(2013).day.toString() );
-      expect("2014-01-20", Holiday.martinLutherKing(2014).day.toString() );
-      expect(Holiday.martinLutherKing(2014).name, "Martin Luther King");
+
+    test("Martin Luther King birthday", (){
+      expect("2012-01-16", new MlkBirthday().forYear(2012).toString());
+      expect("2013-01-21", new MlkBirthday().forYear(2013).toString());
+      expect("2014-01-20", new MlkBirthday().forYear(2014).toString());
+      expect(new MlkBirthday().isDate(new Date(2012, 1, 16)), true);
     });
-      
+
     test("Memorial Day", (){
-      expect("2012-05-28", Holiday.memorialDay(2012).day.toString() );
-      expect("2013-05-27", Holiday.memorialDay(2013).day.toString() );
-      expect("2014-05-26", Holiday.memorialDay(2014).day.toString() );
-      expect(Holiday.memorialDay(2014).name, "Memorial Day");
+      expect("2012-05-28", new MemorialDay().forYear(2012).toString());
+      expect("2013-05-27", new MemorialDay().forYear(2013).toString());
+      expect("2014-05-26", new MemorialDay().forYear(2014).toString());
+      expect(new MemorialDay().isDate(new Date(2012, 5, 28)), true);
     });
 
     test("Labor Day", (){
-      expect("2012-09-03", Holiday.laborDay(2012).day.toString() );
-      expect("2013-09-02", Holiday.laborDay(2013).day.toString() );
-      expect("2014-09-01", Holiday.laborDay(2014).day.toString() );
-      expect(Holiday.laborDay(2014).name, "Labor Day");
+      expect("2012-09-03", new LaborDay().forYear(2012).toString());
+      expect("2013-09-02", new LaborDay().forYear(2013).toString());
+      expect("2014-09-01", new LaborDay().forYear(2014).toString());
+      expect(new LaborDay().isDate(new Date(2012,9,3)), true);
     });
 
-    test("Lincoln\'s Birthday", (){
-      expect("2017-02-13", Holiday.lincolnBirthday(2017).day.toString() );
-      expect("2016-02-12", Holiday.lincolnBirthday(2016).day.toString() );
-      expect("2015-02-12", Holiday.lincolnBirthday(2015).day.toString() );
-      expect(Holiday.lincolnBirthday(2014).name, "Lincoln\'s Birthday");
+    test("Washington\'s birthday", (){
+      expect("2017-02-20", new WashingtonBirthday().forYear(2017).toString());
+      expect("2018-02-19", new WashingtonBirthday().forYear(2018).toString());
+      expect("2021-02-15", new WashingtonBirthday().forYear(2021).toString());
+      expect(new WashingtonBirthday().isDate(new Date(2017,2,20)), true);
     });
 
+    test("Lincoln\'s birthday", (){
+      expect("2011-02-11", new LincolnBirthday().forYear(2011).toString());
+      expect("2017-02-13", new LincolnBirthday().forYear(2017).toString());
+      expect("2016-02-12", new LincolnBirthday().forYear(2016).toString());
+      expect("2015-02-12", new LincolnBirthday().forYear(2015).toString());
+      expect(new LincolnBirthday().isDate(new Date(2017,2,13)), true);
+      expect(new LincolnBirthday().isDate(new Date(2017,2,12)), false);
+    });
 
+    test("Good Friday", (){
+      expect("2018-03-30", new GoodFriday().forYear(2018).toString());
+      expect("2017-04-14", new GoodFriday().forYear(2017).toString());
+      expect(new GoodFriday().isDate(new Date(2017,4,14)), true);
+      expect(new GoodFriday().isDate(new Date(2017,4,15)), false);
+    });
+
+    test("Veterans Day", (){
+      expect("2012-11-12", new VeteransDay().forYear(2012).toString());
+      expect("2019-11-11", new VeteransDay().forYear(2019).toString());
+      expect("2017-11-10", new VeteransDay().forYear(2017).toString());
+      expect(new VeteransDay().isDate(new Date(2017,11,10)), true);
+      expect(new VeteransDay().isDate(new Date(2017,4,15)), false);
+      expect(new VeteransDay().holidayType, HolidayType.veteransDay);
+    });
   });
-  
-  
-  
-  
+
 }
 
 main() => test_holiday();

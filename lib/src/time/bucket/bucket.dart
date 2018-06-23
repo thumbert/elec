@@ -3,6 +3,7 @@ library elec.bucket;
 import 'package:date/date.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
+import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/iso/iso.dart';
 
 abstract class Bucket {

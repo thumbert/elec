@@ -7,14 +7,6 @@ import 'package:elec/src/iso/location.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/ftr/auction.dart';
 
-/// Create a NEPOOL path from simple inputs.
-Path nepoolPath(int sourcePtid, int sinkPtid, Bucket bucket, {num quantity: 1}) {
-  Location source = new NepoolLocation.fromPtid(sourcePtid);
-  Location sink = new NepoolLocation.fromPtid(sinkPtid);
-
-  return new Path.from(source, sink, bucket, quantity: quantity);
-}
-
 
 
 class Path {
