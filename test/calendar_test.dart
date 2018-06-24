@@ -6,6 +6,7 @@ import 'package:elec/src/time/calendar/holiday.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/federal_holidays_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/ct_state_holiday_calendar.dart';
+import 'package:elec/src/time/calendar/calendars/ri_state_holiday_calendar.dart';
 
 calendarTests(){
   group('Test calendar', (){
@@ -52,12 +53,24 @@ calendarTests(){
     test('CT State Holidays 2011', () {
       var calendar = new CtStateHolidayCalendar();
       expect(calendar.isHoliday(new Date(2011, 2, 11)), true);
-//      expect(
-//          calendar.getHolidayType(new Date(2011, 2, 11)), HolidayType.lincolnBirthday);
-//      expect(calendar.isHoliday(new Date(2011, 4, 22)), true);
-//      expect(
-//          calendar.getHolidayType(new Date(2011, 4, 22)), HolidayType.goodFriday);
+      expect(
+          calendar.getHolidayType(new Date(2011, 2, 11)), HolidayType.lincolnBirthday);
+      expect(calendar.isHoliday(new Date(2011, 4, 22)), true);
+      expect(
+          calendar.getHolidayType(new Date(2011, 4, 22)), HolidayType.goodFriday);
     });
+
+    test('RI State Holidays 2018', () {
+      var calendar = new RiStateHolidayCalendar();
+      expect(calendar.isHoliday(new Date(2018, 11, 6)), true);
+      expect(
+          calendar.getHolidayType(new Date(2018, 11, 6)), HolidayType.electionDay);
+      expect(calendar.isHoliday(new Date(2018, 8, 13)), true);
+      expect(
+          calendar.getHolidayType(new Date(2018, 8, 13)), HolidayType.victoryDay);
+    });
+
+
   });
 }
 

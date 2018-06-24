@@ -4,7 +4,8 @@ import '../holiday.dart';
 import '../_holiday_utils.dart';
 
 /// Election Day. See https://en.wikipedia.org/wiki/Election_Day_(United_States)
-/// Set on 1st Tuesday after November 1st.
+/// Set on 1st Tuesday after November 1st.  It is a state holiday in RI (on
+/// even years only!).
 class ElectionDay implements Holiday {
   HolidayType holidayType = HolidayType.electionDay;
 

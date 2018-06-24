@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart';
 enum HolidayType {
   christmas,
   columbusDay,
+  dayAfterThanksgiving,
   electionDay,
   goodFriday,
   independenceDay,
@@ -17,6 +18,7 @@ enum HolidayType {
   patriotsDay,
   thanksgiving,
   veteransDay,
+  victoryDay,
   washingtonBirthday,
 }
 
