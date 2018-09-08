@@ -8,6 +8,7 @@
 build/
 packages
 pubspec.lock
+.dart_tool/
 
 out
 docs
