@@ -24,6 +24,6 @@ loadModelTests() {
 
 main() {
   /// line below crashes all_tests if not removed.
-  initializeTimeZoneSync(getLocationTzdb());
+  initializeTimeZone();
   loadModelTests();
 }

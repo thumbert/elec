@@ -10,7 +10,7 @@ class ElectionDay implements Holiday {
   HolidayType holidayType = HolidayType.electionDay;
 
   Date forYear(int year, {Location location}) {
-    return makeHoliday(year, 11, 1, DateTime.TUESDAY, location: location);
+    return makeHoliday(year, 11, 1, DateTime.tuesday, location: location);
   }
 
   bool isDate(Date date) =>

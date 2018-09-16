@@ -2987,7 +2987,7 @@ List<Map> hourlyHubPrices() {
     ]
   };
 
-  List out = [];
+  var out = <Map>[];
   for (int i=0; i<aux['hourBeginning'].length; i++) {
     out.add({
       'hourBeginning': TZDateTime.parse(_eastern, aux['hourBeginning'][i]),

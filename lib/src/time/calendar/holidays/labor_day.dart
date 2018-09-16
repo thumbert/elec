@@ -8,7 +8,7 @@ class LaborDay implements Holiday {
   HolidayType holidayType = HolidayType.laborDay;
 
   Date forYear(int year, {Location location}) {
-    return makeHoliday(year, DateTime.SEPTEMBER, 1, DateTime.MONDAY,
+    return makeHoliday(year, DateTime.september, 1, DateTime.monday,
         location: location);
   }
 

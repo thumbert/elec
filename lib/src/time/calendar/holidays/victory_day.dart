@@ -9,7 +9,7 @@ class VictoryDay implements Holiday {
   HolidayType holidayType = HolidayType.victoryDay;
 
   Date forYear(int year, {Location location}) {
-    return makeHoliday(year, 8, 2, DateTime.MONDAY, location: location);
+    return makeHoliday(year, 8, 2, DateTime.monday, location: location);
   }
 
   bool isDate(Date date) =>

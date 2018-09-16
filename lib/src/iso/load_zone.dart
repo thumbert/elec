@@ -5,7 +5,11 @@ class LoadZone {
   final int ptid;
   LoadZone(this.name, this.ptid);
   String toString() => name;
-  bool operator ==(LoadZone other) => other != null && other.ptid == ptid;
+  bool operator ==(Object other) {
+    if (other is! LoadZone) return false;
+    LoadZone loadZone = other;
+    return loadZone.ptid == ptid;
+  }
   int get hashCode => ptid;
 }
 

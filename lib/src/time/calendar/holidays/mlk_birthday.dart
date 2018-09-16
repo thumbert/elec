@@ -9,7 +9,7 @@ class MlkBirthday implements Holiday {
   HolidayType holidayType = HolidayType.mlkBirthday;
 
   Date forYear(int year, {Location location}) {
-    return makeHoliday(year, 1, 3, DateTime.MONDAY, location: location);
+    return makeHoliday(year, 1, 3, DateTime.monday, location: location);
   }
 
   bool isDate(Date date) =>

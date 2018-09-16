@@ -9,7 +9,7 @@ class ColumbusDay implements Holiday {
   HolidayType holidayType = HolidayType.columbusDay;
 
   Date forYear(int year, {Location location}) {
-    return makeHoliday(year, 10, 2, DateTime.MONDAY, location: location);
+    return makeHoliday(year, 10, 2, DateTime.monday, location: location);
   }
 
   bool isDate(Date date) =>
