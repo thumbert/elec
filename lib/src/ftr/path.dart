@@ -5,7 +5,7 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/iso/location.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
-import 'package:elec/src/ftr/auction.dart';
+import 'auction.dart';
 
 
 
@@ -53,7 +53,7 @@ class Path {
 
 class Bid extends Path {
   num bidPrice;
-  Auction auction;
+  FtrAuction auction;
 
   Bid();
   Bid.from(this.auction, this.bidPrice, Path path) {
@@ -67,7 +67,7 @@ class Bid extends Path {
 
 class Award extends Path {
   num clearingPrice;
-  Auction auction;
+  FtrAuction auction;
 
   Award();
   Award.from(this.auction, this.clearingPrice, Path path){

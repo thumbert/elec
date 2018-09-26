@@ -8,7 +8,7 @@ class DayAfterThanksgiving implements Holiday {
   HolidayType holidayType = HolidayType.dayAfterThanksgiving;
 
   Date forYear(int year, {Location location}) {
-    var candidate = makeHoliday(year, 11, 4, DateTime.THURSDAY, location: location);
+    var candidate = makeHoliday(year, 11, 4, DateTime.thursday, location: location);
     return candidate.add(1);
   }
 

@@ -5,7 +5,6 @@ import 'package:http/http.dart';
 import 'dart:math' show max, min;
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
-import 'lib_temperature_data.dart';
 import '../common_enums.dart';
 
 enum IndexType { cdd, hdd }
@@ -78,7 +77,7 @@ class TemperatureSwap implements WeatherInstrument {
   
   /// Value the temperature swap if you know the cumulative index.
   num payoff(num cumulativeIndex) {
-    var value = _sign[buySell] * quantity * (cumulativeIndex - strike);
+    num value = _sign[buySell] * quantity * (cumulativeIndex - strike);
     if (maxPayoff != null) {
       if (value > 0) {
         value = min(value, maxPayoff);
@@ -95,8 +94,8 @@ class TemperatureSwap implements WeatherInstrument {
 /// DB, you can pass in the historical temperatures.
 Future<Map> historicalValuation(WeatherInstrument instrument,
     {TimeSeries hData, Client client}) async {
-  hData ??= await getDailyHistoricalTemperature(instrument.airportCode,
-      instrument.term, client: client);
+//  hData ??= await getDailyHistoricalTemperature(instrument.airportCode,
+//      instrument.term, client: client);
 
   var temps = hData.window(instrument.term).map((e) => e.value);
 

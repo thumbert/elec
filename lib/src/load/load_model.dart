@@ -46,9 +46,9 @@ class LoadModel {
   }
 
 
-  DayType getDayType(Date day) {
-
-  }
+//  DayType getDayType(Date day) {
+//
+//  }
 
 }
 

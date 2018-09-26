@@ -36,11 +36,7 @@ abstract class Bucket {
     }
     return out;
   }
-
 }
-
-
-
 
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
@@ -59,13 +55,11 @@ class Bucket7x8 extends Bucket {
   Bucket7x8(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.hour <= 6 || hour.start.hour == 23)
-      return true;
+    if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
 
     return false;
   }
 }
-
 
 class Bucket7x16 extends Bucket {
   final String name = '7x16';
@@ -75,14 +69,11 @@ class Bucket7x16 extends Bucket {
   Bucket7x16(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.hour >= 7 || hour.start.hour < 23)
-      return true;
+    if (hour.start.hour >= 7 || hour.start.hour < 23) return true;
 
     return false;
   }
 }
-
-
 
 class Bucket5x16 extends Bucket {
   final String name = '5x16';
@@ -102,6 +93,7 @@ class Bucket5x16 extends Bucket {
         return false;
       } else {
         if (calendar.isHoliday(hour.currentDate))
+
           /// it's a holiday
           return false;
         else
@@ -120,8 +112,7 @@ class Bucket2x16H extends Bucket {
 
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
-    if (hour.start.hour < 7 || hour.start.hour == 23)
-      return false;
+    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
@@ -145,10 +136,8 @@ class BucketOffpeak extends Bucket {
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (hour.start.hour < 7 || hour.start.hour == 23)
-        return true;
-      if (calendar.isHoliday(hour.currentDate))
-        return true;
+      if (hour.start.hour < 7 || hour.start.hour == 23) return true;
+      if (calendar.isHoliday(hour.currentDate)) return true;
     }
     return false;
   }

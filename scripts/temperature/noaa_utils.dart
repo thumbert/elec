@@ -60,25 +60,25 @@ DateTime _parseDate(num yyyymmdd) {
 }
 
 /// Test the contents of the database.
-Future<List<Map>> getTemperatureMongo() async{
-  var api = new ApiTemperatureNoaa();
-  await api.init();
-  var aux = await api.getTemperature('USW00014739');
-  await api.db.close();
-
-  List<String> keys = ['date', 'tmin','tmax'];
-
-
-  return res.result;
-}
+//Future<List<Map>> getTemperatureMongo() async{
+//  var api = new ApiTemperatureNoaa();
+//  await api.init();
+//  var aux = await api.getTemperature('USW00014739');
+//  await api.db.close();
+//
+//  List<String> keys = ['date', 'tmin','tmax'];
+//
+//
+//  return res.result;
+//}
 
 main() async {
 //  List data = getNoaaCsvData();
 //  data.take(3).forEach(print);
 //  await insertTemperatureDataMongo(data);
 
-  var res = await getTemperatureMongo();
-  res.take(5).forEach(print);
+//  var res = await getTemperatureMongo();
+//  res.take(5).forEach(print);
 
 
 }
