@@ -69,8 +69,7 @@ class Bucket7x16 extends Bucket {
   Bucket7x16(Location this.location);
 
   bool containsHour(Hour hour) {
-    if (hour.start.hour >= 7 || hour.start.hour < 23) return true;
-
+    if (hour.start.hour >= 7 && hour.start.hour < 23) return true;
     return false;
   }
 }

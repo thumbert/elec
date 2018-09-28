@@ -3,12 +3,14 @@ library test_bucket;
 import 'dart:math' show pow;
 import 'package:timezone/standalone.dart';
 import 'package:test/test.dart';
-import 'package:elec/src/time/bucket/bucket.dart';
-import 'package:elec/src/iso/iso.dart';
 import 'package:date/date.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
+import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'data.dart';
+import 'package:elec/src/iso/iso.dart';
+import 'package:elec/src/time/bucket/bucket.dart';
+import 'package:elec/src/time/bucket/bucket_utils.dart';
 
 num round(num x, {int digits: 2}) =>
     (x * pow(10, digits)).round() / pow(10, digits);
@@ -102,6 +104,13 @@ test_bucket() {
     });
   });
 
+  group('Test the 7x16 bucket ISO New England', (){
+    test('7x16 hours by month in 2012', (){
+      var hours = countByMonth(2012, IsoNewEngland.bucket7x16);
+      expect(hours, [496, 464, 496, 480, 496, 480, 496, 496, 480, 496, 480, 496]);
+    });
+  });
+
   group("Test the 7x8 bucket NEPOOL", () {
     test("7x8 hours by month in 2012", () {
       expect(countByMonth(2012, IsoNewEngland.bucket7x8),
@@ -132,6 +141,24 @@ test_bucket() {
     test('Wrap, OffPeak', () {
       expect(Bucket.parse('Wrap'), IsoNewEngland.bucketOffpeak);
       expect(Bucket.parse('OffPeak'), IsoNewEngland.bucketOffpeak);
+    });
+  });
+
+  group('Split by bucket:', () {
+    var location = getLocation('US/Eastern');
+    test('count hours', () {
+      var month = Month(2018, 1, location: location);
+      var hours = month.splitLeft((dt) => new Hour.beginning(dt));
+      var ts = TimeSeries.fill(hours, 1);
+      var buckets = [
+        IsoNewEngland.bucket7x16,
+        IsoNewEngland.bucket5x16,
+        IsoNewEngland.bucket2x16H,
+        IsoNewEngland.bucket7x8,
+      ];
+      var res = splitByBucket(ts.observations, buckets);
+      var count = res.map((k, v) => MapEntry(k, v.length));
+      expect(count, Map.fromIterables(buckets, [496, 352, 144, 248]));
     });
   });
 }
