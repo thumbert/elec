@@ -9,6 +9,6 @@ library elec;
 
 export 'src/elec_base.dart';
 export 'src/iso/iso.dart';
-export 'src/ftr/auction.dart';
+//export 'src/ftr/auction.dart';
 export 'src/time/bucket/bucket.dart';
 
