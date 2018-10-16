@@ -9,20 +9,20 @@ import 'bucket.dart';
 /// Only one traversal of [x] is made.  Works for hourly and sub-hourly
 /// timeseries.  The [buckets] don't need to be exclusive.  If no observations
 /// fall in a given [bucket], that bucket is removed from the output.
-Map<Bucket, List<IntervalTuple>> splitByBucket(
-    Iterable<IntervalTuple> x, List<Bucket> buckets) {
-  Map<Bucket, List<IntervalTuple>> res = new Map.fromIterables(
-      buckets, new List.generate(buckets.length, (i) => []));
+Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(Iterable<IntervalTuple<K>> x,
+    List<Bucket> buckets) {
+  var res = new Map.fromIterables(
+      buckets, new List.generate(buckets.length, (i) => <IntervalTuple<K>>[]));
 
-  x.forEach((IntervalTuple e) {
-    buckets.forEach((Bucket bucket) {
+  x.forEach((e) {
+    buckets.forEach((bucket) {
       if (bucket.containsHour(new Hour.beginning(e.interval.start)))
         res[bucket].add(e);
     });
   });
 
   /// remove empty buckets, if any
-  List emptyBuckets = [];
+  var emptyBuckets = <Bucket>[];
   res.forEach((k, List v) {
     if (v.isEmpty) emptyBuckets.add(k);
   });
