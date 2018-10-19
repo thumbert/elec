@@ -7,7 +7,6 @@ import 'package:elec/src/iso/location.dart';
 
 abstract class Iso {
   String get name;
-  //static final IsoNewEngland = new NewEngland();
 }
 
 
@@ -22,10 +21,7 @@ class IsoNewEngland implements Iso {
   static final Bucket bucket7x8     = new Bucket7x8(location);
   static final Bucket bucket7x24    = new Bucket7x24(location);
   static final Bucket bucketOffpeak = new BucketOffpeak(location);
-  static final Bucket bucketPeak    = new Bucket5x16(location);
-
-  //static final Location hub = new NepoolLocation.fromPtid(4000)..name='Hub';
-
+  static final Bucket bucketPeak    = bucket5x16;
 }
 
 

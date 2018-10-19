@@ -69,6 +69,11 @@ List<String> daysInBucket(int year, int month, Bucket bucket) {
 test_bucket() {
   group("Test the 5x16 bucket NEPOOL", () {
     Bucket b5x16 = IsoNewEngland.bucket5x16;
+    test('5x16 and Peak are the same', (){
+      var onpeak = IsoNewEngland.bucketPeak;
+      expect(onpeak, b5x16);
+    });
+
     test("peak hours by year", () {
       List res = [];
       for (int year in [2012, 2013, 2014, 2015, 2016]) {
