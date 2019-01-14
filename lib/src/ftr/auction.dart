@@ -110,12 +110,12 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// Get the number of hours in this bucket; e.g. how many peak hours are
   /// in this auction term?
   int hours(Bucket bucket) {
-    if (_hours.containsKey(new Tuple2(this, bucket)))
-      return _hours[new Tuple2(this, bucket)];
-    var hrs = interval.splitLeft((dt) => new Hour.beginning(dt));
-    int count = hrs.where((hour) => bucket.containsHour(hour)).length;
-    _hours[new Tuple2(this, bucket)] = count;
-    return count;
+//    if (_hours.containsKey(new Tuple2(this, bucket)))
+//      return _hours[new Tuple2(this, bucket)];
+//    var hrs = interval.splitLeft((dt) => new Hour.beginning(dt));
+//    int count = hrs.where((hour) => bucket.containsHour(hour)).length;
+//    _hours[new Tuple2(this, bucket)] = count;
+    return 0;
   }
 
   int get hashCode => name.hashCode;
