@@ -169,7 +169,7 @@ test_bucket() {
 }
 
 main() async {
-  await initializeTimeZone(getLocationTzdb());
+  await initializeTimeZone();
   test_bucket();
 
   aggregateByBucketMonth();

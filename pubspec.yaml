@@ -12,6 +12,9 @@ dependencies:
   date:
     git:
         url: git://github.com/thumbert/date.git
+  dama:
+    git:
+      url: git://github.com/thumbert/dama.git
   elec_server:
       git:
           url: git://github.com/thumbert/elec-server.git

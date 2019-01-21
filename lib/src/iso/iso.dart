@@ -7,6 +7,12 @@ import 'package:elec/src/iso/location.dart';
 
 abstract class Iso {
   String get name;
+
+  factory Iso.parse(String x) {
+    var y = x.toLowerCase();
+    if (y == 'isone') return IsoNewEngland();
+    else throw ArgumentError('Iso $x not supported yet');
+  }
 }
 
 
