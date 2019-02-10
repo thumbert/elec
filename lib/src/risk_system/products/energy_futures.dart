@@ -4,11 +4,11 @@ part of elec.risk_system;
 class EnergyFutures extends Object with BaseTrade {
   EnergyHub hub;
   Bucket bucket;
-  num fixPrice;
+  num fixedPrice;
   num mw;
 
   EnergyFutures(Date tradeDate, Interval term, BuySell buySell,
-      this.mw, this.hub, this.bucket, this.fixPrice) {
+      this.mw, this.hub, this.bucket, this.fixedPrice) {
     this.tradeDate = tradeDate;
     this.tradeTerm = term;
     this.buySell = buySell;
@@ -20,7 +20,7 @@ class EnergyFutures extends Object with BaseTrade {
     tradeTerm = parseTerm(x['strip']);
     buySell = BuySell.parse(x['buy/sell']);
     bucket = Bucket.parse(x['bucket']);
-    fixPrice = x['fixPrice'];
+    fixedPrice = x['fixedPrice'];
     mw = x['mw'];
   }
 
@@ -50,8 +50,8 @@ class EnergyFutures extends Object with BaseTrade {
   }
 
   Map<String,dynamic> toMap() {
-    var out = <String,dynamic>{
-      'tradeDate': tradeTerm.toString(),
+    var out = <String,dynamic> {
+      'tradeDate': tradeDate.toString(),
       'strip': tradeTerm.toString(),
       'startDate': startDate.toString(),
       'endDate': endDate.toString(),
@@ -61,7 +61,7 @@ class EnergyFutures extends Object with BaseTrade {
       'product': 'energy futures',
       'hub': hub.toString(),
       'bucket': bucket.name,
-      'fixPrice': fixPrice,
+      'fixPrice': fixedPrice,
     };
     return out;
   }
