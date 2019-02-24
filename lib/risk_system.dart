@@ -14,6 +14,7 @@ part 'src/risk_system/buy_sell.dart';
 part 'src/risk_system/commodity.dart';
 part 'src/risk_system/energy_hubs.dart';
 part 'src/risk_system/energy_unit.dart';
+part 'src/risk_system/lmp_component.dart';
 part 'src/risk_system/market.dart';
 part 'src/risk_system/quantity.dart';
 part 'src/risk_system/time_aggregation.dart';
