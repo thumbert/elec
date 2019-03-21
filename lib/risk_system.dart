@@ -20,6 +20,7 @@ part 'src/risk_system/quantity.dart';
 part 'src/risk_system/time_aggregation.dart';
 part 'src/risk_system/trade.dart';
 part 'src/risk_system/products/energy_futures.dart';
+part 'src/risk_system/units/mwh.dart';
 
 
 final _eastern = getLocation('US/Eastern');
