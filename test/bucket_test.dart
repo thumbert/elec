@@ -42,7 +42,7 @@ aggregateByBucketMonth() {
 List<int> countByMonth(int year, Bucket bucket) {
   Location tzLocation = bucket.location;
   var months = new TimeIterable(new Month(year, 1), new Month(year, 12));
-  return months.map((Month m) {
+  return months.map((m) {
     Hour start =
         new Hour.beginning(new TZDateTime(tzLocation, m.year, m.month));
     Hour end =

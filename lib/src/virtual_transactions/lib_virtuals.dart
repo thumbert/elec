@@ -4,7 +4,7 @@ import 'package:timezone/standalone.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
-import 'price_quantity_pair.dart';
+import 'package:elec/src/physical/price_quantity_pair.dart';
 
 enum VirtualType {increment, decrement}
 
