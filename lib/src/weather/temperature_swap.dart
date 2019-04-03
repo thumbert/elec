@@ -59,10 +59,7 @@ class TemperatureSwap implements WeatherInstrument {
       throw new ArgumentError('maxPayoff needs to be > 0');
 
     /// calculate the number of days in the term
-    _nDays = new TimeIterable(new Date.fromTZDateTime(term.start),
-        new Date.fromTZDateTime(term.end).subtract(1))
-        .toList()
-        .length;
+    _nDays = term.splitLeft((dt) => Date.fromTZDateTime(dt)).length;
   }
 
   /// Value the temperature swap if you know the daily temperature

@@ -6,7 +6,6 @@ import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
-import 'package:elec_server/src/utils/timezone_utils.dart';
 import 'data.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
@@ -40,46 +39,31 @@ aggregateByBucketMonth() {
 }
 
 List<int> countByMonth(int year, Bucket bucket) {
-  Location tzLocation = bucket.location;
-  var months = new TimeIterable(new Month(year, 1), new Month(year, 12));
+  var tzLocation = bucket.location;
+  var months =
+      Interval(TZDateTime(tzLocation, year), TZDateTime(tzLocation, year + 1))
+          .splitLeft((dt) => Month.fromTZDateTime(dt));
   return months.map((m) {
-    Hour start =
-        new Hour.beginning(new TZDateTime(tzLocation, m.year, m.month));
-    Hour end =
-        new Hour.ending(new TZDateTime(tzLocation, m.next.year, m.next.month));
-    return new TimeIterable(start, end)
-        .where((hour) => bucket.containsHour(hour))
-        .length;
+    var hours = m.splitLeft((dt) => Hour.beginning(dt));
+    return hours.where((hour) => bucket.containsHour(hour)).length;
   }).toList();
 }
 
-List<String> daysInBucket(int year, int month, Bucket bucket) {
-  Month next = new Month(year, month).next;
-  Hour start = new Hour.beginning(new TZDateTime(bucket.location, year, month));
-  Hour end =
-      new Hour.ending(new TZDateTime(bucket.location, next.year, next.month));
-  Iterable<Hour> hrs = new TimeIterable(start, end);
-  return hrs
-      .where((hour) => bucket.containsHour(hour))
-      .map((hour) => hour.currentDate.toString())
-      .toSet()
-      .toList();
-}
 
 test_bucket() {
   group("Test the 5x16 bucket NEPOOL", () {
     Bucket b5x16 = IsoNewEngland.bucket5x16;
-    test('5x16 and Peak are the same', (){
+    test('5x16 and Peak are the same', () {
       var onpeak = IsoNewEngland.bucketPeak;
       expect(onpeak, b5x16);
     });
 
     test("peak hours by year", () {
-      List res = [];
+      var res = <int>[];
       for (int year in [2012, 2013, 2014, 2015, 2016]) {
-        Hour start = new Hour.beginning(new TZDateTime(b5x16.location, year));
-        Hour end = new Hour.ending(new TZDateTime(b5x16.location, year + 1));
-        var hrs = new TimeIterable(start, end);
+        var start = TZDateTime(b5x16.location, year);
+        var end = TZDateTime(b5x16.location, year + 1);
+        var hrs = Interval(start,end).splitLeft((dt) => Hour.beginning(dt));
         res.add(hrs.where((hour) => b5x16.containsHour(hour)).length);
       }
       expect(res, [4080, 4080, 4080, 4096, 4080]);
@@ -109,10 +93,11 @@ test_bucket() {
     });
   });
 
-  group('Test the 7x16 bucket ISO New England', (){
-    test('7x16 hours by month in 2012', (){
+  group('Test the 7x16 bucket ISO New England', () {
+    test('7x16 hours by month in 2012', () {
       var hours = countByMonth(2012, IsoNewEngland.bucket7x16);
-      expect(hours, [496, 464, 496, 480, 496, 480, 496, 496, 480, 496, 480, 496]);
+      expect(
+          hours, [496, 464, 496, 480, 496, 480, 496, 496, 480, 496, 480, 496]);
     });
   });
 
