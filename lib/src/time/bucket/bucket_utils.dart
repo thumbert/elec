@@ -11,12 +11,12 @@ import 'bucket.dart';
 /// fall in a given [bucket], that bucket is removed from the output.
 Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(Iterable<IntervalTuple<K>> x,
     List<Bucket> buckets) {
-  var res = new Map.fromIterables(
-      buckets, new List.generate(buckets.length, (i) => <IntervalTuple<K>>[]));
+  var res = Map.fromIterables(
+      buckets, List.generate(buckets.length, (i) => <IntervalTuple<K>>[]));
 
   x.forEach((e) {
     buckets.forEach((bucket) {
-      if (bucket.containsHour(new Hour.beginning(e.interval.start)))
+      if (bucket.containsHour(Hour.beginning(e.interval.start)))
         res[bucket].add(e);
     });
   });

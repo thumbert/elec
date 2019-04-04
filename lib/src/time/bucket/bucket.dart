@@ -11,6 +11,9 @@ abstract class Bucket {
   String get name;
   Location location;
 
+  /// the permissible hour endings of this bucket
+  List<int> hourEnding;
+
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
   String toString() => name;
@@ -43,6 +46,8 @@ abstract class Bucket {
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
   Location location;
+  final List<int> hourEnding =
+      List.generate(24, (i) => i + 1, growable: false);
 
   Bucket7x24(this.location);
 
@@ -52,7 +57,7 @@ class Bucket7x24 extends Bucket {
 class Bucket7x8 extends Bucket {
   final String name = '7x8';
   Location location;
-  Calendar calendar = new NercCalendar();
+  final List<int> hourEnding = [1, 2, 3, 4, 5, 6, 7, 24];
 
   Bucket7x8(Location this.location);
 
@@ -66,7 +71,8 @@ class Bucket7x8 extends Bucket {
 class Bucket7x16 extends Bucket {
   final String name = '7x16';
   Location location;
-  Calendar calendar = new NercCalendar();
+  final List<int> hourEnding =
+    List.generate(16, (i) => i + 8, growable: false);
 
   Bucket7x16(Location this.location);
 
@@ -80,6 +86,8 @@ class Bucket5x16 extends Bucket {
   final String name = '5x16';
   Location location;
   Calendar calendar = new NercCalendar();
+  final List<int> hourEnding =
+    List.generate(16, (i) => i + 8, growable: false);
 
   Bucket5x16(Location this.location);
 
@@ -94,7 +102,6 @@ class Bucket5x16 extends Bucket {
         return false;
       } else {
         if (calendar.isHoliday(hour.currentDate))
-
           /// it's a holiday
           return false;
         else
@@ -107,7 +114,7 @@ class Bucket5x16 extends Bucket {
 class Bucket2x16H extends Bucket {
   final String name = '2x16H';
   Location location;
-  Calendar calendar = new NercCalendar();
+  var calendar = NercCalendar();
 
   Bucket2x16H(Location this.location);
 
@@ -124,7 +131,6 @@ class Bucket2x16H extends Bucket {
     }
   }
 }
-
 
 class Bucket2x16 extends Bucket {
   final String name = '2x16';
@@ -143,7 +149,6 @@ class Bucket2x16 extends Bucket {
     }
   }
 }
-
 
 class BucketOffpeak extends Bucket {
   final String name = 'Offpeak';
