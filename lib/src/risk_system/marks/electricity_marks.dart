@@ -11,6 +11,7 @@ class BucketPrice {
   BucketPrice(this.bucket, this.price);
 }
 
+
 abstract class ElectricityMark {
   /// return the value for this bucket
   num value(Bucket bucket);
@@ -18,8 +19,7 @@ abstract class ElectricityMark {
 
 
 
-
-class ElectricityMark527 extends ElectricityMark {
+class ElectricityMarks extends ElectricityMark {
   num price5x16;
   num price2x16H;
   num price7x8;
@@ -27,7 +27,7 @@ class ElectricityMark527 extends ElectricityMark {
     IsoNewEngland.bucket7x8];
   static final _bucketNames = {'5x16', '2x16H', '7x8'};
 
-  ElectricityMark527(this.price5x16, this.price2x16H, this.price7x8);
+  ElectricityMarks(this.price5x16, this.price2x16H, this.price7x8);
 
   num value(Bucket bucket) {
     if (bucket == IsoNewEngland.bucket5x16) return price5x16;
@@ -37,7 +37,7 @@ class ElectricityMark527 extends ElectricityMark {
       throw ArgumentError('Invalid bucket $bucket');
   }
 
-  ElectricityMark527.fromMap(Map<String,num> x) {
+  ElectricityMarks.fromMap(Map<String,num> x) {
     if (!x.keys.toSet().containsAll(_bucketNames))
       throw ArgumentError('Invalid map input $x');
     price5x16 = x['5x16'];

@@ -28,29 +28,42 @@ TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> mar
 
 tests() {
   var location = getLocation('US/Eastern');
-  group('Electricity marks', () {
+  group('Electricity marks:', () {
     test('the 3 standard buckets', () {
       var b5x16 = Bucket5x16(location);
       var b2x16H = Bucket2x16H(location);
       var b7x8 = Bucket7x8(location);
 
-      var marks = [
-        BucketPrice(b5x16, 81.25),
-        BucketPrice(b2x16H, 67.50),
-        BucketPrice(b7x8, 35.60),
-      ];
       var weights = [
         HourlyWeights(b5x16, List.filled(16, 1.0)),
         HourlyWeights(b2x16H, List.filled(16, 1.0)),
         HourlyWeights(b7x8, List.filled(8, 1.0)),
       ];
 
+      var marks = [
+        BucketPrice(b5x16, 81.25),
+        BucketPrice(b2x16H, 67.50),
+        BucketPrice(b7x8, 35.60),
+      ];
 
       var month = Month(2018, 1, location: location);
       var hourlyMarks = toHourlyFromMonthlyBucketMark(month, marks, weights);
-      print(hourlyMarks);
-
+      expect(hourlyMarks.length, 744);
+      var values = hourlyMarks.values.toList();
+      expect(values[0], 35.6);
+      expect(values[8], 67.5); // New Year's Eve
+//      hourlyMarks.take(32).forEach(print);
+      expect(values[32], 81.25);
     });
+    test('shape monthly marks', () {
+      var monthlyMarks = TimeSeries.fromIterable([
+        IntervalTuple(Month(2018,1,location: location), ElectricityMarks(81.25, 67.50, 35.60)),
+        IntervalTuple(Month(2018,2,location: location), ElectricityMarks(80.50, 66.40, 32.45)),
+      ]);
+      print(monthlyMarks);
+    });
+
+
   });
 }
 

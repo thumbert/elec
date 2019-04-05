@@ -85,11 +85,11 @@ class Bucket7x16 extends Bucket {
 class Bucket5x16 extends Bucket {
   final String name = '5x16';
   Location location;
-  Calendar calendar = new NercCalendar();
+  Calendar calendar = NercCalendar();
   final List<int> hourEnding =
     List.generate(16, (i) => i + 8, growable: false);
 
-  Bucket5x16(Location this.location);
+  Bucket5x16(this.location);
 
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
@@ -115,6 +115,8 @@ class Bucket2x16H extends Bucket {
   final String name = '2x16H';
   Location location;
   var calendar = NercCalendar();
+  final List<int> hourEnding =
+    List.generate(16, (i) => i + 8, growable: false);
 
   Bucket2x16H(Location this.location);
 
@@ -135,8 +137,9 @@ class Bucket2x16H extends Bucket {
 class Bucket2x16 extends Bucket {
   final String name = '2x16';
   Location location;
-  Calendar calendar = new NercCalendar();
-
+  Calendar calendar;
+  final List<int> hourEnding =
+    List.generate(16, (i) => i + 8, growable: false);
   Bucket2x16(Location this.location);
 
   bool containsHour(Hour hour) {
@@ -153,7 +156,10 @@ class Bucket2x16 extends Bucket {
 class BucketOffpeak extends Bucket {
   final String name = 'Offpeak';
   Location location;
-  Calendar calendar = new NercCalendar();
+  Calendar calendar = NercCalendar();
+  final List<int> hourEnding =
+    List.generate(24, (i) => i + 1, growable: false);
+
 
   BucketOffpeak(Location this.location);
 
