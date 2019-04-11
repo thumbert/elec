@@ -7,7 +7,7 @@ class BuySell {
 
   factory BuySell.parse(String x) {
     var y = x.toLowerCase();
-    if (y != 'buy' || y != 'sell')
+    if (y != 'buy' && y != 'sell')
       throw ArgumentError('Can\'t parse $x for BuySell.');
     return y == 'buy' ? buy : sell;
   }

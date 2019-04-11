@@ -12,19 +12,12 @@ class BucketPrice {
 }
 
 
-abstract class ElectricityMark {
-  /// return the value for this bucket
-  num value(Bucket bucket);
-}
 
-
-
-class ElectricityMarks extends ElectricityMark {
+class ElectricityMarks {
   num price5x16;
   num price2x16H;
   num price7x8;
-  static final _buckets = [IsoNewEngland.bucket5x16, IsoNewEngland.bucket2x16H,
-    IsoNewEngland.bucket7x8];
+
   static final _bucketNames = {'5x16', '2x16H', '7x8'};
 
   ElectricityMarks(this.price5x16, this.price2x16H, this.price7x8);

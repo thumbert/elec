@@ -8,7 +8,7 @@ class TradeStatus {
 
   static var _allowed = Set<String>()
     ..addAll([
-      'alive',
+      'live',
       'closed',
     ]);
 
@@ -18,13 +18,13 @@ class TradeStatus {
       throw ArgumentError('Invalid trade status.');
     TradeStatus out;
     switch (y) {
-      case 'alive': out = alive; break;
+      case 'live': out = live; break;
       case 'closed': out = closed; break;
     }
     return out;
   }
 
-  static const alive = const TradeStatus._internal('alive');
+  static const live = const TradeStatus._internal('live');
   static const closed = const TradeStatus._internal('closed');
 
   String toString()  => name;

@@ -7,7 +7,7 @@ class Market {
 
   factory Market.parse(String x) {
     var y = x.toLowerCase();
-    if (y != 'da' || y != 'rt')
+    if (y != 'da' && y != 'rt')
       throw ArgumentError('Market can be only DA or RT.');
     return y == 'da' ? da : rt;
   }

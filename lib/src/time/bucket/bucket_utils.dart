@@ -4,6 +4,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'bucket.dart';
 
+
 /// Split the observations of timeseries [x] into other timeseries such that
 /// each of these timeseries have intervals in a corresponding bucket.
 /// Only one traversal of [x] is made.  Works for hourly and sub-hourly

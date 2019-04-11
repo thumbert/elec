@@ -1,9 +1,16 @@
 library test.time.hourly_shape_test;
 
+import 'package:collection/collection.dart';
+import 'package:elec/src/time/bucket/hourly_shape.dart';
 import 'package:test/test.dart';
+import 'package:http/http.dart';
+import 'package:tuple/tuple.dart';
 import 'package:timezone/standalone.dart';
+import 'package:dama/dama.dart';
+import 'package:elec_server/client/isoexpress/dalmp.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:elec/src/common_enums.dart';
 import 'package:elec/src/risk_system/marks/electricity_marks.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_weights.dart';
@@ -26,7 +33,18 @@ TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> mar
 }
 
 
-tests() {
+Future<HourlyShape> _getHourlyShape(String rootUrl) async {
+  var client = Client();
+  var api = DaLmp(client, rootUrl: rootUrl);
+  var x = await api.getHourlyLmp(
+      4000, LmpComponent.lmp, Date(2017, 1, 1), Date(2017, 12, 31));
+
+  var hs = HourlyShape.fromTimeSeries(x);
+  hs.toJson().forEach(print);
+}
+
+
+tests(String rootUrl) {
   var location = getLocation('US/Eastern');
   group('Electricity marks:', () {
     test('the 3 standard buckets', () {
@@ -70,5 +88,8 @@ tests() {
 
 main() async {
   await initializeTimeZone();
-  tests();
+  String rootUrl = "http://localhost:8080/"; // testing
+  //tests(rootUrl);
+
+  await _getHourlyShape(rootUrl);
 }

@@ -11,6 +11,7 @@ import 'package:quiver/core.dart' show hash2;
 
 
 part 'src/risk_system/buy_sell.dart';
+part 'src/risk_system/call_put.dart';
 part 'src/risk_system/commodity.dart';
 part 'src/risk_system/energy_hubs.dart';
 part 'src/risk_system/energy_unit.dart';
