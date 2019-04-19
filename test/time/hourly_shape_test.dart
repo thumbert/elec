@@ -1,6 +1,6 @@
 library test.time.hourly_shape_test;
 
-import 'package:collection/collection.dart';
+
 import 'package:elec/src/time/bucket/hourly_shape.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';

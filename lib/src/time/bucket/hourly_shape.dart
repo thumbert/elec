@@ -1,7 +1,9 @@
 library time.bucket.hourly_shape;
 
+
 import 'package:timezone/standalone.dart';
 import 'package:collection/collection.dart';
+import 'package:date/date.dart';
 import 'package:dama/dama.dart';
 import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';
@@ -17,6 +19,12 @@ class HourlyShape {
   // outer list is for the 12 months
   List<Map<Bucket,HourlyWeights>> _data;
 
+  /// Construct the hourly shape from a 12 element list containing the
+  /// hourly weights for each bucket.  Usually, you don't have this input data,
+  /// and you would construct it from a time series.
+  HourlyShape(List<Map<Bucket,HourlyWeights>> weights) {
+    _data = weights;
+  }
 
   /// Calculate the hourly shape from a given timeseries.
   ///
