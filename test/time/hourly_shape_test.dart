@@ -41,6 +41,9 @@ Future<HourlyShape> _getHourlyShape(String rootUrl) async {
 
   var hs = HourlyShape.fromTimeSeries(x);
   hs.toJson().forEach(print);
+
+  var hsm = hourlyShapeByYearMonthDayType(x);
+  print(hsm);
 }
 
 
