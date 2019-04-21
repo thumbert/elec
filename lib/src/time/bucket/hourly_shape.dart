@@ -130,10 +130,13 @@ TimeSeries<Map<String, HourlyWeights>> hourlyShapeByYearMonthDayType(
   var xh = x.splitByIndex((e) => e.start.year);
   var months = List.generate(12, (i) => i + 1);
 
-  var aux = xh.entries.map((e) {
-    var year = e.value.first.interval.start.year;
-    var hs = HourlyShape.fromTimeSeries(e.value, buckets: buckets);
+
+  var aux = <IntervalTuple<Map<String,HourlyWeights>>>[];
+  for (var year in xh.keys) {
+    print('year: $year');
+    var hs = HourlyShape.fromTimeSeries(xh[year], buckets: buckets);
     for (var month in months) {
+      print('month: $month');
       var hsm = hs.valuesForMonth(month);
       var w7x8 = hsm[Bucket7x8(location)].weights;
       var w2x16H = hsm[Bucket2x16H(location)].weights;
@@ -144,9 +147,9 @@ TimeSeries<Map<String, HourlyWeights>> hourlyShapeByYearMonthDayType(
         'Weekend/Holiday': HourlyWeights(
             Bucket7x24(location), <num>[]..addAll(w7x8)..addAll(w2x16H)),
       };
-      return IntervalTuple(Month(year, month, location: location), y);
+      aux.add(IntervalTuple(Month(year, month, location: location), y));
     }
-  });
+  }
 
-  return aux;
+  return TimeSeries.fromIterable(aux);
 }

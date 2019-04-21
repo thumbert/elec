@@ -24,5 +24,7 @@ class HourlyWeights {
 
   /// A map from hour ending -> weight
   Map<int, num> toMap() => _values;
+
+  String toString() => toMap().toString();
 }
 

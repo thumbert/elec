@@ -51,7 +51,15 @@ List<int> countByMonth(int year, Bucket bucket) {
 
 
 test_bucket() {
-  group("Test the 5x16 bucket NEPOOL", () {
+  group("Test buckets", () {
+    var location = getLocation('US/Eastern');
+    test('equality for buckets', () {
+      expect(Bucket2x16H(location), Bucket2x16H(location));
+      expect(Bucket5x16(location), Bucket5x16(location));
+      expect(Bucket7x8(location), Bucket7x8(location));
+      expect(Bucket7x8(location).hashCode, Bucket7x8(location).hashCode);
+    });
+
     Bucket b5x16 = IsoNewEngland.bucket5x16;
     test('5x16 and Peak are the same', () {
       var onpeak = IsoNewEngland.bucketPeak;

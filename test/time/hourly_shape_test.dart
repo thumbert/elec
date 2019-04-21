@@ -1,16 +1,18 @@
 library test.time.hourly_shape_test;
 
 
+
 import 'package:elec/src/time/bucket/hourly_shape.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:tuple/tuple.dart';
 import 'package:timezone/standalone.dart';
 import 'package:dama/dama.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec_server/client/isoexpress/system_demand.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/common_enums.dart';
+//import 'package:elec/src/common_enums.dart';
 import 'package:elec/src/risk_system/marks/electricity_marks.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_weights.dart';
@@ -35,12 +37,12 @@ TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> mar
 
 Future<HourlyShape> _getHourlyShape(String rootUrl) async {
   var client = Client();
-  var api = DaLmp(client, rootUrl: rootUrl);
-  var x = await api.getHourlyLmp(
-      4000, LmpComponent.lmp, Date(2017, 1, 1), Date(2017, 12, 31));
+  var api = SystemDemand(client, rootUrl: rootUrl);
+  var x = await api.getSystemDemand(Market.rt,
+      Date(2014, 1, 1), Date(2018, 12, 31));
 
-  var hs = HourlyShape.fromTimeSeries(x);
-  hs.toJson().forEach(print);
+//  var hs = HourlyShape.fromTimeSeries(x);
+//  hs.toJson().forEach(print);
 
   var hsm = hourlyShapeByYearMonthDayType(x);
   print(hsm);

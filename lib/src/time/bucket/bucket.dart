@@ -1,6 +1,7 @@
 library elec.bucket;
 
 import 'package:date/date.dart';
+import 'package:quiver/core.dart';
 import 'package:timezone/standalone.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
@@ -41,6 +42,8 @@ abstract class Bucket {
     }
     return out;
   }
+
+  int get hashCode => hash2(name, location);
 }
 
 class Bucket7x24 extends Bucket {
@@ -52,6 +55,12 @@ class Bucket7x24 extends Bucket {
   Bucket7x24(this.location);
 
   bool containsHour(Hour hour) => true;
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket7x24) return false;
+    Bucket7x24 bucket = other;
+    return name == bucket.name && location == bucket.location;
+  }
 }
 
 class Bucket7x8 extends Bucket {
@@ -63,8 +72,13 @@ class Bucket7x8 extends Bucket {
 
   bool containsHour(Hour hour) {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
-
     return false;
+  }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket7x8) return false;
+    Bucket7x8 bucket7x8 = other;
+    return name == bucket7x8.name && location == bucket7x8.location;
   }
 }
 
@@ -79,6 +93,12 @@ class Bucket7x16 extends Bucket {
   bool containsHour(Hour hour) {
     if (hour.start.hour >= 7 && hour.start.hour < 23) return true;
     return false;
+  }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket7x16) return false;
+    Bucket7x16 bucket = other;
+    return name == bucket.name && location == bucket.location;
   }
 }
 
@@ -109,6 +129,12 @@ class Bucket5x16 extends Bucket {
       }
     }
   }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket5x16) return false;
+    Bucket5x16 bucket = other;
+    return name == bucket.name && location == bucket.location;
+  }
 }
 
 class Bucket2x16H extends Bucket {
@@ -131,6 +157,12 @@ class Bucket2x16H extends Bucket {
       else
         return false;
     }
+  }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket2x16H) return false;
+    Bucket2x16H bucket = other;
+    return name == bucket.name && location == bucket.location;
   }
 }
 
