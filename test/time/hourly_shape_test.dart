@@ -12,10 +12,11 @@ import 'package:elec/risk_system.dart';
 import 'package:elec_server/client/isoexpress/system_demand.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
-//import 'package:elec/src/common_enums.dart';
 import 'package:elec/src/risk_system/marks/electricity_marks.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_weights.dart';
+import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
+
 
 TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> marks, List<HourlyWeights> weights){
   var hours = month.splitLeft((dt) => Hour.containing(dt)).cast<Hour>();
@@ -37,9 +38,17 @@ TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> mar
 
 Future<HourlyShape> _getHourlyShape(String rootUrl) async {
   var client = Client();
-  var api = SystemDemand(client, rootUrl: rootUrl);
-  var x = await api.getSystemDemand(Market.rt,
-      Date(2014, 1, 1), Date(2018, 12, 31));
+  var location = getLocation('US/Eastern');
+  var start = Date(2014, 1, 1, location: location);
+  var end = Date(2018, 12, 31, location: location);
+
+//  var api = SystemDemand(client, rootUrl: rootUrl);
+//  var x = await api.getSystemDemand(Market.rt, start, end);
+
+  var api = EversourceLoad(Client());
+  var aux = await api.getCtLoad(start, end);
+  var x = TimeSeries.fromIterable(aux.map((e) => IntervalTuple(e.interval,
+      e.value['SS Total'] + e.value['Competitive Supply'] + e.value['LRS'])));
 
 //  var hs = HourlyShape.fromTimeSeries(x);
 //  hs.toJson().forEach(print);

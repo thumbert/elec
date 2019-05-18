@@ -133,10 +133,8 @@ TimeSeries<Map<String, HourlyWeights>> hourlyShapeByYearMonthDayType(
 
   var aux = <IntervalTuple<Map<String,HourlyWeights>>>[];
   for (var year in xh.keys) {
-    print('year: $year');
     var hs = HourlyShape.fromTimeSeries(xh[year], buckets: buckets);
     for (var month in months) {
-      print('month: $month');
       var hsm = hs.valuesForMonth(month);
       var w7x8 = hsm[Bucket7x8(location)].weights;
       var w2x16H = hsm[Bucket2x16H(location)].weights;
