@@ -5,7 +5,6 @@ library test.time.hourly_shape_test;
 import 'package:elec/src/time/bucket/hourly_shape.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
-import 'package:tuple/tuple.dart';
 import 'package:timezone/standalone.dart';
 import 'package:dama/dama.dart';
 import 'package:elec/risk_system.dart';

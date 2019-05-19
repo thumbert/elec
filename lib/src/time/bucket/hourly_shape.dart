@@ -115,8 +115,9 @@ class HourlyShape {
   }
 }
 
-/// Calculate the hourly shape by year, month and Weekday / Weekend & Holiday
+/// Calculate the hourly shape for each month and Weekday / Weekend & Holiday
 /// The input timeseries needs to be hourly frequency.
+/// The return is a monthly timeseries.
 TimeSeries<Map<String, HourlyWeights>> hourlyShapeByYearMonthDayType(
     TimeSeries<num> x) {
   var location = x.first.interval.start.location;
