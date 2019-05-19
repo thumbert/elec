@@ -40,7 +40,7 @@ class Virtual {
 /// Make the xml file
 String toXml(List<Virtual> virtuals, {String subaccountName: 'VIRT'}) {
   var builder = new xml.XmlBuilder();
-  builder.processing('xml', 'version=1.0');
+  builder.processing('xml', 'version="1.0" encoding="utf-8"');
   builder.element('soapenv:Envelope', nest: (){
     builder.attribute('xmlns:mes', 'http://www.markets.iso-ne.com/MUI/eMkt/Messages');
     builder.attribute('xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
