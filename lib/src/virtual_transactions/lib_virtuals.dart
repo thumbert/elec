@@ -1,6 +1,6 @@
 library elec.virtuals.lib_virtuals;
 
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';

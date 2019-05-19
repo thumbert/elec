@@ -1,6 +1,6 @@
 library time.bucket.hourly_shape;
 
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:dama/dama.dart';

@@ -1,6 +1,6 @@
 library ftr.auction;
 
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:elec_server/src/utils/timezone_utils.dart';
 //import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';

@@ -1,6 +1,6 @@
 library elec.iso;
 
-import 'package:timezone/standalone.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/iso/location.dart';
 

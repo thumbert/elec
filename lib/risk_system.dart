@@ -5,7 +5,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:dama/stat/descriptive/summary.dart' show sum;
-import 'package:timezone/standalone.dart';
+import 'package:timezone/timezone.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:quiver/core.dart' show hash2;
 
