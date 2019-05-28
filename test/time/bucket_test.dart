@@ -120,6 +120,19 @@ test_bucket() {
     });
   });
 
+//  group("Test the 2x8 bucket NEPOOL", () {
+//    test("2x8 hours by month in 2012", () {
+//      expect(countByMonth(2012, IsoNewEngland.bucket7x8),
+//          [248, 232, 247, 240, 248, 240, 248, 248, 240, 248, 241, 248]);
+//    });
+//    test("7x8 hours by month in 2013", () {
+//      expect(countByMonth(2013, IsoNewEngland.bucket7x8),
+//          [248, 224, 247, 240, 248, 240, 248, 248, 240, 248, 241, 248]);
+//    });
+//  });
+
+
+
   group("Test the Offpeak bucket NEPOOL", () {
     test("Offpeak hours by month in 2012", () {
       expect(countByMonth(2012, IsoNewEngland.bucketOffpeak),

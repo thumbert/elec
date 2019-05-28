@@ -63,6 +63,7 @@ class Bucket7x24 extends Bucket {
   }
 }
 
+/// Overnight hours for weekeend, weekday, or holiday
 class Bucket7x8 extends Bucket {
   final String name = '7x8';
   Location location;
@@ -81,6 +82,32 @@ class Bucket7x8 extends Bucket {
     return name == bucket7x8.name && location == bucket7x8.location;
   }
 }
+
+
+/// Overnight hours for weekend only (no weekday holidays)
+class Bucket2x8 extends Bucket {
+  final String name = '2x8';
+  Location location;
+  final List<int> hourEnding = [1, 2, 3, 4, 5, 6, 7, 24];
+
+  Bucket2x8(Location this.location);
+
+  bool containsHour(Hour hour) {
+    int dayOfWeek = hour.currentDate.weekday;
+    if (dayOfWeek != 6 || dayOfWeek != 7) return false;
+    if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
+    return false;
+  }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket2x8) return false;
+    Bucket2x8 bucket2x8 = other;
+    return name == bucket2x8.name && location == bucket2x8.location;
+  }
+}
+
+
+
 
 class Bucket7x16 extends Bucket {
   final String name = '7x16';
