@@ -22,7 +22,7 @@ class HourlyShape {
     _data = weights;
   }
 
-  /// Calculate the hourly shape from a given timeseries.
+  /// Calculate the hourly shape from a given hourly timeseries.
   ///
   HourlyShape.fromTimeSeries(TimeSeries<num> x, {List<Bucket> buckets}) {
     if (buckets == null) {
@@ -34,43 +34,43 @@ class HourlyShape {
       ];
     }
 
-    // the average by month, bucket
+    // calculate the average value by month [1..12], bucket
     var bucketPrice = <Tuple2<int, Bucket>, num>{};
-    var grp = x.splitByIndex((hour) {
-      var bucket = buckets.firstWhere((bucket) => bucket.containsHour(hour));
-      return Tuple2(hour.start.month, bucket);
-    });
-    grp.entries.forEach((e) {
-      bucketPrice[e.key] = mean(e.value.values);
-    });
+    for (var bucket in buckets) {
+      var _grp = groupBy(x.where((e) => bucket.containsHour(e.interval)),
+          (IntervalTuple e) => Tuple2(e.interval.start.month, bucket));
+      _grp.entries.forEach((e) {
+        bucketPrice[e.key] = mean(e.value.map((e) => e.value));
+      });
+    }
 
-    // the weights by month, bucket, hour of day
+    // calculate the weights by month [1..12], bucket, hour of day [0..23]
     var weights = <Tuple3<int, Bucket, int>, num>{};
-    var grpHour = x.splitByIndex((hour) {
-      var bucket = buckets.firstWhere((bucket) => bucket.containsHour(hour));
-      return Tuple3(hour.start.month, bucket, hour.start.hour);
-    });
-    grpHour.entries.forEach((e) {
-      var month = e.key.item1;
-      var bucket = e.key.item2;
-      weights[e.key] =
-          mean(e.value.values) / bucketPrice[Tuple2(month, bucket)];
-    });
+    for (var bucket in buckets) {
+      var _grpHour = groupBy(
+          x.where((e) => bucket.containsHour(e.interval)),
+          (IntervalTuple e) =>
+              Tuple3(e.interval.start.month, bucket, e.interval.start.hour));
+      _grpHour.entries.forEach((e) {
+        var month = e.key.item1;
+        var bucket = e.key.item2;
+        weights[e.key] = mean(e.value.map((e) => e.value)) /
+            bucketPrice[Tuple2(month, bucket)];
+      });
+    }
 
     _data = List.generate(12, (i) => <Bucket, HourlyWeights>{});
     var g1 = groupBy(weights.entries, (e) => e.key.item1 as int);
-    g1.entries.forEach((e) {
-      var month = e.key;
-      var g2 = groupBy(e.value, (e) => e.key.item2 as Bucket);
-      g2.entries.forEach((f) {
-        var bucket = f.key;
-        var weights = f.value.map((g) => g.value);
+    for (int month in g1.keys) {
+      var g2 = groupBy(g1[month], (e) => e.key.item2 as Bucket);
+      for (Bucket bucket in g2.keys) {
+        var weights = g2[bucket].map((e) => e.value);
         _data[month - 1][bucket] = HourlyWeights(bucket, weights);
-      });
-    });
+      }
+    }
   }
 
-  /// Construct an hourly shape from a 3 element List, each element is a Map
+  /// Construct an hourly shape from a List, each element is a Map
   /// with keys 'bucket' and 'weights'.  Weights is a
   /// 12 element List of List<num> with the weights for all months.
   ///
@@ -115,40 +115,19 @@ class HourlyShape {
   }
 }
 
-/// Calculate the hourly shape for each month and Weekday / Weekend & Holiday
+/// Calculate the hourly shape by month for a bucket.
 /// The input timeseries needs to be hourly frequency.
-/// The return is a monthly timeseries.
-TimeSeries<Map<String, HourlyWeights>> hourlyShapeByYearMonthDayType(
-    TimeSeries<num> x) {
-  var location = x.first.interval.start.location;
-  var buckets = [
-      Bucket5x16(location),
-      Bucket2x16H(location),
-      Bucket7x8(location),
-  ];
+/// The return is a monthly timeseries of hourly weights.
+TimeSeries<HourlyWeights> hourlyShapeByYearMonth(
+    TimeSeries<num> x, Bucket bucket) {
+  var xh = x.splitByIndex((e) => Month.fromTZDateTime(e.start));
 
-  // split the timeseries into year chunks
-  var xh = x.splitByIndex((e) => e.start.year);
-  var months = List.generate(12, (i) => i + 1);
-
-
-  var aux = <IntervalTuple<Map<String,HourlyWeights>>>[];
-  for (var year in xh.keys) {
-    var hs = HourlyShape.fromTimeSeries(xh[year], buckets: buckets);
-    for (var month in months) {
-      var hsm = hs.valuesForMonth(month);
-      var w7x8 = hsm[Bucket7x8(location)].weights;
-      var w2x16H = hsm[Bucket2x16H(location)].weights;
-      var w5x16 = hsm[Bucket5x16(location)].weights;
-      var y = <String, HourlyWeights>{
-        'Weekday': HourlyWeights(
-            Bucket7x24(location), <num>[]..addAll(w7x8)..addAll(w5x16)),
-        'Weekend/Holiday': HourlyWeights(
-            Bucket7x24(location), <num>[]..addAll(w7x8)..addAll(w2x16H)),
-      };
-      aux.add(IntervalTuple(Month(year, month, location: location), y));
-    }
+  var out = TimeSeries<HourlyWeights>();
+  for (var month in xh.keys) {
+    var hs = HourlyShape.fromTimeSeries(xh[month], buckets: [bucket]);
+    var hsm = hs.valuesForMonth(month.month);
+    out.add(IntervalTuple(month, hsm[bucket]));
   }
 
-  return TimeSeries.fromIterable(aux);
+  return TimeSeries.fromIterable(out);
 }

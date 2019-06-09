@@ -2,6 +2,7 @@ library test.time.hourly_shape_test;
 
 
 
+import 'package:elec/elec.dart';
 import 'package:elec/src/time/bucket/hourly_shape.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
@@ -52,7 +53,7 @@ Future<HourlyShape> _getHourlyShape(String rootUrl) async {
 //  var hs = HourlyShape.fromTimeSeries(x);
 //  hs.toJson().forEach(print);
 
-  var hsm = hourlyShapeByYearMonthDayType(x);
+  var hsm = hourlyShapeByYearMonth(x, Bucket7x24(location));
   print(hsm);
 }
 
