@@ -3,7 +3,12 @@ library time.bucket.bucket_utils;
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'bucket.dart';
+import 'package:elec/src/time/calendar/calendar.dart';
 
+/// Calculate if this day is a Peak day
+bool isPeakDay(Date x, Calendar calendar) {
+  return x.weekday == 6 || x.weekday == 7 || calendar.isHoliday(x);
+}
 
 /// Split the observations of timeseries [x] into other timeseries such that
 /// each of these timeseries have intervals in a corresponding bucket.
