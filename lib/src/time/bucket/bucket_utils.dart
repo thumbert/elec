@@ -7,7 +7,8 @@ import 'package:elec/src/time/calendar/calendar.dart';
 
 /// Calculate if this day is a Peak day
 bool isPeakDay(Date x, Calendar calendar) {
-  return x.weekday == 6 || x.weekday == 7 || calendar.isHoliday(x);
+  var aux = x.weekday == 6 || x.weekday == 7 || calendar.isHoliday(x);
+  return !aux;
 }
 
 /// Split the observations of timeseries [x] into other timeseries such that
