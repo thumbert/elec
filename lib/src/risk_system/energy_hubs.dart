@@ -6,7 +6,7 @@ abstract class BaseHub {
 }
 
 class EnergyHub implements BaseHub {
-  Commodity commodity = Commodity.energy;
+  Commodity commodity = Commodity.electricity;
   String hub;
   Market market;
   Iso iso;
@@ -33,7 +33,7 @@ class EnergyHub implements BaseHub {
   EnergyHub.fromMap(Map<String, dynamic> x) {
     // TODO: add some checks here
     var commodity = Commodity.parse(x['commodity']);
-    if (commodity != Commodity.energy)
+    if (commodity != Commodity.electricity)
       throw ArgumentError('$x is not an energy hub');
     hub = x['hub'];
     market = Market.parse(x['market']);

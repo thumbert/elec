@@ -7,7 +7,7 @@ class Commodity {
   static var _allowed = Set<String>()
     ..addAll([
       'pwr',
-      'energy',
+      'electricity',
       'ng',
       'natural gas',
       'fo2',
@@ -18,7 +18,7 @@ class Commodity {
 
   const Commodity._internal(this.shortName, this.longName);
 
-  static const energy = const Commodity._internal('Pwr', 'Energy');
+  static const electricity = const Commodity._internal('Pwr', 'Electricity');
   static const ng = const Commodity._internal('Ng', 'Natual Gas');
   static const fo2 = const Commodity._internal('Fo2', 'Fuel Oil #2');
   static const fo6 = const Commodity._internal('Fo6', 'Fuel Oil #6');
@@ -29,8 +29,8 @@ class Commodity {
       throw ArgumentError('Can\'t parse $x as a Commodity.');
 
     Commodity out;
-    if (y == 'pwr' || y == 'energy') {
-      out = energy;
+    if (y == 'pwr' || y == 'electricity') {
+      out = electricity;
     } else if (y == 'ng' || y == 'natural gas') {
       out = ng;
     } else if (y == 'fo2' || y == 'fuel oil #2') {

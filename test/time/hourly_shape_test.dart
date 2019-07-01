@@ -19,7 +19,7 @@ import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
 TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> marks, List<HourlyWeights> weights){
   var hours = month.splitLeft((dt) => Hour.containing(dt)).cast<Hour>();
-  var price = Map.fromIterable(marks, key: (e) => e.bucket, value: (e) => e.price);
+  var price = Map.fromIterable(marks, key: (e) => e.bucket, value: (e) => e.value);
   var ts = TimeSeries<num>();
   for (var hour in hours) {
     for (var weight in weights) {
