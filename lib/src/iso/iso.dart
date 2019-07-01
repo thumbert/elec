@@ -26,6 +26,7 @@ class IsoNewEngland implements Iso {
   static final Bucket bucket2x16H   = Bucket2x16H(location);
   static final Bucket bucket2x16    = Bucket2x16(location);
   static final Bucket bucket7x8     = Bucket7x8(location);
+  static final Bucket bucket2x8     = Bucket2x8(location);
   static final Bucket bucket7x24    = Bucket7x24(location);
   static final Bucket bucketOffpeak = BucketOffpeak(location);
   static final Bucket bucketPeak    = bucket5x16;

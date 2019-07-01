@@ -35,6 +35,8 @@ abstract class Bucket {
       out = IsoNewEngland.bucket7x8;
     } else if (bucket == '7X16') {
       out = IsoNewEngland.bucket7x16;
+    } else if (bucket == '2X8') {
+      out = IsoNewEngland.bucket2x8;
     } else if (bucket == '2X16') {
       out = IsoNewEngland.bucket2x16;
     } else {
@@ -94,7 +96,7 @@ class Bucket2x8 extends Bucket {
 
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
-    if (dayOfWeek != 6 || dayOfWeek != 7) return false;
+    if (dayOfWeek != 6 && dayOfWeek != 7) return false;
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
