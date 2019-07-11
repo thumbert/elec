@@ -68,8 +68,8 @@ class MonthlyBucketCurve {
   /// The months for this curve, ordered.
   List<Month> get months => _months;
 
-  /// Get the value of this forward curve as of a given asOfDate.
-  TimeSeries<num> getCurveForBucket(Date asOfDate, Bucket bucket) {
+  /// Get the value of this curve for a given bucket.
+  TimeSeries<num> getCurveForBucket(Bucket bucket) {
     var aux = values
         .where((mark) => mark.bucket == bucket)
         .map((mark) => IntervalTuple(mark.month, mark.value))
