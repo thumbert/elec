@@ -4,7 +4,7 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/risk_system/locations/location.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/time/bucket/monthly_bucket_value.dart';
+import 'package:elec/src/time/bucket/month_bucket_value.dart';
 
 //class ForwardCurve {
 //  Location location;

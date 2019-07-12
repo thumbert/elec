@@ -6,17 +6,17 @@ import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:quiver/core.dart';
 import 'package:timeseries/timeseries.dart';
 
-class MonthlyBucketValue {
+class MonthBucketValue {
   Month month;
   Bucket bucket;
   num value;
 
-  /// A triple to keep the value of a mark
-  MonthlyBucketValue(this.month, this.bucket, this.value);
+  /// The equivalent of a triple (month, bucket, value).
+  MonthBucketValue(this.month, this.bucket, this.value);
 
   bool operator ==(dynamic other) {
-    if (other is! MonthlyBucketValue) return false;
-    MonthlyBucketValue x = other;
+    if (other is! MonthBucketValue) return false;
+    MonthBucketValue x = other;
     return x.value == value && x.bucket == bucket && x.month == month;
   }
 

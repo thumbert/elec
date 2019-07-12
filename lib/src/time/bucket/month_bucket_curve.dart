@@ -4,19 +4,19 @@ import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/time/bucket/monthly_bucket_value.dart';
+import 'package:elec/src/time/bucket/month_bucket_value.dart';
 import 'package:tuple/tuple.dart';
 
-class MonthlyBucketCurve {
-  List<MonthlyBucketValue> values;
+class MonthBucketCurve {
+  List<MonthBucketValue> values;
   Set<Bucket> _buckets = {};
   List<Month> _months = [];
 
   /// Construct a monthly bucket curve from a list of monthly bucket values.
-  /// It can also be used to represent quantities for a fixed shape deal for
+  /// It can be used to represent quantities for a fixed shape deal for
   /// example.
   /// <p>The month/bucket combination should be unique.
-  MonthlyBucketCurve(List<MonthlyBucketValue> values) {
+  MonthBucketCurve(List<MonthBucketValue> values) {
     _internal(values);
   }
 
@@ -28,24 +28,24 @@ class MonthlyBucketCurve {
   /// For example, if you have two monthly timeseries corresponding to the peak
   /// and offpeak monthly prices.
   ///
-  MonthlyBucketCurve.from(List<Bucket> buckets, List<TimeSeries<num>> xs) {
+  MonthBucketCurve.from(List<Bucket> buckets, List<TimeSeries<num>> xs) {
     _buckets = buckets.toSet();
     if (_buckets.length != buckets.length)
       throw ArgumentError('The buckets $buckets are not unique');
-    var values = <MonthlyBucketValue>[];
+    var values = <MonthBucketValue>[];
     for (int i=0; i<buckets.length; i++) {
       var ts = xs[i];
       for (var iTuple in ts) {
         Month month = iTuple.interval;
-        values.add(MonthlyBucketValue(month, buckets[i], iTuple.value));
+        values.add(MonthBucketValue(month, buckets[i], iTuple.value));
       }
     }
     _internal(values);
   }
 
-  void _internal(List<MonthlyBucketValue> values) {
+  void _internal(List<MonthBucketValue> values) {
     var _uniques = <Tuple2<Month,Bucket>>{};
-    var aux = <MonthlyBucketValue>[];
+    var aux = <MonthBucketValue>[];
     var _monthsS = <Month>{};
     for (var value in values) {
       aux.add(value);
@@ -60,7 +60,6 @@ class MonthlyBucketCurve {
     _months = _monthsS.toList()..sort((a, b) => a.compareTo(b));
   }
 
-
   /// The set of buckets for this curve.  Some months may have only a partial
   /// subset of the buckets.
   Set<Bucket> get buckets => _buckets;
@@ -68,7 +67,8 @@ class MonthlyBucketCurve {
   /// The months for this curve, ordered.
   List<Month> get months => _months;
 
-  /// Get the value of this curve for a given bucket.
+  /// Get the monthly timeseries associated with a given bucket.
+  /// <p>Missing months are not filled with zeros.
   TimeSeries<num> getCurveForBucket(Bucket bucket) {
     var aux = values
         .where((mark) => mark.bucket == bucket)
@@ -79,8 +79,9 @@ class MonthlyBucketCurve {
   }
 
   /// Get the hourly timeseries corresponding to this MonthlyBucketCurve.
+  /// <p>Missing hours are not filled with zeros.
   TimeSeries<num> toHourly() {
-    var grp = groupBy(values, (MonthlyBucketValue x) => x.month);
+    var grp = groupBy(values, (MonthBucketValue x) => x.month);
     var out = TimeSeries<num>();
     for (var month in months) {
       var aux = <IntervalTuple<num>>[];
