@@ -3,7 +3,7 @@ library test.time.hourly_shape_test;
 
 
 import 'package:elec/elec.dart';
-import 'package:elec/src/time/bucket/hourly_shape.dart';
+import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
@@ -13,7 +13,7 @@ import 'package:elec_server/client/isoexpress/system_demand.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
-import 'package:elec/src/time/bucket/hourly_bucket_weights.dart';
+import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
 

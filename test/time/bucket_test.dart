@@ -22,10 +22,10 @@ aggregateByBucketMonth() {
   ];
   var lmp = hourlyHubPrices();
 
-  Nest nest = new Nest()
-    ..key((Map e) => new Month.fromTZDateTime(e['hourBeginning']))
-    ..key((Map e) => buckets.firstWhere((bucket) =>
-        bucket.containsHour(new Hour.beginning(e['hourBeginning']))))
+  var nest = Nest()
+    ..key((e) => Month.fromTZDateTime(e['hourBeginning']))
+    ..key((e) => buckets.firstWhere((bucket) =>
+        bucket.containsHour(Hour.beginning(e['hourBeginning']))))
     ..rollup((Iterable x) =>
         x.map((e) => e['lmp']).reduce((a, b) => a + b) / x.length);
 
@@ -60,7 +60,7 @@ test_bucket() {
       expect(Bucket7x8(location).hashCode, Bucket7x8(location).hashCode);
     });
 
-    Bucket b5x16 = IsoNewEngland.bucket5x16;
+    var b5x16 = IsoNewEngland.bucket5x16;
     test('5x16 and Peak are the same', () {
       var onpeak = IsoNewEngland.bucketPeak;
       expect(onpeak, b5x16);
@@ -91,6 +91,7 @@ test_bucket() {
   });
 
   group("Test the 2x16H bucket NEPOOL", () {
+    var location = getLocation('US/Eastern');
     test("2x16H hours by month in 2012", () {
       expect(countByMonth(2012, IsoNewEngland.bucket2x16H),
           [160, 128, 144, 144, 144, 144, 160, 128, 176, 128, 144, 176]);
@@ -99,6 +100,11 @@ test_bucket() {
       expect(countByMonth(2013, IsoNewEngland.bucket2x16H),
           [144, 128, 160, 128, 144, 160, 144, 144, 160, 128, 160, 160]);
     });
+    test('hours method', () {
+      var month = Month(2013, 1, location: location);
+      expect(IsoNewEngland.bucket2x16H.hours(month), 144);
+    });
+
   });
 
   group('Test the 7x16 bucket ISO New England', () {

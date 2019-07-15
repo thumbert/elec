@@ -12,12 +12,15 @@ abstract class Bucket {
   String get name;
   Location location;
 
-  /// the permissible hour endings of this bucket
-  List<int> hourEnding;
+  /// the permissible hour beginnings of this bucket
+  List<int> hourBeginning;
 
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
   String toString() => name;
+
+  /// a cache for the number of hours in the month for this bucket
+  Map<Month,int> _hours;
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
@@ -46,13 +49,23 @@ abstract class Bucket {
   }
 
   int get hashCode => hash2(name, location);
+
+  int hours(Month month) {
+    if (!_hours.containsKey(month)) {
+      var hrs = month.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
+      _hours[month] = hrs.where((e) => containsHour(e)).length;
+    }
+    return _hours[month];
+  }
 }
 
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
   Location location;
-  final List<int> hourEnding =
+  final List<int> hourBeginning =
       List.generate(24, (i) => i + 1, growable: false);
+
+  var _hours = <Month,int>{};
 
   Bucket7x24(this.location);
 
@@ -69,7 +82,9 @@ class Bucket7x24 extends Bucket {
 class Bucket7x8 extends Bucket {
   final String name = '7x8';
   Location location;
-  final List<int> hourEnding = [1, 2, 3, 4, 5, 6, 7, 24];
+  final List<int> hourBeginning = [1, 2, 3, 4, 5, 6, 7, 24];
+
+  var _hours = <Month,int>{};
 
   Bucket7x8(Location this.location);
 
@@ -90,7 +105,9 @@ class Bucket7x8 extends Bucket {
 class Bucket2x8 extends Bucket {
   final String name = '2x8';
   Location location;
-  final List<int> hourEnding = [1, 2, 3, 4, 5, 6, 7, 24];
+  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
+
+  var _hours = <Month,int>{};
 
   Bucket2x8(Location this.location);
 
@@ -114,8 +131,10 @@ class Bucket2x8 extends Bucket {
 class Bucket7x16 extends Bucket {
   final String name = '7x16';
   Location location;
-  final List<int> hourEnding =
-    List.generate(16, (i) => i + 8, growable: false);
+  final List<int> hourBeginning =
+    List.generate(16, (i) => i + 7, growable: false);
+
+  var _hours = <Month,int>{};
 
   Bucket7x16(Location this.location);
 
@@ -134,9 +153,11 @@ class Bucket7x16 extends Bucket {
 class Bucket5x16 extends Bucket {
   final String name = '5x16';
   Location location;
-  Calendar calendar = NercCalendar();
-  final List<int> hourEnding =
-    List.generate(16, (i) => i + 8, growable: false);
+  var calendar = NercCalendar();
+  final List<int> hourBeginning =
+    List.generate(16, (i) => i + 7, growable: false);
+
+  var _hours = <Month,int>{};
 
   Bucket5x16(this.location);
 
@@ -170,10 +191,12 @@ class Bucket2x16H extends Bucket {
   final String name = '2x16H';
   Location location;
   var calendar = NercCalendar();
-  final List<int> hourEnding =
-    List.generate(16, (i) => i + 8, growable: false);
+  final List<int> hourBeginning =
+    List.generate(16, (i) => i + 7, growable: false);
 
-  Bucket2x16H(Location this.location);
+  var _hours = <Month,int>{};
+
+  Bucket2x16H(this.location);
 
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
@@ -199,9 +222,11 @@ class Bucket2x16 extends Bucket {
   final String name = '2x16';
   Location location;
   Calendar calendar;
-  final List<int> hourEnding =
+  final List<int> hourBeginning =
     List.generate(16, (i) => i + 8, growable: false);
-  Bucket2x16(Location this.location);
+  var _hours = <Month,int>{};
+
+  Bucket2x16(this.location);
 
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
@@ -218,9 +243,10 @@ class BucketOffpeak extends Bucket {
   final String name = 'Offpeak';
   Location location;
   Calendar calendar = NercCalendar();
-  final List<int> hourEnding =
+  final List<int> hourBeginning =
     List.generate(24, (i) => i + 1, growable: false);
 
+  var _hours = <Month,int>{};
 
   BucketOffpeak(Location this.location);
 

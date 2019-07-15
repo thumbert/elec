@@ -7,6 +7,9 @@ import 'package:timeseries/timeseries.dart';
 import 'package:elec/src/time/bucket/month_bucket_value.dart';
 import 'package:tuple/tuple.dart';
 
+
+
+/// Not sure this is useful at all.  7/12/2019
 class MonthBucketCurve {
   List<MonthBucketValue> values;
   Set<Bucket> _buckets = {};

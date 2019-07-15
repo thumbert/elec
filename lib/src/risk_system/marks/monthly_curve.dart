@@ -1,10 +1,51 @@
-library risk_system.marks.forward_curve;
+library risk_system.marks.monthly_curve;
 
+import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/src/risk_system/locations/location.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/time/bucket/month_bucket_value.dart';
+
+class MonthlyCurve {
+  /// the time bucket associated with this curve.
+  Bucket bucket;
+
+  /// a monthly timeseries.
+  TimeSeries<num> values;
+
+  /// A simple forward curve model for monthly values.
+  MonthlyCurve(this.bucket, this.values);
+
+  /// Create the corresponding monthly curve for the aggregated bucket
+  /// according to the bucket_composition_rules, e.g. from Peak and Offpeak,
+  /// get the Flat curve, etc.
+  static MonthlyCurve aggregateBuckets(List<MonthlyCurve> curves) {
+    // TODO implement me.
+  }
+
+  Month get startMonth => values.first.interval;
+
+  Month get endMonth => values.last.interval;
+
+  /// Calculate the value for an interval greater than one month by doing
+  /// an hour weighted average.
+  num aggregateMonths(Interval interval) {
+    if (interval.start.isBefore(values.first.interval.start) ||
+        (interval.end.isAfter(values.last.interval.end)))
+      throw ArgumentError('Input interval extends beyond the underlying curve');
+
+    if (interval is Month) return values.observationAt(interval).value;
+
+    if (!isBeginningOfMonth(interval.start) ||
+        !isBeginningOfMonth(interval.end))
+      throw ArgumentError('Input interval is not a month boundary $interval');
+
+    var months =
+        interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+    var hours = months.map((month) => bucket.hours(month));
+    var xs = values.window(interval).map((e) => e.value);
+    return weightedMean(xs, hours);
+  }
+}
 
 //class ForwardCurve {
 //  Location location;
