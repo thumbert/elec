@@ -9,6 +9,7 @@ class TimeAggregation {
     'daily',
     'monthly',
     'yearly',
+    'byInterval',
   };
 
   factory TimeAggregation.parse(String x) {
@@ -29,6 +30,9 @@ class TimeAggregation {
       case 'yearly':
         out = yearly;
         break;
+      case 'byInterval':
+        out = byInterval;
+        break;  
     }
     return out;
   }
@@ -37,6 +41,7 @@ class TimeAggregation {
   static const daily = const TimeAggregation._internal('daily');
   static const monthly = const TimeAggregation._internal('monthly');
   static const yearly = const TimeAggregation._internal('yearly');
-
+  static const byInterval = const TimeAggregation._internal('byInterval');
+  
   String toString() => name;
 }
