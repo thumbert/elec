@@ -24,8 +24,8 @@ aggregateByBucketMonth() {
 
   var nest = Nest()
     ..key((e) => Month.fromTZDateTime(e['hourBeginning']))
-    ..key((e) => buckets.firstWhere((bucket) =>
-        bucket.containsHour(Hour.beginning(e['hourBeginning']))))
+    ..key((e) => buckets.firstWhere(
+        (bucket) => bucket.containsHour(Hour.beginning(e['hourBeginning']))))
     ..rollup((Iterable x) =>
         x.map((e) => e['lmp']).reduce((a, b) => a + b) / x.length);
 
@@ -49,8 +49,7 @@ List<int> countByMonth(int year, Bucket bucket) {
   }).toList();
 }
 
-
-test_bucket() {
+testBucket() {
   var location = getLocation('US/Eastern');
   group("Test buckets", () {
     test('equality for buckets', () {
@@ -71,7 +70,7 @@ test_bucket() {
       for (int year in [2012, 2013, 2014, 2015, 2016]) {
         var start = TZDateTime(b5x16.location, year);
         var end = TZDateTime(b5x16.location, year + 1);
-        var hrs = Interval(start,end).splitLeft((dt) => Hour.beginning(dt));
+        var hrs = Interval(start, end).splitLeft((dt) => Hour.beginning(dt));
         res.add(hrs.where((hour) => b5x16.containsHour(hour)).length);
       }
       expect(res, [4080, 4080, 4080, 4096, 4080]);
@@ -102,9 +101,8 @@ test_bucket() {
     });
     test('hours method', () {
       var month = Month(2013, 1, location: location);
-      expect(IsoNewEngland.bucket2x16H.hours(month), 144);
+      expect(IsoNewEngland.bucket2x16H.countHours(month), 144);
     });
-
   });
 
   group('Test the 7x16 bucket ISO New England', () {
@@ -129,17 +127,17 @@ test_bucket() {
   group("Test the 2x8 bucket NEPOOL", () {
     var bucket = Bucket2x8(location);
     test("2x8 hours in first week of Jun-2019", () {
-      var interval = Interval(TZDateTime(location, 2019, 6, 1),
-          TZDateTime(location, 2019, 6, 8));
+      var interval = Interval(
+          TZDateTime(location, 2019, 6, 1), TZDateTime(location, 2019, 6, 8));
       var hours = interval.splitLeft((dt) => Hour.beginning(dt));
       expect(bucket.containsHour(hours.first), true);
-      var mask = hours.map((hour) => bucket.containsHour(hour) == true ? 1 : 0)
+      var mask = hours
+          .map((hour) => bucket.containsHour(hour) == true ? 1 : 0)
           .toList();
-      var total = mask.reduce((a,b) => a+b);
+      var total = mask.reduce((a, b) => a + b);
       expect(total, 16);
     });
   });
-
 
   group("Test the Offpeak bucket NEPOOL", () {
     test("Offpeak hours by month in 2012", () {
@@ -180,11 +178,24 @@ test_bucket() {
       expect(count, Map.fromIterables(buckets, [496, 352, 144, 248]));
     });
   });
+
+  group('hours count by bucket/interval', () {
+    test('calculation', () {
+      var year =
+          Interval(TZDateTime(location, 2013), TZDateTime(location, 2014));
+      var months = year.splitLeft((dt) => Month.fromTZDateTime(dt));
+      var b2x16H = IsoNewEngland.bucket2x16H;
+      var count =
+          months.map((month) => b2x16H.countHours(month)).toList();
+      expect(
+          count, [144, 128, 160, 128, 144, 160, 144, 144, 160, 128, 160, 160]);
+    });
+  });
 }
 
 main() async {
   await initializeTimeZone();
-  test_bucket();
+  testBucket();
 
   aggregateByBucketMonth();
 }

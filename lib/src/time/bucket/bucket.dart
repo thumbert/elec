@@ -19,8 +19,8 @@ abstract class Bucket {
   bool containsHour(Hour hour);
   String toString() => name;
 
-  /// a cache for the number of hours in the month for this bucket
-  Map<Month,int> _hours;
+  /// a cache for the number of hours in the interval for this bucket
+  Map<Interval,int> _hours;
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
@@ -50,12 +50,17 @@ abstract class Bucket {
 
   int get hashCode => hash2(name, location);
 
-  int hours(Month month) {
-    if (!_hours.containsKey(month)) {
-      var hrs = month.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
-      _hours[month] = hrs.where((e) => containsHour(e)).length;
+  /// Count the number of hours in the interval
+  int countHours(Interval interval) {
+    if (!_hours.containsKey(interval)) {
+      if (!isBeginningOfHour(interval.start) || !isBeginningOfHour(interval.end))
+        throw ArgumentError(
+            'Input interval $interval doesn\'t start/end at hour boundaries');
+
+      var hrs = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
+      _hours[interval] = hrs.where((e) => containsHour(e)).length;
     }
-    return _hours[month];
+    return _hours[interval];
   }
 }
 

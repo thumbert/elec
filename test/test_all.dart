@@ -13,7 +13,7 @@ import 'risk_system/reporting/trade_aggregator_test.dart' as tradeAggregatorTest
 main() async {
   await initializeTimeZone();
 
-  bucketTest.test_bucket();
+  bucketTest.testBucket();
   bucketTest.aggregateByBucketMonth();
   hourlyScheduleTest.tests();
   monthlyBucketValueTest.tests();

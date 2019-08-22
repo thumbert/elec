@@ -41,7 +41,7 @@ class MonthlyCurve {
 
     var months =
         interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
-    var hours = months.map((month) => bucket.hours(month));
+    var hours = months.map((month) => bucket.countHours(month));
     var xs = values.window(interval).map((e) => e.value);
     return weightedMean(xs, hours);
   }
