@@ -15,11 +15,20 @@ class MonthlyCurve {
   /// A simple forward curve model for monthly values.
   MonthlyCurve(this.bucket, this.values);
 
-  /// Create the corresponding monthly curve for the aggregated bucket
-  /// according to the bucket_composition_rules, e.g. from Peak and Offpeak,
-  /// get the Flat curve, etc.
-  static MonthlyCurve aggregateBuckets(List<MonthlyCurve> curves) {
-    // TODO implement me.
+  /// Create the monthly timeseries for the aggregated bucket by
+  /// hourly weighting.
+  /// E.g. calculate the Flat curve from Peak and Offpeak curves.
+  ///
+  static TimeSeries<num> aggregate2Buckets(MonthlyCurve curve1, MonthlyCurve curve2) {
+    var ts = TimeSeries<num>();
+    var aux = curve1.values.merge(curve2.values, f: (x,y) => [x,y]);
+    for (var obs in aux) {
+      var hr1 = curve1.bucket.countHours(obs.interval);
+      var hr2 = curve2.bucket.countHours(obs.interval);
+      var value = (hr1*obs.value[0] + hr2*obs.value[1])/(hr1 + hr2);
+      ts.add(IntervalTuple(obs.interval, value));
+    }
+    return ts;
   }
 
   Month get startMonth => values.first.interval;

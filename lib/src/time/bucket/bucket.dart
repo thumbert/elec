@@ -12,7 +12,8 @@ abstract class Bucket {
   String get name;
   Location location;
 
-  /// the permissible hour beginnings of this bucket
+  /// The permissible hour beginnings for this bucket.  Used by hourly bucket
+  /// weights.  Should be a sorted list.
   List<int> hourBeginning;
 
   ///Is this hour in the bucket?
@@ -20,7 +21,7 @@ abstract class Bucket {
   String toString() => name;
 
   /// a cache for the number of hours in the interval for this bucket
-  Map<Interval,int> _hours;
+  Map<Interval,int> _hoursCache;
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
@@ -52,17 +53,42 @@ abstract class Bucket {
 
   /// Count the number of hours in the interval
   int countHours(Interval interval) {
-    if (!_hours.containsKey(interval)) {
+    if (!_hoursCache.containsKey(interval)) {
       if (!isBeginningOfHour(interval.start) || !isBeginningOfHour(interval.end))
         throw ArgumentError(
             'Input interval $interval doesn\'t start/end at hour boundaries');
 
       var hrs = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
-      _hours[interval] = hrs.where((e) => containsHour(e)).length;
+      _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
     }
-    return _hours[interval];
+    return _hoursCache[interval];
   }
 }
+
+class CustomBucket extends Bucket {
+  String name;
+  final Location location;
+  final Bucket bucket;
+  final List<int> hourBeginning;
+
+  Set<int> _hours;
+
+  /// Define a custom bucket by starting from a bucket and adding on an hour
+  /// filter, that is, retain only a list of hours.
+  /// For example, to select the hours 12 to 18
+  /// for all peak days of the year.
+  CustomBucket.withHours(this.location, this.bucket, this.hourBeginning) {
+    hourBeginning.sort();
+    if (hourBeginning.first < 0 || hourBeginning.last > 23)
+      throw ArgumentError('Invalid hourBeginning $hourBeginning');
+    name = 'Bucket ${bucket.name} Hours:${hourBeginning.join('|')}_${location.name}';
+    _hours = hourBeginning.toSet();
+  }
+
+  bool containsHour(Hour hour) =>
+      _hours.contains(hour.start.hour) && bucket.containsHour(hour);
+}
+
 
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
@@ -70,7 +96,7 @@ class Bucket7x24 extends Bucket {
   final List<int> hourBeginning =
       List.generate(24, (i) => i + 1, growable: false);
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
   Bucket7x24(this.location);
 
@@ -83,14 +109,14 @@ class Bucket7x24 extends Bucket {
   }
 }
 
-/// Overnight hours for weekeend, weekday, or holiday
 class Bucket7x8 extends Bucket {
   final String name = '7x8';
   Location location;
   final List<int> hourBeginning = [1, 2, 3, 4, 5, 6, 7, 24];
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
+  /// Overnight hours for all days of the year
   Bucket7x8(Location this.location);
 
   bool containsHour(Hour hour) {
@@ -105,15 +131,14 @@ class Bucket7x8 extends Bucket {
   }
 }
 
-
-/// Overnight hours for weekend only (no weekday holidays)
 class Bucket2x8 extends Bucket {
   final String name = '2x8';
   Location location;
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
+  /// Overnight hours for weekend only (no weekday holidays)
   Bucket2x8(Location this.location);
 
   bool containsHour(Hour hour) {
@@ -130,17 +155,15 @@ class Bucket2x8 extends Bucket {
   }
 }
 
-
-
-
 class Bucket7x16 extends Bucket {
   final String name = '7x16';
   Location location;
   final List<int> hourBeginning =
     List.generate(16, (i) => i + 7, growable: false);
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
+  /// Peak hours for all days of the week.
   Bucket7x16(Location this.location);
 
   bool containsHour(Hour hour) {
@@ -162,7 +185,7 @@ class Bucket5x16 extends Bucket {
   final List<int> hourBeginning =
     List.generate(16, (i) => i + 7, growable: false);
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
   Bucket5x16(this.location);
 
@@ -199,7 +222,7 @@ class Bucket2x16H extends Bucket {
   final List<int> hourBeginning =
     List.generate(16, (i) => i + 7, growable: false);
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
   Bucket2x16H(this.location);
 
@@ -229,8 +252,9 @@ class Bucket2x16 extends Bucket {
   Calendar calendar;
   final List<int> hourBeginning =
     List.generate(16, (i) => i + 8, growable: false);
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
+  /// Peak hours, weekends only (no weekday holidays included)
   Bucket2x16(this.location);
 
   bool containsHour(Hour hour) {
@@ -251,7 +275,7 @@ class BucketOffpeak extends Bucket {
   final List<int> hourBeginning =
     List.generate(24, (i) => i + 1, growable: false);
 
-  var _hours = <Month,int>{};
+  var _hoursCache = <Month,int>{};
 
   BucketOffpeak(Location this.location);
 

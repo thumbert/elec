@@ -1,4 +1,4 @@
-library test.risk_system.marks.forward_curve_test;
+library test.risk_system.marks.monthly_curve_test;
 
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
@@ -23,6 +23,19 @@ tests() {
       expect(curve.endMonth, months[1]);
       expect(curve.aggregateMonths(interval),
           equalsWithPrecision(97.64705, precision: 1E-4));
+    });
+    test('aggregate two buckets', () {
+      var interval = parseTerm('Q1,2013', tzLocation: location);
+      var months =
+          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+      var peak = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
+      var offpeak = MonthlyCurve(
+          IsoNewEngland.bucketOffpeak, TimeSeries.from(months, [81, 79, 47.5]));
+      var flat = MonthlyCurve.aggregate2Buckets(peak, offpeak);
+      expect(flat.length, 3);
+      expect(flat.values.map((e) => e.toStringAsFixed(2)).toList(),
+          ['89.99', '86.62', '51.34']);
     });
   });
 }
