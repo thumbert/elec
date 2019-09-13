@@ -15,26 +15,51 @@ class MonthlyCurve {
   /// A simple forward curve model for monthly values.
   MonthlyCurve(this.bucket, this.values);
 
-  /// Create the monthly timeseries for the aggregated bucket by
-  /// hourly weighting.
-  /// E.g. calculate the Flat curve from Peak and Offpeak curves.
-  ///
-  static TimeSeries<num> aggregate2Buckets(MonthlyCurve curve1, MonthlyCurve curve2) {
-    var ts = TimeSeries<num>();
-    var aux = curve1.values.merge(curve2.values, f: (x,y) => [x,y]);
-    for (var obs in aux) {
-      var hr1 = curve1.bucket.countHours(obs.interval);
-      var hr2 = curve2.bucket.countHours(obs.interval);
-      var value = (hr1*obs.value[0] + hr2*obs.value[1])/(hr1 + hr2);
-      ts.add(IntervalTuple(obs.interval, value));
-    }
-    return ts;
-  }
-
   Month get startMonth => values.first.interval;
 
   Month get endMonth => values.last.interval;
 
+  Interval get domain => Interval(values.first.interval.start,
+    values.last.interval.end);
+
+  /// Add one curve to this monthly curve using hour weighting.
+  TimeSeries<num> add(MonthlyCurve other) {
+    if (domain != other.domain)
+      throw ArgumentError('The two monthly curves don\'t have the same domain');
+    var ts = TimeSeries<num>();
+    for (int i = 0; i < values.length; i++) {
+      var m1 = values[i].interval;
+      var m2 = other.values[i].interval;
+      if (m1 != m2)
+        throw ArgumentError('The two monthly curves don\'t line up');
+      var hrs1 = bucket.countHours(m1);
+      var hrs2 = other.bucket.countHours(m1);
+      var value = (hrs1*values[i].value + hrs2*other.values[i].value)/(hrs1 + hrs2);
+      ts.add(IntervalTuple(m1, value));
+    }
+    return ts;
+  }
+
+  /// Subtract one curve from this monthly curve using hour weighting.
+  TimeSeries<num> subtract(MonthlyCurve other) {
+    if (domain != other.domain)
+      throw ArgumentError('The two monthly curves don\'t have the same domain');
+    var ts = TimeSeries<num>();
+    for (int i = 0; i < values.length; i++) {
+      var m1 = values[i].interval;
+      var m2 = other.values[i].interval;
+      if (m1 != m2)
+        throw ArgumentError('The two monthly curves don\'t line up');
+      var hrs1 = bucket.countHours(m1);
+      var hrs2 = other.bucket.countHours(m1);
+      var value = (hrs1*values[i].value - hrs2*other.values[i].value)/(hrs1 - hrs2);
+      ts.add(IntervalTuple(m1, value));
+    }
+    return ts;
+  }
+
+  
+  
   /// Calculate the value for an interval greater than one month by doing
   /// an hour weighted average.
   num aggregateMonths(Interval interval) {
