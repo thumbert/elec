@@ -106,4 +106,14 @@ class MonthlyCurve {
     var xs = values.window(interval).map((e) => e.value);
     return dama.weightedMean(xs, hours);
   }
+  
+  /// Restrict this MonthlyCurve only to the interval of interest.
+  MonthlyCurve window(Interval interval) {
+    if (!domain.containsInterval(interval))
+      throw ArgumentError('Input interval is not contained in the domain');
+    var aux = values.window(interval);
+    return MonthlyCurve(bucket, TimeSeries.fromIterable(aux));
+  }
+
+  
 }
