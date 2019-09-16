@@ -8,10 +8,10 @@ import 'package:timeseries/timeseries.dart';
 
 class MonthlyCurve {
   /// the time bucket associated with this curve.
-  Bucket bucket;
+  final Bucket bucket;
 
   /// a monthly timeseries.
-  TimeSeries<num> values;
+  final TimeSeries<num> values;
 
   /// A simple forward curve model for monthly values.
   MonthlyCurve(this.bucket, this.values);
