@@ -1,6 +1,7 @@
 library risk_system.marks.monthly_curve;
 
 import 'package:dama/dama.dart' as dama;
+import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:timeseries/timeseries.dart';
@@ -55,6 +56,32 @@ class MonthlyCurve {
       var value = (hrs1*values[i].value - hrs2*other.values[i].value)/(hrs1 - hrs2);
       ts.add(IntervalTuple(m1, value));
     }
+    return ts;
+  }
+
+  /// Calculate the yearly (hourly weighted) average.
+  TimeSeries<num> toYearly() {
+    var location = startMonth.location;
+    var ts = TimeSeries<num>();
+    var year = values.first.interval.start.year;
+    var calYear = Interval(TZDateTime(location, year), TZDateTime(location, year+1));
+    num value = 0.0;
+    int hours = 0;
+    for (int i = 0; i < values.length; i++) {
+      var year1 = values[i].interval.start.year;
+      if (year != year1) {
+        // new year
+        ts.add(IntervalTuple(calYear, value));
+        value = 0.0;
+        hours = 0;
+        year = year1;
+        calYear = Interval(TZDateTime(location, year), TZDateTime(location, year+1));;
+      }
+      var hrs1 = bucket.countHours(values[i].interval);
+      value = (hours*value + hrs1*values[i].value)/(hours + hrs1);
+      hours += hrs1;
+    }
+    ts.add(IntervalTuple(calYear, value));
     return ts;
   }
 
