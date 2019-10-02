@@ -19,7 +19,7 @@ dependencies:
       git:
           url: git://github.com/thumbert/elec-server.git
   intl: '>=0.15.7 <0.16.0'
-  mongo_dart: 0.3.3
+  mongo_dart: '>=0.3.6 <1.0.0'
   quiver: '>=2.0.0 <3.0.0'
   table:
       git:
@@ -27,7 +27,7 @@ dependencies:
   timeseries:
       git:
           url: git://github.com/thumbert/timeseries.git
-  timezone: 0.5.0-dev-3
+  timezone: '>=0.5.5 <1.0.0'
   tuple: '>=1.0.0 <2.0.0'
   xml: '>=3.2.0 <4.0.0'
 
