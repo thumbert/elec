@@ -85,8 +85,6 @@ class MonthlyCurve {
     return ts;
   }
 
-  
-  
   /// Calculate the value for an interval greater than one month by doing
   /// an hour weighted average.
   num aggregateMonths(Interval interval) {

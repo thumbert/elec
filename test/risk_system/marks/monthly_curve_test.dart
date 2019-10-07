@@ -32,7 +32,7 @@ tests() {
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
       var offpeak = MonthlyCurve(
           IsoNewEngland.bucketOffpeak, TimeSeries.from(months, [81, 79, 47.5]));
-      var flat = MonthlyCurve.aggregate2Buckets(peak, offpeak);
+      var flat = peak.add(offpeak);
       expect(flat.length, 3);
       expect(flat.values.map((e) => e.toStringAsFixed(2)).toList(),
           ['89.99', '86.62', '51.34']);
