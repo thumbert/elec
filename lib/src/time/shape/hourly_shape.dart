@@ -68,7 +68,7 @@ class HourlyShape {
 
     for (var m = 0; m < 12; m++) {
       for (var b = 0; b < nBuckets; b++) {
-        out[b]['weights'].add(_data[m][buckets[b]].weights.toList());
+        out[b]['weights'].addBucket(_data[m][buckets[b]].weights.toList());
       }
     }
     return out;

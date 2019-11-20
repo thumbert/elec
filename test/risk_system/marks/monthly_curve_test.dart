@@ -32,10 +32,41 @@ tests() {
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
       var offpeak = MonthlyCurve(
           IsoNewEngland.bucketOffpeak, TimeSeries.from(months, [81, 79, 47.5]));
-      var flat = peak.add(offpeak);
+      var flat = peak.addBucket(offpeak);
       expect(flat.length, 3);
       expect(flat.values.map((e) => e.toStringAsFixed(2)).toList(),
           ['89.99', '86.62', '51.34']);
+    });
+    test('add two curves', () {
+      var interval = parseTerm('Q1,2013', tzLocation: location);
+      var months =
+          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+      var c1 = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
+      var c2 = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [80, 70, 50]));
+      var c3 = c1.elementAdd(c2);
+      expect(c3.values.toList(), [180, 160, 130]);
+    });
+    test('multiply two curves', () {
+      var interval = parseTerm('Q1,2013', tzLocation: location);
+      var months =
+          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+      var c1 = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
+      var c2 = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [1, 2, 3]));
+      var c3 = c1.elementMultiply(c2);
+      expect(c3.values.toList(), [100, 180, 240]);
+    });
+    test('multiply a curve by 2', () {
+      var interval = parseTerm('Q1,2013', tzLocation: location);
+      var months =
+          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+      var c1 = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
+      var c3 = c1.apply((x) => 2 * x);
+      expect(c3.values.toList(), [200, 180, 160]);
     });
   });
 }
