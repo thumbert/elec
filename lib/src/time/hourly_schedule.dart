@@ -2,13 +2,16 @@ library time.schedule;
 
 import 'package:date/date.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
+import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
+import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 import 'package:timeseries/timeseries.dart';
 
 /// Construct an hourly time schedule.  This is a convenient way to store the
-/// information needed to construct a time-series with a given "pattern"
+/// information needed to construct an hourly timeseries with a given "pattern"
 /// of values.
 class HourlySchedule {
-
+  /// return the value in this hour, or [null] if the schedule is not defined
+  /// for the hour.
   num Function(Hour) _f;
 
   /// Construct a time schedule which has the same value for all hours.
@@ -18,86 +21,80 @@ class HourlySchedule {
 
   /// Construct a time schedule which returns different values based on the
   /// month of the year.  All hours of the month will have the same value.
-  /// <p>[values] is a list of 12 values, one value for each month.
-  ///
-  HourlySchedule.byMonth(List<num> values) {
-    if (values.length != 12)
-      throw ArgumentError('Input list needs to have 12 elements');
+  /// Note that not all months of the year need to be defined.
+  HourlySchedule.byMonth(Map<int, num> values) {
     _f = (Hour e) {
-      return values[e.start.month - 1];
+      return values[e.start.month];
     };
   }
 
   /// Construct a time schedule which returns different values based on the
   /// bucket. For example all Peak hours value is 100, all Offpeak hours
-  /// value is 80.
-  /// <p>The list of [buckets] needs to be a complete covering.
-  HourlySchedule.byBucket(List<Bucket> buckets, List<num> values) {
-    var n = buckets.length;
+  /// value is 80.  Note that the bucket covering doesn't need to be complete.
+  HourlySchedule.byBucket(Map<Bucket, num> values) {
     _f = (Hour hour) {
-      for (var i=0; i < n; i++) {
-        if (buckets[i].containsHour(hour)) {
-          return values[i];
-        }
+      for (var bucket in values.keys) {
+        if (bucket.containsHour(hour)) return values[bucket];
       }
-      throw ArgumentError('Buckets $buckets are not covering hour $hour');
+      return null;
     };
   }
-
 
   /// Construct a time schedule which returns different values based on the
   /// bucket and the month of the year.
-  /// <p>The list of [buckets] needs to be a complete covering.
-  HourlySchedule.byBucketMonth(Map<Bucket,List<num>> values) {
+  ///
+  /// Note that not all months of the year need to be defined, or the bucket
+  /// covering to be complete.
+  ///
+  /// Note that by using a custom bucket definition, you can restrict the
+  /// HourlySchedule to whatever hours of the day you are interested.
+  HourlySchedule.byBucketMonth(Map<Bucket, Map<int, num>> values) {
     var buckets = values.keys.toList();
-    var _values = values.values.toList();
-    if (!_values.every((e) => e.length == 12))
-      throw ArgumentError('Some buckets don\'t have 12 values.');
+    var mthValues = values.values.toList();
     var n = buckets.length;
     _f = (Hour hour) {
-      for (var i=0; i < n; i++) {
+      for (var i = 0; i < n; i++) {
         if (buckets[i].containsHour(hour)) {
-          return _values[i][hour.start.month - 1];
+          if (mthValues[i].containsKey(hour.start.month))
+            return mthValues[i][hour.start.month];
         }
       }
-      throw ArgumentError('Buckets $buckets are not covering hour $hour');
+      return null;
     };
   }
 
-
-  /// Construct a schedule such that every day of the month has the same
-  /// identical hourly schedule.  That is, 1st hour has the same value v11
-  /// for all days of Jan, 2nd hour the same value v12 for all days of Jan.
-  ///
-  /// [values] is a List of 12 elements, one element for each month of the
-  /// year.  Each element of [values] is itself a List of 24 values
-  /// corresponding to each hour of the day.
-  ///
-  HourlySchedule.byHourMonth(List<List<num>> values) {
-    if (values.length != 12)
-      throw ArgumentError('Input $values list needs to have 12 elements');
-    if (!values.every((e) => e.length == 24))
-      throw ArgumentError('Some months don\'t have 24 values.');
-    _f = (Hour e) {
-      return values[e.start.month - 1][e.start.hour];
+  /// Construct a time schedule which returns different values based on the
+  /// bucket, the month of the year, and the hour of the day.
+  /// This allows the implementation of hourly shape curves for pricing on
+  /// custom buckets.
+  HourlySchedule.byMonthBucketHour(Map<int, List<HourlyBucketScalars>> values) {
+    var months = values.keys.toSet();
+    _f = (Hour hour) {
+      if (months.contains(hour.start.month)) {
+        for (var bValue in values[hour.start.month]) {
+          if (bValue.bucket.containsHour(hour)) return bValue[hour];
+        }
+      }
+      return null;
     };
-
   }
 
+  /// Return the value of the schedule associated with this hour.
+  num operator [](Hour hour) => _f(hour);
 
   /// Return the value of the schedule associated with this hour.
   num value(Hour hour) => _f(hour);
 
-
   /// Construct the hourly timeseries associated with this schedule for a
-  /// given [interval].
+  /// given [interval].  The timeseries will have values only where the
+  /// HourlySchedule is defined.
   TimeSeries<num> toHourly(Interval interval) {
     var hours = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
     var out = TimeSeries<num>();
     for (var hour in hours) {
-      out.add(IntervalTuple(hour, _f(hour)));
+      var value = _f(hour);
+      if (value != null) out.add(IntervalTuple(hour, _f(hour)));
     }
     return out;
   }
-
 }

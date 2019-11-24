@@ -10,7 +10,8 @@ import 'package:elec/elec.dart';
 import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 
 /// Store hourly shapes by month for a set of complete buckets,
-/// e.g. 5x16, 2x16H, 7x8
+/// e.g. 5x16, 2x16H, 7x8.
+/// NEEDS REVIEW 11/25/2019
 class HourlyShape {
 
   /// the covering buckets

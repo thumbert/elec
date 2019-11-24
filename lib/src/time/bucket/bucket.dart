@@ -89,12 +89,10 @@ class CustomBucket extends Bucket {
       _hours.contains(hour.start.hour) && bucket.containsHour(hour);
 }
 
-
 class Bucket7x24 extends Bucket {
   final String name = '7x24';
   Location location;
-  final List<int> hourBeginning =
-      List.generate(24, (i) => i + 1, growable: false);
+  final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
   var _hoursCache = <Month,int>{};
 
@@ -112,7 +110,7 @@ class Bucket7x24 extends Bucket {
 class Bucket7x8 extends Bucket {
   final String name = '7x8';
   Location location;
-  final List<int> hourBeginning = [1, 2, 3, 4, 5, 6, 7, 24];
+  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
   var _hoursCache = <Month,int>{};
 
@@ -144,6 +142,30 @@ class Bucket2x8 extends Bucket {
   bool containsHour(Hour hour) {
     int dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek != 6 && dayOfWeek != 7) return false;
+    if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
+    return false;
+  }
+
+  bool operator ==(dynamic other) {
+    if (other is! Bucket2x8) return false;
+    Bucket2x8 bucket2x8 = other;
+    return name == bucket2x8.name && location == bucket2x8.location;
+  }
+}
+
+class Bucket5x8 extends Bucket {
+  final String name = '5x8';
+  Location location;
+  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
+
+  var _hoursCache = <Month,int>{};
+
+  /// Overnight hours for weekday only (with weekday holidays)
+  Bucket5x8(Location this.location);
+
+  bool containsHour(Hour hour) {
+    int dayOfWeek = hour.currentDate.weekday;
+    if (dayOfWeek > 5) return false;
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
@@ -251,7 +273,7 @@ class Bucket2x16 extends Bucket {
   Location location;
   Calendar calendar;
   final List<int> hourBeginning =
-    List.generate(16, (i) => i + 8, growable: false);
+    List.generate(16, (i) => i + 7, growable: false);
   var _hoursCache = <Month,int>{};
 
   /// Peak hours, weekends only (no weekday holidays included)
@@ -273,7 +295,7 @@ class BucketOffpeak extends Bucket {
   Location location;
   Calendar calendar = NercCalendar();
   final List<int> hourBeginning =
-    List.generate(24, (i) => i + 1, growable: false);
+    List.generate(24, (i) => i, growable: false);
 
   var _hoursCache = <Month,int>{};
 

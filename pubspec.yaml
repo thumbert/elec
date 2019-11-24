@@ -5,7 +5,7 @@ author: Tony Humbert <tony.humbert@yahoo.com>
 #homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: '>=2.4.0 <3.0.0'
 
 dependencies:
   csv: '>=4.0.0 <5.0.0'

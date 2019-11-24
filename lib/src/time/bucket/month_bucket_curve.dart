@@ -10,6 +10,7 @@ import 'package:tuple/tuple.dart';
 
 
 /// Not sure this is useful at all.  7/12/2019
+/// Should be deprecated.  Use MonthlyCurve 11/24/2019
 class MonthBucketCurve {
   List<MonthBucketValue> values;
   Set<Bucket> _buckets = {};

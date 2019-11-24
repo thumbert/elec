@@ -194,6 +194,9 @@ class MonthlyCurve {
     return dama.weightedMean(xs, hours);
   }
 
+  /// Get the curve value for this month.
+  num valueAt(Month month) => timeseries.observationAt(month).value;
+
   /// Restrict this MonthlyCurve only to the interval of interest.
   MonthlyCurve window(Interval interval) {
     if (!domain.containsInterval(interval))
