@@ -27,6 +27,10 @@ class MonthlyCurve {
 
   Iterable<num> get values => timeseries.values;
 
+  IntervalTuple<num> operator [](int i) => timeseries[i];
+
+  operator []=(int i, IntervalTuple<num> obs) => timeseries[i] = obs;
+
   /// Apply a function to each element of the curve.  For example use
   /// f = (x) => 2*x to multiply each element by 2.
   /// <p>This is a convenience function instead of operating on the underlying
@@ -38,7 +42,7 @@ class MonthlyCurve {
   }
 
   /// Add two curves element by element.
-  MonthlyCurve elementAdd(MonthlyCurve other) {
+  MonthlyCurve operator +(MonthlyCurve other) {
     if (domain != other.domain)
       throw ArgumentError('The two monthly curves don\'t have the same domain');
     if (bucket != other.bucket)
@@ -55,8 +59,27 @@ class MonthlyCurve {
     return MonthlyCurve(bucket, ts);
   }
 
+  /// Subtract two curves element by element.
+  MonthlyCurve operator -(MonthlyCurve other) {
+    if (domain != other.domain)
+      throw ArgumentError('The two monthly curves don\'t have the same domain');
+    if (bucket != other.bucket)
+      throw ArgumentError('The two monthly curves must be the same');
+    var ts = TimeSeries<num>();
+    for (int i = 0; i < timeseries.length; i++) {
+      var m1 = timeseries[i].interval;
+      var m2 = other.timeseries[i].interval;
+      if (m1 != m2)
+        throw ArgumentError('Monthly curves don\'t line up $m1 != $m2');
+      var value = timeseries[i].value - other.timeseries[i].value;
+      ts.add(IntervalTuple(m1, value));
+    }
+    return MonthlyCurve(bucket, ts);
+  }
+
+
   /// Multiply two curves element by element.
-  MonthlyCurve elementMultiply(MonthlyCurve other) {
+  MonthlyCurve operator *(MonthlyCurve other) {
     if (domain != other.domain)
       throw ArgumentError('The two monthly curves don\'t have the same domain');
     if (bucket != other.bucket)

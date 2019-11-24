@@ -12,6 +12,17 @@ import 'package:timezone/timezone.dart';
 tests() {
   group('Monthly curve tests:', () {
     var location = getLocation('US/Eastern');
+    test('monthly curve indexing', (){
+      var months = parseTerm('Q1,2013', tzLocation: location)
+        .splitLeft((dt) => Month.fromTZDateTime(dt))
+        .cast<Month>();
+      var curve = MonthlyCurve(
+          IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
+      expect(curve[1].interval, months[1]);
+      expect(curve[1].value, 95);
+      curve[2] = IntervalTuple(months[2], 75);
+      expect(curve[2].value, 75);
+    });
     test('FG13 aggregation, bucket 2x16H', () {
       var interval =
           Interval(TZDateTime(location, 2013), TZDateTime(location, 2013, 3));
@@ -45,7 +56,7 @@ tests() {
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
       var c2 = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [80, 70, 50]));
-      var c3 = c1.elementAdd(c2);
+      var c3 = c1 + c2;
       expect(c3.values.toList(), [180, 160, 130]);
     });
     test('multiply two curves', () {
@@ -56,7 +67,7 @@ tests() {
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
       var c2 = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [1, 2, 3]));
-      var c3 = c1.elementMultiply(c2);
+      var c3 = c1 * c2;
       expect(c3.values.toList(), [100, 180, 240]);
     });
     test('multiply a curve by 2', () {
