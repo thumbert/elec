@@ -1,5 +1,7 @@
 library time.bucket.hourly_bucket_weights;
 
+import 'package:date/date.dart';
+
 import '../bucket/bucket.dart';
 
 /// The hourly weights for a given bucket.
@@ -23,7 +25,7 @@ class HourlyBucketWeights {
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
 
-  num value(int hourEnding) => _values[hourEnding];
+  num value(Hour hour) => _values[hour.start.hour];
 
   /// get the hourly weights
   Iterable<num> get weights => _values.values;

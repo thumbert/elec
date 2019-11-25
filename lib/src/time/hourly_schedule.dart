@@ -14,9 +14,15 @@ class HourlySchedule {
   /// for the hour.
   num Function(Hour) _f;
 
+  Map<String, dynamic> _toJson;
+
   /// Construct a time schedule which has the same value for all hours.
   HourlySchedule.filled(num value) {
     _f = (Hour e) => value;
+    _toJson = {
+      'type': 'filled',
+      'values': value,
+    };
   }
 
   /// Construct a time schedule which returns different values based on the
@@ -25,6 +31,17 @@ class HourlySchedule {
   HourlySchedule.byMonth(Map<int, num> values) {
     _f = (Hour e) {
       return values[e.start.month];
+    };
+    var out = <Map<String, dynamic>>[];
+    for (var month in values.keys) {
+      out.add({
+        'month': month,
+        'value': values[month],
+      });
+    }
+    _toJson = {
+      'type': 'byMonth',
+      'values': out,
     };
   }
 
@@ -37,6 +54,17 @@ class HourlySchedule {
         if (bucket.containsHour(hour)) return values[bucket];
       }
       return null;
+    };
+    var out = <Map<String, dynamic>>[];
+    for (var bucket in values.keys) {
+      out.add({
+        'bucket': bucket.toString(),
+        'value': values[bucket],
+      });
+    }
+    _toJson = {
+      'type': 'byBucket',
+      'values': out,
     };
   }
 
@@ -61,6 +89,20 @@ class HourlySchedule {
       }
       return null;
     };
+    var out = <Map<String, dynamic>>[];
+    for (var bucket in values.keys) {
+      for (var month in values[bucket].keys) {
+        out.add({
+          'bucket': bucket.toString(),
+          'month': month,
+          'value': values[bucket][month],
+        });
+      }
+    }
+    _toJson = {
+      'type': 'byBucketMonth',
+      'values': out,
+    };
   }
 
   /// Construct a time schedule which returns different values based on the
@@ -76,6 +118,20 @@ class HourlySchedule {
         }
       }
       return null;
+    };
+    var out = <Map<String, dynamic>>[];
+    for (var month in values.keys) {
+      for (var bs in values[month]) {
+        out.add({
+          'month': month,
+          'bucket': bs.bucket.toString(),
+          'value': bs.values,
+        });
+      }
+    }
+    _toJson = {
+      'type': 'byMonthBucketHour',
+      'values': out,
     };
   }
 
@@ -97,4 +153,7 @@ class HourlySchedule {
     }
     return out;
   }
+
+  /// A serialization format.
+  Map<String, dynamic> toJson() => _toJson;
 }

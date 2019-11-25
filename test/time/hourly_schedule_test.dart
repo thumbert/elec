@@ -17,6 +17,7 @@ tests() {
       expect(hs.value(Hour.beginning(TZDateTime(location, 2019, 1, 1, 4))), 10);
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(ts.values.toList(), List.filled(24, 10));
+      expect(hs.toJson(), {'type': 'filled', 'values': 10});
     });
     test('one value by month', () {
       var values = Map.fromIterables([1, 5, 9], [1, 5, 9]);
@@ -26,6 +27,13 @@ tests() {
       expect(hs.value(Hour.beginning(TZDateTime(location, 2019, 9, 5, 4))), 9);
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(ts.values.toList(), List.filled(24, 1));
+      expect(hs.toJson(), {'type': 'byMonth',
+        'values': [
+          {'month': 1, 'value': 1},
+          {'month': 5, 'value': 5},
+          {'month': 9, 'value': 9},
+        ]
+      });
     });
     test('one value by bucket', () {
       var hs = HourlySchedule.byBucket({peak: 1, offpeak: 2});
@@ -35,6 +43,12 @@ tests() {
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(
           ts.values.toList(), [...List.filled(7, 2), ...List.filled(16, 1), 2]);
+      expect(hs.toJson(), {'type': 'byBucket',
+        'values': [
+          {'bucket': '5x16', 'value': 1},
+          {'bucket': 'Offpeak', 'value': 2},
+        ]
+      });
     });
 
     test('one value by bucket and month', () {
@@ -50,6 +64,15 @@ tests() {
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(ts.values.toList(),
           [...List.filled(7, 1), ...List.filled(16, 10), 1]);
+      expect(hs.toJson(), {'type': 'byBucketMonth',
+        'values': [
+          {'bucket': '5x16', 'month': 1, 'value': 10},
+          {'bucket': '5x16', 'month': 9, 'value': 90},
+          {'bucket': 'Offpeak', 'month': 1, 'value': 1},
+          {'bucket': 'Offpeak', 'month': 5, 'value': 5},
+          {'bucket': 'Offpeak', 'month': 9, 'value': 9},
+        ]
+      });
     });
 
     test('one value by bucket, month, hour', () {
@@ -75,6 +98,14 @@ tests() {
       ]);
       var ts2 = hs.toHourly(Date(2019, 10, 14, location: location));
       expect(ts2.isEmpty, true);
+      expect(hs.toJson(), {'type': 'byMonthBucketHour',
+        'values': [
+          {'month': 1, 'bucket': '5x16', 'value': List.generate(16, (i) => i)},
+          {'month': 1, 'bucket': 'Offpeak', 'value': List.generate(24, (i) => i)},
+          {'month': 9, 'bucket': '5x16', 'value': List.generate(16, (i) => i + 50)},
+          {'month': 9, 'bucket': 'Offpeak', 'value': List.generate(24, (i) => i + 20)},
+        ]
+      });
     });
   });
 }
