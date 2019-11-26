@@ -1,4 +1,4 @@
-library risk_system.marks.mark;
+library time.bucket.month_bucket_value;
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
@@ -14,6 +14,34 @@ class MonthBucketValue {
   /// The equivalent of a triple (month, bucket, value).
   MonthBucketValue(this.month, this.bucket, this.value);
 
+  /// Add another MonthBucketValue to this.
+  num addBucket(MonthBucketValue other) {
+    if (other.bucket == bucket)
+      throw ArgumentError('The two buckets need to be different');
+    if (other.month != month)
+      throw ArgumentError('The two months need to be the same');
+
+    var hrs = bucket.countHours(month);
+    var hrsOther = other.bucket.countHours(other.month);
+
+    return (value*hrs + other.value*hrsOther)/(hrs + hrsOther);
+  }
+
+  /// Subract another MonthBucketValue from this.
+  num subtractBucket(MonthBucketValue other) {
+    if (other.bucket == bucket)
+      throw ArgumentError('The two buckets need to be different');
+    if (other.month != month)
+      throw ArgumentError('The two months need to be the same');
+    var hrs = bucket.countHours(month);
+    var hrsOther = other.bucket.countHours(other.month);
+    if (hrs <= hrsOther)
+      throw ArgumentError('Can\'t subtract $bucket from ${other.bucket}');
+
+    return (value*hrs - other.value*hrsOther)/(hrs - hrsOther);
+  }
+  
+  
   bool operator ==(dynamic other) {
     if (other is! MonthBucketValue) return false;
     MonthBucketValue x = other;
