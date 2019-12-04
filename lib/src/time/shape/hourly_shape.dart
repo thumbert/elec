@@ -46,10 +46,10 @@ class HourlyShape {
   }
 
   /// Return the hourly weight of this bucket, this hourBeginning for the month.
-  num value(int month, Bucket bucket, int hourBeginning) {
-    var hourlyBucketWeight = _data[month - 1][bucket];
-    return hourlyBucketWeight.value(hourBeginning);
-  }
+//  num value(int month, Bucket bucket, int hourBeginning) {
+//    var hourlyBucketWeight = _data[month - 1][bucket];
+//    return hourlyBucketWeight.value(Hour.beginning(start)hourBeginning);
+//  }
 
   Map<Bucket, HourlyBucketWeights> valuesForMonth(int month) {
     return _data[month - 1];

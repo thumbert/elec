@@ -77,7 +77,6 @@ class MonthlyCurve {
     return MonthlyCurve(bucket, ts);
   }
 
-
   /// Multiply two curves element by element.
   MonthlyCurve operator *(MonthlyCurve other) {
     if (domain != other.domain)
@@ -198,10 +197,11 @@ class MonthlyCurve {
   num valueAt(Month month) => timeseries.observationAt(month).value;
 
   /// Restrict this MonthlyCurve only to the interval of interest.
+  /// Will throw if the [interval] has no overlap with the [domain].
+  /// This [interval] should not be smaller than a month!
   MonthlyCurve window(Interval interval) {
-    if (!domain.containsInterval(interval))
-      throw ArgumentError('Input interval is not contained in the domain');
-    var aux = timeseries.window(interval);
+    var _interval = interval.overlap(domain);
+    var aux = timeseries.window(_interval);
     return MonthlyCurve(bucket, TimeSeries.fromIterable(aux));
   }
 }

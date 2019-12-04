@@ -3,7 +3,6 @@ library time.schedule;
 import 'package:date/date.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
-import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 import 'package:timeseries/timeseries.dart';
 
 /// Construct an hourly time schedule.  This is a convenient way to store the
