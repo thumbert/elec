@@ -24,6 +24,28 @@ class HourlySchedule {
     };
   }
 
+  /// Create an hourly schedule from a specification.
+  /// Each element of the list is a [Map] with one of the keys:
+  /// 'year', 'month', 'bucket', 'hourBeginning',
+  /// DO I NEED THIS???
+//  HourlySchedule.fromSpecification(List<Map<String,dynamic>> xs) {
+//
+//    for (var x in xs) {
+//      var keys = x.keys.toSet()..remove('value');
+//      if (keys.contains('year') && keys.length == 1) {
+//        // only year spec
+//        _f
+//      } else if (keys.contains('year')) {
+//        // year and something else
+//
+//      } else {
+//        /// no year spec
+//      }
+//
+//
+//    }
+//  }
+
   /// Construct a time schedule which returns different values based on the
   /// month of the year.  All hours of the month will have the same value.
   /// Note that not all months of the year need to be defined.

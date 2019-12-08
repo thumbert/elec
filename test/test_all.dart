@@ -3,6 +3,7 @@ library test_all;
 import 'package:timezone/standalone.dart';
 import 'time/bucket_test.dart' as bucketTest;
 import 'time/hourly_schedule_test.dart' as hourlyScheduleTest;
+import 'time/hour_filter_test.dart' as hourFilterTest;
 import 'time/monthly_bucket_value_test.dart' as monthlyBucketValueTest;
 import 'holiday_test.dart' as holidayTest;
 import 'calendar_test.dart' as calendarTest;
@@ -14,6 +15,7 @@ main() async {
 
   bucketTest.testBucket();
   bucketTest.aggregateByBucketMonth();
+  hourFilterTest.tests();
   hourlyScheduleTest.tests();
   monthlyBucketValueTest.tests();
   calendarTest.main();
