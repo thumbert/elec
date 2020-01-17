@@ -23,8 +23,9 @@ class HourlyShape {
   /// Construct the hourly shape from a 12 element list containing the
   /// hourly weights for each bucket.
   HourlyShape.byMonth(List<Map<Bucket, HourlyBucketWeights>> weights) {
-    if (weights.length != 12)
+    if (weights.length != 12) {
       throw ArgumentError('Input weights has ${weights.length} instead of 12.');
+    }
     buckets = weights.first.keys.toList(growable: false);
     _data = weights;
   }
@@ -77,19 +78,3 @@ class HourlyShape {
 }
 
 
-///// Calculate the hourly shape by month for a bucket.
-///// The input timeseries needs to be hourly frequency.
-///// The return is a monthly timeseries of hourly weights.
-//TimeSeries<HourlyBucketWeights> hourlyShapeByYearMonth(
-//    TimeSeries<num> x, Bucket bucket) {
-//  var xh = x.splitByIndex((e) => Month.fromTZDateTime(e.start));
-//
-//  var out = TimeSeries<HourlyBucketWeights>();
-//  for (var month in xh.keys) {
-//    var hs = HourlyShape.fromTimeSeries(xh[month], buckets: [bucket]);
-//    var hsm = hs.valuesForMonth(month.month);
-//    out.add(IntervalTuple(month, hsm[bucket]));
-//  }
-//
-//  return TimeSeries.fromIterable(out);
-//}

@@ -9,7 +9,7 @@ import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
-tests() {
+void tests() {
   group('Monthly curve tests:', () {
     var location = getLocation('US/Eastern');
     test('monthly curve indexing', (){
@@ -82,7 +82,7 @@ tests() {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   tests();
 }

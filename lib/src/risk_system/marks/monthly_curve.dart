@@ -43,16 +43,16 @@ class MonthlyCurve {
 
   /// Add two curves element by element.
   MonthlyCurve operator +(MonthlyCurve other) {
-    if (domain != other.domain)
-      throw ArgumentError('The two monthly curves don\'t have the same domain');
-    if (bucket != other.bucket)
+    if (bucket != other.bucket) {
       throw ArgumentError('The two monthly curves must be the same');
+    }
     var ts = TimeSeries<num>();
-    for (int i = 0; i < timeseries.length; i++) {
+    for (var i = 0; i < timeseries.length; i++) {
       var m1 = timeseries[i].interval;
       var m2 = other.timeseries[i].interval;
-      if (m1 != m2)
+      if (m1 != m2) {
         throw ArgumentError('Monthly curves don\'t line up $m1 != $m2');
+      }
       var value = timeseries[i].value + other.timeseries[i].value;
       ts.add(IntervalTuple(m1, value));
     }
@@ -61,16 +61,16 @@ class MonthlyCurve {
 
   /// Subtract two curves element by element.
   MonthlyCurve operator -(MonthlyCurve other) {
-    if (domain != other.domain)
-      throw ArgumentError('The two monthly curves don\'t have the same domain');
-    if (bucket != other.bucket)
+    if (bucket != other.bucket) {
       throw ArgumentError('The two monthly curves must be the same');
+    }
     var ts = TimeSeries<num>();
-    for (int i = 0; i < timeseries.length; i++) {
+    for (var i = 0; i < timeseries.length; i++) {
       var m1 = timeseries[i].interval;
       var m2 = other.timeseries[i].interval;
-      if (m1 != m2)
+      if (m1 != m2) {
         throw ArgumentError('Monthly curves don\'t line up $m1 != $m2');
+      }
       var value = timeseries[i].value - other.timeseries[i].value;
       ts.add(IntervalTuple(m1, value));
     }
@@ -79,16 +79,16 @@ class MonthlyCurve {
 
   /// Multiply two curves element by element.
   MonthlyCurve operator *(MonthlyCurve other) {
-    if (domain != other.domain)
-      throw ArgumentError('The two monthly curves don\'t have the same domain');
-    if (bucket != other.bucket)
+    if (bucket != other.bucket) {
       throw ArgumentError('The two monthly curves must be the same');
+    }
     var ts = TimeSeries<num>();
-    for (int i = 0; i < timeseries.length; i++) {
+    for (var i = 0; i < timeseries.length; i++) {
       var m1 = timeseries[i].interval;
       var m2 = other.timeseries[i].interval;
-      if (m1 != m2)
+      if (m1 != m2) {
         throw ArgumentError('Monthly curves don\'t line up $m1 != $m2');
+      }
       var value = timeseries[i].value * other.timeseries[i].value;
       ts.add(IntervalTuple(m1, value));
     }
@@ -99,16 +99,16 @@ class MonthlyCurve {
   /// The [other] bucket must to be different.  For example, calculate the
   /// offpeak curve by adding the 2x16H and the 7x8 curves.
   TimeSeries<num> addBucket(MonthlyCurve other) {
-    if (domain != other.domain)
-      throw ArgumentError('The two monthly curves don\'t have the same domain');
-    if (bucket == other.bucket)
+    if (bucket == other.bucket) {
       throw ArgumentError('The two monthly curves must have different buckets');
+    }
     var ts = TimeSeries<num>();
-    for (int i = 0; i < timeseries.length; i++) {
+    for (var i = 0; i < timeseries.length; i++) {
       var m1 = timeseries[i].interval;
       var m2 = other.timeseries[i].interval;
-      if (m1 != m2)
+      if (m1 != m2) {
         throw ArgumentError('The two monthly curves don\'t line up');
+      }
       var hrs1 = bucket.countHours(m1);
       var hrs2 = other.bucket.countHours(m1);
       var value = (hrs1 * timeseries[i].value + hrs2 * other.timeseries[i].value) /
@@ -122,21 +122,22 @@ class MonthlyCurve {
   /// The [other] bucket must to be different.  For example, calculate offpeak
   /// curve by subtracting peak curve from the flat curve.
   TimeSeries<num> subtractBucket(MonthlyCurve other) {
-    if (domain != other.domain)
-      throw ArgumentError('The two monthly curves don\'t have the same domain');
-    if (bucket == other.bucket)
+    if (bucket == other.bucket) {
       throw ArgumentError('The two monthly curves must have different buckets');
+    }
     var ts = TimeSeries<num>();
-    for (int i = 0; i < timeseries.length; i++) {
+    for (var i = 0; i < timeseries.length; i++) {
       var m1 = timeseries[i].interval;
       var m2 = other.timeseries[i].interval;
-      if (m1 != m2)
+      if (m1 != m2) {
         throw ArgumentError('The two monthly curves don\'t line up');
+      }
       var hrs1 = bucket.countHours(m1);
       var hrs2 = other.bucket.countHours(m1);
-      if (hrs2 >= hrs1)
+      if (hrs2 >= hrs1) {
         throw ArgumentError(
             'Incompatible buckets: $bucket and ${other.bucket}');
+      }
       var value = (hrs1 * timeseries[i].value - hrs2 * other.timeseries[i].value) /
           (hrs1 - hrs2);
       ts.add(IntervalTuple(m1, value));
@@ -151,9 +152,9 @@ class MonthlyCurve {
     var year = timeseries.first.interval.start.year;
     var calYear =
         Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
-    num value = 0.0;
-    int hours = 0;
-    for (int i = 0; i < timeseries.length; i++) {
+    var value = 0.0;
+    var hours = 0;
+    for (var i = 0; i < timeseries.length; i++) {
       var year1 = timeseries[i].interval.start.year;
       if (year != year1) {
         // new year
@@ -177,14 +178,16 @@ class MonthlyCurve {
   /// an hour weighted average.
   num aggregateMonths(Interval interval) {
     if (interval.start.isBefore(timeseries.first.interval.start) ||
-        (interval.end.isAfter(timeseries.last.interval.end)))
+        (interval.end.isAfter(timeseries.last.interval.end))) {
       throw ArgumentError('Input interval extends beyond the underlying curve');
+    }
 
     if (interval is Month) return timeseries.observationAt(interval).value;
 
     if (!isBeginningOfMonth(interval.start) ||
-        !isBeginningOfMonth(interval.end))
+        !isBeginningOfMonth(interval.end)) {
       throw ArgumentError('Input interval is not a month boundary $interval');
+    }
 
     var months =
         interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();

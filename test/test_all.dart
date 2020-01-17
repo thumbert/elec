@@ -1,27 +1,27 @@
 library test_all;
 
 import 'package:timezone/standalone.dart';
-import 'time/bucket_test.dart' as bucketTest;
-import 'time/hourly_schedule_test.dart' as hourlyScheduleTest;
-import 'time/hour_filter_test.dart' as hourFilterTest;
-import 'time/monthly_bucket_value_test.dart' as monthlyBucketValueTest;
-import 'holiday_test.dart' as holidayTest;
-import 'calendar_test.dart' as calendarTest;
-import 'risk_system/marks/monthly_curve_test.dart' as monthlyCurveTest;
-import 'risk_system/reporting/trade_aggregator_test.dart' as tradeAggregatorTest;
+import 'time/bucket_test.dart' as bucket;
+import 'time/hourly_schedule_test.dart' as hourly_schedule;
+import 'time/hour_filter_test.dart' as hour_filter;
+import 'time/monthly_bucket_value_test.dart' as monthly_bucket_value;
+import 'holiday_test.dart' as holiday;
+import 'calendar_test.dart' as calendar;
+import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
+import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 
-main() async {
+void main() async {
   await initializeTimeZone();
 
-  bucketTest.testBucket();
-  bucketTest.aggregateByBucketMonth();
-  hourFilterTest.tests();
-  hourlyScheduleTest.tests();
-  monthlyBucketValueTest.tests();
-  calendarTest.main();
-  holidayTest.main();
-  monthlyCurveTest.tests();
-  tradeAggregatorTest.tests();
+  bucket.testBucket();
+  bucket.aggregateByBucketMonth();
+  hour_filter.tests();
+  hourly_schedule.tests();
+  monthly_bucket_value.tests();
+  calendar.main();
+  holiday.main();
+  monthly_curve.tests();
+  trade_aggregator.tests();
 
 
 

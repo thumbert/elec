@@ -2,14 +2,11 @@ library test.time.hour_filter_test;
 
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:elec/src/risk_system/marks/monthly_curve.dart';
-import 'package:dama/src/utils/matchers.dart';
 import 'package:elec/src/time/hour_filter.dart';
 import 'package:test/test.dart';
-import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
 
-tests() {
+void tests() {
   group('Hourly filter tests:', () {
     var location = getLocation('US/Eastern');
     test('with bucket', () {
@@ -34,7 +31,7 @@ tests() {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   tests();
 }

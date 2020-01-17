@@ -20,8 +20,9 @@ class HourlyBucketWeights {
   /// A value is given for each hour in the bucket, e.g. there will be 8 values
   /// for the 7x8 bucket.
   HourlyBucketWeights(this.bucket, List<num> values) {
-    if (values.length != bucket.hourBeginning.length)
+    if (values.length != bucket.hourBeginning.length) {
       throw ArgumentError('Number of weights don\'t match the number of hours in bucket');
+    }
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
 
@@ -33,6 +34,7 @@ class HourlyBucketWeights {
   /// A map from hour ending -> weight
   Map<int, num> toMap() => _values;
 
+  @override
   String toString() => toMap().toString();
 }
 
