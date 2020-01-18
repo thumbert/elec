@@ -10,7 +10,7 @@ class EnergyFutures extends Object with BaseTrade {
   EnergyFutures(Date tradeDate, Interval term, BuySell buySell,
       this.mw, this.hub, this.bucket, this.fixedPrice) {
     this.tradeDate = tradeDate;
-    this.tradeTerm = term;
+    tradeTerm = term;
     this.buySell = buySell;
   }
 
@@ -33,15 +33,15 @@ class EnergyFutures extends Object with BaseTrade {
         .where((hour) => bucket.containsHour(hour)).cast<Hour>();
     var _hourlyQty = TimeSeries.fill(_hours, buySell.sign * mw);
     switch (timeAggregation) {
-      case TimeAggregation.hourly : {
+      case TimeAggregation.hour : {
         out = _hourlyQty;
         break;
       }
-      case TimeAggregation.daily : {
+      case TimeAggregation.day : {
         out = toDaily(_hourlyQty, sum);
         break;
       }
-      case TimeAggregation.monthly : {
+      case TimeAggregation.month : {
         out = toMonthly(_hourlyQty, sum);
         break;
       }

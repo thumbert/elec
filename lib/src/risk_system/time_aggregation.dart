@@ -4,44 +4,46 @@ class TimeAggregation {
   final String name;
   const TimeAggregation._internal(this.name);
 
-  static var _allowed = <String>{
-    'hourly',
-    'daily',
-    'monthly',
-    'yearly',
-    'byInterval',
+  static final _allowed = <String>{
+    'hour',
+    'day',
+    'month',
+    'year',
+    'term',
   };
 
   factory TimeAggregation.parse(String x) {
     var y = x.toLowerCase();
-    if (!_allowed.contains(y))
+    if (!_allowed.contains(y)) {
       throw ArgumentError('Invalid time aggregation value $x');
+    }
     TimeAggregation out;
     switch (y) {
-      case 'hourly':
-        out = hourly;
+      case 'hour':
+        out = hour;
         break;
-      case 'daily':
-        out = daily;
+      case 'day':
+        out = day;
         break;
-      case 'monthly':
-        out = monthly;
+      case 'month':
+        out = month;
         break;
-      case 'yearly':
-        out = yearly;
+      case 'year':
+        out = year;
         break;
-      case 'byInterval':
-        out = byInterval;
+      case 'term':
+        out = term;
         break;  
     }
     return out;
   }
 
-  static const hourly = const TimeAggregation._internal('hourly');
-  static const daily = const TimeAggregation._internal('daily');
-  static const monthly = const TimeAggregation._internal('monthly');
-  static const yearly = const TimeAggregation._internal('yearly');
-  static const byInterval = const TimeAggregation._internal('byInterval');
+  static const hour = TimeAggregation._internal('hour');
+  static const day = TimeAggregation._internal('day');
+  static const month = TimeAggregation._internal('month');
+  static const year = TimeAggregation._internal('year');
+  static const term = TimeAggregation._internal('term');
   
+  @override
   String toString() => name;
 }
