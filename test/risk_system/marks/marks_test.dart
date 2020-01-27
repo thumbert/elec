@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
-tests() {
+void tests() {
   group('Electricity marks', () {
     var location = getLocation('US/Eastern');
     test('the 3 standard buckets', () {
@@ -21,7 +21,7 @@ tests() {
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   tests();
 }

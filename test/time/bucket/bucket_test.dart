@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
-import '../data.dart';
+import '../../data.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/bucket_utils.dart';

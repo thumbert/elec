@@ -9,24 +9,27 @@ import '../holidays/christmas.dart';
 import '../calendar.dart';
 
 /// NERC Calendar
-class NercCalendar implements Calendar {
-  static final Holiday _newYear = new NewYear();
-  static final Holiday _memorialDay = new MemorialDay();
-  static final Holiday _independenceDay = new IndependenceDay();
-  static final Holiday _laborDay = new LaborDay();
-  static final Holiday _thanksgiving = new Thanksgiving();
-  static final Holiday _christmas = new Christmas();
+class NercCalendar extends Calendar {
+  static final Holiday _newYear = NewYear();
+  static final Holiday _memorialDay = MemorialDay();
+  static final Holiday _independenceDay = IndependenceDay();
+  static final Holiday _laborDay = LaborDay();
+  static final Holiday _thanksgiving = Thanksgiving();
+  static final Holiday _christmas = Christmas();
 
   HolidayType _holidayType;
 
+  @override
   HolidayType getHolidayType(Date date) {
-    if (!isHoliday(date))
-      throw new ArgumentError('$date is not a NERC holiday');
+    if (!isHoliday(date)) {
+      throw ArgumentError('$date is not a NERC holiday');
+    }
     return _holidayType;
   }
 
+  @override
   bool isHoliday(Date date) {
-    bool res = false;
+    var res = false;
     switch (date.month) {
       case 1:
         if (_newYear.isDate(date)) res = true;
