@@ -18,10 +18,11 @@ abstract class Bucket {
 
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
+  @override
   String toString() => name;
 
   /// a cache for the number of hours in the interval for this bucket
-  Map<Interval,int> _hoursCache;
+  Map<Interval, int> _hoursCache;
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
@@ -31,7 +32,7 @@ abstract class Bucket {
       out = IsoNewEngland.bucket5x16;
     } else if (['OFFPEAK', 'WRAP'].contains(bucket)) {
       out = IsoNewEngland.bucketOffpeak;
-    } else if (['FLAT', '7X24'].contains(bucket)) {
+    } else if (['FLAT', '7X24', 'ATC'].contains(bucket)) {
       out = IsoNewEngland.bucket7x24;
     } else if (bucket == '2X16H') {
       out = IsoNewEngland.bucket2x16H;
@@ -44,19 +45,22 @@ abstract class Bucket {
     } else if (bucket == '2X16') {
       out = IsoNewEngland.bucket2x16;
     } else {
-      throw new ArgumentError('Unknown bucket $bucket');
+      throw ArgumentError('Unknown bucket $bucket');
     }
     return out;
   }
 
+  @override
   int get hashCode => hash2(name, location);
 
   /// Count the number of hours in the interval
   int countHours(Interval interval) {
     if (!_hoursCache.containsKey(interval)) {
-      if (!isBeginningOfHour(interval.start) || !isBeginningOfHour(interval.end))
+      if (!isBeginningOfHour(interval.start) ||
+          !isBeginningOfHour(interval.end)) {
         throw ArgumentError(
             'Input interval $interval doesn\'t start/end at hour boundaries');
+      }
 
       var hrs = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
       _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
@@ -79,9 +83,11 @@ class CustomBucket extends Bucket {
   /// for all peak days of the year.
   CustomBucket.withHours(this.location, this.bucket, this.hourBeginning) {
     hourBeginning.sort();
-    if (hourBeginning.first < 0 || hourBeginning.last > 23)
+    if (hourBeginning.first < 0 || hourBeginning.last > 23) {
       throw ArgumentError('Invalid hourBeginning $hourBeginning');
-    name = 'Bucket ${bucket.name} Hours:${hourBeginning.join('|')}_${location.name}';
+    }
+    name =
+        'Bucket ${bucket.name} Hours:${hourBeginning.join('|')}_${location.name}';
     _hours = hourBeginning.toSet();
   }
 
@@ -94,7 +100,7 @@ class Bucket7x24 extends Bucket {
   Location location;
   final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   Bucket7x24(this.location);
 
@@ -112,7 +118,7 @@ class Bucket7x8 extends Bucket {
   Location location;
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   /// Overnight hours for all days of the year
   Bucket7x8(Location this.location);
@@ -134,13 +140,13 @@ class Bucket2x8 extends Bucket {
   Location location;
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   /// Overnight hours for weekend only (no weekday holidays)
   Bucket2x8(Location this.location);
 
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek != 6 && dayOfWeek != 7) return false;
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
@@ -158,7 +164,7 @@ class Bucket5x8 extends Bucket {
   Location location;
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   /// Overnight hours for weekday only (with weekday holidays)
   Bucket5x8(Location this.location);
@@ -181,9 +187,9 @@ class Bucket7x16 extends Bucket {
   final String name = '7x16';
   Location location;
   final List<int> hourBeginning =
-    List.generate(16, (i) => i + 7, growable: false);
+      List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   /// Peak hours for all days of the week.
   Bucket7x16(Location this.location);
@@ -205,14 +211,15 @@ class Bucket5x16 extends Bucket {
   Location location;
   var calendar = NercCalendar();
   final List<int> hourBeginning =
-    List.generate(16, (i) => i + 7, growable: false);
+      List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   Bucket5x16(this.location);
 
+  @override
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
@@ -221,15 +228,16 @@ class Bucket5x16 extends Bucket {
         /// not at the right hour of the day
         return false;
       } else {
-        if (calendar.isHoliday(hour.currentDate))
-          /// it's a holiday
+        if (calendar.isHoliday(hour.currentDate)) {
           return false;
-        else
+        } else {
           return true;
+        }
       }
     }
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket5x16) return false;
     Bucket5x16 bucket = other;
@@ -242,9 +250,9 @@ class Bucket2x16H extends Bucket {
   Location location;
   var calendar = NercCalendar();
   final List<int> hourBeginning =
-    List.generate(16, (i) => i + 7, growable: false);
+      List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   Bucket2x16H(this.location);
 
@@ -273,8 +281,8 @@ class Bucket2x16 extends Bucket {
   Location location;
   Calendar calendar;
   final List<int> hourBeginning =
-    List.generate(16, (i) => i + 7, growable: false);
-  var _hoursCache = <Month,int>{};
+      List.generate(16, (i) => i + 7, growable: false);
+  var _hoursCache = <Month, int>{};
 
   /// Peak hours, weekends only (no weekday holidays included)
   Bucket2x16(this.location);
@@ -294,10 +302,9 @@ class BucketOffpeak extends Bucket {
   final String name = 'Offpeak';
   Location location;
   Calendar calendar = NercCalendar();
-  final List<int> hourBeginning =
-    List.generate(24, (i) => i, growable: false);
+  final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
-  var _hoursCache = <Month,int>{};
+  var _hoursCache = <Month, int>{};
 
   BucketOffpeak(Location this.location);
 

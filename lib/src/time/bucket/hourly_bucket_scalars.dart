@@ -14,8 +14,9 @@ class HourlyBucketScalars {
   /// A value is given for each hour in the bucket, e.g. there will be 8 values
   /// for the 7x8 bucket.
   HourlyBucketScalars(this.bucket, this.values) {
-    if (values.length != bucket.hourBeginning.length)
+    if (values.length != bucket.hourBeginning.length) {
       throw ArgumentError('Number of scalars don\'t match the number of hours in bucket');
+    }
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
 
