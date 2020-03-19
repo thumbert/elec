@@ -143,7 +143,7 @@ class Bucket2x8 extends Bucket {
   var _hoursCache = <Month, int>{};
 
   /// Overnight hours for weekend only (no weekday holidays)
-  Bucket2x8(Location this.location);
+  Bucket2x8(this.location);
 
   bool containsHour(Hour hour) {
     var dayOfWeek = hour.currentDate.weekday;
@@ -167,15 +167,17 @@ class Bucket5x8 extends Bucket {
   var _hoursCache = <Month, int>{};
 
   /// Overnight hours for weekday only (with weekday holidays)
-  Bucket5x8(Location this.location);
+  Bucket5x8(this.location);
 
+  @override
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek > 5) return false;
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket2x8) return false;
     Bucket2x8 bucket2x8 = other;
@@ -184,15 +186,18 @@ class Bucket5x8 extends Bucket {
 }
 
 class Bucket7x16 extends Bucket {
+  @override
   final String name = '7x16';
+  @override
   Location location;
+  @override
   final List<int> hourBeginning =
       List.generate(16, (i) => i + 7, growable: false);
 
   var _hoursCache = <Month, int>{};
 
   /// Peak hours for all days of the week.
-  Bucket7x16(Location this.location);
+  Bucket7x16(this.location);
 
   bool containsHour(Hour hour) {
     if (hour.start.hour >= 7 && hour.start.hour < 23) return true;
