@@ -7,6 +7,7 @@ class TimeAggregation {
   static final _allowed = <String>{
     'hour',
     'day',
+    'week',
     'month',
     'year',
     'term',
@@ -25,6 +26,9 @@ class TimeAggregation {
       case 'day':
         out = day;
         break;
+      case 'week':
+        out = week;
+        break;
       case 'month':
         out = month;
         break;
@@ -40,6 +44,7 @@ class TimeAggregation {
 
   static const hour = TimeAggregation._internal('hour');
   static const day = TimeAggregation._internal('day');
+  static const week = TimeAggregation._internal('week');
   static const month = TimeAggregation._internal('month');
   static const year = TimeAggregation._internal('year');
   static const term = TimeAggregation._internal('term');
