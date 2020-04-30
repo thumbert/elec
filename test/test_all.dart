@@ -2,6 +2,7 @@ library test_all;
 
 import 'package:timezone/standalone.dart';
 import 'analysis/seasonal_analysis_test.dart' as seasonal_analysis;
+import 'gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
 import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
 import 'time/hour_filter_test.dart' as hour_filter;
@@ -16,6 +17,7 @@ void main() async {
   await initializeTimeZone();
 
   seasonal_analysis.tests();
+  solar_elevation.tests();
   bucket.testBucket();
   bucket.aggregateByBucketMonth();
   hour_filter.tests();
