@@ -114,14 +114,17 @@ class Bucket7x24 extends Bucket {
 }
 
 class Bucket7x8 extends Bucket {
+  @override
   final String name = '7x8';
+  @override
   Location location;
+  @override
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
   var _hoursCache = <Month, int>{};
 
   /// Overnight hours for all days of the year
-  Bucket7x8(Location this.location);
+  Bucket7x8(this.location);
 
   bool containsHour(Hour hour) {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
@@ -145,6 +148,7 @@ class Bucket2x8 extends Bucket {
   /// Overnight hours for weekend only (no weekday holidays)
   Bucket2x8(this.location);
 
+  @override
   bool containsHour(Hour hour) {
     var dayOfWeek = hour.currentDate.weekday;
     if (dayOfWeek != 6 && dayOfWeek != 7) return false;
@@ -152,6 +156,7 @@ class Bucket2x8 extends Bucket {
     return false;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket2x8) return false;
     Bucket2x8 bucket2x8 = other;

@@ -119,7 +119,7 @@ class MonthlyCurve {
   }
 
   /// Subtract two monthly curves with different buckets using hour weighting.
-  /// The [other] bucket must to be different.  For example, calculate offpeak
+  /// The [other] bucket must be different.  For example, calculate offpeak
   /// curve by subtracting peak curve from the flat curve.
   TimeSeries<num> subtractBucket(MonthlyCurve other) {
     if (bucket == other.bucket) {

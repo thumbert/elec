@@ -1,4 +1,4 @@
-library time.schedule;
+library time.hourly_schedule;
 
 import 'package:date/date.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
@@ -104,8 +104,9 @@ class HourlySchedule {
     _f = (Hour hour) {
       for (var i = 0; i < n; i++) {
         if (buckets[i].containsHour(hour)) {
-          if (mthValues[i].containsKey(hour.start.month))
+          if (mthValues[i].containsKey(hour.start.month)) {
             return mthValues[i][hour.start.month];
+          }
         }
       }
       return null;
