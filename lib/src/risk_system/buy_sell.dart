@@ -7,13 +7,15 @@ class BuySell {
 
   factory BuySell.parse(String x) {
     var y = x.toLowerCase();
-    if (y != 'buy' && y != 'sell')
+    if (y != 'buy' && y != 'sell') {
       throw ArgumentError('Can\'t parse $x for BuySell.');
+    }
     return y == 'buy' ? buy : sell;
   }
 
-  static const buy = const BuySell._internal(1);
-  static const sell = const BuySell._internal(-1);
+  static const buy = BuySell._internal(1);
+  static const sell = BuySell._internal(-1);
 
+  @override
   String toString()  => sign == 1 ? 'Buy' : 'Sell';
 }
