@@ -1,8 +1,8 @@
 library test.analysis.seasonal_analysis_test;
 
 import 'package:date/date.dart';
-import 'package:elec/src/analysis/seasonal_analysis.dart';
-import 'package:elec/src/analysis/seasonality.dart';
+import 'package:elec/src/analysis/seasonal/seasonal_analysis.dart';
+import 'package:elec/src/analysis/seasonal/seasonality.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
@@ -26,6 +26,22 @@ void tests() {
           [2011, 2013.5, 2016, 2018.5, 2021]);
       var histories = sa.paths;
       expect(histories[parseTerm('Cal10')].length, 365);
+    });
+    test('day of year centered', () {
+      var term = parseTerm('Jan10-Dec20');
+      var days = term.splitLeft((dt) => Date.fromTZDateTime(dt));
+      var xs = TimeSeries.fromIterable(days
+          .map((date) => IntervalTuple(date, 1)));
+      var sa = SeasonalAnalysis.dayOfYearCentered(xs, 2);
+      var groups = sa.groups;
+      var g1 = groups[1];
+      var g1Intervals = g1.intervals.toList();
+      expect(g1Intervals[0], Date(2010, 1, 1));
+      expect(g1Intervals[1], Date(2010, 1, 2));
+      expect(g1Intervals[2], Date(2010, 1, 3));
+      expect(g1Intervals[3], Date(2010, 12, 30));
+      expect(g1Intervals[4], Date(2010, 12, 31));
+      expect(g1Intervals[5], Date(2011, 1, 1));
     });
   });
 }

@@ -3,9 +3,6 @@
 
 library elec;
 
-export 'src/analysis/seasonal_analysis.dart';
-export 'src/analysis/seasonality.dart';
-
 export 'src/iso/iso.dart';
 export 'src/physical/price_quantity_pair.dart';
 export 'src/time/bucket/bucket.dart';

@@ -1,7 +1,8 @@
 library test_all;
 
 import 'package:timezone/standalone.dart';
-import 'analysis/seasonal_analysis_test.dart' as seasonal_analysis;
+import 'analysis/filter/filter_test.dart' as filter;
+import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
 import 'gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
 import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
@@ -16,6 +17,7 @@ import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 void main() async {
   await initializeTimeZone();
 
+  filter.tests();
   seasonal_analysis.tests();
   solar_elevation.tests();
   bucket.testBucket();
