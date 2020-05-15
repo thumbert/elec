@@ -12,8 +12,8 @@ import 'package:tuple/tuple.dart';
 /// are the calendar years.
 class Seasonality {
   final String name;
-  final Map<int,List<num>> Function(TimeSeries<num>) toGroups;
-  final Map<Interval,List<Tuple2<int,num>>> Function(TimeSeries<num>) toPaths;
+  final Map<int,TimeSeries<num>> Function(TimeSeries<num>) toGroups;
+  final Map<Interval,TimeSeries<num>> Function(TimeSeries<num>) toPaths;
 
   Seasonality._internal(this.name, this.toGroups, this.toPaths);
 
@@ -38,7 +38,7 @@ class Seasonality {
           (TimeSeries<num> xs) => _toPath(xs, (e) {
         var year = Interval(TZDateTime(e.interval.start.location, e.interval.start.year),
             TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-        return Tuple3(year, e.interval.start.month, e.value);
+        return Tuple2(year, e);
       })
   );
   static var weekOfYear = Seasonality._internal('weekOfYear',
@@ -46,7 +46,7 @@ class Seasonality {
           (TimeSeries<num> xs) => _toPath(xs, (e) {
         var year = Interval(TZDateTime(e.interval.start.location, e.interval.start.year),
             TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-        return Tuple3(year, Week.fromTZDateTime(e.interval.start).week, e.value);
+        return Tuple2(year, e);
       })
   );
   static var dayOfYear = Seasonality._internal('dayOfYear',
@@ -54,16 +54,16 @@ class Seasonality {
           (TimeSeries<num> xs) => _toPath(xs, (e) {
         var year = Interval(TZDateTime(e.interval.start.location, e.interval.start.year),
             TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-        return Tuple3(year, Date.fromTZDateTime(e.interval.start).dayOfYear(), e.value);
+        return Tuple2(year, e);
       })
   );
   static var dayOfWeek = Seasonality._internal('dayOfWeek',
           (TimeSeries<num> xs) => _groupByIndex(xs, (e) => e.start.weekday),
-          (TimeSeries<num> xs) => _toPath(xs, (e) => Tuple3(Week.fromTZDateTime(e.interval.start), e.interval.start.weekday, e.value))
+          (TimeSeries<num> xs) => _toPath(xs, (e) => Tuple2(Week.fromTZDateTime(e.interval.start), e))
   );
   static var hourOfDay = Seasonality._internal('hourOfDay',
           (TimeSeries<num> xs) => _groupByIndex(xs, (e) => e.start.hour),
-          (TimeSeries<num> xs) => _toPath(xs, (e) => Tuple3(Date.fromTZDateTime(e.interval.start), e.interval.start.hour, e.value))
+          (TimeSeries<num> xs) => _toPath(xs, (e) => Tuple2(Date.fromTZDateTime(e.interval.start), e))
   );
 
   @override
@@ -72,25 +72,25 @@ class Seasonality {
 
 
 
-Map<Interval, List<Tuple2<int,num>>> _toPath(TimeSeries<num> xs, Tuple3<Interval,int,num> Function(IntervalTuple obs) f) {
-  var grp = <Interval, List<Tuple2<int,num>>>{};
+Map<Interval, TimeSeries<num>> _toPath(TimeSeries<num> xs, Tuple2<Interval,IntervalTuple> Function(IntervalTuple obs) f) {
+  var grp = <Interval, TimeSeries<num>>{};
   var n = xs.length;
   for (var i = 0; i < n; i++) {
-    var t3 = f(xs[i]);
+    var t2 = f(xs[i]);
     grp
-        .putIfAbsent(t3.item1, () => <Tuple2<int,num>>[])
-        .add(Tuple2(t3.item2, t3.item3));
+        .putIfAbsent(t2.item1, () => TimeSeries<num>())
+        .add(t2.item2);
   }
   return grp;
 }
 
 
-Map<int, List<K>> _groupByIndex<K>(TimeSeries<K> xs, int Function(Interval interval) f) {
-  var grp = <int, List<K>>{};
+Map<int, TimeSeries<K>> _groupByIndex<K>(TimeSeries<K> xs, int Function(Interval interval) f) {
+  var grp = <int, TimeSeries<K>>{};
   var n = xs.length;
   for (var i = 0; i < n; i++) {
     var group = f(xs[i].interval);
-    grp.putIfAbsent(group, () => <K>[]).add(xs[i].value);
+    grp.putIfAbsent(group, () => TimeSeries<K>()).add(xs[i]);
   }
   return grp;
 }
