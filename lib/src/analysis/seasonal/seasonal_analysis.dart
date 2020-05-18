@@ -98,6 +98,7 @@ class SeasonalAnalysis {
     _paths = <Interval, TimeSeries<num>>{};
     for (var term in terms) {
       var ts = xs.window(term.interval);
+      if (ts.isEmpty) continue;
       var startDate = ts.first.interval as Date;
       for (var e in ts) {
         var _dayOfTerm = (e.interval as Date).value - startDate.value + 1;

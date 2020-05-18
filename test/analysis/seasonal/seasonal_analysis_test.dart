@@ -44,6 +44,21 @@ void tests() {
       expect(paths.keys.length, 7);
     });
 
+//    test('analysis by dayOfTerm, missing/incomplete term', () {
+//      var days = Term.parse('15Feb10-Dec12', UTC).days();
+//      var xs = TimeSeries.fromIterable(days
+//          .map((date) => IntervalTuple(date, date.year + date.dayOfYear())));
+//      var years = List.generate(7, (i) => 2010 + i);
+//      var startTerm = Term.parse('Jan10', UTC);
+//      var terms = [ for (var year in years) startTerm.withStartYear(year) ];
+//      var sa = SeasonalAnalysis.dayOfTerm(xs, terms);
+//      var paths = sa.paths;
+//      expect(sa.groups[1].values.first, 2315);
+//      expect(paths.keys.first, Term.parse('Nov10-Mar11', UTC).interval);
+//      expect(paths.keys.length, 7);
+//    });
+
+
 
     test('day of year centered', () {
       var term = parseTerm('Jan10-Dec20');
