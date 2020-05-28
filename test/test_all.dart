@@ -12,6 +12,7 @@ import 'time/shape/shape_cost_test.dart' as shape_cost;
 import 'time/calendar/holiday_test.dart' as holiday;
 import 'time/calendar/calendar_test.dart' as calendar;
 import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
+import 'risk_system/pricing/calculators/elec_calc_cdf/elec_calc_cdf_test.dart' as elec_calc_cdf;
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 
 void main() async {
@@ -28,6 +29,7 @@ void main() async {
   calendar.main();
   holiday.main();
   monthly_curve.tests();
+  elec_calc_cdf.tests();
   shape_cost.tests();
   trade_aggregator.tests();
 
