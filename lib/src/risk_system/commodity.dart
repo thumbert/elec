@@ -4,32 +4,32 @@ class Commodity {
   final String shortName;
   final String longName;
 
-  static var _allowed = Set<String>()
-    ..addAll([
-      'pwr',
-      'electricity',
-      'ng',
-      'natural gas',
-      'fo2',
-      'fuel oil #2',
-      'fo6',
-      'fuel oil #6',
-    ]);
+  static final _allowed = <String>{
+    'elec',
+    'electricity',
+    'ng',
+    'natural gas',
+    'fo2',
+    'fuel oil #2',
+    'fo6',
+    'fuel oil #6',
+  };
 
   const Commodity._internal(this.shortName, this.longName);
 
-  static const electricity = const Commodity._internal('Pwr', 'Electricity');
-  static const ng = const Commodity._internal('Ng', 'Natual Gas');
-  static const fo2 = const Commodity._internal('Fo2', 'Fuel Oil #2');
-  static const fo6 = const Commodity._internal('Fo6', 'Fuel Oil #6');
+  static const electricity = Commodity._internal('Elec', 'Electricity');
+  static const ng = Commodity._internal('Ng', 'Natual Gas');
+  static const fo2 = Commodity._internal('Fo2', 'Fuel Oil #2');
+  static const fo6 = Commodity._internal('Fo6', 'Fuel Oil #6');
 
   factory Commodity.parse(String x) {
     var y = x.toLowerCase();
-    if (!_allowed.contains(y))
+    if (!_allowed.contains(y)) {
       throw ArgumentError('Can\'t parse $x as a Commodity.');
+    }
 
     Commodity out;
-    if (y == 'pwr' || y == 'electricity') {
+    if (y == 'elec' || y == 'electricity') {
       out = electricity;
     } else if (y == 'ng' || y == 'natural gas') {
       out = ng;

@@ -61,8 +61,7 @@ abstract class Bucket {
         throw ArgumentError(
             'Input interval $interval doesn\'t start/end at hour boundaries');
       }
-
-      var hrs = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
+      var hrs = interval.splitLeft((dt) => Hour.beginning(dt));
       _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
     }
     return _hoursCache[interval];

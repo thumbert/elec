@@ -5,6 +5,8 @@ import 'package:elec/elec.dart';
 import 'package:elec/src/risk_system/marks/monthly_curve.dart';
 
 /// An omnipotent curve providing a complete hourly covering of an interval.
+/// No missing values allowed for any hour in the domain where the curve is
+/// defined.
 class OmniCurve {
 
   /// The domain of this OmniCurve.  No missing values allowed for any hour
@@ -18,7 +20,7 @@ class OmniCurve {
   /// Construct an OmniCurve from a list of [MonthlyCurve]s.
   OmniCurve.fromMonthlyCurves(List<MonthlyCurve> curves) {
     domain = curves.first.domain;
-    var buckets = curves.map((curve) => curve.bucket).toList();
+    //var buckets = curves.map((curve) => curve.bucket).toList();
     _f = (Hour hour) {
       if (!domain.containsInterval(hour)) return null;
       for (var curve in curves) {
@@ -36,7 +38,4 @@ class OmniCurve {
 
   /// Return the value of the schedule associated with this hour.
   num value(Hour hour) => _f(hour);
-
-
-
 }

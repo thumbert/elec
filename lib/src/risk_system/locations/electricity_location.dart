@@ -9,6 +9,7 @@ class ElectricityLocation extends Location {
   Iso iso;
   int ptid;
   Market market;
+  @override
   final commodity = Commodity.electricity;
 
   ElectricityLocation(this.iso, this.ptid, this.market);
