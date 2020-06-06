@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 class CurveId {
   tz.Location tzLocation;
   String _name;
+  String _curve;
   Map<String,dynamic> _components;
 
   /// Create a curveId from components.  The resulting curveId is available in
@@ -28,6 +29,8 @@ class CurveId {
         'market': Market.da,
         'lmpComponent': LmpComponent.lmp,
       };
+      _curve = 'HUB_DA_LMP';
+
     } else if (name == 'isone_energy_4004_da_lmp') {
       _components = {
         'iso': IsoNewEngland(),
@@ -37,6 +40,7 @@ class CurveId {
         'market': Market.da,
         'lmpComponent': LmpComponent.lmp,
       };
+      _curve = 'CT_DA_LMP';
     }
   }
 
@@ -57,6 +61,8 @@ class CurveId {
   /// Name is lower case.
   /// For example: isone_elec_hub_lmp_da, isone_elec_hub_mcc_da
   String get name => _name;
+
+  String get curve => _curve;
 
   Map<String,dynamic> get components => _components;
 
