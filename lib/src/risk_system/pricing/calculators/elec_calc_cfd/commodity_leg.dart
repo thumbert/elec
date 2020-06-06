@@ -11,6 +11,9 @@ class CommodityLeg extends _BaseCfd {
   TimeSeries<num> fixPrice;
   TimeSeries<num> floatingPrice;
 
+  /// if custom quantities or fixPrice, what to show in the calculator UI
+  num showQuantity, showFixPrice;
+
   /// Leg leaves
   List<Leaf> leaves;
 
@@ -91,6 +94,27 @@ class CommodityLeg extends _BaseCfd {
       throw ArgumentError('Leg quantity does\'t contain one of accepted time'
           'periods: month, date, hourBeginning');
     }
+
+    if (x.containsKey('showQuantity')) {
+      showQuantity = x['showQuantity'];
+    } else {
+      var aux = quantity.values.toSet();
+      if (aux.length == 1) {
+        showQuantity = aux.first;
+      } else {
+        throw ArgumentError('Quantity is customized.  Please set showQuantity.');
+      }
+    }
+    if (x.containsKey('showFixPrice')) {
+      showFixPrice = x['showFixPrice'];
+    } else {
+      var aux = fixPrice.values.toSet();
+      if (aux.length == 1) {
+        showFixPrice = aux.first;
+      } else {
+        throw ArgumentError('FixPrice is customized.  Please set showFixPrice.');
+      }
+    }
   }
 
   /// serialize it
@@ -100,7 +124,9 @@ class CommodityLeg extends _BaseCfd {
       'cash/physical': cashOrPhys,
       'bucket': bucket.toString(),
       'quantity': _serializeSeries(quantity),
+      'showQuantity': showQuantity,
       'fixPrice': _serializeSeries(fixPrice),
+      'showFixPrice': showFixPrice,
     };
   }
 

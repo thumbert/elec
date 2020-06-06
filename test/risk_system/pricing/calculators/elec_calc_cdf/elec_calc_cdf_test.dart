@@ -23,11 +23,13 @@ Map<String,dynamic> _calc1() =>  <String,dynamic>{
         {'month': '2021-02', 'value': 50},
         {'month': '2021-03', 'value': 50},
       ],
+      'showQuantity': 50,
       'fixPrice': [
         {'month': '2021-01', 'value': 50.5},
         {'month': '2021-02', 'value': 50.5},
         {'month': '2021-03', 'value': 50.5},
       ],
+      'showFixPrice': 50.5,
       'floatingPrice': [
         {'month': '2021-01', 'value': 58.25},
         {'month': '2021-02', 'value': 55.75},

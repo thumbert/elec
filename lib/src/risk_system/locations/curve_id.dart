@@ -17,8 +17,27 @@ class CurveId {
   CurveId(String name) {
     _name = name.toLowerCase();
     _components = <String,dynamic>{};
-    /// TODO: Fixme once you have a database!
     tzLocation = tz.getLocation('US/Eastern');
+    /// TODO: Fixme once you have a database!
+    if (name == 'isone_energy_4000_da_lmp') {
+      _components = {
+        'iso': IsoNewEngland(),
+        'serviceType': 'energy',
+        'ptid': 4000,
+        'name': 'Mass Hub',
+        'market': Market.da,
+        'lmpComponent': LmpComponent.lmp,
+      };
+    } else if (name == 'isone_energy_4004_da_lmp') {
+      _components = {
+        'iso': IsoNewEngland(),
+        'serviceType': 'energy',
+        'ptid': 4004,
+        'name': 'CT',
+        'market': Market.da,
+        'lmpComponent': LmpComponent.lmp,
+      };
+    }
   }
 
   CurveId.forIsoEnergyPtid(Iso iso, int ptid, Market market, LmpComponent component) {
