@@ -2,16 +2,17 @@ part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 
 class CommodityLeg extends _BaseCfd {
-  CurveId curveId;
+  String curveId;
   String cashOrPhys;
   Bucket bucket;
+  Map<String,dynamic> curveIdDetails;
 
   /// Can be monthly, daily or hourly time series
   TimeSeries<num> quantity;
   TimeSeries<num> fixPrice;
   TimeSeries<num> floatingPrice;
 
-  /// if custom quantities or fixPrice, what to show in the calculator UI
+  /// if custom quantities or fixPrice, what to show on the screen in the UI
   num showQuantity, showFixPrice;
 
   /// Leg leaves
@@ -71,8 +72,8 @@ class CommodityLeg extends _BaseCfd {
     if (x['curveId'] == null) {
       throw ArgumentError('Input needs to have key curveId');
     }
-    curveId = CurveId(x['curveId'] as String);
-    cashOrPhys = x['cash/physical'];
+    curveId = (x['curveId'] as String).toLowerCase();
+    cashOrPhys = (x['cash/physical'] as String).toLowerCase();
     if (x['bucket'] == null) {
       throw ArgumentError('Input needs to have key bucket');
     }
@@ -120,7 +121,7 @@ class CommodityLeg extends _BaseCfd {
   /// serialize it
   Map<String,dynamic> toJson() {
     return <String,dynamic>{
-      'curveId': curveId.name,
+      'curveId': curveId,
       'cash/physical': cashOrPhys,
       'bucket': bucket.toString(),
       'quantity': _serializeSeries(quantity),
