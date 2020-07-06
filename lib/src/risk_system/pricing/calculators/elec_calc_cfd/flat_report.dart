@@ -62,7 +62,7 @@ class FlatReportElecCfd implements Report {
           });
           table.add({
             'term': leaf.interval.toString(),
-            'curveId': leg.curveId.name,
+            'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
             'nominalQuantity': leg.buySell.sign * leaf.quantity * leaf.hours,
             'forwardPrice': leaf.floatingPrice,

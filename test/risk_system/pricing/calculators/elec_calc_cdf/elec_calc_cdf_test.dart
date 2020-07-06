@@ -1,11 +1,14 @@
 library test.risk_system.pricing.elec_calc_cdf_test;
 
+import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
+import 'package:elec_server/client/marks/curves/curve_id.dart';
+
 
 /// Monthly quantities and prices, ISONE
 Map<String,dynamic> _calc1() =>  <String,dynamic>{
@@ -39,9 +42,16 @@ Map<String,dynamic> _calc1() =>  <String,dynamic>{
   ],
 };
 
-void tests() async {
+void tests(String rootUrl) async {
   group('Elec calc cdf tests ISONE, 1 leg:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
+    var curveDetails = <String,Map<String,dynamic>>{};
+    var curveIdClient = CurveIdClient(Client(), rootUrl: rootUrl);
+    setUp(() async {
+      var _aux = await curveIdClient.getCurveIds(['isone_energy_4000_da_lmp']);
+      curveDetails = { for (var x in _aux) x['curveId']: x};
+      ElecCalculatorCfd.curveDetails = curveDetails;
+    });
     test('fromJson', () {
       var calc = ElecCalculatorCfd.fromJson(_calc1());
       expect(calc.asOfDate, Date(2020, 5, 29, location: UTC));
@@ -115,5 +125,5 @@ total                         50,400        ''';
 
 void main() async {
   await initializeTimeZones();
-  await tests();
+  await tests('http://localhost:8080/');
 }

@@ -4,7 +4,6 @@ import 'package:dama/dama.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
-import 'package:quiver/iterables.dart';
 import 'package:table/table.dart';
 import 'package:table/table_base.dart';
 
@@ -77,7 +76,7 @@ class MonthlyPositionReportElecCfd implements Report {
           });
           table.add({
             'term': leaf.interval.toString(),
-            'curveId': leg.curveId.name,
+            'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
             'nominalQuantity': leg.buySell.sign * leaf.quantity * leaf.hours,
             'forwardPrice': leaf.floatingPrice,

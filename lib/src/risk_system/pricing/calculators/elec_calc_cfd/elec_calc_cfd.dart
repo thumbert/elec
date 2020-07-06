@@ -1,7 +1,5 @@
 library risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
-import 'package:elec/src/risk_system/data_provider/data_provider.dart';
-import 'package:elec/src/risk_system/locations/curve_id.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
@@ -18,7 +16,6 @@ part 'leaf.dart';
 enum TimePeriod {month, day, hour}
 
 class _BaseCfd {
-  DataProvider _dataProvider;
   Date asOfDate;
   BuySell buySell;
   Term term;
@@ -29,9 +26,12 @@ class ElecCalculatorCfd extends _BaseCfd {
   String comments;
   List<CommodityLeg> legs;
 
+  /// all the data from marks/curve_ids; the key is the curveId.
+  static Map<String,Map<String,dynamic>> curveDetails;
+
   ElecCalculatorCfd();
 
-  /// The recommended way to initialize.
+  /// The recommended way to initialize.  See tests.
   ElecCalculatorCfd.fromJson(Map<String, dynamic> x) {
     if (x['term'] == null) {
       throw ArgumentError('Input needs to have key term');
@@ -54,14 +54,15 @@ class ElecCalculatorCfd extends _BaseCfd {
     legs = <CommodityLeg>[];
     var _aux = x['legs'] as List;
     for (Map<String,dynamic> e in _aux) {
+      // inject the tzLocation.
+      e['tzLocation'] = curveDetails[e['curveId']]['tzLocation'] as String;
       var leg = CommodityLeg.fromJson(e)
         ..asOfDate = asOfDate
         ..buySell = buySell
         ..term = term;
       if (e.containsKey('floatingPrice')) {
         /// if you pass the floatingPrice to the commodity leg directly
-        leg.floatingPrice = _parseSeries(e['floatingPrice'],
-            leg.curveId.tzLocation);
+        leg.floatingPrice = _parseSeries(e['floatingPrice'], leg.tzLocation);
         leg.makeLeaves();
       } /// else you have to give the calculator a [dataProvider]
       legs.add(leg);
@@ -77,14 +78,6 @@ class ElecCalculatorCfd extends _BaseCfd {
       if (leg.fixPrice.values.toSet().length != 1) return true;
     }
     return res;
-  }
-
-  /// Needs to have a functioning [DataProvider] for the calculator to price.
-  set dataProvider(DataProvider provider) {
-    _dataProvider = provider;
-    for (var leg in legs) {
-      leg._dataProvider = provider;
-    }
   }
 
   /// Get the total dollar value of this calculator.

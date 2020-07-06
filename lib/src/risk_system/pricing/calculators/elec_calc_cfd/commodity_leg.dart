@@ -5,7 +5,8 @@ class CommodityLeg extends _BaseCfd {
   String curveId;
   String cashOrPhys;
   Bucket bucket;
-  Map<String,dynamic> curveIdDetails;
+  Location tzLocation;
+  Map<String,dynamic> curveDetails;
 
   /// Can be monthly, daily or hourly time series
   TimeSeries<num> quantity;
@@ -37,15 +38,6 @@ class CommodityLeg extends _BaseCfd {
     return _price;
   }
 
-  /// Get the [floatingPrice] from a provider if not passed in during
-  /// construction.
-  Future<TimeSeries<num>> getFloatingPrice() async {
-    if (floatingPrice == null) {
-      var aux = await _dataProvider.getForwardCurveForBucket(curveId, bucket, asOfDate);
-      floatingPrice = TimeSeries.fromIterable(aux.timeseries.window(term.interval));
-    }
-    return floatingPrice;
-  }
 
   /// Make the leaves for this leg.  Needs [floatingPrice].
   /// One leaf per period.
@@ -73,11 +65,12 @@ class CommodityLeg extends _BaseCfd {
       throw ArgumentError('Input needs to have key curveId');
     }
     curveId = (x['curveId'] as String).toLowerCase();
+    tzLocation = getLocation(x['tzLocation']);
     cashOrPhys = (x['cash/physical'] as String).toLowerCase();
     if (x['bucket'] == null) {
       throw ArgumentError('Input needs to have key bucket');
     }
-    bucket = Bucket.parse(x['bucket']);
+    bucket = Bucket.parse(x['bucket'])..location = tzLocation;
     /// quantities are specified as a List of {'month': '2020-01', 'value': 40.0}
     quantity = _parseSeries(x['quantity'], bucket.location);
     /// prices are specified as a List of {'month': '2020-01', 'value': 40.0}
