@@ -44,12 +44,14 @@ class CommodityLeg extends _BaseCfd {
   void makeLeaves() {
     leaves = <Leaf>[];
     if (timePeriod == TimePeriod.month) {
-      for (var qty in quantity) {
-        Month month = qty.interval;
+      var months = term.interval.withTimeZone(tzLocation)
+          .splitLeft((dt) => Month.fromTZDateTime(dt));
+      for (var month in months) {
+        var _quantity = quantity.observationAt(month).value;
         var _fixPrice = fixPrice.observationAt(month).value;
         var _floatPrice = floatingPrice.observationAt(month).value;
         var hours = bucket.countHours(month);
-        leaves.add(Leaf(buySell, qty.interval, qty.value, _fixPrice,
+        leaves.add(Leaf(buySell, month, _quantity, _fixPrice,
             _floatPrice, hours));
       }
     } else {

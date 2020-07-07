@@ -1,5 +1,7 @@
 library test.risk_system.pricing.elec_calc_cdf_test;
 
+import 'package:elec/risk_system.dart';
+import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
@@ -47,19 +49,23 @@ void tests(String rootUrl) async {
     var location = getLocation('America/New_York');
     var curveDetails = <String,Map<String,dynamic>>{};
     var curveIdClient = CurveIdClient(Client(), rootUrl: rootUrl);
+    var forwardMarksClient = ForwardMarks(Client(), rootUrl: rootUrl);
+    ElecCalculatorCfd c1;
     setUp(() async {
       var _aux = await curveIdClient.getCurveIds(['isone_energy_4000_da_lmp']);
       curveDetails = { for (var x in _aux) x['curveId']: x};
-      ElecCalculatorCfd.curveDetails = curveDetails;
+      c1 = ElecCalculatorCfd(curveIdClient: curveIdClient,
+          forwardMarksClient: forwardMarksClient)
+        ..curveDetails = curveDetails
+        ..fromJson(_calc1());
     });
     test('fromJson', () {
-      var calc = ElecCalculatorCfd.fromJson(_calc1());
-      expect(calc.asOfDate, Date(2020, 5, 29, location: UTC));
-      expect(calc.term, Term.parse('Jan21-Mar21', UTC));
+      expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));
+      expect(c1.term, Term.parse('Jan21-Mar21', UTC));
       var _term = Term.parse('Jan21-Mar21', location);
       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
-      expect(calc.legs.length, 1);
-      var leg = calc.legs.first;
+      expect(c1.legs.length, 1);
+      var leg = c1.legs.first;
       expect(leg.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
       expect(leg.fixPrice, TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
       expect(leg.floatingPrice, TimeSeries<num>.from(_months, [58.25, 55.75, 40.0]));
@@ -68,18 +74,40 @@ void tests(String rootUrl) async {
       var aux = _calc1();
       ((aux['legs'] as List).first as Map).remove('floatingPrice');
       aux.remove('asOfDate');
-      var calc = ElecCalculatorCfd.fromJson(_calc1());
-      var out = calc.toJson();
-      expect(out, aux);
+      expect(c1.toJson(), aux);
     });
     test('price it', () {
-      var calc = ElecCalculatorCfd.fromJson(_calc1());
+      expect(c1.dollarPrice().round(), 14800);
+      var leg = c1.legs.first;
+      expect(leg.price.toStringAsFixed(2), '50.79');
+      expect(leg.leaves.length, 3);  // 3 months
+    });
+    test('change buy/sell and reprice', () {
+      var calc = c1..buySell = BuySell.sell;
+      expect(calc.dollarPrice().round(), -14800);
       var leg = calc.legs.first;
       expect(leg.price.toStringAsFixed(2), '50.79');
-      expect(calc.dollarPrice().round(), 14800);
     });
+    test('change calculator term and reprice', () {
+      var calc = c1..term = Term.parse('Jan21-Feb21', location);
+      expect(calc.dollarPrice().round(), 208000);
+      var leg = calc.legs.first;
+      expect(leg.leaves.length, 2);  // two months only
+      expect(leg.price.toStringAsFixed(2), '57.00');
+    });
+    test('change calculator asOfDate and reprice', () {
+      var calc = c1
+        ..term = Term.parse('Jan21-Feb21', location)
+        ..asOfDate = Date(2020, 7, 6);
+      expect(calc.dollarPrice().round(), 270400);
+      var leg = calc.legs.first;
+      expect(leg.leaves.length, 2);  // two months only
+      expect(leg.price.toStringAsFixed(2), '58.95');
+    });
+    
+
     test('flat report', () {
-      var calc = ElecCalculatorCfd.fromJson(_calc1());
+      var calc = c1..dollarPrice();
       var report = calc.flatReport();
       var aux = report.toString().split('\n');
       aux.removeAt(2);  // remove line with Printed: xxxxxxxx
@@ -102,7 +130,7 @@ Value: $14,800
       expect(aux.join('\n'), out);
     });
     test('position report', () {
-      var calc = ElecCalculatorCfd.fromJson(_calc1());
+      var calc = c1..dollarPrice();
       var report = calc.monthlyPositionReport();
       var aux = report.toString().split('\n');
       aux.removeAt(2);  // remove line with Printed: xxxxxxxx
@@ -117,8 +145,6 @@ Mar21                         18,400  18,400
 total                         50,400        ''';
       expect(aux.join('\n'), out);
     });
-
-
   });
   
 }
@@ -126,4 +152,6 @@ total                         50,400        ''';
 void main() async {
   await initializeTimeZones();
   await tests('http://localhost:8080/');
+
+
 }

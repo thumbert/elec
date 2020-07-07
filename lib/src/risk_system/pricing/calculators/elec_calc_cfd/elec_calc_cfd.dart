@@ -3,12 +3,15 @@ library risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
+import 'package:elec_server/client/marks/curves/curve_id.dart';
+import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
+import 'package:tuple/tuple.dart';
 
 part 'commodity_leg.dart';
 part 'leaf.dart';
@@ -16,23 +19,56 @@ part 'leaf.dart';
 enum TimePeriod {month, day, hour}
 
 class _BaseCfd {
-  Date asOfDate;
-  BuySell buySell;
-  Term term;
+  CurveIdClient curveIdClient;
+  ForwardMarks forwardMarksClient;
+
+  Date _asOfDate;
+  /// Does not need local timezone.  UTC timezone is fine.
+  Date get asOfDate => _asOfDate;
+  set asOfDate(Date date) {
+    _asOfDate = date;
+    /// get the forward marks as of this date, all buckets at once
+    var curveIds = [ for (var leg in legs) leg.curveId];
+    /// TODO:
+  }
+
+
+  BuySell _buySell;
+  BuySell get buySell => _buySell;
+  set buySell(BuySell buySell) {
+    _buySell = buySell;
+  }
+
+
+  Term _term;
+  Term get term => _term;
+  set term(Term term) {
+    _term = term;
+  }
+
+
   TimePeriod timePeriod;
+
+  var legs = <CommodityLeg>[];
+
+  /// The keys of the cache are triples (asOfDate, bucket, curveId)
+  var fwdMarksCache = <Tuple3<Date,Bucket,String>>{};
+
 }
 
 class ElecCalculatorCfd extends _BaseCfd {
   String comments;
-  List<CommodityLeg> legs;
 
   /// all the data from marks/curve_ids; the key is the curveId.
-  static Map<String,Map<String,dynamic>> curveDetails;
+  Map<String,Map<String,dynamic>> curveDetails;
 
-  ElecCalculatorCfd();
+  ElecCalculatorCfd({CurveIdClient curveIdClient, ForwardMarks forwardMarksClient}) {
+    super.curveIdClient = curveIdClient;
+    super.forwardMarksClient = forwardMarksClient;
+  }
 
-  /// The recommended way to initialize.  See tests.
-  ElecCalculatorCfd.fromJson(Map<String, dynamic> x) {
+  /// The recommended way to initialize from a template.  See tests.
+  void fromJson(Map<String, dynamic> x) {
     if (x['term'] == null) {
       throw ArgumentError('Input needs to have key term');
     }
@@ -54,7 +90,7 @@ class ElecCalculatorCfd extends _BaseCfd {
     legs = <CommodityLeg>[];
     var _aux = x['legs'] as List;
     for (Map<String,dynamic> e in _aux) {
-      // inject the tzLocation.
+      // curveDetails need to be set prior to this
       e['tzLocation'] = curveDetails[e['curveId']]['tzLocation'] as String;
       var leg = CommodityLeg.fromJson(e)
         ..asOfDate = asOfDate
@@ -63,11 +99,18 @@ class ElecCalculatorCfd extends _BaseCfd {
       if (e.containsKey('floatingPrice')) {
         /// if you pass the floatingPrice to the commodity leg directly
         leg.floatingPrice = _parseSeries(e['floatingPrice'], leg.tzLocation);
-        leg.makeLeaves();
       } /// else you have to give the calculator a [dataProvider]
       legs.add(leg);
     }
   }
+
+
+  /// Get the curve details from the database
+  void setCurveDetails(List<String> curveIds) async {
+    var _aux = await curveIdClient.getCurveIds(curveIds);
+    curveDetails = { for (var x in _aux) x['curveId']: x};
+  }
+
 
   /// Return [true] if the calculator has custom quantities and prices, i.e.
   /// not the same value for all time intervals.
@@ -84,6 +127,9 @@ class ElecCalculatorCfd extends _BaseCfd {
   num dollarPrice() {
     var value = 0.0;
     for (var leg in legs) {
+      leg.buySell = buySell;
+      leg.term = term;
+      leg.makeLeaves();
       for (var leaf in leg.leaves) {
         value += leaf.dollarPrice();
       }
