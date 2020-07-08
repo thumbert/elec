@@ -135,6 +135,24 @@ class HourlySchedule {
     };
   }
 
+  /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
+  HourlySchedule.fromTimeSeries(TimeSeries<Map<Bucket,num>> ts) {
+    _f = (Hour hour) {
+      if (!ts.domain.containsInterval(hour)) {
+        return null;
+      } else {
+        var obs = ts.observationContains(hour);
+        for (var bucket in obs.value.keys) {
+          if (bucket.containsHour(hour)) {
+            return obs.value[bucket];
+          }
+        }
+        throw ArgumentError('Can\'t find the hour $hour in buckets ${obs.value.keys}');
+      }
+    };
+  }
+
+
   /// Return the value of the schedule associated with this hour.
   num operator [](Hour hour) => _f(hour);
 

@@ -16,10 +16,12 @@ class MonthBucketValue {
 
   /// Add another MonthBucketValue to this.
   num addBucket(MonthBucketValue other) {
-    if (other.bucket == bucket)
+    if (other.bucket == bucket) {
       throw ArgumentError('The two buckets need to be different');
-    if (other.month != month)
+    }
+    if (other.month != month) {
       throw ArgumentError('The two months need to be the same');
+    }
 
     var hrs = bucket.countHours(month);
     var hrsOther = other.bucket.countHours(other.month);
@@ -29,25 +31,30 @@ class MonthBucketValue {
 
   /// Subract another MonthBucketValue from this.
   num subtractBucket(MonthBucketValue other) {
-    if (other.bucket == bucket)
+    if (other.bucket == bucket) {
       throw ArgumentError('The two buckets need to be different');
-    if (other.month != month)
+    }
+    if (other.month != month) {
       throw ArgumentError('The two months need to be the same');
+    }
     var hrs = bucket.countHours(month);
     var hrsOther = other.bucket.countHours(other.month);
-    if (hrs <= hrsOther)
+    if (hrs <= hrsOther) {
       throw ArgumentError('Can\'t subtract $bucket from ${other.bucket}');
+    }
 
     return (value*hrs - other.value*hrsOther)/(hrs - hrsOther);
   }
   
   
+  @override
   bool operator ==(dynamic other) {
     if (other is! MonthBucketValue) return false;
     MonthBucketValue x = other;
     return x.value == value && x.bucket == bucket && x.month == month;
   }
 
+  @override
   int get hashCode => hash3(bucket, month, value);
 
   TimeSeries<num> toHourly() {

@@ -5,13 +5,16 @@ import 'package:elec/elec.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
 
-tests() {
+void tests() {
   group('Hourly schedule tests:', () {
     var location = getLocation('US/Eastern');
     var peak = IsoNewEngland.bucketPeak;
     var offpeak = IsoNewEngland.bucketOffpeak;
+    var b2x16H = IsoNewEngland.bucket2x16H;
+    var b7x8 = IsoNewEngland.bucket7x8;
     test('one value all hours', () {
       var hs = HourlySchedule.filled(10);
       expect(hs.value(Hour.beginning(TZDateTime(location, 2019, 1, 1, 4))), 10);
@@ -50,7 +53,6 @@ tests() {
         ]
       });
     });
-
     test('one value by bucket and month', () {
       var values = {
         peak: {1: 10, 9: 90},
@@ -74,7 +76,6 @@ tests() {
         ]
       });
     });
-
     test('one value by bucket, month, hour', () {
       var values = {
         1: [
@@ -107,10 +108,20 @@ tests() {
         ]
       });
     });
+    test('from timeseries', () {
+      var month = Month(2021, 1, location: location);
+      var ts = TimeSeries.fromIterable([
+        IntervalTuple(month, {peak: 60.7, b2x16H: 54.93, b7x8: 48.89})
+      ]);
+      var hs = HourlySchedule.fromTimeSeries(ts);
+      var out = hs.toHourly(month);
+      expect(out.length, 744);
+    });
+
   });
 }
 
-main() async {
+void main() async {
   await initializeTimeZone();
   tests();
 }
