@@ -136,6 +136,7 @@ class HourlySchedule {
   }
 
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
+  /// For example the input timeseries can be monthly.
   HourlySchedule.fromTimeSeries(TimeSeries<Map<Bucket,num>> ts) {
     _f = (Hour hour) {
       if (!ts.domain.containsInterval(hour)) {

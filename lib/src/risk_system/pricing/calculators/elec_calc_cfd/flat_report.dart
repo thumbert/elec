@@ -56,17 +56,17 @@ class FlatReportElecCfd implements Report {
             'term': leaf.interval.toString(),
             'curveId': 'USD',
             'bucket': '',
-            'nominalQuantity': -leg.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'nominalQuantity': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
             'forwardPrice': 1,
-            'value': -leg.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'value': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
           });
           table.add({
             'term': leaf.interval.toString(),
             'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
-            'nominalQuantity': leg.buySell.sign * leaf.quantity * leaf.hours,
+            'nominalQuantity': calculator.buySell.sign * leaf.quantity * leaf.hours,
             'forwardPrice': leaf.floatingPrice,
-            'value': leg.buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice,
+            'value': calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice,
           });
         }
       }
