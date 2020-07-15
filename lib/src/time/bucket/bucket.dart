@@ -24,6 +24,8 @@ abstract class Bucket {
   /// a cache for the number of hours in the interval for this bucket
   Map<Interval, int> _hoursCache;
 
+
+
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
     bucket = bucket.toUpperCase();
@@ -90,6 +92,7 @@ class CustomBucket extends Bucket {
     _hours = hourBeginning.toSet();
   }
 
+  @override
   bool containsHour(Hour hour) =>
       _hours.contains(hour.start.hour) && bucket.containsHour(hour);
 }
