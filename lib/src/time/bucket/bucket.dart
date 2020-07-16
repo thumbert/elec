@@ -8,9 +8,7 @@ import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/iso/iso.dart';
 
 abstract class Bucket {
-  Calendar calendar;
   String get name;
-  Location location;
 
   /// The permissible hour beginnings for this bucket.  Used by hourly bucket
   /// weights.  Should be a sorted list.
@@ -24,7 +22,15 @@ abstract class Bucket {
   /// a cache for the number of hours in the interval for this bucket
   Map<Interval, int> _hoursCache;
 
-
+  static final atc = Bucket7x24();
+  static final b2x8 = Bucket2x8();
+  static final b2x16 = Bucket2x16();
+  static final b2x16H = Bucket2x16H();
+  static final b5x8 = Bucket5x8();
+  static final b5x16 = Bucket5x16();
+  static final b7x8 = Bucket7x8();
+  static final b7x16 = Bucket7x16();
+  static final offpeak = BucketOffpeak();
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
   static Bucket parse(String bucket) {
@@ -53,10 +59,11 @@ abstract class Bucket {
   }
 
   @override
-  int get hashCode => hash2(name, location);
+  int get hashCode => name.hashCode;
 
   /// Count the number of hours in the interval
   int countHours(Interval interval) {
+    _hoursCache ??= <Interval, int>{};
     if (!_hoursCache.containsKey(interval)) {
       if (!isBeginningOfHour(interval.start) ||
           !isBeginningOfHour(interval.end)) {
@@ -71,9 +78,10 @@ abstract class Bucket {
 }
 
 class CustomBucket extends Bucket {
+  @override
   String name;
-  final Location location;
   final Bucket bucket;
+  @override
   final List<int> hourBeginning;
 
   Set<int> _hours;
@@ -82,13 +90,13 @@ class CustomBucket extends Bucket {
   /// filter, that is, retain only a list of hours.
   /// For example, to select the hours 12 to 18
   /// for all peak days of the year.
-  CustomBucket.withHours(this.location, this.bucket, this.hourBeginning) {
+  CustomBucket.withHours(this.bucket, this.hourBeginning) {
     hourBeginning.sort();
     if (hourBeginning.first < 0 || hourBeginning.last > 23) {
       throw ArgumentError('Invalid hourBeginning $hourBeginning');
     }
     name =
-        'Bucket ${bucket.name} Hours:${hourBeginning.join('|')}_${location.name}';
+        'Bucket ${bucket.name} Hours:${hourBeginning.join('|')}';
     _hours = hourBeginning.toSet();
   }
 
@@ -98,20 +106,20 @@ class CustomBucket extends Bucket {
 }
 
 class Bucket7x24 extends Bucket {
+  @override
   final String name = '7x24';
-  Location location;
+  @override
   final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
-  var _hoursCache = <Month, int>{};
+  Bucket7x24();
 
-  Bucket7x24(this.location);
-
+  @override
   bool containsHour(Hour hour) => true;
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket7x24) return false;
-    Bucket7x24 bucket = other;
-    return name == bucket.name && location == bucket.location;
+    return true;
   }
 }
 
@@ -119,36 +127,32 @@ class Bucket7x8 extends Bucket {
   @override
   final String name = '7x8';
   @override
-  Location location;
-  @override
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month, int>{};
-
   /// Overnight hours for all days of the year
-  Bucket7x8(this.location);
+  Bucket7x8();
 
+  @override
   bool containsHour(Hour hour) {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket7x8) return false;
-    Bucket7x8 bucket7x8 = other;
-    return name == bucket7x8.name && location == bucket7x8.location;
+    return true;
   }
 }
 
 class Bucket2x8 extends Bucket {
+  @override
   final String name = '2x8';
-  Location location;
+  @override
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month, int>{};
-
   /// Overnight hours for weekend only (no weekday holidays)
-  Bucket2x8(this.location);
+  Bucket2x8();
 
   @override
   bool containsHour(Hour hour) {
@@ -161,20 +165,18 @@ class Bucket2x8 extends Bucket {
   @override
   bool operator ==(dynamic other) {
     if (other is! Bucket2x8) return false;
-    Bucket2x8 bucket2x8 = other;
-    return name == bucket2x8.name && location == bucket2x8.location;
+    return true;
   }
 }
 
 class Bucket5x8 extends Bucket {
+  @override
   final String name = '5x8';
-  Location location;
+  @override
   final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
 
-  var _hoursCache = <Month, int>{};
-
   /// Overnight hours for weekday only (with weekday holidays)
-  Bucket5x8(this.location);
+  Bucket5x8();
 
   @override
   bool containsHour(Hour hour) {
@@ -187,8 +189,7 @@ class Bucket5x8 extends Bucket {
   @override
   bool operator ==(dynamic other) {
     if (other is! Bucket2x8) return false;
-    Bucket2x8 bucket2x8 = other;
-    return name == bucket2x8.name && location == bucket2x8.location;
+    return true;
   }
 }
 
@@ -196,38 +197,34 @@ class Bucket7x16 extends Bucket {
   @override
   final String name = '7x16';
   @override
-  Location location;
-  @override
   final List<int> hourBeginning =
       List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month, int>{};
-
   /// Peak hours for all days of the week.
-  Bucket7x16(this.location);
+  Bucket7x16();
 
+  @override
   bool containsHour(Hour hour) {
     if (hour.start.hour >= 7 && hour.start.hour < 23) return true;
     return false;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket7x16) return false;
-    Bucket7x16 bucket = other;
-    return name == bucket.name && location == bucket.location;
+    return true;
   }
 }
 
 class Bucket5x16 extends Bucket {
+  @override
   final String name = '5x16';
-  Location location;
-  var calendar = NercCalendar();
+  final calendar = NercCalendar();
+  @override
   final List<int> hourBeginning =
       List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month, int>{};
-
-  Bucket5x16(this.location);
+  Bucket5x16();
 
   @override
   bool containsHour(Hour hour) {
@@ -252,55 +249,55 @@ class Bucket5x16 extends Bucket {
   @override
   bool operator ==(dynamic other) {
     if (other is! Bucket5x16) return false;
-    Bucket5x16 bucket = other;
-    return name == bucket.name && location == bucket.location;
+    return true;
   }
 }
 
 class Bucket2x16H extends Bucket {
+  @override
   final String name = '2x16H';
-  Location location;
-  var calendar = NercCalendar();
+  final calendar = NercCalendar();
+  @override
   final List<int> hourBeginning =
       List.generate(16, (i) => i + 7, growable: false);
 
-  var _hoursCache = <Month, int>{};
+  Bucket2x16H();
 
-  Bucket2x16H(this.location);
-
+  @override
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.currentDate.weekday;
     if (hour.start.hour < 7 || hour.start.hour == 23) return false;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(hour.currentDate))
+      if (calendar.isHoliday(hour.currentDate)) {
         return true;
-      else
+      } else {
         return false;
+      }
     }
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Bucket2x16H) return false;
-    Bucket2x16H bucket = other;
-    return name == bucket.name && location == bucket.location;
+    return true;
   }
 }
 
 class Bucket2x16 extends Bucket {
+  @override
   final String name = '2x16';
-  Location location;
-  Calendar calendar;
+  @override
   final List<int> hourBeginning =
       List.generate(16, (i) => i + 7, growable: false);
-  var _hoursCache = <Month, int>{};
 
   /// Peak hours, weekends only (no weekday holidays included)
-  Bucket2x16(this.location);
+  Bucket2x16();
 
+  @override
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.currentDate.weekday;
     if (hour.start.hour < 7 || hour.start.hour == 23) return false;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
@@ -308,20 +305,26 @@ class Bucket2x16 extends Bucket {
       return false;
     }
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! Bucket2x16) return false;
+    return true;
+  }
 }
 
 class BucketOffpeak extends Bucket {
+  @override
   final String name = 'Offpeak';
-  Location location;
-  Calendar calendar = NercCalendar();
+  final calendar = NercCalendar();
+  @override
   final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
-  var _hoursCache = <Month, int>{};
+  BucketOffpeak();
 
-  BucketOffpeak(Location this.location);
-
+  @override
   bool containsHour(Hour hour) {
-    int dayOfWeek = hour.start.weekday;
+    var dayOfWeek = hour.start.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
@@ -329,5 +332,11 @@ class BucketOffpeak extends Bucket {
       if (calendar.isHoliday(hour.currentDate)) return true;
     }
     return false;
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! BucketOffpeak) return false;
+    return true;
   }
 }

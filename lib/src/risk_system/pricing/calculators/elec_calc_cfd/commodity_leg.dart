@@ -75,14 +75,14 @@ class CommodityLeg {
     if (x['bucket'] == null) {
       throw ArgumentError('Json input is missing the key bucket');
     }
-    bucket = Bucket.parse(x['bucket'])..location = tzLocation;
+    bucket = Bucket.parse(x['bucket']);
 
     /// quantities are specified as a List of {'month': '2020-01', 'value': 40.0}
-    quantity = _parseSeries(x['quantity'], bucket.location);
+    quantity = _parseSeries(x['quantity'], tzLocation);
 
     if (x.containsKey('fixPrice')) {
       /// fix prices are specified as a List of {'month': '2020-01', 'value': 40.0}
-      fixPrice = _parseSeries(x['fixPrice'], bucket.location);
+      fixPrice = _parseSeries(x['fixPrice'], tzLocation);
     } else {
       fixPrice = TimeSeries.fill(quantity.intervals, 0.0);
     }

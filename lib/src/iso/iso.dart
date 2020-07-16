@@ -28,15 +28,15 @@ class IsoNewEngland implements Iso {
   @override
   final String name = 'ISONE';
   static tz.Location location = tz.getLocation('US/Eastern');
-  static final Bucket bucket5x8     = Bucket5x8(location);
-  static final Bucket bucket5x16    = Bucket5x16(location);
-  static final Bucket bucket7x16    = Bucket7x16(location);
-  static final Bucket bucket2x8     = Bucket2x8(location);
-  static final Bucket bucket2x16H   = Bucket2x16H(location);
-  static final Bucket bucket2x16    = Bucket2x16(location);
-  static final Bucket bucket7x8     = Bucket7x8(location);
-  static final Bucket bucket7x24    = Bucket7x24(location);
-  static final Bucket bucketOffpeak = BucketOffpeak(location);
+  static final Bucket bucket5x8     = Bucket.b5x8;
+  static final Bucket bucket5x16    = Bucket.b5x16;
+  static final Bucket bucket7x16    = Bucket.b7x16;
+  static final Bucket bucket2x8     = Bucket.b2x8;
+  static final Bucket bucket2x16H   = Bucket.b2x16H;
+  static final Bucket bucket2x16    = Bucket.b2x16;
+  static final Bucket bucket7x8     = Bucket.b7x8;
+  static final Bucket bucket7x24    = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak    = bucket5x16;
 
   /// Allowed service types in this ISO

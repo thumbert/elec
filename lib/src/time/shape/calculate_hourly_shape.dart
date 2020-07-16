@@ -15,14 +15,11 @@ import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 ///
 List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
     {List<Bucket> buckets}) {
-  if (buckets == null) {
-    var location = getLocation('US/Eastern');
-    buckets = [
-      Bucket5x16(location),
-      Bucket2x16H(location),
-      Bucket7x8(location),
+  buckets ??= [
+      Bucket.b5x16,
+      Bucket.b2x16H,
+      Bucket.b7x8,
     ];
-  }
 
   // calculate the average value by month [1..12] and bucket
   var bucketPrice = <Tuple2<int, Bucket>, num>{};
@@ -51,9 +48,9 @@ List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
 
   var data = List.generate(12, (i) => <Bucket, HourlyBucketWeights>{});
   var g1 = groupBy(weights.entries, (e) => e.key.item1 as int);
-  for (int month in g1.keys) {
+  for (var month in g1.keys) {
     var g2 = groupBy(g1[month], (e) => e.key.item2 as Bucket);
-    for (Bucket bucket in g2.keys) {
+    for (var bucket in g2.keys) {
       var weights = g2[bucket].map((e) => e.value);
       data[month - 1][bucket] = HourlyBucketWeights(bucket, weights);
     }
