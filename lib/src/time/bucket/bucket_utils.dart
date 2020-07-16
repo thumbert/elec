@@ -5,6 +5,15 @@ import 'package:date/date.dart';
 import 'bucket.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
 
+/// Assign this [hour] to a bucket.
+Bucket assignBucket(Hour hour, List<Bucket> buckets) {
+  for (var bucket in buckets) {
+    if (bucket.containsHour(hour)) return bucket;
+  }
+  throw ArgumentError('Bucket list is not complete for $hour');
+}
+
+
 /// Calculate if this day is a Peak day
 bool isPeakDay(Date x, Calendar calendar) {
   var aux = x.weekday == 6 || x.weekday == 7 || calendar.isHoliday(x);

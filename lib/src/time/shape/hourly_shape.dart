@@ -1,80 +1,105 @@
 library time.bucket.hourly_shape;
 
-import 'package:timezone/timezone.dart';
-import 'package:collection/collection.dart';
+import 'package:elec/src/time/bucket/bucket_utils.dart';
+import 'package:intl/intl.dart';
+import 'package:table/table.dart';
 import 'package:date/date.dart';
 import 'package:dama/dama.dart';
-import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
+import 'package:timezone/timezone.dart';
 
 /// Store hourly shapes by month for a set of complete buckets,
 /// e.g. 5x16, 2x16H, 7x8.
-/// NEEDS REVIEW 11/25/2019
 class HourlyShape {
-
   /// the covering buckets
   List<Bucket> buckets;
 
-  /// The outer list is for the 12 months, the inner list is for the buckets
-  List<Map<Bucket, HourlyBucketWeights>> _data;
+  /// Monthly timeseries.  The values for the bucket keys are the shaping
+  /// factors for the hours in that bucket (sorted by hour beginning).
+  TimeSeries<Map<Bucket, List<num>>> data;
 
-  /// Construct the hourly shape from a 12 element list containing the
-  /// hourly weights for each bucket.
-  HourlyShape.byMonth(List<Map<Bucket, HourlyBucketWeights>> weights) {
-    if (weights.length != 12) {
-      throw ArgumentError('Input weights has ${weights.length} instead of 12.');
+  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
+
+  HourlyShape();
+
+  /// Input [ts] is an hourly timeseries.
+  HourlyShape.fromTimeSeries(TimeSeries<num> ts, this.buckets) {
+    // calculate the average by month/bucket/hour
+    var nest = Nest()
+      ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
+      ..key((IntervalTuple e) => assignBucket(e.interval, buckets))
+      ..key((IntervalTuple e) => e.interval.start.hour)
+      ..rollup((List xs) => mean(xs.map((e) => e.value)));
+    var aux = nest.map(ts);
+    var avg = flattenMap(aux, ['month', 'bucket', 'hourBeginning', 'value']);
+
+    // calculate the shaping factors
+    var nest2 = Nest()
+      ..key((e) => e['month'])
+      ..key((e) => e['bucket'])
+      ..rollup((List xs) {
+        var avg = mean(xs.map((e) => e['value'] as num));
+        return xs.map((e) => e['value'] / avg).toList();
+      });
+    var bux = nest2.map(avg);
+
+    data = TimeSeries<Map<Bucket, List<num>>>();
+    for (var month in bux.keys) {
+      var kv = {
+        for (var entry in (bux[month] as Map).entries)
+          entry.key as Bucket: (entry.value as List).cast<num>()
+      };
+      data.add(IntervalTuple(month, kv));
     }
-    buckets = weights.first.keys.toList(growable: false);
-    _data = weights;
   }
 
-
-  /// Construct an hourly shape from a List, each element is a Map
-  /// with keys 'bucket' and 'weights'.  Weights is a
-  /// 12 element List of List<num> with the weights for all months.
-  ///
-  HourlyShape.fromJson(List<Map<String, dynamic>> xs) {
-    _data = List.filled(12, <Bucket, HourlyBucketWeights>{});
-    for (var x in xs) {
-      var bucket = Bucket.parse(x['bucket']);
-      var weights = (x['weights'] as List).cast<List<num>>();
-      for (var m = 0; m < weights.length; m++) {
-        _data[m][bucket] = HourlyBucketWeights(bucket, weights[m]);
+  /// The opposite of [toJson] method.
+  HourlyShape.fromJson(Map<String,dynamic> x, Location location) {
+    if (x.keys.toSet().difference({'terms', 'buckets'}).isNotEmpty) {
+      throw ArgumentError('Wrong input');
+    }
+    var _buckets = (x['buckets'] as Map).keys;
+    var months = (x['terms'] as List).cast<String>();
+    var aux = x['buckets'] as Map;
+    buckets = _buckets.map((e) => Bucket.parse(e)).toList();
+    data = TimeSeries<Map<Bucket, List<num>>>();
+    for (var i=0; i<months.length; i++) {
+      var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+      var value = <Bucket,List<num>>{};
+      for (var _bucket in _buckets) {
+        value[Bucket.parse(_bucket)] = aux[_bucket][i];
       }
+      data.add(IntervalTuple(month, value));
     }
   }
 
-  /// Return the hourly weight of this bucket, this hourBeginning for the month.
-//  num value(int month, Bucket bucket, int hourBeginning) {
-//    var hourlyBucketWeight = _data[month - 1][bucket];
-//    return hourlyBucketWeight.value(Hour.beginning(start)hourBeginning);
-//  }
 
-  Map<Bucket, HourlyBucketWeights> valuesForMonth(int month) {
-    return _data[month - 1];
-  }
-
-  /// Format the data for serialization to Mongo.  The output list has 3
-  /// elements, each for one bucket.
-  List<Map<String, dynamic>> toJson() {
-    var buckets = _data.first.keys.toList();
-    var nBuckets = buckets.length; // 3
-
-    var out = List.generate(nBuckets, (i) => <String, dynamic>{});
-    for (var b = 0; b < nBuckets; b++) {
-      out[b]['bucket'] = buckets[b].name;
-      out[b]['weights'] = <List<num>>[];
-    }
-
-    for (var m = 0; m < 12; m++) {
-      for (var b = 0; b < nBuckets; b++) {
-        out[b]['weights'].addBucket(_data[m][buckets[b]].weights.toList());
+  /// Format the data for serialization to Mongo.
+  ///{
+  ///  "terms": [
+  ///    "2020-01",
+  ///    "2020-02",
+  ///    "2020-03"],
+  ///  "buckets": {
+  ///     "7x8": [[...], [...], [...]],
+  ///     "5x16": [[...], [...], [...]],
+  ///     "2x16H": [[...], [...], [...]],
+  ///  }
+  Map<String, dynamic> toJson() {
+    var out = <String, dynamic>{
+      'terms': <String>[],
+      'buckets': <String, dynamic>{},
+    };
+    for (var x in data) {
+      (out['terms'] as List).add((x.interval as Month).toIso8601String());
+      for (var bucket in x.value.keys) {
+        if (!(out['buckets'] as Map).containsKey(bucket.toString())) {
+          out['buckets'][bucket.toString()] = [];
+        }
+        (out['buckets'][bucket.toString()] as List).add(x.value[bucket]);
       }
     }
     return out;
   }
 }
-
-

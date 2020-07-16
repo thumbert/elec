@@ -1,45 +1,63 @@
 library test.time.hourly_shape_test;
 
-
+import 'dart:convert';
 
 import 'package:elec/elec.dart';
+import 'package:elec/src/common_enums.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
+import 'package:elec_server/client/isoexpress/dalmp.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/standalone.dart';
-import 'package:dama/dama.dart';
-import 'package:elec/risk_system.dart';
-import 'package:elec_server/client/isoexpress/system_demand.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
-import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
-import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
-
-
-
-Future<HourlyShape> _getHourlyShape(String rootUrl) async {
-  var client = Client();
+void tests(String rootUrl) async {
+  var client = DaLmp(Client(), rootUrl: rootUrl);
+  var buckets = [Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8];
   var location = getLocation('America/New_York');
-  var start = Date(2014, 1, 1, location: location);
-  var end = Date(2018, 12, 31, location: location);
+  TimeSeries<num> ts;
 
-//  var api = SystemDemand(client, rootUrl: rootUrl);
-//  var x = await api.getSystemDemand(Market.rt, start, end);
-
-  var api = EversourceLoad(Client());
-  var aux = await api.getCtLoad(start, end);
-  var x = TimeSeries.fromIterable(aux.map((e) => IntervalTuple(e.interval,
-      e.value['SS Total'] + e.value['Competitive Supply'] + e.value['LRS'])));
-
-//  var hs = HourlyShape.fromTimeSeries(x);
-//  hs.toJson().forEach(print);
-
-//  var hsm = hourlyShapeByYearMonth(x, Bucket7x24(location));
-//  print(hsm);
+  group('HourlyShape tests:', () {
+    setUp(() async {
+      ts = await client.getHourlyLmp(
+          4000, LmpComponent.lmp, Date(2019, 1, 1), Date(2019, 12, 31));
+    });
+    test('from timeseries', () {
+      var hs = HourlyShape.fromTimeSeries(ts, buckets);
+      expect(hs.data.length, 12);
+      var s0 = hs.data.first.value;
+      expect(s0.keys.toSet(), buckets.toSet());
+      expect(s0[Bucket.b5x16].length, 16);
+    });
+    test('to Json/from Json', () {
+      var hs = HourlyShape.fromTimeSeries(ts, buckets);
+      var out = hs.toJson();
+      expect(out.keys.toSet(), {'terms', 'buckets'});
+      var hs1 = HourlyShape.fromJson(out, location);
+      expect(hs1.data.length, 12);
+      expect(hs1.data.first.value.keys.toSet(),
+          {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8});
+    });
+    test('extend hourly shape', () {
+      var hs = HourlyShape.fromTimeSeries(ts, buckets);
+      var hs1 = HourlyShape()
+        ..buckets = buckets
+        ..data = TimeSeries.from(
+            Term.parse('Jan20-Dec21', location)
+                .interval
+                .splitLeft((dt) => Month.fromTZDateTime(dt)),
+            [
+              ...hs.data.values,
+              ...hs.data.values,
+            ]);
+      expect(hs1.data.domain, Term.parse('Jan20-Dec21', location).interval);
+//      var encoder = JsonEncoder.withIndent('  ');
+//      print(encoder.convert(hs1.toJson()));
+    });
+  });
 }
-
 
 //tests(String rootUrl) {
 //  var location = getLocation('America/New_York');
@@ -82,11 +100,8 @@ Future<HourlyShape> _getHourlyShape(String rootUrl) async {
 //  });
 //}
 
-
 void main() async {
   await initializeTimeZone();
   var rootUrl = 'http://localhost:8080/'; // testing
-  //tests(rootUrl);
-
-  await _getHourlyShape(rootUrl);
+  await tests(rootUrl);
 }

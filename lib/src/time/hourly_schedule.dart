@@ -3,6 +3,7 @@ library time.hourly_schedule;
 import 'package:date/date.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
+import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:timeseries/timeseries.dart';
 
 /// Construct an hourly time schedule.  This is a convenient way to store the
@@ -153,6 +154,27 @@ class HourlySchedule {
     };
   }
 
+  /// Construct an hourly schedule from an hourly shape.
+  HourlySchedule.fromHourlyShape(HourlyShape hs) {
+    // go from hourBeginning value to index in bucket.hourBeginning array
+    var idx = { for (var bucket in hs.data.first.value.keys) bucket :
+      Map.fromIterables(bucket.hourBeginning, List.generate(bucket.hourBeginning.length, (i) => i))};
+    _f = (Hour hour) {
+      var ts = hs.data;
+      if (!ts.domain.containsInterval(hour)) {
+        return null;
+      } else {
+        var obs = ts.observationContains(hour);
+        for (var bucket in obs.value.keys) {
+          if (bucket.containsHour(hour)) {
+            var ind = idx[bucket][hour.start.hour];
+            return obs.value[bucket][ind];
+          }
+        }
+        throw ArgumentError('Can\'t find the hour $hour in buckets ${obs.value.keys}');
+      }
+    };
+  }
 
   /// Return the value of the schedule associated with this hour.
   num operator [](Hour hour) => _f(hour);

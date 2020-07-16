@@ -54,7 +54,6 @@ class HourlyFilter {
   Iterable<Hour> hours() {
     return interval
         .splitLeft((dt) => Hour.beginning(dt))
-        .cast<Hour>()
         .where((hour) => _f(hour));
   }
 }
