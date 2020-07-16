@@ -11,7 +11,7 @@ import 'package:timezone/timezone.dart';
 
 void tests() {
   group('Monthly curve tests:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('monthly curve indexing', (){
       var months = parseTerm('Q1,2013', tzLocation: location)
         .splitLeft((dt) => Month.fromTZDateTime(dt))

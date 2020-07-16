@@ -10,7 +10,7 @@ import 'package:timezone/standalone.dart';
 
 void tests() {
   group('Shape cost tests:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('one day', () {
       var interval = parseTerm('1Jan18', tzLocation: location);
       var buckets = [

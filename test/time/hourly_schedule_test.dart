@@ -10,7 +10,7 @@ import 'package:timezone/standalone.dart';
 
 void tests() {
   group('Hourly schedule tests:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     var peak = IsoNewEngland.bucketPeak;
     var offpeak = IsoNewEngland.bucketOffpeak;
     var b2x16H = IsoNewEngland.bucket2x16H;

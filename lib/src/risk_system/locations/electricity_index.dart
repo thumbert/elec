@@ -16,6 +16,6 @@ class ElectricityIndex extends Location {
 
   ElectricityIndex.IsoNewEngland(this.ptid, this.market, this.lmpComponent) {
     iso = IsoNewEngland();
-    tzLocation = tz.getLocation('US/Eastern');
+    tzLocation = tz.getLocation('America/New_York');
   }
 }

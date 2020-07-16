@@ -15,7 +15,7 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// number of months for this auction
   int noMonths;
   int round;
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
   String name;
   FtrAuctionType auctionType;
 

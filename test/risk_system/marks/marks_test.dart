@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart';
 
 void tests() {
   group('Electricity marks', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('the 3 standard buckets', () {
       var month = Month(2019, 1, location: location);
       var marks = [

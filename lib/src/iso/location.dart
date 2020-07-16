@@ -16,7 +16,7 @@ abstract class Location {
 //  int ptid;
 //  String name;
 //
-//  final tz.Location tzLocation = tz.getLocation('US/Eastern');
+//  final tz.Location tzLocation = tz.getLocation('America/New_York');
 //  Iso iso = new IsoNewEngland();
 //
 //  NepoolLocation.fromPtid(this.ptid) {}

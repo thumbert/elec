@@ -8,7 +8,7 @@ import 'package:timezone/standalone.dart';
 
 void tests() {
   group('Hourly filter tests:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('with bucket', () {
       var interval = parseTerm('Q1,2019', tzLocation: location);
       var b7x8 = IsoNewEngland.bucket7x8;

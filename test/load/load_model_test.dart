@@ -8,7 +8,7 @@ import 'package:elec/src/load/load_model.dart';
 
 
 loadModelTests() {
-  Location location = getLocation('US/Eastern');
+  Location location = getLocation('America/New_York');
   group('Load model simple tests', () {
     test('similar days', (){
       Interval interval = new Interval(

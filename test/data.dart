@@ -2,7 +2,7 @@
 import 'package:timezone/timezone.dart';
 
 List<Map> hourlyHubPrices() {
-  Location _eastern = getLocation('US/Eastern');
+  Location _eastern = getLocation('America/New_York');
 
   var aux = {
     "hourBeginning": [

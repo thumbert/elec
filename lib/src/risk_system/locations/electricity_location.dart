@@ -16,6 +16,6 @@ class ElectricityLocation extends Location {
 
   ElectricityLocation.IsoNewEngland(this.ptid, this.market) {
     iso = IsoNewEngland();
-    tzLocation = tz.getLocation('US/Eastern');
+    tzLocation = tz.getLocation('America/New_York');
   }
 }

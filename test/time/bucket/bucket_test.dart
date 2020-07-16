@@ -39,7 +39,7 @@ void aggregateByBucketMonth() {
 }
 
 List<int> countByMonth(int year, Bucket bucket) {
-  var tzLocation = getLocation('US/Eastern');;
+  var tzLocation = getLocation('America/New_York');;
   var months =
       Interval(TZDateTime(tzLocation, year), TZDateTime(tzLocation, year + 1))
           .splitLeft((dt) => Month.fromTZDateTime(dt));
@@ -50,7 +50,7 @@ List<int> countByMonth(int year, Bucket bucket) {
 }
 
 void testBucket() {
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   group('Test buckets', () {
     test('equality for buckets', () {
       expect(Bucket2x16H(), Bucket2x16H());
@@ -161,7 +161,7 @@ void testBucket() {
   });
 
   group('Split by bucket:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('count hours', () {
       var month = Month(2018, 1, location: location);
       var hours = month.splitLeft((dt) => Hour.beginning(dt));

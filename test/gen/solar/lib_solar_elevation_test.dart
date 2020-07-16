@@ -9,7 +9,7 @@ import 'package:timezone/standalone.dart';
 /// https://www.esrl.noaa.gov/gmd/grad/solcalc/
 void tests() {
   group('Solar elevation tests: ', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('elevation angle noon', () {
       var dt = TZDateTime(location, 2010, 6, 21, 12);
       expect(solarElevationAngle(40, -105, dt).toStringAsFixed(2), '48.48');

@@ -5,7 +5,7 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 
 tests() {
-  var tzLocation = getLocation('US/Eastern');
+  var tzLocation = getLocation('America/New_York');
   group('Risk system: Energy futures', () {
     test('Jan19 Nepool MH DA futures', () {
       var tradeDate = Date(2018, 12, 10);

@@ -8,7 +8,7 @@ import 'package:timezone/standalone.dart';
 
 tests() async {
   group('Trade aggregator:', () {
-    var location = getLocation('US/Eastern');
+    var location = getLocation('America/New_York');
     test('Check splitting of Flat bucket trade into Peak/Offpeak trades', () {
       var trades = <Map<String,dynamic>>[
         {'buy/sell': 'buy', 'term': 'Jan20-Dec20', 'bucket': 'flat', 'mw': 25, 'price': 39.60},

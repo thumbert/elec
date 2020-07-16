@@ -10,7 +10,7 @@
 //
 //
 //tests() {
-//  var location = getLocation('US/Eastern');
+//  var location = getLocation('America/New_York');
 //  var b5x16 = IsoNewEngland.bucket5x16;
 //  var b2x16H = IsoNewEngland.bucket2x16H;
 //  var bOffpeak = IsoNewEngland.bucketOffpeak;

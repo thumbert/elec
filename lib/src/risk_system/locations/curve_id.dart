@@ -18,7 +18,7 @@
 //  CurveId(String name) {
 //    _name = name.toLowerCase();
 //    _components = <String,dynamic>{};
-//    tzLocation = tz.getLocation('US/Eastern');
+//    tzLocation = tz.getLocation('America/New_York');
 //    /// TODO: Fixme once you have a database!
 //    if (name == 'isone_energy_4000_da_lmp') {
 //      _components = {

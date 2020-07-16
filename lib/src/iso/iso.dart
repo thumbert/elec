@@ -27,7 +27,7 @@ abstract class Iso {
 class IsoNewEngland implements Iso {
   @override
   final String name = 'ISONE';
-  static tz.Location location = tz.getLocation('US/Eastern');
+  static tz.Location location = tz.getLocation('America/New_York');
   static final Bucket bucket5x8     = Bucket.b5x8;
   static final Bucket bucket5x16    = Bucket.b5x16;
   static final Bucket bucket7x16    = Bucket.b7x16;
@@ -53,7 +53,7 @@ class IsoNewEngland implements Iso {
   };
 
   @override
-  tz.Location preferredTimeZoneLocation = tz.getLocation('US/Eastern');
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
 
 
 

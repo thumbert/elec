@@ -24,4 +24,4 @@ part 'package:elec/src/risk_system/transactions/energy_futures.dart';
 part 'src/risk_system/units/mwh.dart';
 
 
-final _eastern = getLocation('US/Eastern');
+final _eastern = getLocation('America/New_York');

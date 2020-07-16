@@ -17,27 +17,11 @@ import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 import 'package:elec_server/client/utilities/eversource/eversource_load.dart';
 
 
-//TimeSeries<num> toHourlyFromMonthlyBucketMark(Month month, List<BucketPrice> marks, List<HourlyWeights> weights){
-//  var hours = month.splitLeft((dt) => Hour.containing(dt)).cast<Hour>();
-//  var price = Map.fromIterable(marks, key: (e) => e.bucket, value: (e) => e.value);
-//  var ts = TimeSeries<num>();
-//  for (var hour in hours) {
-//    for (var weight in weights) {
-//      var bucket = weight.bucket;
-//      if (bucket.containsHour(hour)) {
-//        var hourEnding = hour.start.hour + 1;
-//        ts.add(IntervalTuple(hour, price[bucket] * weight.value(hourEnding)));
-//        continue;
-//      }
-//    }
-//  }
-//  return ts;
-//}
 
 
 Future<HourlyShape> _getHourlyShape(String rootUrl) async {
   var client = Client();
-  var location = getLocation('US/Eastern');
+  var location = getLocation('America/New_York');
   var start = Date(2014, 1, 1, location: location);
   var end = Date(2018, 12, 31, location: location);
 
@@ -58,7 +42,7 @@ Future<HourlyShape> _getHourlyShape(String rootUrl) async {
 
 
 //tests(String rootUrl) {
-//  var location = getLocation('US/Eastern');
+//  var location = getLocation('America/New_York');
 //  group('Electricity marks:', () {
 //    test('the 3 standard buckets', () {
 //      var b5x16 = Bucket5x16(location);
@@ -99,9 +83,9 @@ Future<HourlyShape> _getHourlyShape(String rootUrl) async {
 //}
 
 
-main() async {
+void main() async {
   await initializeTimeZone();
-  String rootUrl = "http://localhost:8080/"; // testing
+  var rootUrl = 'http://localhost:8080/'; // testing
   //tests(rootUrl);
 
   await _getHourlyShape(rootUrl);

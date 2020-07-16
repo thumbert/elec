@@ -8,7 +8,7 @@ import 'package:elec/src/physical/price_quantity_pair.dart';
 
 
 virtualTest() {
-  Date day = new Date(2019, 5, 20, location: getLocation('US/Eastern'));
+  Date day = new Date(2019, 5, 20, location: getLocation('America/New_York'));
   var hours = day.splitLeft((dt) => Hour.beginning(dt))
       .where((hour) => hour.start.hour >= 7)
       .where((hour) => hour.start.hour <= 21)
