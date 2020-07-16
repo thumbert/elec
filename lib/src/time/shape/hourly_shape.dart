@@ -56,8 +56,8 @@ class HourlyShape {
 
   /// The opposite of [toJson] method.
   HourlyShape.fromJson(Map<String,dynamic> x, Location location) {
-    if (x.keys.toSet().difference({'terms', 'buckets'}).isNotEmpty) {
-      throw ArgumentError('Wrong input');
+    if (!x.keys.toSet().containsAll({'terms', 'buckets'})) {
+      throw ArgumentError('Missing one of keys: terms, buckets.');
     }
     var _buckets = (x['buckets'] as Map).keys;
     var months = (x['terms'] as List).cast<String>();
