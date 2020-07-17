@@ -186,7 +186,7 @@ class HourlySchedule {
   /// given [interval].  The timeseries will have values only where the
   /// HourlySchedule is defined.
   TimeSeries<num> toHourly(Interval interval) {
-    var hours = interval.splitLeft((dt) => Hour.beginning(dt)).cast<Hour>();
+    var hours = interval.splitLeft((dt) => Hour.beginning(dt));
     var out = TimeSeries<num>();
     for (var hour in hours) {
       var value = _f(hour);

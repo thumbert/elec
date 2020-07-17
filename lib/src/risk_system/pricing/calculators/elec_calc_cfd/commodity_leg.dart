@@ -101,8 +101,8 @@ class CommodityLeg {
     }
 
     /// get the floating price from the cache
-    floatingPrice = await calculator.getForwardMarks(
-        calculator.asOfDate, bucket, curveId, timePeriod);
+    floatingPrice = await calculator.getFloatingPrice(bucket, curveId,
+        timePeriod);
   }
 
 

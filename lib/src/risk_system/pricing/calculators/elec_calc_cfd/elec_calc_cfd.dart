@@ -37,6 +37,9 @@ class ElecCalculatorCfd extends _BaseCfd {
     forwardMarksCache =
         Cache<Tuple2<Date, String>, TimeSeries<Map<Bucket, num>>>.lru(
             loader: _fwdMarksLoader);
+    hourlyShapeCache = Cache<Tuple2<Date, String>, HourlySchedule>.lru(
+        loader: _hourlyShapeLoader);
+
   }
 
   /// The recommended way to initialize from a template.  See tests.
@@ -82,11 +85,11 @@ class ElecCalculatorCfd extends _BaseCfd {
   }
 
   /// After you make a change, you need to rebuild it before repricing it.
-  /// It is a brittle design, because people will forget to call it.
+  /// It is a brittle design, because people may forget to call it.
   void build() async {
     for (var leg in legs) {
       leg.floatingPrice =
-          await getForwardMarks(asOfDate, leg.bucket, leg.curveId, leg.timePeriod);
+          await getFloatingPrice(leg.bucket, leg.curveId, leg.timePeriod);
       leg.makeLeaves();
     }
   }

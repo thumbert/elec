@@ -68,7 +68,7 @@ class HourlyShape {
       var month = Month.parse(months[i], fmt: _isoFmt, location: location);
       var value = <Bucket,List<num>>{};
       for (var _bucket in _buckets) {
-        value[Bucket.parse(_bucket)] = aux[_bucket][i];
+        value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
       }
       data.add(IntervalTuple(month, value));
     }

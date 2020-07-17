@@ -19,27 +19,31 @@ class FlatReportElecCfd implements Report {
 
   @override
   String toString() {
-    _json ?? toJson();
-    var out = StringBuffer();
-    out.writeln('Flat Report');
-    out.writeln('As of date: ${_json['asOfDate']}');
-    out.writeln('Printed: ${DateTime.now().toString()}');
-    out.writeln('');
+    _json ??= toJson();
     var tbl = _json['table'] as List;
     for (var row in tbl) {
       row['forwardPrice'] = (row['forwardPrice'] as num).toStringAsFixed(2);
       row['nominalQuantity'] = _fmt0.format(row['nominalQuantity'] as num);
       row['value'] = _fmtCurrency2.format(row['value'] as num);
     }
-    
+
+    // rearrange the leaves, start with the USD leaves first
     var cashRows = tbl.where((e) => e['curveId'] == 'USD').toList();
     var _tbl = Table.from([
       ...cashRows, 
       ...tbl.where((e) => e['curveId'] != 'USD'), 
     ], options: {'columnSeparation': '  '});
+
+    // add spacing between fixed and floating commodities
     var aux = _tbl.toString().split('\n');
-    aux.insert(cashRows.length + 1, ' ' * aux.first.length);
-    aux.insert(cashRows.length + 2, aux.first);
+    aux.insert(cashRows.length + 1, ''); // an empty row
+    aux.insert(cashRows.length + 2, aux.first); // colnames for commmodity leaves
+
+    var out = StringBuffer();
+    out.writeln('Flat Report');
+    out.writeln('As of date: ${_json['asOfDate']}');
+    out.writeln('Printed: ${DateTime.now().toString()}');
+    out.writeln('');
     out.writeAll(aux, '\n');
     out.writeln('\n\nValue: ${_fmtCurrency2.format(_json['totalValue'])}');
     return out.toString();
