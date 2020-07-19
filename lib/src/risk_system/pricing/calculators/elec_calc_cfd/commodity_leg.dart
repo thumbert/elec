@@ -24,22 +24,16 @@ class CommodityLeg {
   List<Leaf> leaves;
 
   /// Fair value for this commodity leg
-  num _price;
-
-
   /// Get the quantity weighted floating price for this leg.
   /// Needs [leaves] to be populated.
-  num get price {
-    if (_price == null) {
-      num hpq = 0; // hours * quantity * floatingPrice
-      num hq = 0; // hours * quantity
-      for (var leaf in leaves) {
-        hpq += leaf.hours * leaf.quantity * leaf.floatingPrice;
-        hq += leaf.hours * leaf.quantity;
-      }
-      _price = hpq / hq;
+  num price() {
+    num hpq = 0; // hours * quantity * floatingPrice
+    num hq = 0; // hours * quantity
+    for (var leaf in leaves) {
+      hpq += leaf.hours * leaf.quantity * leaf.floatingPrice;
+      hq += leaf.hours * leaf.quantity;
     }
-    return _price;
+    return hpq / hq;
   }
 
   /// Make the leaves for this leg.  Needs [floatingPrice].
@@ -106,10 +100,9 @@ class CommodityLeg {
     }
 
     /// get the floating price from the cache
-    floatingPrice = await calculator.getFloatingPrice(bucket, curveId,
-        timePeriod);
+    floatingPrice =
+        await calculator.getFloatingPrice(bucket, curveId, timePeriod);
   }
-
 
   /// serialize it
   Map<String, dynamic> toJson() {
@@ -139,5 +132,4 @@ class CommodityLeg {
     }
     return 1.0;
   }
-
 }

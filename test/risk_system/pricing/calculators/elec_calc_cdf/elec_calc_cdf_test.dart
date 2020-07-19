@@ -102,7 +102,7 @@ void tests(String rootUrl) async {
     test('price it', () async {
       expect(c1.dollarPrice().round(), 14800);
       var leg = c1.legs.first;
-      expect(leg.price.toStringAsFixed(2), '50.79');
+      expect(leg.price().toStringAsFixed(2), '50.79');
       expect(leg.leaves.length, 3); // 3 months
     });
     test('test curveIdCache', () async {
@@ -143,7 +143,7 @@ void tests(String rootUrl) async {
       await calc.build();
       expect(calc.dollarPrice().round(), -14800);
       var leg = calc.legs.first;
-      expect(leg.price.toStringAsFixed(2), '50.79');
+      expect(leg.price().toStringAsFixed(2), '50.79');
     });
     test('change calculator term and reprice', () async {
       var calc = c1..term = Term.parse('Jan21-Feb21', location);
@@ -160,7 +160,7 @@ void tests(String rootUrl) async {
       expect(calc.dollarPrice().round(), 208000);
       var leg = calc.legs.first;
       expect(leg.leaves.length, 2); // two months only
-      expect(leg.price.toStringAsFixed(2), '57.00');
+      expect(leg.price().toStringAsFixed(2), '57.00');
     });
     test('change calculator asOfDate and reprice', () async {
       var calc = c1
@@ -172,7 +172,7 @@ void tests(String rootUrl) async {
       expect(calc.dollarPrice().round(), 270400);
       var leg = calc.legs.first;
       expect(leg.leaves.length, 2); // two months only
-      expect(leg.price.toStringAsFixed(2), '58.95');
+      expect(leg.price().toStringAsFixed(2), '58.95');
     });
     test('change calculator bucket and reprice', () async {
       var calc = c1..legs.first.bucket = IsoNewEngland.bucket7x8;
@@ -188,20 +188,18 @@ void tests(String rootUrl) async {
               .toList(),
           ['48.072', '46.284', '33.343']);
       var leg = calc.legs.first;
-      expect(leg.price.toStringAsFixed(3), '42.455');
+      expect(leg.price().toStringAsFixed(3), '42.455');
     });
     test('price non-standard bucket 7x16', () async {
       var calc = c1
         ..term = Term.parse('Jan21', location)
         ..legs.first.bucket = Bucket.b7x16;
-      var ts = await calc.getFloatingPrice(Bucket.b7x16, calc.legs.first.curveId,
-          TimePeriod.hour);
       await calc.build();
       expect(calc.legs.first.floatingPrice.intervals, [
         Month(2021, 1, location: location),
       ]);
       var leg = calc.legs.first;
-      expect(leg.price.toStringAsFixed(3), '56.286');
+      expect(leg.price().toStringAsFixed(3), '56.286');
     });
     test('parse calculator without fixPrice', () async {
       var aux = <String, dynamic>{
@@ -289,7 +287,7 @@ total                         50,400        ''';
       expect(leg2.bucket, IsoNewEngland.bucketOffpeak);
     });
     test('price it', () {
-      expect(c2.legs[1].price.toStringAsFixed(2), '44.20');
+      expect(c2.legs[1].price().toStringAsFixed(2), '44.20');
       expect(c2.dollarPrice().round(), 5103466);
     });
     test('flat report', () {
