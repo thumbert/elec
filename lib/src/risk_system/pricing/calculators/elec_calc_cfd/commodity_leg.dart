@@ -2,10 +2,12 @@ part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 class CommodityLeg {
   String curveId;
+  String iso;
+  String serviceType;
+  String curveName;
   String cashOrPhys;
   Bucket bucket;
   Location tzLocation;
-  Map<String, dynamic> curveDetails;
 
   TimePeriod timePeriod;
 
@@ -70,6 +72,9 @@ class CommodityLeg {
     }
     curveId = (x['curveId'] as String).toLowerCase();
     var curveDetails = await calculator.curveIdCache.get(curveId);
+    iso = curveDetails['iso'];
+    serviceType = curveDetails['serviceType'];
+    curveName = curveDetails['curveName'];
     tzLocation = getLocation(curveDetails['tzLocation']);
     cashOrPhys = (x['cash/physical'] as String).toLowerCase();
     if (x['bucket'] == null) {

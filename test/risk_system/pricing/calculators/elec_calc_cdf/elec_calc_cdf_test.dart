@@ -1,6 +1,5 @@
 library test.risk_system.pricing.elec_calc_cdf_test;
 
-import 'package:dama/basic/count.dart';
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
