@@ -85,6 +85,9 @@ void tests(String rootUrl) async {
       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       expect(c1.legs.length, 1);
       var leg = c1.legs.first;
+      expect(leg.curveId, 'isone_energy_4000_da_lmp');
+      expect(leg.curveName, 'hub_da_lmp');
+      expect(leg.region, 'isone');
       expect(leg.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
       expect(leg.fixPrice, TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
       expect(leg.floatingPrice.values.map((e) => e.toStringAsFixed(2)),
