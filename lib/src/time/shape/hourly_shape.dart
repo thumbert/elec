@@ -3,8 +3,9 @@ library time.bucket.hourly_shape;
 import 'package:elec/src/time/bucket/bucket_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
+import 'package:collection/collection.dart';
 import 'package:date/date.dart';
-import 'package:dama/dama.dart';
+import 'package:dama/dama.dart' as dama;
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/elec.dart';
 import 'package:timezone/timezone.dart';
@@ -16,7 +17,10 @@ class HourlyShape {
   List<Bucket> buckets;
 
   /// Monthly timeseries.  The values for the bucket keys are the shaping
-  /// factors for the hours in that bucket (sorted by hour beginning).
+  /// factors for the hours in that bucket (sorted by hour beginning).  Note
+  /// that for most buckets the sum of the List elements will add up to the
+  /// numbers of hours in the bucket.  It is not the case for 7x8, in Mar and
+  /// Nov because of DST.
   TimeSeries<Map<Bucket, List<num>>> data;
 
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
@@ -30,16 +34,28 @@ class HourlyShape {
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
       ..key((IntervalTuple e) => assignBucket(e.interval, buckets))
       ..key((IntervalTuple e) => e.interval.start.hour)
-      ..rollup((List xs) => mean(xs.map((e) => e.value)));
+      ..rollup((List xs) => dama.mean(xs.map((e) => e.value)));
     var aux = nest.map(ts);
     var avg = flattenMap(aux, ['month', 'bucket', 'hourBeginning', 'value']);
 
     // calculate the shaping factors
+    // Need to pay attention on the DST transitions.  For example: in Mar there
+    // will be 31 hours beginning 0, 1; but only 30 yours beginning 2.
     var nest2 = Nest()
       ..key((e) => e['month'])
       ..key((e) => e['bucket'])
       ..rollup((List xs) {
-        var avg = mean(xs.map((e) => e['value'] as num));
+        // In case the input [ts] has missing data, count the number of hours
+        // in this month by hourBeginning to do the correct averaging.
+        // Need to sort the count by hourBeginning.
+        var hours = Term.fromInterval(xs.first['month']).hours()
+            .where((hour) => (xs.first['bucket'] as Bucket).containsHour(hour));
+        var aux = groupBy(hours, (Hour e) => e.start.hour);
+        var count = [ for(var k in aux.keys) [k, aux[k].length]];
+        count.sort((a,b) => a[0].compareTo(b[0]));
+        // now do the scaling
+        var avg = dama.weightedMean(xs.map((e) => e['value'] as num),
+            count.map((e) => e[1]));
         return xs.map((e) => e['value'] / avg).toList();
       });
     var bux = nest2.map(avg);

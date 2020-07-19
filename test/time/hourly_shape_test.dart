@@ -2,8 +2,10 @@ library test.time.hourly_shape_test;
 
 import 'dart:convert';
 
+import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
+import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 import 'package:test/test.dart';
@@ -31,6 +33,15 @@ void tests(String rootUrl) async {
       expect(s0.keys.toSet(), buckets.toSet());
       expect(s0[Bucket.b5x16].length, 16);
     });
+    test('check 7x8 in March', () {
+      var term = Term.parse('Mar19', location);
+      var hs = HourlyShape.fromTimeSeries(ts, buckets);
+      var xs = HourlySchedule.fromHourlyShape(hs).toHourly(term.interval);
+      var xs7x8 = TimeSeries.fromIterable(xs
+          .where((e) => Bucket.b7x8.containsHour(e.interval)));
+      var res = mean(xs7x8.values);
+      expect(res.toStringAsFixed(8), '1.00000000');
+    });
     test('to Json/from Json', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
       var out = hs.toJson();
@@ -53,8 +64,8 @@ void tests(String rootUrl) async {
               ...hs.data.values,
             ]);
       expect(hs1.data.domain, Term.parse('Jan20-Dec21', location).interval);
-//      var encoder = JsonEncoder.withIndent('  ');
-//      print(encoder.convert(hs1.toJson()));
+      var encoder = JsonEncoder.withIndent('  ');
+      print(encoder.convert(hs1.toJson()));
     });
   });
 }

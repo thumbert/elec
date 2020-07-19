@@ -15,7 +15,7 @@ class _BaseCfd {
 
   Date _asOfDate;
 
-  /// Does not need local timezone.  UTC timezone is fine.
+  /// The pricing date.  It does not need a timezone.  UTC timezone is fine.
   Date get asOfDate => _asOfDate;
   set asOfDate(Date date) {
     _asOfDate = date;

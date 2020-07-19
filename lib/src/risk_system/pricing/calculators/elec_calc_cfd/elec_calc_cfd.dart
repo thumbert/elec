@@ -84,7 +84,11 @@ class ElecCalculatorCfd extends _BaseCfd {
     return res;
   }
 
-  /// After you make a change, you need to rebuild it before repricing it.
+  /// After you make a change to the calculator that affects the floating price,
+  /// you need to rebuild it before repricing it.
+  /// TODO: Can I call it updateFloatingPrice?
+  ///
+  /// If you change the term, the pricing date, any of the leg buckets, etc.
   /// It is a brittle design, because people may forget to call it.
   void build() async {
     for (var leg in legs) {
