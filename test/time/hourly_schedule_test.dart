@@ -108,7 +108,7 @@ void tests() {
         ]
       });
     });
-    test('from timeseries', () {
+    test('from timeseries, complete covering', () {
       var month = Month(2021, 1, location: location);
       var ts = TimeSeries.fromIterable([
         IntervalTuple(month, {peak: 60.7, b2x16H: 54.93, b7x8: 48.89})
@@ -116,6 +116,20 @@ void tests() {
       var hs = HourlySchedule.fromTimeSeries(ts);
       var out = hs.toHourly(month);
       expect(out.length, 744);
+    });
+    test('from timeseries, incomplete covering', () {
+      var month = Month(2021, 1, location: location);
+      var ts = TimeSeries.fromIterable([IntervalTuple(month, {peak: 60.7})]);
+      var hs = HourlySchedule.fromTimeSeries(ts);
+      var out = hs.toHourly(month);
+      expect(out.length, 320);
+    });
+    test('toMonthly', () {
+      var hs = HourlySchedule.filled(1);
+      var count = hs.toMonthly(Term.parse('Cal20', location).interval,
+              (xs) => xs.length);
+      expect(count.length, 12);
+      expect(count.observationAt(Month(2020,3, location: location)).value, 743);
     });
 
   });

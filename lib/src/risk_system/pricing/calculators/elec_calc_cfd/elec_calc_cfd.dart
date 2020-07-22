@@ -20,7 +20,7 @@ part 'cfd_base.dart';
 part 'commodity_leg.dart';
 part 'leaf.dart';
 
-enum TimePeriod { month, day, hour }
+enum TimePeriod {month, day, hour}
 
 class ElecCalculatorCfd extends _BaseCfd {
   String comments;
@@ -78,22 +78,24 @@ class ElecCalculatorCfd extends _BaseCfd {
   bool hasCustom() {
     var res = false;
     for (var leg in legs) {
-      if (leg.quantity.values.toSet().length != 1) return true;
-      if (leg.fixPrice.values.toSet().length != 1) return true;
+      if (leg.timePeriod != TimePeriod.month) return true;
     }
     return res;
   }
 
   /// After you make a change to the calculator that affects the floating price,
   /// you need to rebuild it before repricing it.
-  /// TODO: Can I call it updateFloatingPrice?
   ///
   /// If you change the term, the pricing date, any of the leg buckets, etc.
   /// It is a brittle design, because people may forget to call it.
   void build() async {
     for (var leg in legs) {
-      leg.floatingPrice =
-          await getFloatingPrice(leg.bucket, leg.curveId, leg.timePeriod);
+      var curveDetails = await leg.calculator.curveIdCache.get(leg.curveId);
+      leg.region = curveDetails['region'];
+      leg.serviceType = curveDetails['serviceType'];
+      leg.curveName = curveDetails['curve'];
+      leg.tzLocation = getLocation(curveDetails['tzLocation']);
+      leg.hourlyFloatingPrice = await getFloatingPrice(leg.bucket, leg.curveId);
       leg.makeLeaves();
     }
   }
@@ -124,40 +126,4 @@ class ElecCalculatorCfd extends _BaseCfd {
   }
 }
 
-final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
-/// Input [xs] can be a hourly, daily, or monthly series.  Only ISO formats are
-/// supported.
-TimeSeries<num> _parseSeries(
-    Iterable<Map<String, dynamic>> xs, Location location) {
-  var ts = TimeSeries<num>();
-  Interval Function(Map<String, dynamic>) parser;
-  if (xs.first.keys.contains('month')) {
-    parser = (e) => Month.parse(e['month'], location: location, fmt: _isoFmt);
-  } else if (xs.first.keys.contains('date')) {
-    parser = (e) => Date.parse(e['date'], location: location);
-  } else if (xs.first.keys.contains('hourBeginning')) {
-    parser =
-        (e) => Hour.beginning(TZDateTime.parse(location, e['hourBeginning']));
-  }
-  for (var e in xs) {
-    ts.add(IntervalTuple(parser(e), e['value'] as num));
-  }
-  return ts;
-}
-
-List<Map<String, dynamic>> _serializeSeries(TimeSeries<num> xs) {
-  Map<String, dynamic> Function(IntervalTuple) fun;
-  if (xs.first.interval is Month) {
-    fun = (e) =>
-        {'month': (e.interval as Month).toIso8601String(), 'value': e.value};
-  } else if (xs.first.interval is Date) {
-    fun = (e) => {'date': (e.interval as Date).toString(), 'value': e.value};
-  } else if (xs.first.interval is Hour) {
-    fun = (e) => {
-          'hourBeginning': (e.interval as Hour).start.toIso8601String(),
-          'value': e.value
-        };
-  }
-  return [for (var x in xs) fun(x)];
-}

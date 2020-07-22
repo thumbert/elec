@@ -3,6 +3,7 @@ library test.risk_system.pricing.elec_calc_cdf_test;
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
+import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
@@ -14,7 +15,25 @@ import 'package:timezone/timezone.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:tuple/tuple.dart';
 
-/// Monthly quantities and prices, ISONE
+/// No fixPrice means fixPrice = 0 for the term.
+Map<String, dynamic> _calc0() => <String, dynamic>{
+      'term': 'Jan21-Mar21',
+      'asOfDate': '2020-05-29',
+      'buy/sell': 'Buy',
+      'comments': 'Simplest calculator.  FixPrice = 0',
+      'legs': [
+        {
+          'curveId': 'isone_energy_4000_da_lmp',
+          'cash/physical': 'cash',
+          'bucket': '5x16',
+          'quantity': {
+            'value': 50,
+          },
+        }
+      ],
+    };
+
+/// fixPrice is specified
 Map<String, dynamic> _calc1() => <String, dynamic>{
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
@@ -25,19 +44,17 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
           'curveId': 'isone_energy_4000_da_lmp',
           'cash/physical': 'cash',
           'bucket': '5x16',
-          'quantity': [
-            {'month': '2021-01', 'value': 50},
-            {'month': '2021-02', 'value': 50},
-            {'month': '2021-03', 'value': 50},
-          ],
-          'fixPrice': [
-            {'month': '2021-01', 'value': 50.5},
-            {'month': '2021-02', 'value': 50.5},
-            {'month': '2021-03', 'value': 50.5},
-          ],
+          'quantity': {
+            'value': 50.0,
+          },
+          'fixPrice': {
+            'value': 50.5,
+          },
         }
       ],
     };
+
+/// Monthly quantities and prices, ISONE
 Map<String, dynamic> _calc2() => <String, dynamic>{
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
@@ -48,21 +65,46 @@ Map<String, dynamic> _calc2() => <String, dynamic>{
           'curveId': 'isone_energy_4000_da_lmp',
           'cash/physical': 'cash',
           'bucket': '5x16',
-          'quantity': [
-            {'month': '2021-01', 'value': 50},
-            {'month': '2021-02', 'value': 50},
-            {'month': '2021-03', 'value': 50},
-          ],
+          'quantity': {
+            'value': [
+              {'month': '2021-01', 'value': 50},
+              {'month': '2021-02', 'value': 50},
+              {'month': '2021-03', 'value': 50},
+            ]
+          },
+          'fixPrice': {
+            'value': [
+              {'month': '2021-01', 'value': 50.5},
+              {'month': '2021-02', 'value': 50.5},
+              {'month': '2021-03', 'value': 50.5},
+            ]
+          },
+        }
+      ],
+    };
+
+/// Two legs
+Map<String, dynamic> _calc3() => <String, dynamic>{
+      'term': 'Jan21-Mar21',
+      'asOfDate': '2020-05-29',
+      'buy/sell': 'Buy',
+      'comments': 'a simple calculator for winter times',
+      'legs': [
+        {
+          'curveId': 'isone_energy_4000_da_lmp',
+          'cash/physical': 'cash',
+          'bucket': '5x16',
+          'quantity': {
+            'value': 50,
+          },
         },
         {
           'curveId': 'isone_energy_4000_da_lmp',
           'cash/physical': 'cash',
           'bucket': 'offpeak',
-          'quantity': [
-            {'month': '2021-01', 'value': 50},
-            {'month': '2021-02', 'value': 50},
-            {'month': '2021-03', 'value': 50},
-          ],
+          'quantity': {
+            'value': 50,
+          },
         },
       ],
     };
@@ -77,6 +119,28 @@ void tests(String rootUrl) async {
       c1 = ElecCalculatorCfd(
           curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient);
       await c1.fromJson(_calc1());
+    });
+    test('initialize by hand', () async {
+      var calc = ElecCalculatorCfd(
+          curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient)
+        ..asOfDate = Date(2020, 5, 29)
+        ..term = Term.parse('Jan21-Mar21', location)
+        ..buySell = BuySell.buy;
+      calc.legs = [
+        CommodityLeg(calc)
+          ..curveId = 'isone_energy_4000_da_lmp'
+          ..bucket = Bucket.b5x16
+          ..timePeriod = TimePeriod.month
+          ..quantitySchedule = HourlySchedule.filled(50)
+          ..fixPriceSchedule = HourlySchedule.filled(0),
+      ];
+      await calc.build();
+      expect(calc.dollarPrice().round(), 2560000);
+      expect(calc.legs.first.price().toStringAsFixed(2), '50.79');
+      // change the term and reprice
+      calc.term = Term.parse('Jan21-Jun21', location);
+      await calc.build();
+      expect(calc.legs.first.price().toStringAsFixed(2), '39.36');
     });
     test('fromJson', () {
       expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));
@@ -124,16 +188,16 @@ void tests(String rootUrl) async {
       });
     });
     test('test getForwardMarks for 7x8 bucket', () async {
-      var x = await c1.getFloatingPrice(
-          Bucket.b7x8, 'isone_energy_4000_da_lmp', TimePeriod.hour);
+      var x =
+          await c1.getFloatingPrice(Bucket.b7x8, 'isone_energy_4000_da_lmp');
       expect(x.length, 719);
       var mPrice = toMonthly(x, mean);
       var mar = Month(2021, 3, location: location);
       expect(mPrice.observationAt(mar).value.toStringAsFixed(3), '33.343');
     });
     test('test getForwardMarks for non-standard bucket', () async {
-      var x = await c1.getFloatingPrice(
-          Bucket.b5x8, 'isone_energy_4000_da_lmp', TimePeriod.hour);
+      var x =
+          await c1.getFloatingPrice(Bucket.b5x8, 'isone_energy_4000_da_lmp');
       var mPrice = toMonthly(x, mean);
       var jan = Month(2021, 1, location: location);
       expect(mPrice.observationAt(jan).value.toStringAsFixed(3), '48.072');
@@ -148,6 +212,7 @@ void tests(String rootUrl) async {
     test('change calculator term and reprice', () async {
       var calc = c1..term = Term.parse('Jan21-Feb21', location);
       await calc.build();
+      expect(calc.legs.length, 1);
       expect(calc.legs.first.floatingPrice.intervals.toList(), [
         Month(2021, 1, location: location),
         Month(2021, 2, location: location)
@@ -201,6 +266,11 @@ void tests(String rootUrl) async {
       var leg = calc.legs.first;
       expect(leg.price().toStringAsFixed(3), '56.286');
     });
+    test('extend term beyond original term', () async {
+      var calc = c1..term = Term.parse('Jan21-Jun21', location);
+      await calc.build();
+      expect(calc.dollarPrice().round(), -1131600);
+    });
     test('parse calculator without fixPrice', () async {
       var aux = <String, dynamic>{
         'term': 'Jan21-Mar21',
@@ -211,11 +281,13 @@ void tests(String rootUrl) async {
             'curveId': 'isone_energy_4000_da_lmp',
             'cash/physical': 'cash',
             'bucket': '5x16',
-            'quantity': [
-              {'month': '2021-01', 'value': 50},
-              {'month': '2021-02', 'value': 50},
-              {'month': '2021-03', 'value': 50},
-            ],
+            'quantity': {
+              'value': [
+                {'month': '2021-01', 'value': 50},
+                {'month': '2021-02', 'value': 50},
+                {'month': '2021-03', 'value': 50},
+              ]
+            },
           }
         ],
       };
@@ -224,7 +296,7 @@ void tests(String rootUrl) async {
       await calc.fromJson(aux);
       expect(calc.dollarPrice().round(), 2560000);
     });
-    test('flat report', () {
+    test('monthly flat report', () {
       var calc = c1..dollarPrice();
       var report = calc.flatReport();
       var aux = report.toString().split('\n');
@@ -247,7 +319,7 @@ Value: $14,800
 ''';
       expect(aux.join('\n'), out);
     });
-    test('position report', () {
+    test('monthly position report', () {
       var calc = c1..dollarPrice();
       var report = calc.monthlyPositionReport();
       var aux = report.toString().split('\n');
@@ -270,7 +342,7 @@ total                         50,400        ''';
     setUp(() async {
       c2 = ElecCalculatorCfd(
           curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient);
-      await c2.fromJson(_calc2());
+      await c2.fromJson(_calc3());
     });
     test('fromJson', () {
       expect(c2.asOfDate, Date(2020, 5, 29, location: UTC));

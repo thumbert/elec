@@ -138,6 +138,7 @@ class HourlySchedule {
 
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
   /// For example the input timeseries can be monthly.
+  /// Works even if the covering is not complete.
   HourlySchedule.fromTimeSeries(TimeSeries<Map<Bucket,num>> ts) {
     _f = (Hour hour) {
       if (!ts.domain.containsInterval(hour)) {
@@ -149,7 +150,7 @@ class HourlySchedule {
             return obs.value[bucket];
           }
         }
-        throw ArgumentError('Can\'t find the hour $hour in buckets ${obs.value.keys}');
+        return null;
       }
     };
   }
@@ -191,6 +192,18 @@ class HourlySchedule {
     for (var hour in hours) {
       var value = _f(hour);
       if (value != null) out.add(IntervalTuple(hour, _f(hour)));
+    }
+    return out;
+  }
+
+  /// Calculate a monthly statistic
+  TimeSeries<num> toMonthly(Interval interval, num Function(Iterable<num>) fun) {
+    var months = interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var out = TimeSeries<num>();
+    for (var month in months) {
+      var values = month.splitLeft((dt) => Hour.beginning(dt))
+          .map((hour) => _f(hour));
+      out.add(IntervalTuple(month, fun(values)));
     }
     return out;
   }
