@@ -113,14 +113,14 @@ void tests() {
       var ts = TimeSeries.fromIterable([
         IntervalTuple(month, {peak: 60.7, b2x16H: 54.93, b7x8: 48.89})
       ]);
-      var hs = HourlySchedule.fromTimeSeries(ts);
+      var hs = HourlySchedule.fromTimeSeriesWithBucket(ts);
       var out = hs.toHourly(month);
       expect(out.length, 744);
     });
     test('from timeseries, incomplete covering', () {
       var month = Month(2021, 1, location: location);
       var ts = TimeSeries.fromIterable([IntervalTuple(month, {peak: 60.7})]);
-      var hs = HourlySchedule.fromTimeSeries(ts);
+      var hs = HourlySchedule.fromTimeSeriesWithBucket(ts);
       var out = hs.toHourly(month);
       expect(out.length, 320);
     });

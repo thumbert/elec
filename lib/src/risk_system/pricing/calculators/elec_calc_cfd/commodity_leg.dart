@@ -139,7 +139,7 @@ class CommodityLeg {
       quantitySchedule = HourlySchedule.filled(qValue);
     } else if (qValue is List) {
       var aux = _parseSeries(qValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
-      quantitySchedule = HourlySchedule.fromTimeSeries(aux);
+      quantitySchedule = HourlySchedule.fromTimeSeriesWithBucket(aux);
       if (aux.first.interval is Month) {
         timePeriod = TimePeriod.month;
       } else if (aux.first.interval is Date) {
@@ -156,7 +156,7 @@ class CommodityLeg {
         fixPriceSchedule = HourlySchedule.filled(pValue);
       } else if (pValue is List) {
         var aux = _parseSeries(qValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
-        fixPriceSchedule = HourlySchedule.fromTimeSeries(aux);
+        fixPriceSchedule = HourlySchedule.fromTimeSeriesWithBucket(aux);
         if (aux.first.interval is Date &&
             timePeriod != TimePeriod.hour) {
           timePeriod = TimePeriod.day;

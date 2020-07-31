@@ -48,7 +48,7 @@ class _BaseCfd {
 
     var location = fwdMark.first.interval.start.location;
     var _term = term.interval.withTimeZone(location);
-    var ts = HourlySchedule.fromTimeSeries(fwdMark).toHourly(_term);
+    var ts = HourlySchedule.fromTimeSeriesWithBucket(fwdMark).toHourly(_term);
     var res = TimeSeries.fromIterable(
         ts.where((obs) => bucket.containsHour(obs.interval)));
 

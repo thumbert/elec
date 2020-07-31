@@ -136,10 +136,29 @@ class HourlySchedule {
     };
   }
 
+
+  /// Create an hourly schedule from a timeseries.
+  /// The input timeseries can have any periodicity higher than hourly.
+  HourlySchedule.fromTimeSeries(TimeSeries<num> ts) {
+    _f = (Hour hour) {
+      try {
+        var obs = ts.observationContains(hour);
+        return obs.value;
+      } catch (e) {
+        return null;
+      }
+    };
+    _toJson = {
+      'type': 'fromTimeSeries',
+      'values': ts,   // FIXME: make it valid json
+    };
+  }
+
+
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
   /// For example the input timeseries can be monthly.
   /// Works even if the covering is not complete.
-  HourlySchedule.fromTimeSeries(TimeSeries<Map<Bucket,num>> ts) {
+  HourlySchedule.fromTimeSeriesWithBucket(TimeSeries<Map<Bucket,num>> ts) {
     _f = (Hour hour) {
       if (!ts.domain.containsInterval(hour)) {
         return null;

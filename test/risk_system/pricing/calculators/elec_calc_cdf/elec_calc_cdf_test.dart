@@ -141,6 +141,7 @@ void tests(String rootUrl) async {
       calc.term = Term.parse('Jan21-Jun21', location);
       await calc.build();
       expect(calc.legs.first.price().toStringAsFixed(2), '39.36');
+      expect(calc.legs.first.showQuantity(), 50);
     });
     test('fromJson', () {
       expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));
