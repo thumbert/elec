@@ -48,7 +48,8 @@ class HourlyShape {
         // In case the input [ts] has missing data, count the number of hours
         // in this month by hourBeginning to do the correct averaging.
         // Need to sort the count by hourBeginning.
-        var hours = Term.fromInterval(xs.first['month']).hours()
+        var hours = Term.fromInterval(xs.first['month'])
+            .hours()
             .where((hour) => (xs.first['bucket'] as Bucket).containsHour(hour));
         var aux = groupBy(hours, (Hour e) => e.start.hour);
         var count = [ for(var k in aux.keys) [k, aux[k].length]];

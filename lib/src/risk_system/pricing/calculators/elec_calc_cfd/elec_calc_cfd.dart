@@ -25,9 +25,6 @@ enum TimePeriod {month, day, hour}
 class ElecCalculatorCfd extends _BaseCfd {
   String comments;
 
-  /// all the data from marks/curve_ids; the key is the curveId.
-//  Map<String, Map<String, dynamic>> curveDetails;
-
   ElecCalculatorCfd(
       {CurveIdClient curveIdClient, ForwardMarks forwardMarksClient}) {
     this.curveIdClient = curveIdClient;
