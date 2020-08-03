@@ -3,6 +3,7 @@ library test.risk_system.pricing.elec_calc_cdf_test;
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:http/http.dart';
@@ -111,18 +112,15 @@ Map<String, dynamic> _calc3() => <String, dynamic>{
 
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var curveIdClient = CurveIdClient(Client(), rootUrl: rootUrl);
-  var forwardMarksClient = ForwardMarks(Client(), rootUrl: rootUrl);
+  var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
   group('Elec calc cdf tests ISONE, 1 leg:', () {
     ElecCalculatorCfd c1;
     setUp(() async {
-      c1 = ElecCalculatorCfd(
-          curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient);
+      c1 = ElecCalculatorCfd(cacheProvider);
       await c1.fromJson(_calc1());
     });
     test('initialize by hand', () async {
-      var calc = ElecCalculatorCfd(
-          curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient)
+      var calc = ElecCalculatorCfd(cacheProvider)
         ..asOfDate = Date(2020, 5, 29)
         ..term = Term.parse('Jan21-Mar21', location)
         ..buySell = BuySell.buy;
@@ -171,13 +169,13 @@ void tests(String rootUrl) async {
       expect(leg.leaves.length, 3); // 3 months
     });
     test('test curveIdCache', () async {
-      var doc = await c1.curveIdCache.get('isone_energy_4000_da_lmp');
+      var doc = await c1.cacheProvider.curveIdCache.get('isone_energy_4000_da_lmp');
       expect(doc['commodity'], 'electricity');
       expect(doc['serviceType'], 'energy');
       expect(doc['region'], 'isone');
     });
     test('test forwardMarksCache', () async {
-      var doc = await c1.forwardMarksCache
+      var doc = await c1.cacheProvider.forwardMarksCache
           .get(Tuple2(Date(2020, 5, 29), 'isone_energy_4000_da_lmp'));
       expect(doc.length, 19);
       var x0 = doc.first;
@@ -227,6 +225,18 @@ void tests(String rootUrl) async {
       var leg = calc.legs.first;
       expect(leg.leaves.length, 2); // two months only
       expect(leg.price().toStringAsFixed(2), '57.00');
+    });
+    test('change calculator term to use settled data', () async {
+      var calc = c1..term = Term.parse('Jan20-Dec20', location);
+      await calc.build();
+      expect(calc.legs.length, 1);
+      expect(calc.legs.first.floatingPrice.intervals.length, 12);
+      expect(
+          calc.legs.first.floatingPrice.values
+              .map((e) => e.toStringAsFixed(2))
+              .take(2)
+              .toList(),
+          ['29.60', '25.05']);  // believe it or not, Ripley
     });
     test('change calculator asOfDate and reprice', () async {
       var calc = c1
@@ -292,8 +302,7 @@ void tests(String rootUrl) async {
           }
         ],
       };
-      var calc = ElecCalculatorCfd(
-          curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient);
+      var calc = ElecCalculatorCfd(cacheProvider);
       await calc.fromJson(aux);
       expect(calc.dollarPrice().round(), 2560000);
     });
@@ -341,8 +350,7 @@ total                         50,400        ''';
   group('Elec calc cdf tests ISONE, 2 legs', () {
     ElecCalculatorCfd c2;
     setUp(() async {
-      c2 = ElecCalculatorCfd(
-          curveIdClient: curveIdClient, forwardMarksClient: forwardMarksClient);
+      c2 = ElecCalculatorCfd(cacheProvider);
       await c2.fromJson(_calc3());
     });
     test('fromJson', () {

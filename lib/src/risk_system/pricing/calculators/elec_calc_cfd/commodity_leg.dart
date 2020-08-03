@@ -118,7 +118,7 @@ class CommodityLeg {
       throw ArgumentError('Json input is missing the key curveId');
     }
     curveId = (x['curveId'] as String).toLowerCase();
-    var curveDetails = await calculator.curveIdCache.get(curveId);
+    var curveDetails = await calculator.cacheProvider.curveIdCache.get(curveId);
     region = curveDetails['region'];
     serviceType = curveDetails['serviceType'];
     curveName = curveDetails['curve'];

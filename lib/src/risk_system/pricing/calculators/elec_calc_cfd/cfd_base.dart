@@ -1,24 +1,9 @@
 part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 class _BaseCfd {
-  CurveIdClient curveIdClient;
-  ForwardMarks forwardMarksClient;
 
-  /// the keys are the curveId, data comes from marks/curve_ids collection
-  Cache<String, Map<String, dynamic>> curveIdCache;
-
-  /// The keys of the cache are tuples (asOfDate,curveId).
-  /// for daily and monthly marks
-  Cache<Tuple2<Date, String>, TimeSeries<Map<Bucket, num>>> forwardMarksCache;
-
-  /// A cache for hourly settlement data, if available.  It makes sense for
-  /// energy curves, but what do you do for other service types (LSCPR for
-  /// example)?
-  /// Cache key is curveId.
-  Cache<String, TimeSeries<num>> settlementPricesCache;
-
-  /// A cache for hourly shape curves
-  Cache<Tuple2<Date, String>, HourlySchedule> hourlyShapeCache;
+  /// A collection of caches for different market and curve data.
+  CacheProvider cacheProvider;
 
   Date _asOfDate;
 
@@ -51,8 +36,8 @@ class _BaseCfd {
   ///
   /// Return a timeseries of hourly prices.
   Future<TimeSeries<num>> getFloatingPrice(Bucket bucket, String curveId) async {
-    var curveDetails = await curveIdCache.get(curveId);
-    var fwdMark = await forwardMarksCache.get(Tuple2(asOfDate, curveId));
+    var curveDetails = await cacheProvider.curveIdCache.get(curveId);
+    var fwdMark = await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
 
     var location = fwdMark.first.interval.start.location;
     var _term = term.interval.withTimeZone(location);
@@ -66,7 +51,7 @@ class _BaseCfd {
 
     if (curveDetails.containsKey('hourlyShapeCurveId')) {
       /// get the hourly shaping curve
-      var hSchedule = await hourlyShapeCache
+      var hSchedule = await cacheProvider.hourlyShapeCache
           .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
       var hShapeMultiplier =
           hSchedule.toHourly(term.interval.withTimeZone(location));
@@ -77,53 +62,28 @@ class _BaseCfd {
     /// Check if you need to add settlement prices
     var startDate = Date.fromTZDateTime(fwdMark.first.interval.start);
     if (term.startDate.isBefore(startDate)) {
-      /// need to get settlement data
-      var settlementData = await settlementPricesCache.get(curveId);
+      /// need to get settlement data, return all hours of the term
+      var settlementData = await cacheProvider
+          .settlementPricesCache.get(Tuple2(term, curveId));
       if (term.interval.start.isBefore(settlementData.first.interval.start)) {
         // Clear the settlement cache if term start is earlier than existing
         // term.  This only gets executed once, for the first leg.
-        await settlementPricesCache.invalidateAll();
-        settlementData = await settlementPricesCache.get(curveId);
+        await cacheProvider.settlementPricesCache.invalidateAll();
+        settlementData = await cacheProvider.settlementPricesCache
+            .get(Tuple2(term, curveId));
       }
+      /// select only the bucket you need
+      var sData = settlementData.where((e) => bucket.containsHour(e.interval));
+      /// put it together
       res = TimeSeries<num>()..addAll([
-        ...settlementData.where((e) => bucket.containsHour(e.interval)),
-        ...res,
+        ...sData,
+        ...res.window(Interval(sData.last.interval.end, term.interval.end)),
       ]);
     }
 
     return res;
   }
 
-  /// Populate fwdMarksCache given the asOfDate and the curveId.
-  Future<TimeSeries<Map<Bucket, num>>> _fwdMarksLoader(
-      Tuple2<Date, String> tuple) async {
-    var aux = await curveIdCache.get(tuple.item2);
-    var location = getLocation(aux['tzLocation']);
-    return forwardMarksClient.getMonthlyForwardCurve(tuple.item2, tuple.item1,
-        tzLocation: location);
-  }
-
-  /// Populate the settlementPricesCache given the deal term and the curveId.
-  Future<TimeSeries<num>> _settlementPricesLoader(String curveId) async {
-    var curveDetails = await curveIdCache.get(curveId);
-    var location = getLocation(curveDetails['tzLocation']);
-    var settlementSymbol = curveDetails['settlementSymbol'];
-    return TimeSeries<num>();
-  }
-
-
-  /// Cache the HourlySchedule associated with this hourly shape.
-  Future<HourlySchedule> _hourlyShapeLoader(Tuple2<Date, String> tuple) async {
-    var aux = await curveIdCache.get(tuple.item2);
-    var location = getLocation(aux['tzLocation']);
-    var hs = await forwardMarksClient.getHourlyShape(tuple.item2, tuple.item1,
-        tzLocation: location);
-    return HourlySchedule.fromHourlyShape(hs);
-  }
-
-  Future<Map<String, dynamic>> _curveIdLoader(String curveId) {
-//    print('in curve loader');
-    return curveIdClient.getCurveId(curveId);
-  }
 
 }
+

@@ -5,8 +5,8 @@ import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_repo
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
-import 'package:elec_server/client/marks/curves/curve_id.dart';
-import 'package:elec_server/client/marks/forward_marks.dart';
+//import 'package:elec_server/client/marks/curves/curve_id.dart';
+//import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
@@ -14,7 +14,7 @@ import 'package:elec/risk_system.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
-import 'package:more/cache.dart';
+import '../base/cache_provider.dart';
 
 part 'cfd_base.dart';
 part 'commodity_leg.dart';
@@ -25,18 +25,8 @@ enum TimePeriod {month, day, hour}
 class ElecCalculatorCfd extends _BaseCfd {
   String comments;
 
-  ElecCalculatorCfd(
-      {CurveIdClient curveIdClient, ForwardMarks forwardMarksClient}) {
-    this.curveIdClient = curveIdClient;
-    this.forwardMarksClient = forwardMarksClient;
-    curveIdCache =
-        Cache<String, Map<String, dynamic>>.lru(loader: _curveIdLoader);
-    forwardMarksCache =
-        Cache<Tuple2<Date, String>, TimeSeries<Map<Bucket, num>>>.lru(
-            loader: _fwdMarksLoader);
-    hourlyShapeCache = Cache<Tuple2<Date, String>, HourlySchedule>.lru(
-        loader: _hourlyShapeLoader);
-
+  ElecCalculatorCfd(CacheProvider cacheProvider) {
+    this.cacheProvider = cacheProvider;
   }
 
   /// The recommended way to initialize from a template.  See tests.
@@ -87,7 +77,7 @@ class ElecCalculatorCfd extends _BaseCfd {
   /// It is a brittle design, because people may forget to call it.
   void build() async {
     for (var leg in legs) {
-      var curveDetails = await leg.calculator.curveIdCache.get(leg.curveId);
+      var curveDetails = await leg.calculator.cacheProvider.curveIdCache.get(leg.curveId);
       leg.region = curveDetails['region'];
       leg.serviceType = curveDetails['serviceType'];
       leg.curveName = curveDetails['curve'];
