@@ -30,6 +30,8 @@ class CacheProvider {
   /// A cache for hourly shape curves
   Cache<Tuple2<Date, String>, HourlySchedule> hourlyShapeCache;
 
+  CacheProvider();
+
   /// An example of a CacheProvider implementation
   CacheProvider.test({Client client, String rootUrl = 'http://localhost:8080/'}) {
     client ??= Client();

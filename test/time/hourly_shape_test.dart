@@ -64,8 +64,8 @@ void tests(String rootUrl) async {
               ...hs.data.values,
             ]);
       expect(hs1.data.domain, Term.parse('Jan20-Dec21', location).interval);
-      var encoder = JsonEncoder.withIndent('  ');
-      print(encoder.convert(hs1.toJson()));
+//      var encoder = JsonEncoder.withIndent('  ');
+//      print(encoder.convert(hs1.toJson()));
     });
   });
 }

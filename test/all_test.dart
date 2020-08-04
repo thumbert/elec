@@ -6,6 +6,7 @@ import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
 import 'gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
 import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
+import 'time/hourly_shape_test.dart' as hourly_shape;
 import 'time/hour_filter_test.dart' as hour_filter;
 import 'time/monthly_bucket_value_test.dart' as monthly_bucket_value;
 import 'time/shape/shape_cost_test.dart' as shape_cost;
@@ -27,6 +28,7 @@ void main() async {
   bucket.aggregateByBucketMonth();
   hour_filter.tests();
   hourly_schedule.tests();
+  hourly_shape.tests(rootUrl);
   monthly_bucket_value.tests();
   calendar.main();
   holiday.main();

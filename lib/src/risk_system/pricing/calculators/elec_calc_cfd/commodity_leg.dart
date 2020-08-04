@@ -123,6 +123,7 @@ class CommodityLeg {
     serviceType = curveDetails['serviceType'];
     curveName = curveDetails['curve'];
     tzLocation = getLocation(curveDetails['tzLocation']);
+    x.putIfAbsent('cash/physical', () => 'cash');
     cashOrPhys = (x['cash/physical'] as String).toLowerCase();
     if (x['bucket'] == null) {
       throw ArgumentError('Json input is missing the key bucket');

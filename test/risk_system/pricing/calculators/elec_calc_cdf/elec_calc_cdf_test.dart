@@ -25,7 +25,6 @@ Map<String, dynamic> _calc0() => <String, dynamic>{
       'legs': [
         {
           'curveId': 'isone_energy_4000_da_lmp',
-          'cash/physical': 'cash',
           'bucket': '5x16',
           'quantity': {
             'value': 50,
@@ -43,8 +42,8 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
       'legs': [
         {
           'curveId': 'isone_energy_4000_da_lmp',
-          'cash/physical': 'cash',
           'bucket': '5x16',
+          'cash/physical': 'cash',
           'quantity': {
             'value': 50.0,
           },
@@ -64,7 +63,6 @@ Map<String, dynamic> _calc2() => <String, dynamic>{
       'legs': [
         {
           'curveId': 'isone_energy_4000_da_lmp',
-          'cash/physical': 'cash',
           'bucket': '5x16',
           'quantity': {
             'value': [
@@ -93,7 +91,6 @@ Map<String, dynamic> _calc3() => <String, dynamic>{
       'legs': [
         {
           'curveId': 'isone_energy_4000_da_lmp',
-          'cash/physical': 'cash',
           'bucket': '5x16',
           'quantity': {
             'value': 50,
@@ -101,7 +98,6 @@ Map<String, dynamic> _calc3() => <String, dynamic>{
         },
         {
           'curveId': 'isone_energy_4000_da_lmp',
-          'cash/physical': 'cash',
           'bucket': 'offpeak',
           'quantity': {
             'value': 50,
