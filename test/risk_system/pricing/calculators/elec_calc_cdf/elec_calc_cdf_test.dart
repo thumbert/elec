@@ -173,7 +173,7 @@ void tests(String rootUrl) async {
     test('test forwardMarksCache', () async {
       var doc = await c1.cacheProvider.forwardMarksCache
           .get(Tuple2(Date(2020, 5, 29), 'isone_energy_4000_da_lmp'));
-      expect(doc.length, 19);
+      expect(doc.length, 79);
       var x0 = doc.first;
       expect(x0.interval, Month(2020, 6, location: location));
       expect(x0.value, <Bucket, num>{

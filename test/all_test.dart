@@ -12,6 +12,7 @@ import 'time/monthly_bucket_value_test.dart' as monthly_bucket_value;
 import 'time/shape/shape_cost_test.dart' as shape_cost;
 import 'time/calendar/holiday_test.dart' as holiday;
 import 'time/calendar/calendar_test.dart' as calendar;
+import 'risk_system/marks/forward_curve_test.dart' as forward_curve;
 import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
 import 'risk_system/pricing/calculators/elec_calc_cdf/elec_calc_cdf_test.dart' as elec_calc_cdf;
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
@@ -24,14 +25,16 @@ void main() async {
   filter.tests();
   seasonal_analysis.tests();
   solar_elevation.tests();
-  bucket.testBucket();
+  bucket.tests();
   bucket.aggregateByBucketMonth();
+
   hour_filter.tests();
   hourly_schedule.tests();
   hourly_shape.tests(rootUrl);
   monthly_bucket_value.tests();
   calendar.main();
   holiday.main();
+  forward_curve.tests();
   monthly_curve.tests();
   elec_calc_cdf.tests(rootUrl);
   shape_cost.tests();

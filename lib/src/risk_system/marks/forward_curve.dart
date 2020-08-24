@@ -1,36 +1,134 @@
-//library risk_system.marks.forward_curve;
-//
-//import 'package:dama/dama.dart' as dama;
-//import 'package:timezone/timezone.dart';
-//import 'package:date/date.dart';
-//import 'package:elec/elec.dart';
-//import 'package:timeseries/timeseries.dart';
-//
-//class ForwardCurve {
-//  /// the time bucket associated with this curve.
-//  final Bucket bucket;
-//
-//  /// a timeseries of daily and monthly intervals.
-//  final TimeSeries<num> timeseries;
-//
-//  /// A simple forward curve model for daily and monthly values.
-//  ForwardCurve(this.bucket, this.timeseries);
-//
-////  Month get startMonth => timeseries.first.interval;
-////
-////  Month get endMonth => timeseries.last.interval;
-//
-//  Interval get domain =>
-//      Interval(timeseries.first.interval.start, timeseries.last.interval.end);
-//
-////  Iterable<Month> get months => timeseries.intervals.cast<Month>();
-//
-//  Iterable<num> get values => timeseries.values;
-//
-//  IntervalTuple<num> operator [](int i) => timeseries[i];
-//
-//  operator []=(int i, IntervalTuple<num> obs) => timeseries[i] = obs;
-//
+library risk_system.marks.forward_curve;
+
+import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/shape/hourly_shape.dart';
+import 'package:elec_server/utils.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart';
+import 'package:date/date.dart';
+import 'package:elec/elec.dart';
+import 'package:timeseries/timeseries.dart';
+
+class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
+
+  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
+
+  HourlySchedule _hourlySchedule;
+
+  /// A simple forward curve model for daily and monthly values extending
+  /// a TimeSeries<Map<Bucket,num>>.
+  ForwardCurve();
+
+  ForwardCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket,num>>> xs) {
+    addAll(xs);
+    _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
+  }
+
+  /// Construct a forward curve given an input in this form.  The buckets
+  /// can be different, but the covering needs to be complete (no gaps.)
+  ///   [
+  ///     {'term': '2020-07-17', '5x16': 27.10, '7x8': 15.5},
+  ///     {'term': '2020-07-18', '2x16H': 22.15, '7x8': 15.5},
+  ///     ...
+  ///     {'term': '2020-08', '5x16': 31.50, '2x16H': 25.15, '7x8': 18.75},
+  ///     ...
+  ///   ]
+  ///   The inputs are time-ordered.
+  ForwardCurve.fromTermBucketMarks(List<Map<String,dynamic>> xs, Location location) {
+    location ??= UTC;
+    for (var x in xs) {
+      Interval term;
+      if ((x['term'] as String).length == 10) {
+        term = Date.parse(x['term'], location: location);
+      } else if ((x['term'] as String).length == 7) {
+        term = Month.parse(x['term'], fmt: _isoFmt, location: location);
+      } else {
+        throw ArgumentError('Unsupported term format ${x['term']}');
+      }
+      var value = <Bucket,num>{};
+      for (var key in x.keys.where((e) => e != 'term')) {
+        value[Bucket.parse(key)] = x[key];
+      }
+      add(IntervalTuple(term, value));
+    }
+    _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
+  }
+
+  /// Calculate the value for this curve for any term and any bucket.
+  /// If the curve doesn't have a value for any hour in the term you requested
+  /// return [null].
+  num value(Interval interval, Bucket bucket, {HourlyShape hourlyShape}) {
+    if (hourlyShape != null) {
+      throw ArgumentError('Not implemented yet');
+    }
+    var avg = 0.0;
+    var i = 0;
+    var hIterator = interval.hourIterator;
+    while (hIterator.moveNext()) {
+      if (bucket.containsHour(hIterator.current)) {
+        var x0 = _hourlySchedule.value(hIterator.current);
+        if (x0 == null) return x0;
+        avg += x0;
+        i += 1;
+      }
+    }
+//    print(avg);
+//    print(i);
+    return avg/i;
+  }
+
+
+
+
+  /// Format this forward curve to a json format
+  ///   [
+  ///     {'term': '2020-07-17', '5x16': 27.10, '7x8': 15.5},
+  ///     {'term': '2020-07-18', '2x16H': 22.15, '7x8': 15.5},
+  ///     ...
+  ///     {'term': '2020-08', '5x16': 31.50, '2x16H': 25.15, '7x8': 18.75},
+  ///     ...
+  ///   ]
+  List<Map<String,dynamic>> toJson() {
+    var out = <Map<String,dynamic>>[];
+    for (var x in this) {
+      var one = <String,dynamic>{};
+      if (x.interval is Date) {
+        one['term'] = (x.interval as Date).toString();
+      } else if (x.interval is Month) {
+        one['term'] = (x.interval as Month).toIso8601String();
+      } else {
+        throw ArgumentError('Unsupported term ${x.interval}');
+      }
+      for (var entry in x.value.entries) {
+        one[entry.key.toString()] = entry.value;
+      }
+      out.add(one);
+    }
+    return out;
+  }
+
+  /// Make the output ready for a spreadsheet.
+  /// Understands only m/dd/yyyy format!
+  String toCsv() {
+    var dateFmt = DateFormat('M/dd/yyyy');
+    var out = <Map<String,dynamic>>[];
+    for (var x in this) {
+      var one = <String,dynamic>{};
+      if (x.interval is Date) {
+        one['term'] = (x.interval as Date).toString(dateFmt);
+      } else if (x.interval is Month) {
+        one['term'] = (x.interval as Month).startDate.toString(dateFmt);
+      } else {
+        throw ArgumentError('Unsupported term ${x.interval}');
+      }
+      for (var entry in x.value.entries) {
+        one[entry.key.toString()] = entry.value;
+      }
+      out.add(one);
+    }
+    return listOfMapToCsv(out);
+  }
+
 //  /// Apply a function to each element of the curve.  For example use
 //  /// f = (x) => 2*x to multiply each element by 2.
 //  /// <p>This is a convenience function instead of operating on the underlying
@@ -58,7 +156,7 @@
 //    }
 //    return ForwardCurve(bucket, ts);
 //  }
-//
+
 //  /// Subtract two curves element by element.
 //  MonthlyCurve operator -(MonthlyCurve other) {
 //    if (bucket != other.bucket) {
@@ -207,4 +305,4 @@
 //    var aux = timeseries.window(_interval);
 //    return MonthlyCurve(bucket, TimeSeries.fromIterable(aux));
 //  }
-//}
+}

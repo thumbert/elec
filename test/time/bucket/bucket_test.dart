@@ -11,7 +11,7 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/time/bucket/bucket_utils.dart';
 
-num round(num x, {int digits: 2}) =>
+num round(num x, {int digits = 2}) =>
     (x * pow(10, digits)).round() / pow(10, digits);
 
 void aggregateByBucketMonth() {
@@ -49,7 +49,7 @@ List<int> countByMonth(int year, Bucket bucket) {
   }).toList();
 }
 
-void testBucket() {
+void tests() {
   var location = getLocation('America/New_York');
   group('Test buckets', () {
     test('equality for buckets', () {
@@ -86,6 +86,17 @@ void testBucket() {
     test('peak hours by month in 2015', () {
       expect(countByMonth(2015, IsoNewEngland.bucket5x16),
           [336, 320, 352, 352, 320, 352, 368, 336, 336, 352, 320, 352]);
+    });
+    
+    test('custom bucket', () {
+      var b5x16_1318 = CustomBucket.withHours(Bucket.b5x16, 
+          [13, 14, 15, 16, 17, 18]);
+      var term = Term.parse('21Aug20', location);
+      var hours = term.hours()
+          .where((hour) => b5x16_1318.containsHour(hour))
+          .toList();
+      expect(hours.length, 6);
+      expect(hours.first, Hour.beginning(TZDateTime(location, 2020, 8, 21, 13)));
     });
   });
 
@@ -194,7 +205,7 @@ void testBucket() {
 
 void main() async {
   await initializeTimeZone();
-  testBucket();
+  tests();
 
   aggregateByBucketMonth();
 }

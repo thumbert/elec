@@ -24,7 +24,7 @@ class CacheProvider {
   /// A cache for hourly settlement data, if available.  It makes sense for
   /// energy curves, but what do you do for other service types (LSCPR for
   /// example)?
-  /// Cache key is curveId.
+  /// Cache key contains the curveId, e.g. isone_energy_4000_hourlyshape.
   Cache<Tuple2<Term,String>, TimeSeries<num>> settlementPricesCache;
 
   /// A cache for hourly shape curves
@@ -59,6 +59,7 @@ class CacheProvider {
     }
 
     /// Cache the HourlySchedule associated with this hourly shape.
+    /// tuple.item2 = 'isone_energy_4000_hourlyshape'
     Future<HourlySchedule> _hourlyShapeLoader(
         Tuple2<Date, String> tuple) async {
       var aux = await curveIdCache.get(tuple.item2);
