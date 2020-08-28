@@ -23,7 +23,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
     addAll(xs);
     _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
   }
-
+  
   /// Construct a forward curve given an input in this form.  The buckets
   /// can be different, but the covering needs to be complete (no gaps.)
   ///   [
@@ -54,6 +54,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
     _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
   }
 
+
   /// Calculate the value for this curve for any term and any bucket.
   /// If the curve doesn't have a value for any hour in the term you requested
   /// return [null].
@@ -72,11 +73,8 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
         i += 1;
       }
     }
-//    print(avg);
-//    print(i);
     return avg/i;
   }
-
 
 
 
