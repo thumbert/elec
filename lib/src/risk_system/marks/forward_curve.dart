@@ -9,8 +9,7 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:timeseries/timeseries.dart';
 
-class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
-
+class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   HourlySchedule _hourlySchedule;
@@ -19,22 +18,22 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
   /// a TimeSeries<Map<Bucket,num>>.
   ForwardCurve();
 
-  ForwardCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket,num>>> xs) {
+  ForwardCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
     _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
   }
-  
+
   /// Construct a forward curve given an input in this form.  The buckets
   /// can be different, but the covering needs to be complete (no gaps.)
   ///   [
-  ///     {'term': '2020-07-17', '5x16': 27.10, '7x8': 15.5},
-  ///     {'term': '2020-07-18', '2x16H': 22.15, '7x8': 15.5},
+  ///     {'term': '2020-07-17', 'value': {'5x16': 27.10, '7x8': 15.5}},
+  ///     {'term': '2020-07-18', 'value': {'2x16H': 22.15, '7x8': 15.5}},
   ///     ...
-  ///     {'term': '2020-08', '5x16': 31.50, '2x16H': 25.15, '7x8': 18.75},
+  ///     {'term': '2020-08', 'value': {'5x16': 31.50, '2x16H': 25.15, '7x8': 18.75}},
   ///     ...
   ///   ]
   ///   The inputs are time-ordered.
-  ForwardCurve.fromTermBucketMarks(List<Map<String,dynamic>> xs, Location location) {
+  ForwardCurve.fromJson(List<Map<String, dynamic>> xs, Location location) {
     location ??= UTC;
     for (var x in xs) {
       Interval term;
@@ -45,15 +44,13 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
       } else {
         throw ArgumentError('Unsupported term format ${x['term']}');
       }
-      var value = <Bucket,num>{};
-      for (var key in x.keys.where((e) => e != 'term')) {
-        value[Bucket.parse(key)] = x[key];
-      }
+      var value = {
+        for (var e in (x['value'] as Map).entries) Bucket.parse(e.key): e.value as num
+      };
       add(IntervalTuple(term, value));
     }
     _hourlySchedule = HourlySchedule.fromTimeSeriesWithBucket(this);
   }
-
 
   /// Calculate the value for this curve for any term and any bucket.
   /// If the curve doesn't have a value for any hour in the term you requested
@@ -68,28 +65,26 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
     while (hIterator.moveNext()) {
       if (bucket.containsHour(hIterator.current)) {
         var x0 = _hourlySchedule.value(hIterator.current);
-        if (x0 == null) return x0;
+        if (x0 == null) return null;
         avg += x0;
         i += 1;
       }
     }
-    return avg/i;
+    return avg / i;
   }
-
-
 
   /// Format this forward curve to a json format
   ///   [
-  ///     {'term': '2020-07-17', '5x16': 27.10, '7x8': 15.5},
-  ///     {'term': '2020-07-18', '2x16H': 22.15, '7x8': 15.5},
+  ///     {'term': '2020-07-17', 'value': {'5x16': 27.10, '7x8': 15.5}},
+  ///     {'term': '2020-07-18', 'value': {'2x16H': 22.15, '7x8': 15.5}},
   ///     ...
-  ///     {'term': '2020-08', '5x16': 31.50, '2x16H': 25.15, '7x8': 18.75},
+  ///     {'term': '2020-08', 'value': {'5x16': 31.50, '2x16H': 25.15, '7x8': 18.75}},
   ///     ...
   ///   ]
-  List<Map<String,dynamic>> toJson() {
-    var out = <Map<String,dynamic>>[];
+  List<Map<String, dynamic>> toJson() {
+    var out = <Map<String, dynamic>>[];
     for (var x in this) {
-      var one = <String,dynamic>{};
+      var one = <String, dynamic>{};
       if (x.interval is Date) {
         one['term'] = (x.interval as Date).toString();
       } else if (x.interval is Month) {
@@ -97,9 +92,9 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
       } else {
         throw ArgumentError('Unsupported term ${x.interval}');
       }
-      for (var entry in x.value.entries) {
-        one[entry.key.toString()] = entry.value;
-      }
+      one['value'] = {
+        for (var e in x.value.entries) e.key.toString() : e.value
+      };
       out.add(one);
     }
     return out;
@@ -109,9 +104,9 @@ class ForwardCurve extends TimeSeries<Map<Bucket,num>>{
   /// Understands only m/dd/yyyy format!
   String toCsv() {
     var dateFmt = DateFormat('M/dd/yyyy');
-    var out = <Map<String,dynamic>>[];
+    var out = <Map<String, dynamic>>[];
     for (var x in this) {
-      var one = <String,dynamic>{};
+      var one = <String, dynamic>{};
       if (x.interval is Date) {
         one['term'] = (x.interval as Date).toString(dateFmt);
       } else if (x.interval is Month) {

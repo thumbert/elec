@@ -16,16 +16,16 @@ void tests() {
     var location = getLocation('America/New_York');
     var aux = File('test/risk_system/marks/marks_test.json').readAsStringSync();
     var xs = json.decode(aux) as List;
-    var x0 = (xs[0]['value'] as List).cast<Map<String,dynamic>>();
-    var curve0 = ForwardCurve.fromTermBucketMarks(x0, location);
-    var x1 = (xs[1]['value'] as List).cast<Map<String,dynamic>>();
+    var x0 = (xs[0]['observations'] as List).cast<Map<String,dynamic>>();
+    var curve0 = ForwardCurve.fromJson(x0, location);
+    var x1 = (xs[1]['observations'] as List).cast<Map<String,dynamic>>();
     test('from the 3 standard buckets', () {
       expect(curve0.length, 11);
       expect(curve0.first.value.length, 2);
       expect(curve0.toJson(), x0);
     });
     test('from the flat bucket only', () {
-      var curve = ForwardCurve.fromTermBucketMarks(x1, location);
+      var curve = ForwardCurve.fromJson(x1, location);
       expect(curve.length, 11);
       expect(curve.first.value.length, 1);
       expect(curve.toJson(), x1);
