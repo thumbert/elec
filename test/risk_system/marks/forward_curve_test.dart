@@ -7,6 +7,7 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/risk_system/marks/forward_curve.dart';
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
@@ -55,6 +56,62 @@ void tests() {
       var value = curve0.value(term.interval, Bucket.atc);
       expect(value.toStringAsFixed(4), '24.8889');
     });
+    test('add two forward curves element by element', () {
+      var c1 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
+      ]);
+      var c2 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
+      ]);
+      var c3 = c1 + c2;
+      expect(c3.length, 3);
+      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.value, {
+        Bucket.b5x16: 60.1, Bucket.b2x16H: 50.11, Bucket.b7x8: 45.21
+      });
+    });
+    test('subtract two forward curves element by element', () {
+      var c1 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
+      ]);
+      var c2 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
+      ]);
+      var c3 = c1 - c2;
+      expect(c3.length, 3);
+      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.value, {
+        Bucket.b5x16: 59.9, Bucket.b2x16H: 49.89, Bucket.b7x8: 44.79
+      });
+    });
+    test('multiply two forward curves element by element', () {
+      var c1 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
+      ]);
+      var c2 = ForwardCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 2, Bucket.b2x16H: 5, Bucket.b7x8: 3}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
+      ]);
+      var c3 = c1 / c2;
+      expect(c3.length, 3);
+      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.value, {
+        Bucket.b5x16: 30, Bucket.b2x16H: 10, Bucket.b7x8: 15
+      });
+    });
+
+    
   });
 }
 
