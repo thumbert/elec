@@ -62,7 +62,7 @@ void tests(String rootUrl) async {
     test('toHourly', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
       var term = Term.parse('15Jan19-15Feb19', location);
-      var xs = hs.toHourly(term.interval);
+      var xs = hs.toHourly(interval: term.interval);
       expect(xs.first.interval.start, TZDateTime(location, 2019, 1, 15));
       expect(xs.last.interval.end, TZDateTime(location, 2019, 2, 16));
       expect(xs.first.value.toStringAsFixed(7), '0.9807817');
@@ -116,7 +116,7 @@ void speedTests(String rootUrl) async {
 
   sw.reset();
   sw.start();
-  var ts7 = hs.toHourly(interval);
+  var ts7 = hs.toHourly(interval: interval);
   sw.stop();
   print('From HourlyShape toHourly: ${sw.elapsedMilliseconds}');
 

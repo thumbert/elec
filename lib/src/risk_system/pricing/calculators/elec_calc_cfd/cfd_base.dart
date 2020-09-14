@@ -1,7 +1,6 @@
 part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 class _BaseCfd {
-
   /// A collection of caches for different market and curve data.
   CacheProvider cacheProvider;
 
@@ -35,15 +34,16 @@ class _BaseCfd {
   /// buckets.
   ///
   /// Return a timeseries of hourly prices.
-  Future<TimeSeries<num>> getFloatingPrice(Bucket bucket, String curveId) async {
+  Future<TimeSeries<num>> getFloatingPrice(
+      Bucket bucket, String curveId) async {
     var curveDetails = await cacheProvider.curveIdCache.get(curveId);
-    var fwdMark = await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+    var fwdMarks =
+        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
 
-    var location = fwdMark.first.interval.start.location;
+    var location = fwdMarks.first.interval.start.location;
     var _term = term.interval.withTimeZone(location);
-    var ts = HourlySchedule.fromTimeSeriesWithBucket(fwdMark).toHourly(_term);
     var res = TimeSeries.fromIterable(
-        ts.where((obs) => bucket.containsHour(obs.interval)));
+        fwdMarks.window(_term).where((obs) => bucket.containsHour(obs.interval)));
 
     error = res.isEmpty
         ? 'No prices found in the Db for curve $curveId and bucket $bucket'
@@ -53,18 +53,19 @@ class _BaseCfd {
       /// get the hourly shaping curve
       var hSchedule = await cacheProvider.hourlyShapeCache
           .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
-      var hShapeMultiplier =
-          hSchedule.toHourly(term.interval.withTimeZone(location));
+      var hShapeMultiplier = TimeSeries.fromIterable(
+          hSchedule.window(term.interval.withTimeZone(location)));
+
       /// multiply each hour by the shape factor
       res = res * hShapeMultiplier;
     }
 
     /// Check if you need to add settlement prices
-    var startDate = Date.fromTZDateTime(fwdMark.first.interval.start);
+    var startDate = Date.fromTZDateTime(fwdMarks.first.interval.start);
     if (term.startDate.isBefore(startDate)) {
       /// need to get settlement data, return all hours of the term
-      var settlementData = await cacheProvider
-          .settlementPricesCache.get(Tuple2(term, curveId));
+      var settlementData =
+          await cacheProvider.settlementPricesCache.get(Tuple2(term, curveId));
       if (term.interval.start.isBefore(settlementData.first.interval.start)) {
         // Clear the settlement cache if term start is earlier than existing
         // term.  This only gets executed once, for the first leg.
@@ -72,18 +73,18 @@ class _BaseCfd {
         settlementData = await cacheProvider.settlementPricesCache
             .get(Tuple2(term, curveId));
       }
+
       /// select only the bucket you need
       var sData = settlementData.where((e) => bucket.containsHour(e.interval));
+
       /// put it together
-      res = TimeSeries<num>()..addAll([
-        ...sData,
-        ...res.window(Interval(sData.last.interval.end, term.interval.end)),
-      ]);
+      res = TimeSeries<num>()
+        ..addAll([
+          ...sData,
+          ...res.window(Interval(sData.last.interval.end, term.interval.end)),
+        ]);
     }
 
     return res;
   }
-
-
 }
-

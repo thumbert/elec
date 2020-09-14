@@ -1,6 +1,7 @@
 library risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 import 'package:dama/dama.dart';
+import 'package:elec/src/risk_system/marks/forward_curve.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';

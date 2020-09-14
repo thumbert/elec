@@ -70,7 +70,8 @@ class HourlyShape {
     }
   }
 
-  TimeSeries<num> toHourly(Interval interval) {
+  TimeSeries<num> toHourly({Interval interval}) {
+    interval ??= data.domain;
     var ts = TimeSeries<num>();
     // need to extend the interval to make sure it matches the data boundaries
     var extInterval = Interval(Month.fromTZDateTime(interval.start).start,

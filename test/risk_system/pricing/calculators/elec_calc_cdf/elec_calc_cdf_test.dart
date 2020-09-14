@@ -173,14 +173,10 @@ void tests(String rootUrl) async {
     test('test forwardMarksCache', () async {
       var doc = await c1.cacheProvider.forwardMarksCache
           .get(Tuple2(Date(2020, 5, 29), 'isone_energy_4000_da_lmp'));
-      expect(doc.length, 79);
+      expect(doc.length, 57721);
       var x0 = doc.first;
-      expect(x0.interval, Month(2020, 6, location: location));
-      expect(x0.value, <Bucket, num>{
-        IsoNewEngland.bucket5x16: 22.2,
-        IsoNewEngland.bucket2x16H: 18.35,
-        IsoNewEngland.bucket7x8: 12.928,
-      });
+      expect(x0.interval, Hour.beginning(TZDateTime(location, 2020, 6)));
+      expect(x0.value, 12.928);
     });
     test('test getForwardMarks for 7x8 bucket', () async {
       var x =

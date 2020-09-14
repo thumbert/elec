@@ -1,8 +1,8 @@
 library risk_system.pricing.calculators.base.cache_provider;
 
+import 'package:elec/src/risk_system/marks/forward_curve.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
@@ -19,7 +19,7 @@ class CacheProvider {
 
   /// The keys of the cache are tuples (asOfDate,curveId).
   /// for daily and monthly marks
-  Cache<Tuple2<Date, String>, TimeSeries<Map<Bucket, num>>> forwardMarksCache;
+  Cache<Tuple2<Date, String>, TimeSeries<num>> forwardMarksCache;
 
   /// A cache for hourly settlement data, if available.  It makes sense for
   /// energy curves, but what do you do for other service types (LSCPR for
@@ -28,7 +28,7 @@ class CacheProvider {
   Cache<Tuple2<Term,String>, TimeSeries<num>> settlementPricesCache;
 
   /// A cache for hourly shape curves
-  Cache<Tuple2<Date, String>, HourlySchedule> hourlyShapeCache;
+  Cache<Tuple2<Date, String>, TimeSeries<num>> hourlyShapeCache;
 
   CacheProvider();
 
@@ -40,12 +40,13 @@ class CacheProvider {
     var daLmpClient = DaLmp(client, rootUrl: rootUrl);
 
   /// Populate fwdMarksCache given the asOfDate and the curveId.
-    Future<TimeSeries<Map<Bucket, num>>> _fwdMarksLoader(
+    Future<TimeSeries<num>> _fwdMarksLoader(
         Tuple2<Date, String> tuple) async {
       var aux = await curveIdCache.get(tuple.item2);
       var location = getLocation(aux['tzLocation']);
-      return forwardMarksClient.getMonthlyForwardCurve(tuple.item2, tuple.item1,
+      var marks = await forwardMarksClient.getMonthlyForwardCurve(tuple.item2, tuple.item1,
           tzLocation: location);
+      return ForwardCurve.fromIterable(marks).toHourly();
     }
 
     /// Populate the settlementPricesCache given the deal term and the curveId.
@@ -60,13 +61,13 @@ class CacheProvider {
 
     /// Cache the HourlySchedule associated with this hourly shape.
     /// tuple.item2 = 'isone_energy_4000_hourlyshape'
-    Future<HourlySchedule> _hourlyShapeLoader(
+    Future<TimeSeries<num>> _hourlyShapeLoader(
         Tuple2<Date, String> tuple) async {
       var aux = await curveIdCache.get(tuple.item2);
       var location = getLocation(aux['tzLocation']);
       var hs = await forwardMarksClient.getHourlyShape(tuple.item2, tuple.item1,
           tzLocation: location);
-      return HourlySchedule.fromHourlyShape(hs);
+      return hs.toHourly();
     }
 
     /// Loader for [curveIdCache] with all curveDetails
@@ -77,9 +78,9 @@ class CacheProvider {
     curveIdCache =
         Cache<String, Map<String, dynamic>>.lru(loader: _curveIdLoader);
     forwardMarksCache =
-        Cache<Tuple2<Date, String>, TimeSeries<Map<Bucket, num>>>.lru(
+        Cache<Tuple2<Date, String>, TimeSeries<num>>.lru(
             loader: _fwdMarksLoader);
-    hourlyShapeCache = Cache<Tuple2<Date, String>, HourlySchedule>.lru(
+    hourlyShapeCache = Cache<Tuple2<Date, String>, TimeSeries<num>>.lru(
         loader: _hourlyShapeLoader);
     settlementPricesCache = Cache<Tuple2<Term, String>, TimeSeries<num>>.lru(
       loader: _settlementPricesLoader);

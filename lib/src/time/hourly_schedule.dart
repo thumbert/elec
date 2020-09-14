@@ -9,6 +9,8 @@ import 'package:timeseries/timeseries.dart';
 /// Construct an hourly time schedule.  This is a convenient way to store the
 /// information needed to construct an hourly timeseries with a given "pattern"
 /// of values.
+///
+/// Note: this is slow.  If code needs to be fast, avoid it.
 class HourlySchedule {
   /// return the value in this hour, or [null] if the schedule is not defined
   /// for the hour.

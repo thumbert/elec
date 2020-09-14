@@ -54,7 +54,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
     }
   }
 
-
+  /// Get the entire curve as an hourly timeseries
   TimeSeries<num> toHourly() {
     if (_ts != null) return _ts;
     _ts = TimeSeries<num>();
