@@ -27,39 +27,38 @@ class HourlyShape {
 
   HourlyShape();
 
-  /// Input [ts] is an hourly timeseries.
+  /// Construct the shaping factors from an hourly timeseries.
   HourlyShape.fromTimeSeries(TimeSeries<num> ts, this.buckets) {
-    // calculate the average by month/bucket/hour
+    // calculate the average by month/bucket/hourBeginning
     var nest = Nest()
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
       ..key((IntervalTuple e) => assignBucket(e.interval, buckets))
       ..key((IntervalTuple e) => e.interval.start.hour)
       ..rollup((List xs) => dama.mean(xs.map((e) => e.value)));
     var aux = nest.map(ts);
-    var avg = flattenMap(aux, ['month', 'bucket', 'hourBeginning', 'value']);
+    var avg = flattenMap(aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour']);
 
-    // calculate the shaping factors
-    // Need to pay attention on the DST transitions.  For example: in Mar there
-    // will be 31 hours beginning 0, 1; but only 30 yours beginning 2.
+    // calculate the average price by month/bucket
+    var nestB = Nest()
+      ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
+      ..key((IntervalTuple e) => assignBucket(e.interval, buckets))
+      ..rollup((List xs) {
+        return dama.mean(xs.map((e) => e.value));
+      });
+    var _avgPrice = nestB.map(ts);
+    var avgPrice = flattenMap(_avgPrice, ['month', 'bucket', 'averageValue']);
+
+    // join them (by bucket/month) to calculate the shaping factor
+    var xs = join(avg, avgPrice);
     var nest2 = Nest()
       ..key((e) => e['month'])
       ..key((e) => e['bucket'])
       ..rollup((List xs) {
-        // In case the input [ts] has missing data, count the number of hours
-        // in this month by hourBeginning to do the correct averaging.
-        // Need to sort the count by hourBeginning.
-        var hours = Term.fromInterval(xs.first['month'])
-            .hours()
-            .where((hour) => (xs.first['bucket'] as Bucket).containsHour(hour));
-        var aux = groupBy(hours, (Hour e) => e.start.hour);
-        var count = [ for(var k in aux.keys) [k, aux[k].length]];
-        count.sort((a,b) => a[0].compareTo(b[0]));
-        // now do the scaling
-        var avg = dama.weightedMean(xs.map((e) => e['value'] as num),
-            count.map((e) => e[1]));
-        return xs.map((e) => e['value'] / avg).toList();
+        xs.sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));
+        return xs.map((e) => e['averageValueForHour']/e['averageValue']).toList();
       });
-    var bux = nest2.map(avg);
+    var bux = nest2.map(xs);
+
 
     data = TimeSeries<Map<Bucket, List<num>>>();
     for (var month in bux.keys) {
@@ -71,8 +70,44 @@ class HourlyShape {
     }
   }
 
+  TimeSeries<num> toHourly(Interval interval) {
+    var ts = TimeSeries<num>();
+    // need to extend the interval to make sure it matches the data boundaries
+    var extInterval = Interval(Month.fromTZDateTime(interval.start).start,
+        Month.fromTZDateTime(interval.end.subtract(Duration(seconds: 1))).end);
+    var xs = data.window(extInterval);
+    // assume same buckets for all observations
+    // keep buckets in the order below for faster containsHour test
+    final buckets = [Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H];
+
+    // go from hourBeginning value to index in bucket.hourBeginning array
+    final idx = {
+      for (var bucket in buckets)
+        bucket: Map.fromIterables(bucket.hourBeginning,
+            List.generate(bucket.hourBeginning.length, (i) => i))
+    };
+    for (var x in xs) {
+      var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
+      num value;
+      for (var hour in hours) {
+        for (var bucket in buckets) {
+          if (bucket.containsHour(hour)) {
+            var ind = idx[bucket][hour.start.hour];
+            value = x.value[bucket][ind];
+            break; // the bucket for loop
+          }
+        }
+        if (interval.containsInterval(hour)) {
+          ts.add(IntervalTuple(hour, value));
+        }
+      }
+    }
+
+    return ts;
+  }
+
   /// The opposite of [toJson] method.
-  HourlyShape.fromJson(Map<String,dynamic> x, Location location) {
+  HourlyShape.fromJson(Map<String, dynamic> x, Location location) {
     if (!x.keys.toSet().containsAll({'terms', 'buckets'})) {
       throw ArgumentError('Missing one of keys: terms, buckets.');
     }
@@ -81,16 +116,15 @@ class HourlyShape {
     var aux = x['buckets'] as Map;
     buckets = _buckets.map((e) => Bucket.parse(e)).toList();
     data = TimeSeries<Map<Bucket, List<num>>>();
-    for (var i=0; i<months.length; i++) {
+    for (var i = 0; i < months.length; i++) {
       var month = Month.parse(months[i], fmt: _isoFmt, location: location);
-      var value = <Bucket,List<num>>{};
+      var value = <Bucket, List<num>>{};
       for (var _bucket in _buckets) {
         value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
       }
       data.add(IntervalTuple(month, value));
     }
   }
-
 
   /// Format the data for serialization to Mongo.
   ///{

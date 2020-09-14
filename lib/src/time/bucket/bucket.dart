@@ -279,7 +279,7 @@ class Bucket5x16 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    var dayOfWeek = hour.start.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
@@ -826,8 +826,8 @@ class Bucket2x16H extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
     if (hour.start.hour < 7 || hour.start.hour == 23) return false;
+    var dayOfWeek = hour.start.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {

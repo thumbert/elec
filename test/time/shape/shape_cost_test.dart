@@ -17,7 +17,9 @@ void tests() {
         IsoNewEngland.bucket7x24,
       ];
       var hours = interval.splitLeft((dt) => Hour.beginning(dt));
-      var price = TimeSeries.from(hours, [32.72, 33.68,
+      var price = TimeSeries.from(hours, [
+        32.72,
+        33.68,
         32.99,
         30,
         30.3,
@@ -41,7 +43,8 @@ void tests() {
         33.94,
         31.32,
       ]);
-      var quantity = TimeSeries.from(hours, [2943.135,
+      var quantity = TimeSeries.from(hours, [
+        2943.135,
         2802.993,
         2810.21,
         2850.705,
@@ -70,7 +73,6 @@ void tests() {
           timeAggregation: TimeAggregation.term);
       expect(cost[buckets.first].first.value.toStringAsFixed(3), '0.317');
     });
-
   });
 }
 

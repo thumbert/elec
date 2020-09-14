@@ -139,6 +139,7 @@ class HourlySchedule {
 
   /// Create an hourly schedule from a timeseries.
   /// The input timeseries can have any periodicity higher than hourly.
+  /// An order of magnitude faster to do [ts.interpolate(Duration(hours: 1))]
   HourlySchedule.fromTimeSeries(TimeSeries<num> ts) {
     _f = (Hour hour) {
       try {
@@ -158,6 +159,7 @@ class HourlySchedule {
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
   /// For example the input timeseries can be monthly.
   /// Works even if the covering is not complete.
+  @Deprecated('Too slow.  Use toHourly from ForwardCurve.')
   HourlySchedule.fromTimeSeriesWithBucket(TimeSeries<Map<Bucket,num>> ts) {
     _f = (Hour hour) {
       if (!ts.domain.containsInterval(hour)) {
@@ -175,6 +177,7 @@ class HourlySchedule {
   }
 
   /// Construct an hourly schedule from an hourly shape.
+  /// Almost an order of magnitude faster to use [hs.toHourly(interval)].
   HourlySchedule.fromHourlyShape(HourlyShape hs) {
     // go from hourBeginning value to index in bucket.hourBeginning array
     var idx = { for (var bucket in hs.data.first.value.keys) bucket :

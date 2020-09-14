@@ -17,8 +17,10 @@ void tests() {
     var location = getLocation('America/New_York');
     var aux = File('test/risk_system/marks/marks_test.json').readAsStringSync();
     var xs = json.decode(aux) as List;
+    // a power curve, daily and monthly, 3 buckets
     var x0 = (xs[0]['observations'] as List).cast<Map<String,dynamic>>();
     var curve0 = ForwardCurve.fromJson(x0, location);
+    // a gas curve, 7x24 bucket
     var x1 = (xs[1]['observations'] as List).cast<Map<String,dynamic>>();
     test('from the 3 standard buckets', () {
       expect(curve0.length, 11);
@@ -35,6 +37,13 @@ void tests() {
       var curve0m = ForwardCurve.fromIterable(
           curve0.where((e) => e.interval is Month));
       expect(curve0m.length, 5);
+    });
+    test('toHourly', () {
+      var ts = curve0.toHourly();
+      expect(ts.first.interval, Hour.beginning(TZDateTime(location, 2020, 7, 26)));
+      expect(ts.last.interval, Hour.ending(TZDateTime(location, 2021)));
+      var n = Term.parse('26Jul20-31Dec20', location).hours().length;
+      expect(ts.length, n);
     });
     test('calculate value for offpeak bucket (aggregate 2x16H, 7x8)', () {
       var month = Month(2020, 8, location: location);

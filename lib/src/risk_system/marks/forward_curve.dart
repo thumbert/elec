@@ -12,12 +12,14 @@ import 'package:timeseries/timeseries.dart';
 class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
-  HourlySchedule _hourlySchedule;
+  TimeSeries<num> _ts;
 
   /// A simple forward curve model for daily and monthly values extending
-  /// a TimeSeries<Map<Bucket,num>>.
+  /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   ForwardCurve();
 
+  /// A simple forward curve model for daily and monthly values extending
+  /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   ForwardCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
   }
@@ -32,7 +34,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   ///     {'term': '2020-08', 'value': {'5x16': 31.50, '2x16H': 25.15, '7x8': 18.75}},
   ///     ...
   ///   ]
-  ///   The inputs are time-ordered.
+  ///   The inputs are time-ordered with no gaps.
   ForwardCurve.fromJson(List<Map<String, dynamic>> xs, Location location) {
     location ??= UTC;
     for (var x in xs) {
@@ -52,27 +54,44 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
     }
   }
 
-  /// Get the [HourlySchedule] associated with this ForwardCurve
-  HourlySchedule get hourlySchedule {
-    _hourlySchedule ??= HourlySchedule.fromTimeSeriesWithBucket(this);
-    return _hourlySchedule;
+
+  TimeSeries<num> toHourly() {
+    if (_ts != null) return _ts;
+    _ts = TimeSeries<num>();
+    var buckets = <Bucket>{...expand((e) => e.value.keys)};
+    if (buckets == {Bucket.b7x8, Bucket.b2x16H, Bucket.b5x16}) {
+      // this is fastest
+      buckets = {Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H};
+    }
+    for (var x in this) {
+      var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
+      for (var hour in hours) {
+        for (var bucket in buckets) {
+          if (bucket.containsHour(hour)) {
+            _ts.add(IntervalTuple(hour, x.value[bucket]));
+            break;
+          }
+        }
+      }
+    }
+    return _ts;
   }
 
   /// Calculate the value for this curve for any term and any bucket.
-  /// If the curve doesn't have a value for any hour in the term you requested
-  /// return [null].
+  ///
   num value(Interval interval, Bucket bucket, {HourlyShape hourlyShape}) {
     if (hourlyShape != null) {
       throw ArgumentError('Not implemented yet');
     }
+    if (!toHourly().domain.containsInterval(interval)) {
+      throw ArgumentError('Forward curve not defined for the entire $interval');
+    }
     var avg = 0.0;
     var i = 0;
-    var hIterator = interval.hourIterator;
-    while (hIterator.moveNext()) {
-      if (bucket.containsHour(hIterator.current)) {
-        var x0 = hourlySchedule.value(hIterator.current);
-        if (x0 == null) return null;
-        avg += x0;
+    var xs = _ts.window(interval);
+    for (var x in xs) {
+      if (bucket.containsHour(x.interval)) {
+        avg += x.value;
         i += 1;
       }
     }

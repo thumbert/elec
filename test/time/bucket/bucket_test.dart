@@ -39,7 +39,7 @@ void aggregateByBucketMonth() {
 }
 
 List<int> countByMonth(int year, Bucket bucket) {
-  var tzLocation = getLocation('America/New_York');;
+  var tzLocation = getLocation('America/New_York');
   var months =
       Interval(TZDateTime(tzLocation, year), TZDateTime(tzLocation, year + 1))
           .splitLeft((dt) => Month.fromTZDateTime(dt));
@@ -203,9 +203,33 @@ void tests() {
   });
 }
 
+void speedTest() {
+  var location = getLocation('America/New_York');
+  var term = Term.parse('Jan21-Dec30', location);
+  var values = {Bucket.b5x16: 80, Bucket.b7x8: 56, Bucket.b2x16H: 32};
+  var hours = term.hours();
+  var buckets = [Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H];
+  var ts = TimeSeries<num>();
+  var sw = Stopwatch()..start();
+  for (var hour in hours) {
+    for (var bucket in buckets) {
+      if (bucket.containsHour(hour)) {
+        ts.add(IntervalTuple(hour, values[bucket]));
+        // ts.add(IntervalTuple(hour, 1));
+        break;
+      }
+    }
+  }
+  sw.stop();
+  print(sw.elapsedMilliseconds);
+}
+
+
 void main() async {
   await initializeTimeZone();
-  tests();
+  // tests();
 
-  aggregateByBucketMonth();
+  // aggregateByBucketMonth();
+
+  speedTest();
 }
