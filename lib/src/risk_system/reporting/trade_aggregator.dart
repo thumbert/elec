@@ -23,7 +23,7 @@ class SimpleTradeAggregator {
 
   Nest _nestMw, _nestMwh, _nestMtm;
 
-  var _mustHaveColumns = <String>{'buy/sell', 'term', 'bucket', 'mw', 'price'};
+  final _mustHaveColumns = <String>{'buy/sell', 'term', 'bucket', 'mw', 'price'};
 
   /// A simple trade aggregator to calculate the total position usually
   /// by month and bucket.  For now only for electricity trades.
@@ -79,19 +79,21 @@ class SimpleTradeAggregator {
       var bucket = Bucket.parse(aux['bucket']);
       var buckets = <Bucket>[bucket];
       // break down the Flat bucket into Peak and Offpeak trades.
-      if (bucket == IsoNewEngland.bucket7x24)
+      if (bucket == IsoNewEngland.bucket7x24) {
         buckets = <Bucket>[
           IsoNewEngland.bucketPeak,
           IsoNewEngland.bucketOffpeak
         ];
+      }
       for (var bucket in buckets) {
         var mw = aux['mw'];
         var price = aux['price'];
         var _months =
             term.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
         for (var month in _months) {
-          if (!_hours.containsKey(Tuple2(bucket, month)))
+          if (!_hours.containsKey(Tuple2(bucket, month))) {
             _hours[Tuple2(bucket, month)] = _calculateHours(bucket, month);
+          }
           _tradesX.add(<String, dynamic>{
             'buy/sell': buySell,
             'month': month,
@@ -136,14 +138,15 @@ class SimpleTradeAggregator {
   }
 
   /// Check inputs
-  _validate(Map<String, dynamic> trade) {
+  void _validate(Map<String, dynamic> trade) {
     if (!trade.keys.toSet().containsAll(_mustHaveColumns)) {
       throw ArgumentError('Trade $trade does not have all must have columns');
     }
 
     /// No negative mw values are allowed.  A flat trade with 0 mw value may
     /// be used to set the monthly ranges for the aggregation.
-    if (trade['mw'] < 0)
+    if (trade['mw'] < 0) {
       throw ArgumentError('Trade quantity needs to be positive. $trade');
+    }
   }
 }

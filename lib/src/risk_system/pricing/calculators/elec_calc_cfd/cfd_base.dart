@@ -10,18 +10,30 @@ class _BaseCfd {
   Date get asOfDate => _asOfDate;
   set asOfDate(Date date) {
     _asOfDate = date;
+    // push it into the legs
+    for (var leg in legs) {
+      leg.asOfDate = asOfDate;
+    }
   }
 
   BuySell _buySell;
   BuySell get buySell => _buySell;
   set buySell(BuySell buySell) {
     _buySell = buySell;
+    // push it into the legs
+    for (var leg in legs) {
+      leg.buySell = buySell;
+    }
   }
 
   Term _term;
   Term get term => _term;
   set term(Term term) {
     _term = term;
+    // push it into the legs
+    for (var leg in legs) {
+      leg.term = term;
+    }
   }
 
   /// Communicate an error with the UI.
@@ -42,8 +54,9 @@ class _BaseCfd {
 
     var location = fwdMarks.first.interval.start.location;
     var _term = term.interval.withTimeZone(location);
-    var res = TimeSeries.fromIterable(
-        fwdMarks.window(_term).where((obs) => bucket.containsHour(obs.interval)));
+    var res = TimeSeries.fromIterable(fwdMarks
+        .window(_term)
+        .where((obs) => bucket.containsHour(obs.interval)));
 
     error = res.isEmpty
         ? 'No prices found in the Db for curve $curveId and bucket $bucket'

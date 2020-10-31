@@ -1,19 +1,19 @@
 library risk_system.pricing.calculators.elec_calc_cfd.flat_report;
 
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_swap.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table_base.dart';
 
 class FlatReportElecCfd implements Report {
-  ElecCalculatorCfd calculator;
+  ElecSwapCalculator calculator;
 
-  static final _fmtCurrency2 = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  static final _fmtCurrency2 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 0);
   static final _fmt0 = NumberFormat()..maximumIntegerDigits = 0;
 
-
   /// a json output
-  Map<String,dynamic> _json;
+  Map<String, dynamic> _json;
 
   FlatReportElecCfd(this.calculator);
 
@@ -30,14 +30,17 @@ class FlatReportElecCfd implements Report {
     // rearrange the leaves, start with the USD leaves first
     var cashRows = tbl.where((e) => e['curveId'] == 'USD').toList();
     var _tbl = Table.from([
-      ...cashRows, 
-      ...tbl.where((e) => e['curveId'] != 'USD'), 
-    ], options: {'columnSeparation': '  '});
+      ...cashRows,
+      ...tbl.where((e) => e['curveId'] != 'USD'),
+    ], options: {
+      'columnSeparation': '  '
+    });
 
     // add spacing between fixed and floating commodities
     var aux = _tbl.toString().split('\n');
     aux.insert(cashRows.length + 1, ''); // an empty row
-    aux.insert(cashRows.length + 2, aux.first); // colnames for commmodity leaves
+    aux.insert(
+        cashRows.length + 2, aux.first); // colnames for commmodity leaves
 
     var out = StringBuffer();
     out.writeln('Flat Report');
@@ -51,30 +54,40 @@ class FlatReportElecCfd implements Report {
 
   /// Output a flat report in json format.
   @override
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     if (_json == null) {
-      var table = <Map<String,dynamic>>[];
+      var table = <Map<String, dynamic>>[];
       for (var leg in calculator.legs) {
         for (var leaf in leg.leaves) {
           table.add({
             'term': leaf.interval.toString(),
             'curveId': 'USD',
             'bucket': '',
-            'nominalQuantity': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'nominalQuantity': -calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.fixPrice,
             'forwardPrice': 1,
-            'value': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'value': -calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.fixPrice,
           });
           table.add({
             'term': leaf.interval.toString(),
             'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
-            'nominalQuantity': calculator.buySell.sign * leaf.quantity * leaf.hours,
+            'nominalQuantity':
+                calculator.buySell.sign * leaf.quantity * leaf.hours,
             'forwardPrice': leaf.floatingPrice,
-            'value': calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice,
+            'value': calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.floatingPrice,
           });
         }
       }
-      var out = <String,dynamic>{
+      var out = <String, dynamic>{
         'asOfDate': calculator.asOfDate.toString(),
         'reportDate': DateTime.now().toString(),
         'table': table,
@@ -85,4 +98,3 @@ class FlatReportElecCfd implements Report {
     return _json;
   }
 }
-

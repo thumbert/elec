@@ -1,14 +1,10 @@
 library risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
 
 import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/marks/forward_curve.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
-//import 'package:elec_server/client/marks/curves/curve_id.dart';
-//import 'package:elec_server/client/marks/forward_marks.dart';
-import 'package:intl/intl.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
@@ -21,18 +17,33 @@ part 'cfd_base.dart';
 part 'commodity_leg.dart';
 part 'leaf.dart';
 
-enum TimePeriod {month, day, hour}
+enum TimePeriod { month, day, hour }
 
-class ElecCalculatorCfd extends _BaseCfd {
+class ElecSwapCalculator extends _BaseCfd {
   String comments;
 
-  ElecCalculatorCfd(CacheProvider cacheProvider) {
+  ElecSwapCalculator(
+      {Date asOfDate,
+      Term term,
+      BuySell buySell,
+      List<CommodityLeg> legs,
+      CacheProvider cacheProvider}) {
+    this.asOfDate = asOfDate;
+    this.term = term;
+    this.buySell = buySell;
+    // these 3 properties are needed for the legs
+    for (var leg in legs) {
+      leg.asOfDate = asOfDate;
+      leg.term = term;
+      leg.buySell = buySell;
+    }
+    this.legs = legs;
     this.cacheProvider = cacheProvider;
   }
 
   /// The recommended way to initialize from a template.  See tests.
-  /// Method is async because it uses [curveIdCache] and [forwardMarksCache].
-  void fromJson(Map<String, dynamic> x) async {
+  /// Still needs [cacheProvider] to be set.
+  ElecSwapCalculator.fromJson(Map<String, dynamic> x) {
     if (x['term'] == null) {
       throw ArgumentError('Json input is missing the key term');
     }
@@ -54,9 +65,11 @@ class ElecCalculatorCfd extends _BaseCfd {
     legs = <CommodityLeg>[];
     var _aux = x['legs'] as List;
     for (Map<String, dynamic> e in _aux) {
-      var leg = CommodityLeg(this);
-      await leg.fromJson(e);
-      leg.makeLeaves();
+      e['asOfDate'] = x['asOfDate'];
+      e['term'] = x['term'];
+      e['buy/sell'] = x['buy/sell'];
+      var leg = CommodityLeg.fromJson(e);
+      // leg.makeLeaves();
       legs.add(leg);
     }
   }
@@ -78,10 +91,7 @@ class ElecCalculatorCfd extends _BaseCfd {
   /// It is a brittle design, because people may forget to call it.
   void build() async {
     for (var leg in legs) {
-      var curveDetails = await leg.calculator.cacheProvider.curveIdCache.get(leg.curveId);
-      leg.region = curveDetails['region'];
-      leg.serviceType = curveDetails['serviceType'];
-      leg.curveName = curveDetails['curve'];
+      var curveDetails = await cacheProvider.curveIdCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
       leg.hourlyFloatingPrice = await getFloatingPrice(leg.bucket, leg.curveId);
       leg.makeLeaves();
@@ -89,6 +99,7 @@ class ElecCalculatorCfd extends _BaseCfd {
   }
 
   /// Get the total dollar value of this calculator.
+  /// Need to build() the calculator first.
   num dollarPrice() {
     var value = 0.0;
     for (var leg in legs) {
@@ -113,5 +124,3 @@ class ElecCalculatorCfd extends _BaseCfd {
     };
   }
 }
-
-

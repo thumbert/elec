@@ -1,21 +1,22 @@
 library risk_system.pricing.calculators.elec_calc_cfd.monthly_position_report;
 
 import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_calc_cfd.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_swap.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
 import 'package:table/table_base.dart';
 
 class MonthlyPositionReportElecCfd implements Report {
-  ElecCalculatorCfd calculator;
+  ElecSwapCalculator calculator;
 
-  static final _fmtCurrency2 = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  static final _fmtCurrency2 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 0);
   static final _fmt0 = NumberFormat()..maximumIntegerDigits = 0;
   static final _fmtDt = DateFormat.yMMMMd('en_US').add_jm();
 
   /// json output
-  Map<String,dynamic> _json;
+  Map<String, dynamic> _json;
 
   MonthlyPositionReportElecCfd(this.calculator);
 
@@ -33,19 +34,20 @@ class MonthlyPositionReportElecCfd implements Report {
     /// calculate totals by period
     var nest = Nest()
       ..key((e) => e['term'])
-      ..rollup((List xs) => _fmt0.format(sum(xs.map((e) => e['nominalQuantity']))));
+      ..rollup(
+          (List xs) => _fmt0.format(sum(xs.map((e) => e['nominalQuantity']))));
     var totalsByTerm = flattenMap(nest.map(tbl), ['term', 'total'])
       ..add({'term': 'total', 'total': ''});
-
 
     /// add the totals by curveId and bucket to the table
     nest = Nest()
       ..key((e) => e['curveId'])
       ..key((e) => e['bucket'])
       ..rollup((List xs) => sum(xs.map((e) => e['nominalQuantity'])));
-    var totalCurveId = flattenMap(nest.map(tbl), ['curveId', 'bucket', 'nominalQuantity']);
+    var totalCurveId =
+        flattenMap(nest.map(tbl), ['curveId', 'bucket', 'nominalQuantity']);
     for (var row in totalCurveId) {
-      tbl.add(<String,dynamic>{'term': 'total', ...row});
+      tbl.add(<String, dynamic>{'term': 'total', ...row});
     }
 
     for (var row in tbl) {
@@ -61,30 +63,40 @@ class MonthlyPositionReportElecCfd implements Report {
 
   /// Output a flat report in json format.
   @override
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     if (_json == null) {
-      var table = <Map<String,dynamic>>[];
+      var table = <Map<String, dynamic>>[];
       for (var leg in calculator.legs) {
         for (var leaf in leg.leaves) {
           table.add({
             'term': leaf.interval.toString(),
             'curveId': 'USD',
             'bucket': '',
-            'nominalQuantity': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'nominalQuantity': -calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.fixPrice,
             'forwardPrice': 1,
-            'value': -calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.fixPrice,
+            'value': -calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.fixPrice,
           });
           table.add({
             'term': leaf.interval.toString(),
             'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
-            'nominalQuantity': calculator.buySell.sign * leaf.quantity * leaf.hours,
+            'nominalQuantity':
+                calculator.buySell.sign * leaf.quantity * leaf.hours,
             'forwardPrice': leaf.floatingPrice,
-            'value': calculator.buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice,
+            'value': calculator.buySell.sign *
+                leaf.quantity *
+                leaf.hours *
+                leaf.floatingPrice,
           });
         }
       }
-      var out = <String,dynamic>{
+      var out = <String, dynamic>{
         'asOfDate': calculator.asOfDate.toString(),
         'reportDate': DateTime.now().toString(),
         'table': table,
@@ -95,4 +107,3 @@ class MonthlyPositionReportElecCfd implements Report {
     return _json;
   }
 }
-
