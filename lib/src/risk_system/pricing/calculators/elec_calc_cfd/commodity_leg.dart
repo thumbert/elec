@@ -1,4 +1,10 @@
-part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
+part of elec.calculators;
+
+// import 'package:date/date.dart';
+// import 'package:elec/elec.dart';
+// import 'package:elec/risk_system.dart';
+// import 'package:timezone/timezone.dart';
+// import 'cfd_base.dart';
 
 class CommodityLeg extends _BaseCfd {
   String curveId;

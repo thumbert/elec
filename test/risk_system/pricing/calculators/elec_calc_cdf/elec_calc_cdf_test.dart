@@ -7,7 +7,7 @@ import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dar
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_swap.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';

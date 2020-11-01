@@ -1,4 +1,4 @@
-part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
+part of elec.calculators;
 
 class _BaseCfd {
   /// A collection of caches for different market and curve data.

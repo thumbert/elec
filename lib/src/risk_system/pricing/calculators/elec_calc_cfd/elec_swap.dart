@@ -1,21 +1,4 @@
-library risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
-
-import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/flat_report.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/monthly_position_report.dart';
-import 'package:elec/src/risk_system/pricing/reports/report.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
-import 'package:date/date.dart';
-import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
-import '../base/cache_provider.dart';
-
-part 'cfd_base.dart';
-part 'commodity_leg.dart';
-part 'leaf.dart';
+part of elec.calculators;
 
 enum TimePeriod { month, day, hour }
 

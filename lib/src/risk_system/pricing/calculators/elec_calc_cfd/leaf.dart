@@ -1,4 +1,4 @@
-part of risk_system.pricing.calculators.elec_calc_cdf.elec_calc_cfd;
+part of elec.calculators;
 
 /// One leaf per period (month or day).
 class Leaf {
@@ -7,6 +7,7 @@ class Leaf {
   num quantity;
   num fixPrice;
   num floatingPrice;
+
   /// number of hours in this period
   int hours;
 

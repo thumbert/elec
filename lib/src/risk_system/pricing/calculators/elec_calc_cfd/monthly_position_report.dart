@@ -1,7 +1,7 @@
 library risk_system.pricing.calculators.elec_calc_cfd.monthly_position_report;
 
 import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_calc_cfd/elec_swap.dart';
+import 'package:elec/calculators/elec_swap.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
