@@ -1,9 +1,14 @@
 part of elec.risk_system;
 
-
 class BuySell {
   final int sign;
   const BuySell._internal(this.sign);
+
+  BuySell.fromSign(this.sign) {
+    if (sign != 1 && sign != -1) {
+      throw ArgumentError('Invalid sign value $sign');
+    }
+  }
 
   factory BuySell.parse(String x) {
     var y = x.toLowerCase();
@@ -17,5 +22,15 @@ class BuySell {
   static const sell = BuySell._internal(-1);
 
   @override
-  String toString()  => sign == 1 ? 'Buy' : 'Sell';
+  String toString() => sign == 1 ? 'Buy' : 'Sell';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! BuySell) return false;
+    BuySell bs = other;
+    return bs.sign == sign;
+  }
+
+  @override
+  int get hashCode => sign;
 }

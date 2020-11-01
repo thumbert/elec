@@ -1,5 +1,6 @@
 library elec.risk_system;
 
+import 'package:elec/src/common_enums.dart';
 import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
