@@ -24,7 +24,6 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
     addAll(xs);
   }
 
-
   /// Construct a forward curve given an input in this form.  The buckets
   /// can be different, but the covering needs to be complete (no gaps.)
   ///   [
@@ -96,6 +95,47 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
       }
     }
     return avg / i;
+  }
+
+  /// Get the daily part of the curve.  Can be empty.  All intervals are
+  /// [Date]s.
+  ForwardCurve dailyComponent() {
+    return ForwardCurve.fromIterable(where((e) => e.interval is Date));
+  }
+
+  /// Get the monthly part of the curve.  All intervals are [Month]s.
+  ForwardCurve monthlyComponent() {
+    return ForwardCurve.fromIterable(where((e) => e.interval is Month));
+  }
+
+  /// If there are monthly marks before and including [upTo] month, expand them
+  /// into to daily marks (same buckets.)
+  ForwardCurve expandToDaily(Month upTo) {
+    var out = dailyComponent();
+    var mCurve = monthlyComponent();
+    for (var i = 0; i < mCurve.length; i++) {
+      if ((mCurve[i].interval as Month).isAfter(upTo)) {
+        out.add(mCurve[i]);
+      } else {
+        // split into daily curve
+        var buckets = mCurve[i].value.keys;
+        var dates = (mCurve[i].interval as Month).days();
+        for (var date in dates) {
+          var hours = date.hours();
+          var value = <Bucket, num>{};
+          for (var bucket in buckets) {
+            for (var hour in hours) {
+              if (bucket.containsHour(hour)) {
+                value[bucket] = mCurve[i].value[bucket];
+                break;
+              }
+            }
+          }
+          out.add(IntervalTuple(date, value));
+        }
+      }
+    }
+    return out;
   }
 
   /// Format this forward curve to a json format
@@ -205,8 +245,4 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
 
     return ForwardCurve.fromIterable(ys.observations);
   }
-
-
-
-
 }
