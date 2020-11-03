@@ -37,6 +37,9 @@ void tests() {
           ForwardCurve.fromIterable(curve0.where((e) => e.interval is Month));
       expect(curve0m.length, 5);
     });
+    test('first month', () {
+      expect(curve0.firstMonth, Month(2020, 8, location: location));
+    });
     test('expand to daily', () {
       var curve0P1 = curve0.expandToDaily(Month(2020, 8, location: location));
       expect(curve0P1.length, 41);

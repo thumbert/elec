@@ -108,6 +108,9 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
     return ForwardCurve.fromIterable(where((e) => e.interval is Month));
   }
 
+  /// get the first month that is marked
+  Month get firstMonth => firstWhere((e) => e.interval is Month).interval;
+
   /// If there are monthly marks before and including [upTo] month, expand them
   /// into to daily marks (same buckets.)
   ForwardCurve expandToDaily(Month upTo) {
