@@ -36,10 +36,20 @@ class _BaseCfd {
     }
   }
 
+  List<CommodityLeg> _legs;
+  List<CommodityLeg> get legs => _legs ?? <CommodityLeg>[];
+  set legs(List<CommodityLeg> xs) {
+    _legs = <CommodityLeg>[];
+    for (var x in xs) {
+      x.term = term;
+      x.asOfDate = asOfDate;
+      x.buySell = buySell;
+      _legs.add(x);
+    }
+  }
+
   /// Communicate an error with the UI.
   String error = '';
-
-  var legs = <CommodityLeg>[];
 
   /// Get daily and monthly marks for a given curveId and bucket.
   /// LMP curves will also use an hourly shape curve to support non-standard

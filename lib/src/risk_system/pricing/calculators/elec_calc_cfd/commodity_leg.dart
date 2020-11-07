@@ -28,9 +28,6 @@ class CommodityLeg extends _BaseCfd {
   HourlySchedule fixPriceSchedule;
 
   CommodityLeg({
-    Date asOfDate,
-    Term term,
-    BuySell buySell,
     this.curveId,
     this.bucket,
     this.timePeriod,
@@ -38,9 +35,7 @@ class CommodityLeg extends _BaseCfd {
     this.fixPriceSchedule,
     this.tzLocation,
   }) {
-    this.asOfDate = asOfDate;
-    this.term = term;
-    this.buySell = buySell;
+    fixPriceSchedule ??= HourlySchedule.filled(0);
   }
 
   /// Support hourly, daily and monthly quantities/fixPrices.

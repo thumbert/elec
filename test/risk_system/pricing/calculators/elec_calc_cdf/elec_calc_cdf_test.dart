@@ -118,29 +118,46 @@ void tests(String rootUrl) async {
       c1 = ElecSwapCalculator.fromJson(_calc1())..cacheProvider = cacheProvider;
       await c1.build();
     });
-    test('initialize by hand', () async {
-      var calc = ElecSwapCalculator(
-          asOfDate: Date(2020, 5, 29),
-          term: Term.parse('Jan21-Mar21', location),
-          buySell: BuySell.buy,
-          legs: [
-            CommodityLeg(
-                curveId: 'isone_energy_4000_da_lmp',
-                tzLocation: location,
-                bucket: Bucket.b5x16,
-                timePeriod: TimePeriod.month,
-                quantitySchedule: HourlySchedule.filled(50),
-                fixPriceSchedule: HourlySchedule.filled(0)),
-          ],
-          cacheProvider: cacheProvider);
+    // test('initialize by hand', () async {
+    //   var calc = ElecSwapCalculator(
+    //       asOfDate: Date(2020, 5, 29),
+    //       term: Term.parse('Jan21-Mar21', location),
+    //       buySell: BuySell.buy,
+    //       legs: [
+    //         CommodityLeg(
+    //             curveId: 'isone_energy_4000_da_lmp',
+    //             tzLocation: location,
+    //             bucket: Bucket.b5x16,
+    //             timePeriod: TimePeriod.month,
+    //             quantitySchedule: HourlySchedule.filled(50),
+    //             fixPriceSchedule: HourlySchedule.filled(0)),
+    //       ],
+    //       cacheProvider: cacheProvider);
+    //   await calc.build();
+    //   expect(calc.dollarPrice().round(), 2560000);
+    //   expect(calc.legs.first.price().toStringAsFixed(2), '50.79');
+    //   // change the term and reprice
+    //   calc.term = Term.parse('Jan21-Jun21', location);
+    //   await calc.build();
+    //   expect(calc.legs.first.price().toStringAsFixed(2), '39.36');
+    //   expect(calc.legs.first.showQuantity(), 50);
+    // });
+    test('initialize by hand with cascades', () async {
+      var calc = ElecSwapCalculator()
+        ..asOfDate = Date(2020, 5, 29)
+        ..term = Term.parse('Jan21-Mar21', location)
+        ..buySell = BuySell.buy
+        ..legs = [
+          CommodityLeg(
+              curveId: 'isone_energy_4000_da_lmp',
+              tzLocation: location,
+              bucket: Bucket.b5x16,
+              timePeriod: TimePeriod.month,
+              quantitySchedule: HourlySchedule.filled(50)),
+        ]
+        ..cacheProvider = cacheProvider;
       await calc.build();
       expect(calc.dollarPrice().round(), 2560000);
-      expect(calc.legs.first.price().toStringAsFixed(2), '50.79');
-      // change the term and reprice
-      calc.term = Term.parse('Jan21-Jun21', location);
-      await calc.build();
-      expect(calc.legs.first.price().toStringAsFixed(2), '39.36');
-      expect(calc.legs.first.showQuantity(), 50);
     });
     test('fromJson', () {
       expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));

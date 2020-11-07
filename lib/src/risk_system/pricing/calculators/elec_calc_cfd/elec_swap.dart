@@ -14,9 +14,9 @@ class ElecSwapCalculator extends _BaseCfd {
     this.asOfDate = asOfDate;
     this.term = term;
     this.buySell = buySell;
-    this.legs = legs ?? <CommodityLeg>[];
+    this.legs = legs ?? super.legs;
     // these 3 properties are needed for the legs
-    for (var leg in legs) {
+    for (var leg in this.legs) {
       leg.asOfDate = asOfDate;
       leg.term = term;
       leg.buySell = buySell;
