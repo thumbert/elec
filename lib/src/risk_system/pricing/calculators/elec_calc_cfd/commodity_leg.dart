@@ -223,6 +223,18 @@ class CommodityLeg extends _BaseCfd {
     };
   }
 
+  /// Make a copy
+  CommodityLeg copy() => CommodityLeg(
+      curveId: curveId,
+      bucket: bucket,
+      timePeriod: timePeriod,
+      quantitySchedule: quantitySchedule,
+      fixPriceSchedule: fixPriceSchedule,
+      tzLocation: tzLocation)
+    ..asOfDate = asOfDate
+    ..term = term
+    ..buySell = buySell;
+
   /// if custom quantities, what to show on the screen in the UI
   num showQuantity() {
     var aux = hourlyQuantity.values.toSet();
