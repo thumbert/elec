@@ -3,7 +3,8 @@ library test_all;
 import 'package:timezone/standalone.dart';
 import 'analysis/filter/filter_test.dart' as filter;
 import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
-import 'gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
+import 'physical/gas/time_aggregation_test.dart' as time_aggregation;
+import 'physical/gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
 import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
 import 'time/hourly_shape_test.dart' as hourly_shape;
@@ -41,5 +42,6 @@ void main() async {
   monthly_curve.tests();
   elec_calc_cdf.tests(rootUrl);
   shape_cost.tests();
+  time_aggregation.tests();
   trade_aggregator.tests();
 }

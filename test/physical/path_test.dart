@@ -4,8 +4,8 @@ import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:elec/src/ftr/path.dart';
-import 'package:elec/src/ftr/auction.dart';
+// import 'package:elec/src/ftr/path.dart';
+// import 'package:elec/src/ftr/auction.dart';
 
 //pathTest() async {
 //  var source = new NepoolLocation.fromPtid(555);
