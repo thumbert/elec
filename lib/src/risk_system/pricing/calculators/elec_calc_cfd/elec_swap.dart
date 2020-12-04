@@ -72,7 +72,7 @@ class ElecSwapCalculator extends _BaseCfd {
   ///
   /// If you change the term, the pricing date, any of the leg buckets, etc.
   /// It is a brittle design, because people may forget to call it.
-  void build() async {
+  Future<void> build() async {
     for (var leg in legs) {
       var curveDetails = await cacheProvider.curveIdCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
@@ -97,6 +97,30 @@ class ElecSwapCalculator extends _BaseCfd {
 
   Report monthlyPositionReport() => MonthlyPositionReportElecCfd(this);
 
+  @override
+  String showDetails() {
+    var table = <Map<String, dynamic>>[];
+    for (var leg in legs) {
+      for (var leaf in leg.leaves) {
+        table.add({
+          'term': leaf.interval.toString(),
+          'curveId': leg.curveId,
+          'bucket': leg.bucket.toString(),
+          'nominalQuantity':
+              _fmtQty.format(buySell.sign * leaf.quantity * leaf.hours),
+          'forwardPrice': _fmtCurrency4.format(leaf.floatingPrice),
+          'value': _fmtCurrency0.format(
+              buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice),
+        });
+      }
+      // table.add(emptyRow);
+    }
+    var _tbl = Table.from(table, options: {
+      'columnSeparation': '  ',
+    });
+    return _tbl.toString();
+  }
+
   /// Serialize it.  Don't serialize 'asOfDate' or 'floatingPrice' info.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -106,4 +130,14 @@ class ElecSwapCalculator extends _BaseCfd {
       'legs': [for (var leg in legs) leg.toJson()],
     };
   }
+
+  static final _fmtQty = NumberFormat.currency(symbol: '', decimalDigits: 0);
+  static final _fmtCurrency0 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  static final _fmtCurrency4 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 4);
 }
+
+var _emptyRow = Map.fromIterables(
+    ['term', 'curveId', 'bucket', 'nominalQuantity', 'forwardPrice', 'value'],
+    ['', '', '', '', '', '']);

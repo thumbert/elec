@@ -51,11 +51,14 @@ class _BaseCfd {
   /// Communicate an error with the UI.
   String error = '';
 
+  /// What to show in the UI for details.  Each calculator implements it.
+  String showDetails() => '';
+
   /// Get daily and monthly marks for a given curveId and bucket.
   /// LMP curves will also use an hourly shape curve to support non-standard
   /// buckets.
   ///
-  /// Return a timeseries of hourly prices.
+  /// Return a timeseries of hourly prices, for only the hours of interest.
   Future<TimeSeries<num>> getFloatingPrice(
       Bucket bucket, String curveId) async {
     var curveDetails = await cacheProvider.curveIdCache.get(curveId);

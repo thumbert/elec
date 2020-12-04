@@ -19,7 +19,7 @@ class CommodityLeg extends _BaseCfd {
   ///
   TimePeriod timePeriod;
 
-  /// An hourly time series
+  /// An hourly time series.
   TimeSeries<num> hourlyFloatingPrice;
 
   /// If you have a custom quantity, only intervals included in the
