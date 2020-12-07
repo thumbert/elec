@@ -16,8 +16,8 @@ import 'time/calendar/calendar_test.dart' as calendar;
 import 'risk_system/buy_sell_test.dart' as buy_sell;
 import 'risk_system/marks/forward_curve_test.dart' as forward_curve;
 import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
-import 'risk_system/pricing/calculators/elec_calc_cdf/elec_calc_cdf_test.dart'
-    as elec_calc_cdf;
+import 'risk_system/pricing/calculators/elec_swap/elec_swap_test.dart'
+    as elec_swap;
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 
 void main() async {
@@ -40,7 +40,7 @@ void main() async {
   buy_sell.tests();
   forward_curve.tests();
   monthly_curve.tests();
-  elec_calc_cdf.tests(rootUrl);
+  elec_swap.tests(rootUrl);
   shape_cost.tests();
   time_aggregation.tests();
   trade_aggregator.tests();

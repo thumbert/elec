@@ -1,6 +1,16 @@
 part of elec.calculators;
 
-class _BaseCfd {
+class CalculatorBase {
+  CalculatorBase();
+
+  factory CalculatorBase.fromJson(Map<String, dynamic> x) {
+    if (x['calculatorType'] == 'elec_swap') {
+      return ElecSwapCalculator.fromJson(x);
+    } else {
+      throw ArgumentError('Unsupported calculator type ${x['calculatorType']}');
+    }
+  }
+
   /// A collection of caches for different market and curve data.
   CacheProvider cacheProvider;
 
@@ -51,6 +61,9 @@ class _BaseCfd {
   /// Communicate an error with the UI.
   String error = '';
 
+  /// Calculator comments.  Useful for UI.
+  String comments = '';
+
   /// What to show in the UI for details.  Each calculator implements it.
   String showDetails() => '';
 
@@ -76,7 +89,7 @@ class _BaseCfd {
         : '';
 
     if (curveDetails.containsKey('hourlyShapeCurveId')) {
-      /// get the hourly shaping curve
+      /// get the hourly shaping curve if needed
       var hSchedule = await cacheProvider.hourlyShapeCache
           .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
       var hShapeMultiplier = TimeSeries.fromIterable(

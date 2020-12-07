@@ -2,9 +2,7 @@ part of elec.calculators;
 
 enum TimePeriod { month, day, hour }
 
-class ElecSwapCalculator extends _BaseCfd {
-  String comments;
-
+class ElecSwapCalculator extends CalculatorBase {
   ElecSwapCalculator(
       {Date asOfDate,
       Term term,
@@ -27,6 +25,10 @@ class ElecSwapCalculator extends _BaseCfd {
   /// The recommended way to initialize from a template.  See tests.
   /// Still needs [cacheProvider] to be set.
   ElecSwapCalculator.fromJson(Map<String, dynamic> x) {
+    if (x['calculatorType'] != 'elec_swap') {
+      throw ArgumentError('Json input needs a key calculatorType = elec_swap');
+    }
+
     if (x['term'] == null) {
       throw ArgumentError('Json input is missing the key term');
     }
@@ -52,7 +54,6 @@ class ElecSwapCalculator extends _BaseCfd {
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
       var leg = CommodityLeg.fromJson(e);
-      // leg.makeLeaves();
       legs.add(leg);
     }
   }
@@ -121,9 +122,12 @@ class ElecSwapCalculator extends _BaseCfd {
     return _tbl.toString();
   }
 
+  /// TODO: implement a copyWith() method.
+
   /// Serialize it.  Don't serialize 'asOfDate' or 'floatingPrice' info.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'calculatorType': 'elec_swap',
       'term': term.toString(),
       'buy/sell': buySell.toString(),
       'comments': comments,
@@ -138,6 +142,6 @@ class ElecSwapCalculator extends _BaseCfd {
       NumberFormat.currency(symbol: '\$', decimalDigits: 4);
 }
 
-var _emptyRow = Map.fromIterables(
-    ['term', 'curveId', 'bucket', 'nominalQuantity', 'forwardPrice', 'value'],
-    ['', '', '', '', '', '']);
+// var _emptyRow = Map.fromIterables(
+//     ['term', 'curveId', 'bucket', 'nominalQuantity', 'forwardPrice', 'value'],
+//     ['', '', '', '', '', '']);

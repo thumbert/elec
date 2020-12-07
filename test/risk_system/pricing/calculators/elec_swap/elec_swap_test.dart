@@ -16,6 +16,7 @@ import 'package:tuple/tuple.dart';
 
 /// No fixPrice means fixPrice = 0 for the term.
 Map<String, dynamic> _calc0() => <String, dynamic>{
+      'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
@@ -34,6 +35,7 @@ Map<String, dynamic> _calc0() => <String, dynamic>{
 
 /// fixPrice is specified
 Map<String, dynamic> _calc1() => <String, dynamic>{
+      'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
@@ -56,6 +58,7 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
 
 /// Monthly quantities and prices, ISONE
 Map<String, dynamic> _calc2() => <String, dynamic>{
+      'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
@@ -85,6 +88,7 @@ Map<String, dynamic> _calc2() => <String, dynamic>{
 
 /// Two legs
 Map<String, dynamic> _calc3() => <String, dynamic>{
+      'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
@@ -297,6 +301,7 @@ void tests(String rootUrl) async {
     });
     test('parse calculator without fixPrice', () async {
       var aux = <String, dynamic>{
+        'calculatorType': 'elec_swap',
         'term': 'Jan21-Mar21',
         'asOfDate': '2020-05-29',
         'buy/sell': 'Buy',
@@ -371,74 +376,74 @@ total                         50,400        ''';
     });
   });
 
-//   group('Elec calc cdf tests ISONE, 2 legs', () {
-//     ElecSwapCalculator c2;
-//     setUp(() async {
-//       c2 = ElecSwapCalculator.fromJson(_calc3())..cacheProvider = cacheProvider;
-//       await c2.build();
-//     });
-//     test('fromJson', () {
-//       expect(c2.asOfDate, Date(2020, 5, 29, location: UTC));
-//       expect(c2.term, Term.parse('Jan21-Mar21', UTC));
-//       var _term = Term.parse('Jan21-Mar21', location);
-//       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
-//       expect(c2.legs.length, 2);
-//       var leg1 = c2.legs.first;
-//       expect(leg1.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
-//       expect(leg1.fixPrice, TimeSeries<num>.from(_months, [0, 0, 0]));
-//       expect(leg1.floatingPrice.values.map((e) => e.toStringAsFixed(3)),
-//           ['58.250', '55.750', '40.000']);
-//       var leg2 = c2.legs[1];
-//       expect(leg2.bucket, IsoNewEngland.bucketOffpeak);
-//     });
-//     test('price it', () {
-//       expect(c2.legs[1].price().toStringAsFixed(2), '44.20');
-//       expect(c2.dollarPrice().round(), 5103466);
-//     });
-//     test('flat report', () {
-//       var report = c2.flatReport();
-//       var aux = report.toString().split('\n');
-//       aux.removeAt(2); // remove line with Printed: xxxxxxxx
-//       var out = r'''
-// Flat Report
-// As of date: 2020-05-29
-//
-//  term                   curveId   bucket  nominalQuantity  forwardPrice       value
-// Jan21                       USD                        -0          1.00         -$0
-// Feb21                       USD                        -0          1.00         -$0
-// Mar21                       USD                        -0          1.00         -$0
-// Jan21                       USD                        -0          1.00         -$0
-// Feb21                       USD                        -0          1.00         -$0
-// Mar21                       USD                        -0          1.00         -$0
-//
-//  term                   curveId   bucket  nominalQuantity  forwardPrice       value
-// Jan21  isone_energy_4000_da_lmp     5x16           16,000         58.25    $932,000
-// Feb21  isone_energy_4000_da_lmp     5x16           16,000         55.75    $892,000
-// Mar21  isone_energy_4000_da_lmp     5x16           18,400         40.00    $736,000
-// Jan21  isone_energy_4000_da_lmp  Offpeak           21,200         50.00  $1,059,994
-// Feb21  isone_energy_4000_da_lmp  Offpeak           17,600         47.80    $841,286
-// Mar21  isone_energy_4000_da_lmp  Offpeak           18,750         34.25    $642,186
-//
-// Value: $5,103,466
-// ''';
-//       expect(aux.join('\n'), out);
-//     });
-//     test('position report', () {
-//       var report = c2.monthlyPositionReport();
-//       var aux = report.toString().split('\n');
-//       aux.removeAt(2); // remove line with Printed: xxxxxxxx
-//       var out = r'''
-// Monthly Position Report
-// As of date: 2020-05-29
-//
-//  term  isone_energy_4000_da_lmp_5x16  isone_energy_4000_da_lmp_Offpeak   total
-// Jan21                         16,000                            21,200  37,200
-// Feb21                         16,000                            17,600  33,600
-// Mar21                         18,400                            18,750  37,150
-// total                         50,400                            57,550        ''';
-//       expect(aux.join('\n'), out);
-//     });
-//   });
+  group('Elec calc cdf tests ISONE, 2 legs', () {
+    ElecSwapCalculator c2;
+    setUp(() async {
+      c2 = ElecSwapCalculator.fromJson(_calc3())..cacheProvider = cacheProvider;
+      await c2.build();
+    });
+    test('fromJson', () {
+      expect(c2.asOfDate, Date(2020, 5, 29, location: UTC));
+      expect(c2.term, Term.parse('Jan21-Mar21', UTC));
+      var _term = Term.parse('Jan21-Mar21', location);
+      var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      expect(c2.legs.length, 2);
+      var leg1 = c2.legs.first;
+      expect(leg1.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
+      expect(leg1.fixPrice, TimeSeries<num>.from(_months, [0, 0, 0]));
+      expect(leg1.floatingPrice.values.map((e) => e.toStringAsFixed(3)),
+          ['58.250', '55.750', '40.000']);
+      var leg2 = c2.legs[1];
+      expect(leg2.bucket, IsoNewEngland.bucketOffpeak);
+    });
+    test('price it', () {
+      expect(c2.legs[1].price().toStringAsFixed(2), '44.20');
+      expect(c2.dollarPrice().round(), 5103466);
+    });
+    test('flat report', () {
+      var report = c2.flatReport();
+      var aux = report.toString().split('\n');
+      aux.removeAt(2); // remove line with Printed: xxxxxxxx
+      var out = r'''
+Flat Report
+As of date: 2020-05-29
+
+ term                   curveId   bucket  nominalQuantity  forwardPrice       value
+Jan21                       USD                        -0          1.00         -$0
+Feb21                       USD                        -0          1.00         -$0
+Mar21                       USD                        -0          1.00         -$0
+Jan21                       USD                        -0          1.00         -$0
+Feb21                       USD                        -0          1.00         -$0
+Mar21                       USD                        -0          1.00         -$0
+
+ term                   curveId   bucket  nominalQuantity  forwardPrice       value
+Jan21  isone_energy_4000_da_lmp     5x16           16,000         58.25    $932,000
+Feb21  isone_energy_4000_da_lmp     5x16           16,000         55.75    $892,000
+Mar21  isone_energy_4000_da_lmp     5x16           18,400         40.00    $736,000
+Jan21  isone_energy_4000_da_lmp  Offpeak           21,200         50.00  $1,059,994
+Feb21  isone_energy_4000_da_lmp  Offpeak           17,600         47.80    $841,286
+Mar21  isone_energy_4000_da_lmp  Offpeak           18,750         34.25    $642,186
+
+Value: $5,103,466
+''';
+      expect(aux.join('\n'), out);
+    });
+    test('position report', () {
+      var report = c2.monthlyPositionReport();
+      var aux = report.toString().split('\n');
+      aux.removeAt(2); // remove line with Printed: xxxxxxxx
+      var out = r'''
+Monthly Position Report
+As of date: 2020-05-29
+
+ term  isone_energy_4000_da_lmp_5x16  isone_energy_4000_da_lmp_Offpeak   total
+Jan21                         16,000                            21,200  37,200
+Feb21                         16,000                            17,600  33,600
+Mar21                         18,400                            18,750  37,150
+total                         50,400                            57,550        ''';
+      expect(aux.join('\n'), out);
+    });
+  });
 }
 
 void main() async {
