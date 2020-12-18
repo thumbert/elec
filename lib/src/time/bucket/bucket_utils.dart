@@ -13,7 +13,6 @@ Bucket assignBucket(Hour hour, List<Bucket> buckets) {
   throw ArgumentError('Bucket list is not complete for $hour');
 }
 
-
 /// Calculate if this day is a Peak day
 bool isPeakDay(Date x, Calendar calendar) {
   var aux = x.weekday == 6 || x.weekday == 7 || calendar.isHoliday(x);
@@ -25,8 +24,8 @@ bool isPeakDay(Date x, Calendar calendar) {
 /// Only one traversal of [x] is made.  Works for hourly and sub-hourly
 /// timeseries.  The [buckets] don't need to be exclusive.  If no observations
 /// fall in a given [bucket], that bucket is removed from the output.
-Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(Iterable<IntervalTuple<K>> x,
-    List<Bucket> buckets) {
+Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(
+    Iterable<IntervalTuple<K>> x, List<Bucket> buckets) {
   var res = Map.fromIterables(
       buckets, List.generate(buckets.length, (i) => <IntervalTuple<K>>[]));
 

@@ -58,16 +58,6 @@ class ElecSwapCalculator extends CalculatorBase {
     }
   }
 
-  /// Return [true] if the calculator has custom quantities and prices, i.e.
-  /// not the same value for all time intervals.
-  bool hasCustom() {
-    var res = false;
-    for (var leg in legs) {
-      if (leg.timePeriod != TimePeriod.month) return true;
-    }
-    return res;
-  }
-
   /// After you make a change to the calculator that affects the floating price,
   /// you need to rebuild it before repricing it.
   ///

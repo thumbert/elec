@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 import 'package:test/test.dart';
@@ -55,6 +55,7 @@ void tests(String rootUrl) async {
       var xs7x8 = TimeSeries.fromIterable(
           xs.where((e) => Bucket.b7x8.containsHour(e.interval)));
       var res = mean(xs7x8.values);
+
       /// the average price will equal the monthly bucket price
       expect(res.toStringAsFixed(8), '1.00000000');
     });
@@ -66,7 +67,7 @@ void tests(String rootUrl) async {
       expect(xs.first.interval.start, TZDateTime(location, 2019, 1, 15));
       expect(xs.last.interval.end, TZDateTime(location, 2019, 2, 16));
       expect(xs.first.value.toStringAsFixed(7), '0.9807817');
-      expect(xs.last.value.toStringAsFixed(7),  '0.9539886');
+      expect(xs.last.value.toStringAsFixed(7), '0.9539886');
     });
 
     test('to Json/from Json', () {
@@ -121,8 +122,8 @@ void speedTests(String rootUrl) async {
   print('From HourlyShape toHourly: ${sw.elapsedMilliseconds}');
 
   sw.reset();
-  var hSchedule4 = HourlySchedule.byBucket({Bucket.b2x16H: 15, Bucket.b7x8: 8,
-    Bucket.b5x16: 25});
+  var hSchedule4 = HourlySchedule.byBucket(
+      {Bucket.b2x16H: 15, Bucket.b7x8: 8, Bucket.b5x16: 25});
   sw.start();
   var ts4 = hSchedule4.toHourly(interval);
   sw.stop();
@@ -143,7 +144,6 @@ void speedTests(String rootUrl) async {
   sw.stop();
   print('From from TimeSeries.interpolate: ${sw.elapsedMilliseconds}');
 
-
   var hSchedule2 = HourlySchedule.filled(50);
   sw.reset();
   sw.start();
@@ -161,14 +161,11 @@ void speedTests(String rootUrl) async {
   sw.start();
   var n = 8760 * 5;
   var x = <num>[];
-  for (var i=0; i<n; i++) {
+  for (var i = 0; i < n; i++) {
     x.add(50);
   }
   sw.stop();
   print('From List.fill: ${sw.elapsedMilliseconds}');
-
-
-
 }
 
 void main() async {

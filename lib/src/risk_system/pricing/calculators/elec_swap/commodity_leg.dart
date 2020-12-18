@@ -131,7 +131,7 @@ class CommodityLeg extends CalculatorBase {
     return hpq / hq;
   }
 
-  /// Get the [floatingPrice] at the period of the leg.
+  /// Get the [floatingPrice] at the period of the leg (monthly, daily, hourly.)
   TimeSeries<num> get floatingPrice {
     if (timePeriod == TimePeriod.month) {
       return toMonthly(hourlyFloatingPrice, mean);
@@ -140,7 +140,8 @@ class CommodityLeg extends CalculatorBase {
     }
   }
 
-  /// Get the leg quantity as a timeseries
+  /// Get the leg quantity as a timeseries at the period of the leg (monthly,
+  /// daily, hourly.)
   TimeSeries<num> get quantity {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
@@ -171,6 +172,13 @@ class CommodityLeg extends CalculatorBase {
     var _term = term.interval.withTimeZone(tzLocation);
     return fixPriceSchedule.toHourly(_term);
   }
+
+  /// Return [true] if the calculator has custom quantity, i.e.
+  /// not the same value for all time intervals.
+  bool hasCustomQuantity;
+
+  /// Return [true] if the calculator has custom prices,
+  bool hasCustomFixPrice;
 
   /// Make the leaves for this leg.  One leaf per period.
   void makeLeaves() {
@@ -223,18 +231,6 @@ class CommodityLeg extends CalculatorBase {
     };
   }
 
-  /// Make a copy
-  CommodityLeg copy() => CommodityLeg(
-      curveId: curveId,
-      bucket: bucket,
-      timePeriod: timePeriod,
-      quantitySchedule: quantitySchedule,
-      fixPriceSchedule: fixPriceSchedule,
-      tzLocation: tzLocation)
-    ..asOfDate = asOfDate
-    ..term = term
-    ..buySell = buySell;
-
   /// if custom quantities, what to show on the screen in the UI
   num showQuantity() {
     var aux = hourlyQuantity.values.toSet();
@@ -252,6 +248,29 @@ class CommodityLeg extends CalculatorBase {
     }
     return 1.0;
   }
+
+  /// Make a copy
+  CommodityLeg copyWith({
+    String curveId,
+    Bucket bucket,
+    TimePeriod timePeriod,
+    HourlySchedule quantitySchedule,
+    HourlySchedule fixPriceSchedule,
+    Location tzLocation,
+    Date asOfDate,
+    Term term,
+    BuySell buySell,
+  }) =>
+      CommodityLeg(
+          curveId: curveId ?? this.curveId,
+          bucket: bucket ?? this.bucket,
+          timePeriod: timePeriod ?? this.timePeriod,
+          quantitySchedule: quantitySchedule ?? this.quantitySchedule,
+          fixPriceSchedule: fixPriceSchedule ?? this.fixPriceSchedule,
+          tzLocation: tzLocation ?? this.tzLocation)
+        ..asOfDate = asOfDate ?? this.asOfDate
+        ..term = term ?? this.term
+        ..buySell = buySell ?? this.buySell;
 }
 
 /// Input [xs] can be a hourly, daily, or monthly series.  Only ISO formats are

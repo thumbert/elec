@@ -1,6 +1,6 @@
 library risk_system.marks.forward_curve;
 
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec_server/utils.dart';
 import 'package:intl/intl.dart';
@@ -54,6 +54,8 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   }
 
   /// Get the entire curve as an hourly timeseries
+  /// If the forward curve contains only one bucket, say 2x16H, only the hours
+  /// associated with that bucket will be returned in the interval.
   TimeSeries<num> toHourly() {
     if (_ts != null) return _ts;
     _ts = TimeSeries<num>();

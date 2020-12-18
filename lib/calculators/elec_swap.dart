@@ -1,10 +1,10 @@
 library elec.calculators;
 
 import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/flat_report.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/monthly_position_report.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/flat_report.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';

@@ -4,7 +4,7 @@ import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec/calculators/elec_swap.dart';

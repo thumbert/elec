@@ -3,7 +3,7 @@ library test.time.hourly_schedule_test;
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
@@ -30,7 +30,8 @@ void tests() {
       expect(hs.value(Hour.beginning(TZDateTime(location, 2019, 9, 5, 4))), 9);
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(ts.values.toList(), List.filled(24, 1));
-      expect(hs.toJson(), {'type': 'byMonth',
+      expect(hs.toJson(), {
+        'type': 'byMonth',
         'values': [
           {'month': 1, 'value': 1},
           {'month': 5, 'value': 5},
@@ -46,7 +47,8 @@ void tests() {
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(
           ts.values.toList(), [...List.filled(7, 2), ...List.filled(16, 1), 2]);
-      expect(hs.toJson(), {'type': 'byBucket',
+      expect(hs.toJson(), {
+        'type': 'byBucket',
         'values': [
           {'bucket': '5x16', 'value': 1},
           {'bucket': 'Offpeak', 'value': 2},
@@ -66,7 +68,8 @@ void tests() {
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
       expect(ts.values.toList(),
           [...List.filled(7, 1), ...List.filled(16, 10), 1]);
-      expect(hs.toJson(), {'type': 'byBucketMonth',
+      expect(hs.toJson(), {
+        'type': 'byBucketMonth',
         'values': [
           {'bucket': '5x16', 'month': 1, 'value': 10},
           {'bucket': '5x16', 'month': 9, 'value': 90},
@@ -92,19 +95,29 @@ void tests() {
       expect(hs[Hour.beginning(TZDateTime(location, 2019, 9, 5, 4))], 24);
       expect(hs[Hour.beginning(TZDateTime(location, 2019, 9, 5, 22))], 65);
       var ts = hs.toHourly(Date(2019, 1, 4, location: location));
-      expect(ts.values.toList(), [
-        ...List.generate(7, (i) => i),
-        ...List.generate(16, (i) => i),
-        23
-      ]);
+      expect(ts.values.toList(),
+          [...List.generate(7, (i) => i), ...List.generate(16, (i) => i), 23]);
       var ts2 = hs.toHourly(Date(2019, 10, 14, location: location));
       expect(ts2.isEmpty, true);
-      expect(hs.toJson(), {'type': 'byMonthBucketHour',
+      expect(hs.toJson(), {
+        'type': 'byMonthBucketHour',
         'values': [
           {'month': 1, 'bucket': '5x16', 'value': List.generate(16, (i) => i)},
-          {'month': 1, 'bucket': 'Offpeak', 'value': List.generate(24, (i) => i)},
-          {'month': 9, 'bucket': '5x16', 'value': List.generate(16, (i) => i + 50)},
-          {'month': 9, 'bucket': 'Offpeak', 'value': List.generate(24, (i) => i + 20)},
+          {
+            'month': 1,
+            'bucket': 'Offpeak',
+            'value': List.generate(24, (i) => i)
+          },
+          {
+            'month': 9,
+            'bucket': '5x16',
+            'value': List.generate(16, (i) => i + 50)
+          },
+          {
+            'month': 9,
+            'bucket': 'Offpeak',
+            'value': List.generate(24, (i) => i + 20)
+          },
         ]
       });
     });
@@ -119,19 +132,21 @@ void tests() {
     });
     test('from timeseries, incomplete covering', () {
       var month = Month(2021, 1, location: location);
-      var ts = TimeSeries.fromIterable([IntervalTuple(month, {peak: 60.7})]);
+      var ts = TimeSeries.fromIterable([
+        IntervalTuple(month, {peak: 60.7})
+      ]);
       var hs = HourlySchedule.fromTimeSeriesWithBucket(ts);
       var out = hs.toHourly(month);
       expect(out.length, 320);
     });
     test('toMonthly', () {
       var hs = HourlySchedule.filled(1);
-      var count = hs.toMonthly(Term.parse('Cal20', location).interval,
-              (xs) => xs.length);
+      var count = hs.toMonthly(
+          Term.parse('Cal20', location).interval, (xs) => xs.length);
       expect(count.length, 12);
-      expect(count.observationAt(Month(2020,3, location: location)).value, 743);
+      expect(
+          count.observationAt(Month(2020, 3, location: location)).value, 743);
     });
-
   });
 }
 
