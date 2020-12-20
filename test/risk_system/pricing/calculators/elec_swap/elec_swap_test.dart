@@ -4,7 +4,7 @@ import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'package:elec/src/time/hourly_schedule_old.dart';
+import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:elec/calculators/elec_swap.dart';
@@ -68,18 +68,19 @@ Map<String, dynamic> _calc2() => <String, dynamic>{
           'curveId': 'isone_energy_4000_da_lmp',
           'tzLocation': 'America/New_York',
           'bucket': '5x16',
+          'cash/physical': 'cash',
           'quantity': {
             'value': [
-              {'month': '2021-01', 'value': 50},
-              {'month': '2021-02', 'value': 50},
-              {'month': '2021-03', 'value': 50},
+              {'month': '2021-01', 'value': 50.0},
+              {'month': '2021-02', 'value': 60.0},
+              {'month': '2021-03', 'value': 70.0},
             ]
           },
           'fixPrice': {
             'value': [
-              {'month': '2021-01', 'value': 50.5},
-              {'month': '2021-02', 'value': 50.5},
-              {'month': '2021-03', 'value': 50.5},
+              {'month': '2021-01', 'value': 70.5},
+              {'month': '2021-02', 'value': 68.5},
+              {'month': '2021-03', 'value': 48.5},
             ]
           },
         }
@@ -117,10 +118,12 @@ void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
   group('Elec calc cdf tests ISONE, 1 leg:', () {
-    ElecSwapCalculator c1;
+    ElecSwapCalculator c1, c2;
     setUp(() async {
       c1 = ElecSwapCalculator.fromJson(_calc1())..cacheProvider = cacheProvider;
       await c1.build();
+      c2 = ElecSwapCalculator.fromJson(_calc2())..cacheProvider = cacheProvider;
+      await c2.build();
     });
     test('initialize by hand', () async {
       var calc = ElecSwapCalculator(
@@ -171,16 +174,34 @@ void tests(String rootUrl) async {
       expect(c1.legs.length, 1);
       var leg = c1.legs.first;
       expect(leg.curveId, 'isone_energy_4000_da_lmp');
-      expect(leg.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
-      expect(leg.fixPrice, TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
-      expect(leg.floatingPrice.values.map((e) => e.toStringAsFixed(2)),
+      expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
+      expect(leg.fixPrice(), TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
+      expect(leg.floatingPrice().values.map((e) => e.toStringAsFixed(2)),
           ['58.25', '55.75', '40.00']);
+      expect(leg.hasCustomQuantity, false);
+      expect(leg.hasCustomFixPrice, false);
+    });
+    test('fromJson, custom quantities', () async {
+      var leg = c2.legs.first;
+      var _months =
+          leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 60, 70]));
+      expect(leg.fixPrice(), TimeSeries<num>.from(_months, [70.5, 68.5, 48.5]));
+      expect(leg.hasCustomQuantity, true);
+      expect(leg.hasCustomFixPrice, true);
+      expect(leg.showQuantity(), 1.0);
+      expect(leg.showFixPrice(), 1.0);
     });
     test('toJson (don\'t serialize the floatingPrice and asOfDate)', () {
       var aux = _calc1();
       ((aux['legs'] as List).first as Map).remove('floatingPrice');
       aux.remove('asOfDate');
       expect(c1.toJson(), aux);
+    });
+    test('toJson a calc with custom quantities/prices', () {
+      var aux = _calc2();
+      aux.remove('asOfDate');
+      expect(c2.toJson(), aux);
     });
     test('price it', () async {
       expect(c1.dollarPrice().round(), 14800);
@@ -229,12 +250,14 @@ void tests(String rootUrl) async {
       var calc = c1..term = Term.parse('Jan21-Feb21', location);
       await calc.build();
       expect(calc.legs.length, 1);
-      expect(calc.legs.first.floatingPrice.intervals.toList(), [
+      expect(calc.legs.first.floatingPrice().intervals.toList(), [
         Month(2021, 1, location: location),
         Month(2021, 2, location: location)
       ]);
       expect(
-          calc.legs.first.floatingPrice.values
+          calc.legs.first
+              .floatingPrice()
+              .values
               .map((e) => e.toStringAsFixed(2))
               .toList(),
           ['58.25', '55.75']);
@@ -247,9 +270,11 @@ void tests(String rootUrl) async {
       var calc = c1..term = Term.parse('Jan20-Dec20', location);
       await calc.build();
       expect(calc.legs.length, 1);
-      expect(calc.legs.first.floatingPrice.intervals.length, 12);
+      expect(calc.legs.first.floatingPrice().intervals.length, 12);
       expect(
-          calc.legs.first.floatingPrice.values
+          calc.legs.first
+              .floatingPrice()
+              .values
               .map((e) => e.toStringAsFixed(2))
               .take(2)
               .toList(),
@@ -260,7 +285,7 @@ void tests(String rootUrl) async {
         ..term = Term.parse('Jan21-Feb21', location)
         ..asOfDate = Date(2020, 7, 6);
       await calc.build();
-      expect(calc.legs.first.floatingPrice.first.value.toStringAsFixed(2),
+      expect(calc.legs.first.floatingPrice().first.value.toStringAsFixed(2),
           '60.70');
       expect(calc.dollarPrice().round(), 270400);
       var leg = calc.legs.first;
@@ -270,13 +295,15 @@ void tests(String rootUrl) async {
     test('change calculator bucket and reprice', () async {
       var calc = c1..legs.first.bucket = IsoNewEngland.bucket7x8;
       await calc.build();
-      expect(calc.legs.first.floatingPrice.intervals, [
+      expect(calc.legs.first.floatingPrice().intervals, [
         Month(2021, 1, location: location),
         Month(2021, 2, location: location),
         Month(2021, 3, location: location),
       ]);
       expect(
-          calc.legs.first.floatingPrice.values
+          calc.legs.first
+              .floatingPrice()
+              .values
               .map((e) => e.toStringAsFixed(3))
               .toList(),
           ['48.072', '46.284', '33.343']);
@@ -288,7 +315,7 @@ void tests(String rootUrl) async {
         ..term = Term.parse('Jan21', location)
         ..legs.first.bucket = Bucket.b7x16;
       await calc.build();
-      expect(calc.legs.first.floatingPrice.intervals, [
+      expect(calc.legs.first.floatingPrice().intervals, [
         Month(2021, 1, location: location),
       ]);
       var leg = calc.legs.first;
@@ -389,9 +416,9 @@ total                         50,400        ''';
       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       expect(c2.legs.length, 2);
       var leg1 = c2.legs.first;
-      expect(leg1.quantity, TimeSeries<num>.from(_months, [50, 50, 50]));
-      expect(leg1.fixPrice, TimeSeries<num>.from(_months, [0, 0, 0]));
-      expect(leg1.floatingPrice.values.map((e) => e.toStringAsFixed(3)),
+      expect(leg1.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
+      expect(leg1.fixPrice(), TimeSeries<num>.from(_months, [0, 0, 0]));
+      expect(leg1.floatingPrice().values.map((e) => e.toStringAsFixed(3)),
           ['58.250', '55.750', '40.000']);
       var leg2 = c2.legs[1];
       expect(leg2.bucket, IsoNewEngland.bucketOffpeak);

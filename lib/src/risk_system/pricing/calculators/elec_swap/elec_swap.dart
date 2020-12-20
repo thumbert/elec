@@ -1,7 +1,5 @@
 part of elec.calculators;
 
-enum TimePeriod { month, day, hour }
-
 class ElecSwapCalculator extends CalculatorBase {
   ElecSwapCalculator(
       {Date asOfDate,

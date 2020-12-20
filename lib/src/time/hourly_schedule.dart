@@ -1,3 +1,5 @@
+library time.hourly_schedule;
+
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/risk_system/marks/forward_curve.dart';
@@ -35,7 +37,7 @@ abstract class HourlySchedule {
 
   /// Construct an infinitely long schedule, same value for all hours.
   factory HourlySchedule.filled(num value) {
-    return _HourlyScheduleFilled(value);
+    return HourlyScheduleFilled(value);
   }
 
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
@@ -79,6 +81,19 @@ abstract class HourlySchedule {
     }
     return out;
   }
+
+  // /// Calculate a monthly statistic.  Default implementation
+  // TimeSeries<num> toMonthly(
+  //     Interval interval, num Function(Iterable<num>) fun) {
+  //   var months = interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+  //   var out = TimeSeries<num>();
+  //   for (var month in months) {
+  //     var values =
+  //         month.splitLeft((dt) => Hour.beginning(dt)).map((hour) => _f(hour));
+  //     out.add(IntervalTuple(month, fun(values)));
+  //   }
+  //   return out;
+  // }
 
   Map<String, dynamic> toJson();
 }
@@ -188,8 +203,8 @@ class _HourlyScheduleByMonth extends HourlySchedule {
   }
 }
 
-class _HourlyScheduleFilled extends HourlySchedule {
-  _HourlyScheduleFilled(this.value) {
+class HourlyScheduleFilled extends HourlySchedule {
+  HourlyScheduleFilled(this.value) {
     _f = (Hour e) => value;
   }
   final num value;
@@ -304,16 +319,3 @@ class _HourlyScheduleFromTimeSeries extends HourlySchedule {
         'values': ts.toJson(),
       };
 }
-
-// /// Calculate a monthly statistic
-// TimeSeries<num> toMonthly(
-//     Interval interval, num Function(Iterable<num>) fun) {
-//   var months = interval.splitLeft((dt) => Month.fromTZDateTime(dt));
-//   var out = TimeSeries<num>();
-//   for (var month in months) {
-//     var values =
-//         month.splitLeft((dt) => Hour.beginning(dt)).map((hour) => _f(hour));
-//     out.add(IntervalTuple(month, fun(values)));
-//   }
-//   return out;
-// }

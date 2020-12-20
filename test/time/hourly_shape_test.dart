@@ -1,11 +1,9 @@
 library test.time.hourly_shape_test;
 
-import 'dart:convert';
-
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/common_enums.dart';
-import 'package:elec/src/time/hourly_schedule_old.dart';
+import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec_server/client/isoexpress/dalmp.dart';
 import 'package:test/test.dart';

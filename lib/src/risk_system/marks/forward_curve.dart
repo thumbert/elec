@@ -1,6 +1,5 @@
 library risk_system.marks.forward_curve;
 
-import 'package:elec/src/time/hourly_schedule_old.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:elec_server/utils.dart';
 import 'package:intl/intl.dart';

@@ -84,26 +84,23 @@ class CommodityLeg extends CalculatorBase {
     } else if (qValue is List) {
       var aux =
           _parseSeries(qValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
-      quantitySchedule = HourlySchedule.fromTimeSeriesWithBucket(aux);
-      // quantitySchedule = ForwardCurve.fromIterable(aux).toHourly();
-      if (aux.first.interval is Month) {
-        timePeriod = TimePeriod.month;
-      } else if (aux.first.interval is Date) {
-        timePeriod = TimePeriod.day;
-      } else if (aux.first.interval is Hour) {
-        timePeriod = TimePeriod.hour;
-      }
+      quantitySchedule =
+          HourlySchedule.fromForwardCurve(ForwardCurve.fromIterable(aux));
+      timePeriod = getTimePeriod(aux.first.interval);
     }
 
-    /// set the fixPrice schedule and lower the timePeriod if needed
+    /// set the fixPrice schedule and lower the timePeriod
     if (x.containsKey('fixPrice')) {
       var pValue = x['fixPrice']['value'];
       if (pValue is num) {
         fixPriceSchedule = HourlySchedule.filled(pValue);
       } else if (pValue is List) {
         var aux = _parseSeries(
-            qValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
-        fixPriceSchedule = HourlySchedule.fromTimeSeriesWithBucket(aux);
+            pValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
+        fixPriceSchedule =
+            HourlySchedule.fromForwardCurve(ForwardCurve.fromIterable(aux));
+
+        /// lower the timePeriod if needed
         if (aux.first.interval is Date && timePeriod != TimePeriod.hour) {
           timePeriod = TimePeriod.day;
         } else if (aux.first.interval is Hour) {
@@ -132,7 +129,7 @@ class CommodityLeg extends CalculatorBase {
   }
 
   /// Get the [floatingPrice] at the period of the leg (monthly, daily, hourly.)
-  TimeSeries<num> get floatingPrice {
+  TimeSeries<num> floatingPrice() {
     if (timePeriod == TimePeriod.month) {
       return toMonthly(hourlyFloatingPrice, mean);
     } else {
@@ -142,43 +139,57 @@ class CommodityLeg extends CalculatorBase {
 
   /// Get the leg quantity as a timeseries at the period of the leg (monthly,
   /// daily, hourly.)
-  TimeSeries<num> get quantity {
+  TimeSeries<num> quantity() {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
-      return quantitySchedule.toMonthly(_term, mean);
+      /// TODO: maybe I can do better here and not expand to hourly first
+      var aux = quantitySchedule.toHourly(_term);
+      return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented ${timePeriod}');
     }
   }
 
   /// Get the leg quantity as an hourly timeseries.
-  TimeSeries<num> get hourlyQuantity {
+  TimeSeries<num> hourlyQuantity() {
     var _term = term.interval.withTimeZone(tzLocation);
     return quantitySchedule.toHourly(_term);
   }
 
-  /// Get the leg quantity as a timeseries
-  TimeSeries<num> get fixPrice {
+  /// Get the leg fixPrice as a timeseries
+  TimeSeries<num> fixPrice() {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
-      return fixPriceSchedule.toMonthly(_term, mean);
+      /// TODO: maybe I can do better here and not expand to hourly first
+      var aux = fixPriceSchedule.toHourly(_term);
+      return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented ${timePeriod}');
     }
   }
 
   /// Get the leg fixPrice as an hourly timeseries.
-  TimeSeries<num> get hourlyFixPrice {
+  TimeSeries<num> hourlyFixPrice() {
     var _term = term.interval.withTimeZone(tzLocation);
     return fixPriceSchedule.toHourly(_term);
   }
 
   /// Return [true] if the calculator has custom quantity, i.e.
   /// not the same value for all time intervals.
-  bool hasCustomQuantity;
+  bool get hasCustomQuantity {
+    if (quantitySchedule is HourlyScheduleFilled) {
+      return false;
+    }
+    return true;
+  }
 
   /// Return [true] if the calculator has custom prices,
-  bool hasCustomFixPrice;
+  bool get hasCustomFixPrice {
+    if (fixPriceSchedule is HourlyScheduleFilled) {
+      return false;
+    }
+    return true;
+  }
 
   /// Make the leaves for this leg.  One leaf per period.
   void makeLeaves() {
@@ -187,8 +198,8 @@ class CommodityLeg extends CalculatorBase {
       var months = term.interval
           .withTimeZone(tzLocation)
           .splitLeft((dt) => Month.fromTZDateTime(dt));
-      var _quantityM = toMonthly(hourlyQuantity, mean);
-      var _fixPriceM = toMonthly(hourlyFixPrice, mean);
+      var _quantityM = toMonthly(hourlyQuantity(), mean);
+      var _fixPriceM = toMonthly(hourlyFixPrice(), mean);
       var _floatingPriceM = toMonthly(hourlyFloatingPrice, mean);
       for (var month in months) {
         var _quantity = _quantityM.observationAt(month).value;
@@ -204,21 +215,20 @@ class CommodityLeg extends CalculatorBase {
     }
   }
 
-  /// serialize it
+  /// Serialize it
   Map<String, dynamic> toJson() {
     var q, fp;
 
-    /// check if all values are the same, then return simplified form
-    if (quantity.values.toSet().length == 1) {
-      q = {'value': quantity.values.first};
+    if (!hasCustomQuantity) {
+      q = {'value': (quantitySchedule as HourlyScheduleFilled).value};
     } else {
-      q = _serializeSeries(quantity);
+      q = {'value': _serializeSeries(quantity())};
     }
 
-    if (fixPrice.values.toSet().length == 1) {
-      fp = {'value': fixPrice.values.first};
+    if (!hasCustomFixPrice) {
+      fp = {'value': (fixPriceSchedule as HourlyScheduleFilled).value};
     } else {
-      fp = _serializeSeries(fixPrice);
+      fp = {'value': _serializeSeries(fixPrice())};
     }
 
     return <String, dynamic>{
@@ -233,18 +243,16 @@ class CommodityLeg extends CalculatorBase {
 
   /// if custom quantities, what to show on the screen in the UI
   num showQuantity() {
-    var aux = hourlyQuantity.values.toSet();
-    if (aux.length == 1) {
-      return aux.first;
+    if (!hasCustomQuantity) {
+      return (quantitySchedule as HourlyScheduleFilled).value;
     }
     return 1.0;
   }
 
   /// if custom fixPrice, what to show on the screen in the UI
   num showFixPrice() {
-    var aux = hourlyFixPrice.values.toSet();
-    if (aux.length == 1) {
-      return aux.first;
+    if (!hasCustomFixPrice) {
+      return (fixPriceSchedule as HourlyScheduleFilled).value;
     }
     return 1.0;
   }
@@ -274,7 +282,12 @@ class CommodityLeg extends CalculatorBase {
 }
 
 /// Input [xs] can be a hourly, daily, or monthly series.  Only ISO formats are
-/// supported.
+/// supported.  Each element is one of the following formats
+/// ```
+///   {'month': '2020-03', 'value': 50.1}
+///   {'date': '2020-03-05', 'value': 50.1}
+///   {'hourBeginning': '2002-02-27T14:00:00-0500', 'value': 50.1}
+/// ```
 TimeSeries<Map<Bucket, num>> _parseSeries(
     Iterable<Map<String, dynamic>> xs, Location location, Bucket bucket) {
   var ts = TimeSeries<Map<Bucket, num>>();
@@ -293,6 +306,7 @@ TimeSeries<Map<Bucket, num>> _parseSeries(
   return ts;
 }
 
+///
 List<Map<String, dynamic>> _serializeSeries(TimeSeries<num> xs) {
   Map<String, dynamic> Function(IntervalTuple) fun;
   if (xs.first.interval is Month) {
