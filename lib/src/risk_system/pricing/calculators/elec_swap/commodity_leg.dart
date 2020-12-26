@@ -1,11 +1,5 @@
 part of elec.calculators;
 
-// import 'package:date/date.dart';
-// import 'package:elec/elec.dart';
-// import 'package:elec/risk_system.dart';
-// import 'package:timezone/timezone.dart';
-// import 'calculator_base.dart';
-
 class CommodityLeg extends CalculatorBase {
   String curveId;
   String cashOrPhys;

@@ -1,12 +1,9 @@
-library risk_system.marks.forward_curve;
+part of elec.risk_system;
 
-import 'package:elec/src/time/shape/hourly_shape.dart';
-import 'package:elec_server/utils.dart';
-import 'package:intl/intl.dart';
-import 'package:timezone/timezone.dart';
-import 'package:date/date.dart';
-import 'package:elec/elec.dart';
-import 'package:timeseries/timeseries.dart';
+// import 'package:timezone/timezone.dart';
+// import 'package:date/date.dart';
+// import 'package:elec/elec.dart';
+// import 'package:timeseries/timeseries.dart';
 
 class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
@@ -248,5 +245,23 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
     });
 
     return ForwardCurve.fromIterable(ys.observations);
+  }
+
+  /// Extend this forward curve periodically by year.  That is, if the curve
+  /// is defined only through Dec25, construct Jan26 by applying function [f]
+  /// to Jan25 values, etc.  By default, function [f] is the identity function.
+  ForwardCurve extendPeriodicallyByYear(Month endMonth,
+      {Map<Bucket, num> Function(Map<Bucket, num>) f}) {
+    f ??= (x) => x;
+    var n = length;
+    var month = (intervals.last as Month).next;
+    var fc = ForwardCurve.fromIterable(this);
+    while (!month.isAfter(endMonth)) {
+      var value = fc.values.toList()[n - 12];
+      fc.add(IntervalTuple(month, f(value)));
+      month = month.next;
+      n++;
+    }
+    return fc;
   }
 }

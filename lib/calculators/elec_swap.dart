@@ -1,7 +1,7 @@
 library elec.calculators;
 
 import 'package:dama/dama.dart';
-import 'package:elec/src/risk_system/marks/forward_curve.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/flat_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/monthly_position_report.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';

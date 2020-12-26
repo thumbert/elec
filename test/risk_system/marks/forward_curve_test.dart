@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/src/risk_system/marks/forward_curve.dart';
+import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
@@ -21,6 +21,7 @@ void tests() {
     var curve0 = ForwardCurve.fromJson(x0, location);
     // a gas curve, 7x24 bucket
     var x1 = (xs[1]['observations'] as List).cast<Map<String, dynamic>>();
+
     test('from the 3 standard buckets', () {
       expect(curve0.length, 11);
       expect(curve0.first.value.length, 2);
@@ -80,6 +81,28 @@ void tests() {
       var term = Term.parse('26Jul20-31Jul20', location);
       var value = curve0.value(term.interval, Bucket.atc);
       expect(value.toStringAsFixed(4), '24.8889');
+    });
+    test('extend periodically by year', () {
+      var x2 = (xs[2]['observations'] as List).cast<Map<String, dynamic>>();
+      var curve = ForwardCurve.fromJson(x2, location);
+      var curveX =
+          curve.extendPeriodicallyByYear(Month(2022, 12, location: location));
+      expect(curveX.length, 29);
+      expect(
+          curveX
+              .observationAt(Month(2022, 1, location: location))
+              .value[Bucket.atc],
+          3.11);
+      expect(
+          curveX
+              .observationAt(Month(2022, 2, location: location))
+              .value[Bucket.atc],
+          3.12);
+      expect(
+          curveX
+              .observationAt(Month(2022, 12, location: location))
+              .value[Bucket.atc],
+          3.16);
     });
     test('add two forward curves element by element', () {
       var c1 = ForwardCurve.fromIterable([

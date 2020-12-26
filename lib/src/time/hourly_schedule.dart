@@ -2,7 +2,7 @@ library time.hourly_schedule;
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/src/risk_system/marks/forward_curve.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
 import 'package:timeseries/timeseries.dart';
 

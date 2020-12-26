@@ -7,7 +7,10 @@ import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:dama/stat/descriptive/summary.dart' show sum;
 import 'package:timezone/timezone.dart';
 import 'package:elec/src/iso/iso.dart';
+import 'package:intl/intl.dart';
 import 'package:quiver/core.dart' show hash2;
+import 'package:elec/src/time/shape/hourly_shape.dart';
+import 'package:elec_server/utils.dart';
 
 part 'src/risk_system/buy_sell.dart';
 part 'src/risk_system/call_put.dart';
@@ -21,5 +24,6 @@ part 'src/risk_system/time_aggregation.dart';
 part 'src/risk_system/trade.dart';
 part 'src/risk_system/transactions/energy_futures.dart';
 part 'src/risk_system/units/mwh.dart';
+part 'src/risk_system/marks/forward_curve.dart';
 
 final _eastern = getLocation('America/New_York');

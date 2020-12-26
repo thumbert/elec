@@ -2,8 +2,7 @@ library test.time.hourly_schedule_test;
 
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-import 'package:elec/src/risk_system/marks/forward_curve.dart';
-import 'package:elec/src/time/bucket/hourly_bucket_scalars.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';

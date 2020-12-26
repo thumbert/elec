@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import 'dart:math' show max, min;
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
-import '../common_enums.dart';
+import 'package:elec/risk_system.dart';
 
 enum IndexType { cdd, hdd }
 
