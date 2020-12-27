@@ -71,14 +71,14 @@ class VolatilitySurface {
     var keys = (x['buckets'] as Map).keys;
     _data = <Bucket, Map<num, TimeSeries<num>>>{};
     for (String _bucket in keys) {
-      var y = (x['buckets'][_bucket] as List).cast<List<num>>();
+      var y = (x['buckets'][_bucket] as List).cast<List>();
       var bucket = Bucket.parse(_bucket);
       _data[bucket] = <num, TimeSeries<num>>{};
       for (var j = 0; j < _strikeRatios.length; j++) {
         var ts = TimeSeries<num>();
         // populate it
         for (var i = 0; i < _terms.length; i++) {
-          ts.add(IntervalTuple(_terms[i], y[i][j]));
+          ts.add(IntervalTuple(_terms[i], y[i][j] as num));
         }
         _data[bucket][_strikeRatios[j]] = ts;
       }
