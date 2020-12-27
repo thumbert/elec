@@ -1,5 +1,7 @@
 library elec.risk_system;
 
+import 'dart:convert';
+
 import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
@@ -25,5 +27,6 @@ part 'src/risk_system/trade.dart';
 part 'src/risk_system/transactions/energy_futures.dart';
 part 'src/risk_system/units/mwh.dart';
 part 'src/risk_system/marks/forward_curve.dart';
+part 'src/risk_system/marks/volatility_surface.dart';
 
 final _eastern = getLocation('America/New_York');
