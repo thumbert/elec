@@ -50,6 +50,11 @@ void tests() {
       expect(curve0P2.monthlyComponent().first.interval,
           Month(2020, 10, location: location));
     });
+    test('expand to daily is idempotent', () {
+      /// nothing to do here
+      var curve0P1 = curve0.expandToDaily(Month(2020, 7, location: location));
+      expect(curve0P1.length, curve0.length);
+    });
     test('toHourly', () {
       var ts = curve0.toHourly();
       expect(
@@ -104,6 +109,79 @@ void tests() {
               .value[Bucket.atc],
           3.16);
     });
+    test('align two PriceCurves', () {
+      var x = PriceCurve.fromJson([
+        {
+          'term': '2020-01-29',
+          'value': {'5x16': 69}
+        },
+        {
+          'term': '2020-01-30',
+          'value': {'5x16': 68}
+        },
+        {
+          'term': '2020-01-31',
+          'value': {'5x16': 67}
+        },
+        {
+          'term': '2020-02-13',
+          'value': {'5x16': 52}
+        },
+        {
+          'term': '2020-03',
+          'value': {'5x16': 53}
+        },
+        {
+          'term': '2020-04',
+          'value': {'5x16': 54}
+        },
+      ], UTC);
+      var y = PriceCurve.fromJson([
+        {
+          'term': '2019-11',
+          'value': {'5x16': 69.2}
+        },
+        {
+          'term': '2019-12',
+          'value': {'5x16': 68.2}
+        },
+        {
+          'term': '2020-01',
+          'value': {'5x16': 67.2}
+        },
+        {
+          'term': '2020-02',
+          'value': {'5x16': 52.2}
+        },
+        {
+          'term': '2020-03',
+          'value': {'5x16': 53.2}
+        },
+        {
+          'term': '2020-04',
+          'value': {'5x16': 54.2}
+        },
+        {
+          'term': '2020-05',
+          'value': {'5x16': 55.2}
+        },
+        {
+          'term': '2020-06',
+          'value': {'5x16': 56.2}
+        },
+      ], UTC);
+      var out = x.align(y);
+      expect(out.length, 6);
+      expect(out.intervals.toList(), [
+        Date(2020, 1, 29),
+        Date(2020, 1, 30),
+        Date(2020, 1, 31),
+        Date(2020, 2, 13),
+        Month(2020, 3),
+        Month(2020, 4),
+      ]);
+    });
+
     test('add two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
@@ -127,6 +205,28 @@ void tests() {
       expect(c3.first.value,
           {Bucket.b5x16: 60.1, Bucket.b2x16H: 50.11, Bucket.b7x8: 45.21});
     });
+    test('add two price curves, non-matching terms with expansion', () {
+      var c1 = PriceCurve.fromIterable([
+        IntervalTuple(Date(2020, 1, 29), {Bucket.b5x16: 60}),
+        IntervalTuple(Date(2020, 1, 30), {Bucket.b5x16: 61}),
+        IntervalTuple(Date(2020, 1, 31), {Bucket.b5x16: 62}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47}),
+      ]);
+      var c2 = PriceCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3}),
+      ]);
+      var c3 = c1 + c2;
+      expect(c3.length, 5);
+      expect(c3.first.interval, Date(2020, 1, 29));
+      expect(c3[0].value, {Bucket.b5x16: 60.1});
+      expect(c3[1].value, {Bucket.b5x16: 61.1});
+      expect(c3[2].value, {Bucket.b5x16: 62.1});
+      expect(c3[3].value, {Bucket.b5x16: 57.2});
+    });
+
     test('subtract two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),

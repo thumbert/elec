@@ -11,6 +11,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
 
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
+  /// Support only daily and monthly observations.
   PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
   }
@@ -127,7 +128,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
               }
             }
           }
-          out.add(IntervalTuple(date, value));
+          if (value.isNotEmpty) out.add(IntervalTuple(date, value));
         }
       }
     }
@@ -181,65 +182,114 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return listOfMapToCsv(out);
   }
 
-  /// Add two curves element by element.
+  /// Return a time series after aligning  this price curve with the [other]
+  /// price curve.  They now have the same terms.  For example, one had to
+  /// expand some of the monthly marks to daily, etc.  Only the overlapping
+  /// terms are returned.
+  TimeSeries<Tuple2<Map<Bucket, num>, Map<Bucket, num>>> align(
+      PriceCurve other) {
+    // align their domains first
+    var domainY = Interval(
+        Month.fromTZDateTime(other.domain.start).start, other.domain.end);
+    var x = PriceCurve.fromIterable(window(domainY));
+    var domainX =
+        Interval(Month.fromTZDateTime(domain.start).start, domain.end);
+    var y = PriceCurve.fromIterable(other.window(domainX));
+
+    // expand to daily marks as needed
+    var m0x = x.firstMonth;
+    var m0y = y.firstMonth;
+    if (m0x.isBefore(m0y)) {
+      x = x.expandToDaily(m0y.previous);
+    } else if (m0y.isBefore(m0x)) {
+      y = y.expandToDaily(m0x.previous);
+    }
+
+    // do an inner join
+    return x.merge(y, f: (a, b) => Tuple2(a, b));
+  }
+
+  /// Add two curves observation by observation and bucket by bucket.
+  /// Most commonly the [other] curve will have the same buckets as this
+  /// curve for a given term.  If they don't, the missing bucket is replaced
+  /// with zero in the addition.
   @override
   PriceCurve operator +(PriceCurve other) {
-    var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
-      if (x == null) return y as Map<Bucket, num>;
-      if (y == null) return x;
-      var out = <Bucket, num>{};
-      for (var bucket in x.keys) {
-        out[bucket] = x[bucket] + y[bucket];
+    var zs = align(other);
+    var out = PriceCurve();
+    for (var z in zs) {
+      var x = z.value.item1;
+      var y = z.value.item2;
+      var buckets = {...x.keys, ...y.keys};
+      var one = <Bucket, num>{};
+      for (var bucket in buckets) {
+        one[bucket] =
+            x.putIfAbsent(bucket, () => 0) + y.putIfAbsent(bucket, () => 0);
       }
-      return out;
-    });
-
-    return PriceCurve.fromIterable(ys.observations);
+      out.add(IntervalTuple(z.interval, one));
+    }
+    return out;
   }
 
   /// Subtract two curves element by element.
+  /// Most commonly the [other] curve will have the same buckets as this
+  /// curve for a given term.  If they don't, the missing bucket is replaced
+  /// with zero in the subtraction.
   PriceCurve operator -(PriceCurve other) {
-    var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
-      if (x == null) return y as Map<Bucket, num>;
-      if (y == null) return x;
-      var out = <Bucket, num>{};
-      for (var bucket in x.keys) {
-        out[bucket] = x[bucket] - y[bucket];
+    var zs = align(other);
+    var out = PriceCurve();
+    for (var z in zs) {
+      var x = z.value.item1;
+      var y = z.value.item2;
+      var buckets = {...x.keys, ...y.keys};
+      var one = <Bucket, num>{};
+      for (var bucket in buckets) {
+        one[bucket] =
+            x.putIfAbsent(bucket, () => 0) - y.putIfAbsent(bucket, () => 0);
       }
-      return out;
-    });
-
-    return PriceCurve.fromIterable(ys.observations);
+      out.add(IntervalTuple(z.interval, one));
+    }
+    return out;
   }
 
-  /// Multiply two curves element by element.
+  /// Multiply two curves element by element.  ONLY multiply buckets that exist
+  /// in both curves.  This is different behavior than addition/subtraction.
   PriceCurve operator *(PriceCurve other) {
-    var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
-      if (x == null) return y as Map<Bucket, num>;
-      if (y == null) return x;
-      var out = <Bucket, num>{};
-      for (var bucket in x.keys) {
-        out[bucket] = x[bucket] * y[bucket];
+    var zs = align(other);
+    var out = PriceCurve();
+    for (var z in zs) {
+      var x = z.value.item1;
+      var y = z.value.item2;
+      var buckets = {...x.keys, ...y.keys};
+      var one = <Bucket, num>{};
+      for (var bucket in buckets) {
+        if (x.containsKey(bucket) && y.containsKey(bucket)) {
+          one[bucket] = x[bucket] * y[bucket];
+        }
       }
-      return out;
-    });
-
-    return PriceCurve.fromIterable(ys.observations);
+      out.add(IntervalTuple(z.interval, one));
+    }
+    return out;
   }
 
-  /// Divide two curves element by element.
+  /// Divide two curves element by element. ONLY divide buckets that exist
+  /// in both curves.  This is different behavior than addition/subtraction.
   PriceCurve operator /(PriceCurve other) {
-    var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
-      if (x == null) return y as Map<Bucket, num>;
-      if (y == null) return x;
-      var out = <Bucket, num>{};
-      for (var bucket in x.keys) {
-        out[bucket] = x[bucket] / y[bucket];
+    var zs = align(other);
+    var out = PriceCurve();
+    for (var z in zs) {
+      var x = z.value.item1;
+      var y = z.value.item2;
+      var buckets = {...x.keys, ...y.keys};
+      var one = <Bucket, num>{};
+      for (var bucket in buckets) {
+        if (x.containsKey(bucket) && y.containsKey(bucket)) {
+          one[bucket] = x[bucket] / y[bucket];
+        }
       }
-      return out;
-    });
-
-    return PriceCurve.fromIterable(ys.observations);
+      out.add(IntervalTuple(z.interval, one));
+    }
+    return out;
   }
 
   /// Extend this forward curve periodically by year.  That is, if the curve
