@@ -1,9 +1,9 @@
 library time.bucket.hourly_shape;
 
+import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/bucket/bucket_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
-import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:dama/dama.dart' as dama;
 import 'package:timeseries/timeseries.dart';
@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart';
 
 /// Store hourly shapes by month for a set of complete buckets,
 /// e.g. 5x16, 2x16H, 7x8.
-class HourlyShape {
+class HourlyShape extends MarksCurve {
   /// the covering buckets
   List<Bucket> buckets;
 
@@ -36,7 +36,8 @@ class HourlyShape {
       ..key((IntervalTuple e) => e.interval.start.hour)
       ..rollup((List xs) => dama.mean(xs.map((e) => e.value)));
     var aux = nest.map(ts);
-    var avg = flattenMap(aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour']);
+    var avg = flattenMap(
+        aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour']);
 
     // calculate the average price by month/bucket
     var nestB = Nest()
@@ -54,11 +55,12 @@ class HourlyShape {
       ..key((e) => e['month'])
       ..key((e) => e['bucket'])
       ..rollup((List xs) {
-        xs.sort((a,b) => a['hourBeginning'].compareTo(b['hourBeginning']));
-        return xs.map((e) => e['averageValueForHour']/e['averageValue']).toList();
+        xs.sort((a, b) => a['hourBeginning'].compareTo(b['hourBeginning']));
+        return xs
+            .map((e) => e['averageValueForHour'] / e['averageValue'])
+            .toList();
       });
     var bux = nest2.map(xs);
-
 
     data = TimeSeries<Map<Bucket, List<num>>>();
     for (var month in bux.keys) {

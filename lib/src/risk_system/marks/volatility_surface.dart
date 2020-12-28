@@ -1,6 +1,6 @@
 part of elec.risk_system;
 
-class VolatilitySurface {
+class VolatilitySurface extends MarksCurve {
   /// The [xs] keys are strike ratios.  No checks are made to guarantee that
   /// all [TimeSeries] have the same domain.
   VolatilitySurface.fromTimeSeries(

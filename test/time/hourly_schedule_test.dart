@@ -132,7 +132,7 @@ void tests() {
     // });
     test('from timeseries, complete covering', () {
       var month = Month(2021, 1, location: location);
-      var ts = ForwardCurve.fromIterable([
+      var ts = PriceCurve.fromIterable([
         IntervalTuple(month, {peak: 60.7, b2x16H: 54.93, b7x8: 48.89})
       ]);
       var hs = HourlySchedule.fromForwardCurve(ts);
@@ -141,7 +141,7 @@ void tests() {
     });
     test('from timeseries, incomplete covering', () {
       var month = Month(2021, 1, location: location);
-      var ts = ForwardCurve.fromIterable([
+      var ts = PriceCurve.fromIterable([
         IntervalTuple(month, {peak: 60.7})
       ]);
       var hs = HourlySchedule.fromForwardCurve(ts);

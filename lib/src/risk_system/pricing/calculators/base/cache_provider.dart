@@ -45,7 +45,7 @@ class CacheProvider {
       var marks = await forwardMarksClient.getMonthlyForwardCurve(
           tuple.item2, tuple.item1,
           tzLocation: location);
-      return ForwardCurve.fromIterable(marks).toHourly();
+      return PriceCurve.fromIterable(marks).toHourly();
     }
 
     /// Populate the settlementPricesCache given the deal term and the curveId.

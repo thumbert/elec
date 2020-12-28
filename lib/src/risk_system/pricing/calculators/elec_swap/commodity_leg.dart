@@ -79,7 +79,7 @@ class CommodityLeg extends CalculatorBase {
       var aux =
           _parseSeries(qValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
       quantitySchedule =
-          HourlySchedule.fromForwardCurve(ForwardCurve.fromIterable(aux));
+          HourlySchedule.fromForwardCurve(PriceCurve.fromIterable(aux));
       timePeriod = getTimePeriod(aux.first.interval);
     }
 
@@ -92,7 +92,7 @@ class CommodityLeg extends CalculatorBase {
         var aux = _parseSeries(
             pValue.cast<Map<String, dynamic>>(), tzLocation, bucket);
         fixPriceSchedule =
-            HourlySchedule.fromForwardCurve(ForwardCurve.fromIterable(aux));
+            HourlySchedule.fromForwardCurve(PriceCurve.fromIterable(aux));
 
         /// lower the timePeriod if needed
         if (aux.first.interval is Date && timePeriod != TimePeriod.hour) {

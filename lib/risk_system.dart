@@ -26,7 +26,8 @@ part 'src/risk_system/time_aggregation.dart';
 part 'src/risk_system/trade.dart';
 part 'src/risk_system/transactions/energy_futures.dart';
 part 'src/risk_system/units/mwh.dart';
-part 'src/risk_system/marks/forward_curve.dart';
+part 'src/risk_system/marks/price_curve.dart';
+part 'src/risk_system/marks/marks_curve.dart';
 part 'src/risk_system/marks/volatility_surface.dart';
 
 final _eastern = getLocation('America/New_York');

@@ -43,7 +43,7 @@ abstract class HourlySchedule {
   /// Create an hourly schedule from a timeseries.  No intra-bucket shaping.
   /// For example the input timeseries can be monthly.
   /// Works even if the bucket covering is not complete.
-  factory HourlySchedule.fromForwardCurve(ForwardCurve forwardCurve) {
+  factory HourlySchedule.fromForwardCurve(PriceCurve forwardCurve) {
     return _HourlyScheduleFromForwardCurve(forwardCurve);
   }
 
@@ -279,7 +279,7 @@ class _HourlyScheduleFromForwardCurve extends HourlySchedule {
     };
   }
 
-  final ForwardCurve forwardCurve;
+  final PriceCurve forwardCurve;
 
   @override
   TimeSeries<num> toHourly(Interval interval) {

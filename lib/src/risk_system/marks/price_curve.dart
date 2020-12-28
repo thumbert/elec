@@ -1,17 +1,17 @@
 part of elec.risk_system;
 
-class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
+class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   TimeSeries<num> _ts;
 
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
-  ForwardCurve();
+  PriceCurve();
 
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
-  ForwardCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
+  PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
   }
 
@@ -25,7 +25,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
   ///     ...
   ///   ]
   ///   The inputs are time-ordered with no gaps.
-  ForwardCurve.fromJson(List<Map<String, dynamic>> xs, Location location) {
+  PriceCurve.fromJson(List<Map<String, dynamic>> xs, Location location) {
     location ??= UTC;
     for (var x in xs) {
       Interval term;
@@ -92,13 +92,13 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
 
   /// Get the daily part of the curve.  Can be empty.  All intervals are
   /// [Date]s.
-  ForwardCurve dailyComponent() {
-    return ForwardCurve.fromIterable(where((e) => e.interval is Date));
+  PriceCurve dailyComponent() {
+    return PriceCurve.fromIterable(where((e) => e.interval is Date));
   }
 
   /// Get the monthly part of the curve.  All intervals are [Month]s.
-  ForwardCurve monthlyComponent() {
-    return ForwardCurve.fromIterable(where((e) => e.interval is Month));
+  PriceCurve monthlyComponent() {
+    return PriceCurve.fromIterable(where((e) => e.interval is Month));
   }
 
   /// get the first month that is marked
@@ -106,7 +106,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
 
   /// If there are monthly marks before and including [upTo] month, expand them
   /// into to daily marks (same buckets.)
-  ForwardCurve expandToDaily(Month upTo) {
+  PriceCurve expandToDaily(Month upTo) {
     var out = dailyComponent();
     var mCurve = monthlyComponent();
     for (var i = 0; i < mCurve.length; i++) {
@@ -183,7 +183,7 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
 
   /// Add two curves element by element.
   @override
-  ForwardCurve operator +(ForwardCurve other) {
+  PriceCurve operator +(PriceCurve other) {
     var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
       if (x == null) return y as Map<Bucket, num>;
       if (y == null) return x;
@@ -194,11 +194,11 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
       return out;
     });
 
-    return ForwardCurve.fromIterable(ys.observations);
+    return PriceCurve.fromIterable(ys.observations);
   }
 
   /// Subtract two curves element by element.
-  ForwardCurve operator -(ForwardCurve other) {
+  PriceCurve operator -(PriceCurve other) {
     var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
       if (x == null) return y as Map<Bucket, num>;
       if (y == null) return x;
@@ -209,11 +209,11 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
       return out;
     });
 
-    return ForwardCurve.fromIterable(ys.observations);
+    return PriceCurve.fromIterable(ys.observations);
   }
 
   /// Multiply two curves element by element.
-  ForwardCurve operator *(ForwardCurve other) {
+  PriceCurve operator *(PriceCurve other) {
     var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
       if (x == null) return y as Map<Bucket, num>;
       if (y == null) return x;
@@ -224,11 +224,11 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
       return out;
     });
 
-    return ForwardCurve.fromIterable(ys.observations);
+    return PriceCurve.fromIterable(ys.observations);
   }
 
   /// Divide two curves element by element.
-  ForwardCurve operator /(ForwardCurve other) {
+  PriceCurve operator /(PriceCurve other) {
     var ys = merge(other, joinType: JoinType.Outer, f: (x, y) {
       if (x == null) return y as Map<Bucket, num>;
       if (y == null) return x;
@@ -239,18 +239,18 @@ class ForwardCurve extends TimeSeries<Map<Bucket, num>> {
       return out;
     });
 
-    return ForwardCurve.fromIterable(ys.observations);
+    return PriceCurve.fromIterable(ys.observations);
   }
 
   /// Extend this forward curve periodically by year.  That is, if the curve
   /// is defined only through Dec25, construct Jan26 by applying function [f]
   /// to Jan25 values, etc.  By default, function [f] is the identity function.
-  ForwardCurve extendPeriodicallyByYear(Month endMonth,
+  PriceCurve extendPeriodicallyByYear(Month endMonth,
       {Map<Bucket, num> Function(Map<Bucket, num>) f}) {
     f ??= (x) => x;
     var n = length;
     var month = (intervals.last as Month).next;
-    var fc = ForwardCurve.fromIterable(this);
+    var fc = PriceCurve.fromIterable(this);
     while (!month.isAfter(endMonth)) {
       var value = fc.values.toList()[n - 12];
       fc.add(IntervalTuple(month, f(value)));

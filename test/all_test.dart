@@ -14,7 +14,7 @@ import 'time/shape/shape_cost_test.dart' as shape_cost;
 import 'time/calendar/holiday_test.dart' as holiday;
 import 'time/calendar/calendar_test.dart' as calendar;
 import 'risk_system/buy_sell_test.dart' as buy_sell;
-import 'risk_system/marks/forward_curve_test.dart' as forward_curve;
+import 'risk_system/marks/price_curve_test.dart' as price_curve;
 import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
 import 'risk_system/marks/volatility_surface_test.dart' as volatility_surface;
 import 'risk_system/pricing/calculators/elec_swap/elec_swap_test.dart'
@@ -39,7 +39,7 @@ void main() async {
   calendar.main();
   holiday.main();
   buy_sell.tests();
-  forward_curve.tests();
+  price_curve.tests();
   monthly_curve.tests();
   volatility_surface.tests();
   elec_swap.tests(rootUrl);

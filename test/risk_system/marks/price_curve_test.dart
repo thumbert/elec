@@ -18,7 +18,7 @@ void tests() {
     var xs = json.decode(aux) as List;
     // a power curve, daily and monthly, 3 buckets
     var x0 = (xs[0]['observations'] as List).cast<Map<String, dynamic>>();
-    var curve0 = ForwardCurve.fromJson(x0, location);
+    var curve0 = PriceCurve.fromJson(x0, location);
     // a gas curve, 7x24 bucket
     var x1 = (xs[1]['observations'] as List).cast<Map<String, dynamic>>();
 
@@ -28,14 +28,14 @@ void tests() {
       expect(curve0.toJson(), x0);
     });
     test('from the flat bucket only', () {
-      var curve = ForwardCurve.fromJson(x1, location);
+      var curve = PriceCurve.fromJson(x1, location);
       expect(curve.length, 11);
       expect(curve.first.value.length, 1);
       expect(curve.toJson(), x1);
     });
     test('filter only the monthly values', () {
       var curve0m =
-          ForwardCurve.fromIterable(curve0.where((e) => e.interval is Month));
+          PriceCurve.fromIterable(curve0.where((e) => e.interval is Month));
       expect(curve0m.length, 5);
     });
     test('first month', () {
@@ -84,7 +84,7 @@ void tests() {
     });
     test('extend periodically by year', () {
       var x2 = (xs[2]['observations'] as List).cast<Map<String, dynamic>>();
-      var curve = ForwardCurve.fromJson(x2, location);
+      var curve = PriceCurve.fromJson(x2, location);
       var curveX =
           curve.extendPeriodicallyByYear(Month(2022, 12, location: location));
       expect(curveX.length, 29);
@@ -105,7 +105,7 @@ void tests() {
           3.16);
     });
     test('add two forward curves element by element', () {
-      var c1 = ForwardCurve.fromIterable([
+      var c1 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
         IntervalTuple(Month(2020, 2),
@@ -113,7 +113,7 @@ void tests() {
         IntervalTuple(Month(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
-      var c2 = ForwardCurve.fromIterable([
+      var c2 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
         IntervalTuple(Month(2020, 2),
@@ -128,7 +128,7 @@ void tests() {
           {Bucket.b5x16: 60.1, Bucket.b2x16H: 50.11, Bucket.b7x8: 45.21});
     });
     test('subtract two forward curves element by element', () {
-      var c1 = ForwardCurve.fromIterable([
+      var c1 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
         IntervalTuple(Month(2020, 2),
@@ -136,7 +136,7 @@ void tests() {
         IntervalTuple(Month(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
-      var c2 = ForwardCurve.fromIterable([
+      var c2 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
         IntervalTuple(Month(2020, 2),
@@ -151,7 +151,7 @@ void tests() {
           {Bucket.b5x16: 59.9, Bucket.b2x16H: 49.89, Bucket.b7x8: 44.79});
     });
     test('multiply two forward curves element by element', () {
-      var c1 = ForwardCurve.fromIterable([
+      var c1 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
         IntervalTuple(Month(2020, 2),
@@ -159,7 +159,7 @@ void tests() {
         IntervalTuple(Month(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
-      var c2 = ForwardCurve.fromIterable([
+      var c2 = PriceCurve.fromIterable([
         IntervalTuple(Month(2020, 1),
             {Bucket.b5x16: 2, Bucket.b2x16H: 5, Bucket.b7x8: 3}),
         IntervalTuple(Month(2020, 2),
