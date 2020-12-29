@@ -210,9 +210,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   }
 
   /// Add two curves observation by observation and bucket by bucket.
-  /// Most commonly the [other] curve will have the same buckets as this
-  /// curve for a given term.  If they don't, the missing bucket is replaced
-  /// with zero in the addition.
+  /// If the curves don't match buckets, nothing is done (strict).
+  ///
   @override
   PriceCurve operator +(PriceCurve other) {
     var zs = align(other);
@@ -223,8 +222,9 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var buckets = {...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
-        one[bucket] =
-            x.putIfAbsent(bucket, () => 0) + y.putIfAbsent(bucket, () => 0);
+        if (x.containsKey(bucket) && y.containsKey(bucket)) {
+          one[bucket] = x[bucket] + y[bucket];
+        }
       }
       out.add(IntervalTuple(z.interval, one));
     }
@@ -232,9 +232,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   }
 
   /// Subtract two curves element by element.
-  /// Most commonly the [other] curve will have the same buckets as this
-  /// curve for a given term.  If they don't, the missing bucket is replaced
-  /// with zero in the subtraction.
+  /// If the curves don't match buckets, nothing is done (strict).
   PriceCurve operator -(PriceCurve other) {
     var zs = align(other);
     var out = PriceCurve();
@@ -244,16 +242,17 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var buckets = {...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
-        one[bucket] =
-            x.putIfAbsent(bucket, () => 0) - y.putIfAbsent(bucket, () => 0);
+        if (x.containsKey(bucket) && y.containsKey(bucket)) {
+          one[bucket] = x[bucket] - y[bucket];
+        }
       }
       out.add(IntervalTuple(z.interval, one));
     }
     return out;
   }
 
-  /// Multiply two curves element by element.  ONLY multiply buckets that exist
-  /// in both curves.  This is different behavior than addition/subtraction.
+  /// Multiply two curves element by element.
+  /// If the curves don't match buckets, nothing is done (strict).
   PriceCurve operator *(PriceCurve other) {
     var zs = align(other);
     var out = PriceCurve();
@@ -272,8 +271,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return out;
   }
 
-  /// Divide two curves element by element. ONLY divide buckets that exist
-  /// in both curves.  This is different behavior than addition/subtraction.
+  /// Divide two curves element by element.
+  /// If the curves don't match buckets, nothing is done (strict).
   PriceCurve operator /(PriceCurve other) {
     var zs = align(other);
     var out = PriceCurve();
