@@ -175,4 +175,14 @@ class HourlyShape extends MarksCurve {
   void window(Interval interval) {
     data = TimeSeries.fromIterable(data.window(interval));
   }
+
+  @override
+  Map<String, dynamic> toMongoDocument(Date fromDate, String curveId) {
+    return {
+      'fromDate': fromDate.toString(),
+      'curveId': curveId,
+      ...toJson(),
+    };
+  }
+
 }

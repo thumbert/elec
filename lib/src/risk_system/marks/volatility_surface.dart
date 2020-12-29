@@ -200,4 +200,13 @@ class VolatilitySurface extends MarksCurve {
     }
     _terms = _terms.where((month) => interval.containsInterval(month)).toList();
   }
+
+  @override
+  Map<String, dynamic> toMongoDocument(Date fromDate, String curveId) {
+    return {
+      'fromDate': fromDate.toString(),
+      'curveId': curveId,
+      ...toJson(),
+    };
+  }
 }

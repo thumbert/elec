@@ -204,6 +204,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   ///   }
   /// }
   ///```
+  @override
   Map<String, dynamic> toMongoDocument(Date fromDate, String curveId) {
     var _buckets = values.map((e) => e.keys).expand((e) => e).toSet();
     var terms = <String>[];
