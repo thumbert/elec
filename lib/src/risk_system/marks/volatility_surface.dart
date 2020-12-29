@@ -100,6 +100,8 @@ class VolatilitySurface extends MarksCurve {
 
   /// Calculate the volatility value for a given month and strikeRatio
   /// by linear interpolation for now.
+  ///
+  /// Will throw if the bucket or month doesn't exist.
   num value(Bucket bucket, Month month, num strikeRatio) {
     var iMin = strikeRatios.lastIndexWhere((e) => e <= strikeRatio);
     if (strikeRatios[iMin] == strikeRatio) {
@@ -185,5 +187,16 @@ class VolatilitySurface extends MarksCurve {
       n++;
     }
     return VolatilitySurface.fromJson(xs, location: terms.first.location);
+  }
+
+  /// Truncate this volatility surface to the given [interval].
+  void window(Interval interval) {
+    for (var bucket in buckets) {
+      for (var strikeRatio in strikeRatios) {
+        _data[bucket][strikeRatio] = TimeSeries.fromIterable(
+            _data[bucket][strikeRatio].window(interval));
+      }
+    }
+    _terms = _terms.where((month) => interval.containsInterval(month)).toList();
   }
 }

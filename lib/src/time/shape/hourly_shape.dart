@@ -72,6 +72,38 @@ class HourlyShape extends MarksCurve {
     }
   }
 
+  /// The opposite of [toJson] method.
+  ///```
+  ///{
+  ///  "terms": [
+  ///    "2020-01",
+  ///    "2020-02",
+  ///    "2020-03"],
+  ///  "buckets": {
+  ///     "7x8": [[...], [...], [...]],
+  ///     "5x16": [[...], [...], [...]],
+  ///     "2x16H": [[...], [...], [...]],
+  /// }
+  /// ```
+  HourlyShape.fromJson(Map<String, dynamic> x, Location location) {
+    if (!x.keys.toSet().containsAll({'terms', 'buckets'})) {
+      throw ArgumentError('Missing one of keys: terms, buckets.');
+    }
+    var _buckets = (x['buckets'] as Map).keys;
+    var months = (x['terms'] as List).cast<String>();
+    var aux = x['buckets'] as Map;
+    buckets = _buckets.map((e) => Bucket.parse(e)).toList();
+    data = TimeSeries<Map<Bucket, List<num>>>();
+    for (var i = 0; i < months.length; i++) {
+      var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+      var value = <Bucket, List<num>>{};
+      for (var _bucket in _buckets) {
+        value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
+      }
+      data.add(IntervalTuple(month, value));
+    }
+  }
+
   TimeSeries<num> toHourly({Interval interval}) {
     interval ??= data.domain;
     var ts = TimeSeries<num>();
@@ -109,26 +141,6 @@ class HourlyShape extends MarksCurve {
     return ts;
   }
 
-  /// The opposite of [toJson] method.
-  HourlyShape.fromJson(Map<String, dynamic> x, Location location) {
-    if (!x.keys.toSet().containsAll({'terms', 'buckets'})) {
-      throw ArgumentError('Missing one of keys: terms, buckets.');
-    }
-    var _buckets = (x['buckets'] as Map).keys;
-    var months = (x['terms'] as List).cast<String>();
-    var aux = x['buckets'] as Map;
-    buckets = _buckets.map((e) => Bucket.parse(e)).toList();
-    data = TimeSeries<Map<Bucket, List<num>>>();
-    for (var i = 0; i < months.length; i++) {
-      var month = Month.parse(months[i], fmt: _isoFmt, location: location);
-      var value = <Bucket, List<num>>{};
-      for (var _bucket in _buckets) {
-        value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
-      }
-      data.add(IntervalTuple(month, value));
-    }
-  }
-
   /// Format the data for serialization to Mongo.
   ///{
   ///  "terms": [
@@ -155,5 +167,10 @@ class HourlyShape extends MarksCurve {
       }
     }
     return out;
+  }
+
+  /// Truncate this hourly shape to this [interval].
+  void window(Interval interval) {
+    data = TimeSeries.fromIterable(data.window(interval));
   }
 }

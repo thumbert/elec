@@ -93,6 +93,12 @@ void tests(String rootUrl) async {
 //      var encoder = JsonEncoder.withIndent('  ');
 //      print(encoder.convert(hs1.toJson()));
     });
+    test('window', () {
+      var hs = HourlyShape.fromTimeSeries(ts, buckets);
+      hs.window(Term.parse('Mar19-Oct19', location).interval);
+      expect(hs.data.first.interval, Month(2019, 3, location: location));
+      expect(hs.data.last.interval, Month(2019, 10, location: location));
+    });
   });
 }
 
@@ -169,7 +175,7 @@ void speedTests(String rootUrl) async {
 void main() async {
   await initializeTimeZone();
   var rootUrl = 'http://localhost:8080/'; // testing
-  // await tests(rootUrl);
+  await tests(rootUrl);
 
-  await speedTests(rootUrl);
+  // await speedTests(rootUrl);
 }

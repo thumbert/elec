@@ -112,13 +112,13 @@ Map<Tuple2<Bucket, num>, TimeSeries<num>> _getTimeSeries() {
 void tests() {
   group('Volatility surface tests: ', () {
     var location = getLocation('America/New_York');
+    var vs = VolatilitySurface.fromJson(_getJson(), location: location);
     test('from TimeSeries', () {
       var vs = VolatilitySurface.fromTimeSeries(_getTimeSeries());
       var ts = vs.value(Bucket.b5x16, Month(2020, 8), 1.5);
       expect(ts, 0.625);
     });
     test('from Json', () {
-      var vs = VolatilitySurface.fromJson(_getJson(), location: location);
       expect(vs.buckets, {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8});
       expect(vs.terms.first, Month(2020, 8, location: location));
       expect(vs.terms.last, Month(2021, 7, location: location));
@@ -127,7 +127,6 @@ void tests() {
       expect(ts, 0.55);
     });
     test('toJson', () {
-      var vs = VolatilitySurface.fromJson(_getJson(), location: location);
       var out = vs.toJson();
       expect(out['strikeRatios'], [0.5, 1, 2.0]);
       expect((out['buckets'] as Map).keys.toSet(), {
@@ -140,13 +139,15 @@ void tests() {
       expect(terms.last, '2021-07');
       expect(out['buckets']['5x16'].first, [0.5, 0.55, 0.7]);
     });
-    test('interpolate volatility', () {
-      var vs = VolatilitySurface.fromJson(_getJson(), location: location);
+    test('volatility value', () {
+      var v0 = vs.value(Bucket.b5x16, Month(2020, 10, location: location), 1);
+      expect(v0, 0.4);
+    });
+    test('interpolate strikeRatios for volatility value', () {
       var ts = vs.value(Bucket.b5x16, Month(2020, 8, location: location), 1.5);
       expect(ts, 0.625);
     });
     test('extend periodically by year', () {
-      var vs = VolatilitySurface.fromJson(_getJson(), location: location);
       var vsX = vs.extendPeriodicallyByYear(Month(2022, 12, location: location),
           f: (x) => 0.9 * x);
       expect(vsX.terms.length, 29);
@@ -164,6 +165,11 @@ void tests() {
               .value
               .toStringAsFixed(3),
           '0.405');
+    });
+    test('window', () {
+      vs.window(Term.parse('Oct20-Dec20', location).interval);
+      expect(vs.terms.first, Month(2020, 10, location: location));
+      expect(vs.terms.last, Month(2020, 12, location: location));
     });
   });
 }
