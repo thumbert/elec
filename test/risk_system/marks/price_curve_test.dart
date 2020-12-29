@@ -33,6 +33,14 @@ void tests() {
       expect(curve.first.value.length, 1);
       expect(curve.toJson(), x1);
     });
+    test('toMongoDocument', () {
+      var out =
+          curve0.toMongoDocument(Date(2020, 10, 1), 'isone_energy_4000_da_lmp');
+      expect(out['fromDate'], '2020-10-01');
+      expect(out['curveId'], 'isone_energy_4000_da_lmp');
+      expect((out['terms'] as List).length, 11);
+      expect((out['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
+    });
     test('filter only the monthly values', () {
       var curve0m =
           PriceCurve.fromIterable(curve0.where((e) => e.interval is Month));

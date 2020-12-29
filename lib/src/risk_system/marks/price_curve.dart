@@ -182,6 +182,38 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return listOfMapToCsv(out);
   }
 
+  /// Construct a Mongo document from a [PriceCurve].
+  /// ```
+  /// {
+  ///   'fromDate': '2020-06-15',
+  ///   'curveId': 'elec_isone_4011_lmp_da',
+  ///   'terms': ['2020-06-16', ..., '2020-07', '2020-08', ..., '2026-12'],
+  ///   'buckets': {
+  ///     '5x16': [27.10, 26.25, ...],
+  ///     '2x16H': [...],
+  ///     '7x8': [...],
+  ///   }
+  /// }
+  ///```
+  Map<String, dynamic> toMongoDocument(Date fromDate, String curveId) {
+    var _buckets = values.map((e) => e.keys).expand((e) => e).toSet();
+    var terms = <String>[];
+    var buckets = Map.fromIterables(_buckets.map((e) => e.name),
+        List.generate(_buckets.length, (index) => <num>[]));
+    for (var obs in observations) {
+      terms.add(obs.interval.toString());
+      for (var bucket in _buckets) {
+        buckets[bucket.name].add(obs.value[bucket]);
+      }
+    }
+    return {
+      'fromDate': fromDate.toString(),
+      'curveId': curveId,
+      'terms': terms,
+      'buckets': buckets,
+    };
+  }
+
   /// Return a time series after aligning  this price curve with the [other]
   /// price curve.  They now have the same terms.  For example, one had to
   /// expand some of the monthly marks to daily, etc.  Only the overlapping
