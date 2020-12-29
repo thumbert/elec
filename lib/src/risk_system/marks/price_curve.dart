@@ -3,8 +3,6 @@ part of elec.risk_system;
 class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
-  TimeSeries<num> _ts;
-
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   PriceCurve();
@@ -44,6 +42,17 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       add(IntervalTuple(term, value));
     }
   }
+
+  @override
+  Set<Bucket> get buckets {
+    _buckets ??= values.map((e) => e.keys).expand((e) => e).toSet();
+    return _buckets;
+  }
+
+  Set<Bucket> _buckets;
+
+  /// an hourly timeseries cache
+  TimeSeries<num> _ts;
 
   /// Get the entire curve as an hourly timeseries
   /// If the forward curve contains only one bucket, say 2x16H, only the hours

@@ -96,6 +96,7 @@ class VolatilitySurface extends MarksCurve {
   List<Month> _terms;
   List<Month> get terms => _terms;
 
+  @override
   Set<Bucket> get buckets => _data.keys.toSet();
 
   /// Calculate the volatility value for a given month and strikeRatio

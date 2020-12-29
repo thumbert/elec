@@ -16,7 +16,7 @@ import 'package:elec_server/client/marks/forward_marks.dart';
 
 void tests(String rootUrl) async {
   var client = DaLmp(Client(), rootUrl: rootUrl);
-  var buckets = [Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8];
+  var buckets = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
   var location = getLocation('America/New_York');
   TimeSeries<num> ts;
 
