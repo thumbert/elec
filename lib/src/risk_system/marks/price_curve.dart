@@ -211,7 +211,12 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var buckets = Map.fromIterables(_buckets.map((e) => e.name),
         List.generate(_buckets.length, (index) => <num>[]));
     for (var obs in observations) {
-      terms.add(obs.interval.toString());
+      if (obs.interval is Month) {
+        Month month = obs.interval;
+        terms.add(month.toIso8601String());
+      } else {
+        terms.add(obs.interval.toString());
+      }
       for (var bucket in _buckets) {
         buckets[bucket.name].add(obs.value[bucket]);
       }

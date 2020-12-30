@@ -39,6 +39,7 @@ void tests() {
       expect(out['fromDate'], '2020-10-01');
       expect(out['curveId'], 'isone_energy_4000_da_lmp');
       expect((out['terms'] as List).length, 11);
+      expect((out['terms'] as List).last, '2020-12');
       expect((out['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('filter only the monthly values', () {

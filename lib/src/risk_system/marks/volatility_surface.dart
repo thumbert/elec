@@ -85,7 +85,7 @@ class VolatilitySurface extends MarksCurve {
     }
   }
 
-  /// The inner map has strikeRatios as keys.
+  /// The inner map has strikeRatios as keys.  The timeseries are all monthly.
   Map<Bucket, Map<num, TimeSeries<num>>> _data;
 
   List<num> _strikeRatios;
