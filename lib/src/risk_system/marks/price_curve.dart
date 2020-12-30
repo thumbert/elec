@@ -43,6 +43,41 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     }
   }
 
+  /// Input map of this form
+  /// ```
+  /// {
+  ///   'terms': ['2020-01-15', ... '2020-02', ...],
+  ///   'buckets': {
+  ///     '5x16': [81.5, 80.17, ...],
+  ///     '2x16H': [70.2, 67.32, ...],
+  ///     '7x8': [45.7, 42.81, ...],
+  ///   }
+  /// }
+  /// ```
+  PriceCurve.fromMongoDocument(
+      Map<String, dynamic> document, Location location) {
+    var buckets = {for (var b in document['buckets'].keys) b: Bucket.parse(b)};
+    final bKeys = buckets.keys.toList();
+    var terms = document['terms'] as List;
+    var xs = <IntervalTuple<Map<Bucket, num>>>[];
+    for (var i = 0; i < terms.length; i++) {
+      var value = {
+        for (var bucket in bKeys)
+          buckets[bucket]: document['buckets'][bucket][i] as num
+      };
+      Interval term;
+      if (terms[i].length == 7) {
+        term = Month.parse(terms[i], location: location);
+      } else if (terms[i].length == 10) {
+        term = Date.parse(terms[i], location: location);
+      } else {
+        throw ArgumentError('Unsupported term ${terms[i]}');
+      }
+      xs.add(IntervalTuple(term, value));
+    }
+    addAll(xs);
+  }
+
   @override
   Set<Bucket> get buckets {
     _buckets ??= values.map((e) => e.keys).expand((e) => e).toSet();
