@@ -1,12 +1,12 @@
-part of elec.calculators;
+part of elec.calculators.elec_swap;
 
 class ElecSwapCalculator extends CalculatorBase {
   ElecSwapCalculator(
       {Date asOfDate,
       Term term,
       BuySell buySell,
-      List<CommodityLeg> legs,
-      CacheProvider cacheProvider}) {
+      List<CommodityLegElecSwap> legs,
+      CacheProviderElecSwap cacheProvider}) {
     this.asOfDate = asOfDate;
     this.term = term;
     this.buySell = buySell;
@@ -45,13 +45,13 @@ class ElecSwapCalculator extends CalculatorBase {
       throw ArgumentError('Json input is missing the key: legs');
     }
 
-    legs = <CommodityLeg>[];
+    legs = <CommodityLegElecSwap>[];
     var _aux = x['legs'] as List;
     for (Map<String, dynamic> e in _aux) {
       e['asOfDate'] = x['asOfDate'];
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
-      var leg = CommodityLeg.fromJson(e);
+      var leg = CommodityLegElecSwap.fromJson(e);
       legs.add(leg);
     }
   }
@@ -62,8 +62,8 @@ class ElecSwapCalculator extends CalculatorBase {
   /// If you change the term, the pricing date, any of the leg buckets, etc.
   /// It is a brittle design, because people may forget to call it.
   Future<void> build() async {
-    for (var leg in legs) {
-      var curveDetails = await cacheProvider.curveIdCache.get(leg.curveId);
+    for (CommodityLegElecSwap leg in legs) {
+      var curveDetails = await cacheProvider.curveDetailsCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
       leg.hourlyFloatingPrice = await getFloatingPrice(leg.bucket, leg.curveId);
       leg.makeLeaves();
@@ -74,7 +74,7 @@ class ElecSwapCalculator extends CalculatorBase {
   /// Need to build() the calculator first.
   num dollarPrice() {
     var value = 0.0;
-    for (var leg in legs) {
+    for (CommodityLegElecSwap leg in legs) {
       for (var leaf in leg.leaves) {
         value += leaf.dollarPrice();
       }
@@ -89,8 +89,8 @@ class ElecSwapCalculator extends CalculatorBase {
   @override
   String showDetails() {
     var table = <Map<String, dynamic>>[];
-    for (var leg in legs) {
-      for (var leaf in leg.leaves) {
+    for (CommodityLegElecSwap leg in legs) {
+      for (LeafElecSwap leaf in leg.leaves) {
         table.add({
           'term': leaf.interval.toString(),
           'curveId': leg.curveId,
@@ -123,13 +123,69 @@ class ElecSwapCalculator extends CalculatorBase {
     };
   }
 
+  /// Get daily and monthly marks for a given curveId and bucket.
+  /// LMP curves will also use an hourly shape curve to support non-standard
+  /// buckets.
+  ///
+  /// Return a timeseries of hourly prices, for only the hours of interest.
+  Future<TimeSeries<num>> getFloatingPrice(
+      Bucket bucket, String curveId) async {
+    CacheProviderElecSwap cp = cacheProvider;
+    var curveDetails = await cp.curveDetailsCache.get(curveId);
+    var fwdMarks = await cp.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+
+    var location = fwdMarks.first.interval.start.location;
+    var _term = term.interval.withTimeZone(location);
+    var res = TimeSeries.fromIterable(fwdMarks
+        .window(_term)
+        .where((obs) => bucket.containsHour(obs.interval)));
+
+    error = res.isEmpty
+        ? 'No prices found in the Db for curve $curveId and bucket $bucket'
+        : '';
+
+    if (curveDetails.containsKey('hourlyShapeCurveId')) {
+      /// get the hourly shaping curve if needed
+      var hSchedule = await cp.hourlyShapeCache
+          .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
+      var hShapeMultiplier = TimeSeries.fromIterable(
+          hSchedule.window(term.interval.withTimeZone(location)));
+
+      /// multiply each hour by the shape factor
+      res = res * hShapeMultiplier;
+    }
+
+    /// Check if you need to add settlement prices
+    var startDate = Date.fromTZDateTime(fwdMarks.first.interval.start);
+    if (term.startDate.isBefore(startDate)) {
+      /// need to get settlement data, return all hours of the term
+      var settlementData =
+          await cp.settlementPricesCache.get(Tuple2(term, curveId));
+      if (term.interval.start.isBefore(settlementData.first.interval.start)) {
+        // Clear the settlement cache if term start is earlier than existing
+        // term.  This only gets executed once, for the first leg.
+        await cp.settlementPricesCache.invalidateAll();
+        settlementData =
+            await cp.settlementPricesCache.get(Tuple2(term, curveId));
+      }
+
+      /// select only the bucket you need
+      var sData = settlementData.where((e) => bucket.containsHour(e.interval));
+
+      /// put it together
+      res = TimeSeries<num>()
+        ..addAll([
+          ...sData,
+          ...res.window(Interval(sData.last.interval.end, term.interval.end)),
+        ]);
+    }
+
+    return res;
+  }
+
   static final _fmtQty = NumberFormat.currency(symbol: '', decimalDigits: 0);
   static final _fmtCurrency0 =
       NumberFormat.currency(symbol: '\$', decimalDigits: 0);
   static final _fmtCurrency4 =
       NumberFormat.currency(symbol: '\$', decimalDigits: 4);
 }
-
-// var _emptyRow = Map.fromIterables(
-//     ['term', 'curveId', 'bucket', 'nominalQuantity', 'forwardPrice', 'value'],
-//     ['', '', '', '', '', '']);

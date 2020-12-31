@@ -1,7 +1,7 @@
-part of elec.calculators;
+part of elec.calculators.elec_swap;
 
 /// One leaf per period (month or day).
-class Leaf {
+class LeafElecSwap extends Leaf {
   BuySell buySell;
   Interval interval;
   num quantity;
@@ -11,9 +11,10 @@ class Leaf {
   /// number of hours in this period
   int hours;
 
-  Leaf(this.buySell, this.interval, this.quantity, this.fixPrice,
+  LeafElecSwap(this.buySell, this.interval, this.quantity, this.fixPrice,
       this.floatingPrice, this.hours);
 
+  @override
   num dollarPrice() {
     return buySell.sign * hours * quantity * (floatingPrice - fixPrice);
   }

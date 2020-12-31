@@ -1,15 +1,20 @@
-part of elec.calculators;
+library elec.risk_system.pricing.calculators.base.calculator_base;
+
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'cache_provider.dart';
+import 'commodity_leg.dart';
 
 class CalculatorBase {
   CalculatorBase();
 
-  factory CalculatorBase.fromJson(Map<String, dynamic> x) {
-    if (x['calculatorType'] == 'elec_swap') {
-      return ElecSwapCalculator.fromJson(x);
-    } else {
-      throw ArgumentError('Unsupported calculator type ${x['calculatorType']}');
-    }
-  }
+  // factory CalculatorBase.fromJson(Map<String, dynamic> x) {
+  //   if (x['calculatorType'] == 'elec_swap') {
+  //     return ElecSwapCalculator.fromJson(x);
+  //   } else {
+  //     throw ArgumentError('Unsupported calculator type ${x['calculatorType']}');
+  //   }
+  // }
 
   /// A collection of caches for different market and curve data.
   CacheProvider cacheProvider;
@@ -66,64 +71,4 @@ class CalculatorBase {
 
   /// What to show in the UI for details.  Each calculator implements it.
   String showDetails() => '';
-
-  /// Get daily and monthly marks for a given curveId and bucket.
-  /// LMP curves will also use an hourly shape curve to support non-standard
-  /// buckets.
-  ///
-  /// Return a timeseries of hourly prices, for only the hours of interest.
-  Future<TimeSeries<num>> getFloatingPrice(
-      Bucket bucket, String curveId) async {
-    var curveDetails = await cacheProvider.curveIdCache.get(curveId);
-    var fwdMarks =
-        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
-
-    var location = fwdMarks.first.interval.start.location;
-    var _term = term.interval.withTimeZone(location);
-    var res = TimeSeries.fromIterable(fwdMarks
-        .window(_term)
-        .where((obs) => bucket.containsHour(obs.interval)));
-
-    error = res.isEmpty
-        ? 'No prices found in the Db for curve $curveId and bucket $bucket'
-        : '';
-
-    if (curveDetails.containsKey('hourlyShapeCurveId')) {
-      /// get the hourly shaping curve if needed
-      var hSchedule = await cacheProvider.hourlyShapeCache
-          .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
-      var hShapeMultiplier = TimeSeries.fromIterable(
-          hSchedule.window(term.interval.withTimeZone(location)));
-
-      /// multiply each hour by the shape factor
-      res = res * hShapeMultiplier;
-    }
-
-    /// Check if you need to add settlement prices
-    var startDate = Date.fromTZDateTime(fwdMarks.first.interval.start);
-    if (term.startDate.isBefore(startDate)) {
-      /// need to get settlement data, return all hours of the term
-      var settlementData =
-          await cacheProvider.settlementPricesCache.get(Tuple2(term, curveId));
-      if (term.interval.start.isBefore(settlementData.first.interval.start)) {
-        // Clear the settlement cache if term start is earlier than existing
-        // term.  This only gets executed once, for the first leg.
-        await cacheProvider.settlementPricesCache.invalidateAll();
-        settlementData = await cacheProvider.settlementPricesCache
-            .get(Tuple2(term, curveId));
-      }
-
-      /// select only the bucket you need
-      var sData = settlementData.where((e) => bucket.containsHour(e.interval));
-
-      /// put it together
-      res = TimeSeries<num>()
-        ..addAll([
-          ...sData,
-          ...res.window(Interval(sData.last.interval.end, term.interval.end)),
-        ]);
-    }
-
-    return res;
-  }
 }

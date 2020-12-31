@@ -1,6 +1,6 @@
-part of elec.calculators;
+part of elec.calculators.elec_swap;
 
-class CommodityLeg extends CalculatorBase {
+class CommodityLegElecSwap extends CommodityLeg {
   String curveId;
   String cashOrPhys;
   Bucket bucket;
@@ -21,7 +21,7 @@ class CommodityLeg extends CalculatorBase {
   HourlySchedule quantitySchedule;
   HourlySchedule fixPriceSchedule;
 
-  CommodityLeg({
+  CommodityLegElecSwap({
     this.curveId,
     this.bucket,
     this.timePeriod,
@@ -34,7 +34,7 @@ class CommodityLeg extends CalculatorBase {
 
   /// Support hourly, daily and monthly quantities/fixPrices.
   /// Method is async because it uses [curveIdCache] and [forwardMarksCache].
-  CommodityLeg.fromJson(Map<String, dynamic> x) {
+  CommodityLegElecSwap.fromJson(Map<String, dynamic> x) {
     // time zone of the curve, may be different than the calc
     if (x['tzLocation'] == null) {
       throw ArgumentError('Json input is missing the key tzLocation');
@@ -45,15 +45,15 @@ class CommodityLeg extends CalculatorBase {
     if (x['asOfDate'] == null) {
       throw ArgumentError('Json input is missing the key asOfDate');
     }
-    _asOfDate = Date.parse(x['asOfDate']);
+    asOfDate = Date.parse(x['asOfDate']);
     if (x['term'] == null) {
       throw ArgumentError('Json input is missing the key term');
     }
-    _term = Term.parse(x['term'], tzLocation);
+    term = Term.parse(x['term'], tzLocation);
     if (x['buy/sell'] == null) {
       throw ArgumentError('Json input is missing the key buy/sell');
     }
-    _buySell = BuySell.parse(x['buy/sell']);
+    buySell = BuySell.parse(x['buy/sell']);
 
     // below is leg info only
     if (x['curveId'] == null) {
@@ -106,16 +106,14 @@ class CommodityLeg extends CalculatorBase {
     }
   }
 
-  /// Leg leaves
-  List<Leaf> leaves;
-
   /// Fair value for this commodity leg.
   /// Get the quantity weighted floating price for this leg.
   /// Needs [leaves] to be populated.
+  @override
   num price() {
     num hpq = 0; // hours * quantity * floatingPrice
     num hq = 0; // hours * quantity
-    for (var leaf in leaves) {
+    for (LeafElecSwap leaf in leaves) {
       hpq += leaf.hours * leaf.quantity * leaf.floatingPrice;
       hq += leaf.hours * leaf.quantity;
     }
@@ -200,8 +198,8 @@ class CommodityLeg extends CalculatorBase {
         var _fixPrice = _fixPriceM.observationAt(month).value;
         var _floatPrice = _floatingPriceM.observationAt(month).value;
         var hours = bucket.countHours(month);
-        leaves.add(
-            Leaf(buySell, month, _quantity, _fixPrice, _floatPrice, hours));
+        leaves.add(LeafElecSwap(
+            buySell, month, _quantity, _fixPrice, _floatPrice, hours));
       }
     } else {
       /// TODO: continue me
@@ -210,6 +208,7 @@ class CommodityLeg extends CalculatorBase {
   }
 
   /// Serialize it
+  @override
   Map<String, dynamic> toJson() {
     var q, fp;
 
@@ -263,7 +262,7 @@ class CommodityLeg extends CalculatorBase {
     Term term,
     BuySell buySell,
   }) =>
-      CommodityLeg(
+      CommodityLegElecSwap(
           curveId: curveId ?? this.curveId,
           bucket: bucket ?? this.bucket,
           timePeriod: timePeriod ?? this.timePeriod,

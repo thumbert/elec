@@ -43,7 +43,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     }
   }
 
-  /// Input map of this form
+  /// Input document is of this form
   /// ```
   /// {
   ///   'terms': ['2020-01-15', ... '2020-02', ...],
