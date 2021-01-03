@@ -1,6 +1,6 @@
 part of elec.calculators.elec_swap;
 
-class ElecSwapCalculator extends CalculatorBase {
+class ElecSwapCalculator extends CalculatorBase<CommodityLegElecSwap> {
   ElecSwapCalculator(
       {Date asOfDate,
       Term term,
@@ -32,7 +32,8 @@ class ElecSwapCalculator extends CalculatorBase {
     }
     term = Term.parse(x['term'], UTC);
     if (x['asOfDate'] == null) {
-      throw ArgumentError('Json input is missing the key asOfDate');
+      // if asOfDate is not specified, it means today
+      x['asOfDate'] = Date.today().toString();
     }
     asOfDate = Date.parse(x['asOfDate'], location: UTC);
     if (x['buy/sell'] == null) {
@@ -61,8 +62,9 @@ class ElecSwapCalculator extends CalculatorBase {
   ///
   /// If you change the term, the pricing date, any of the leg buckets, etc.
   /// It is a brittle design, because people may forget to call it.
+  @override
   Future<void> build() async {
-    for (CommodityLegElecSwap leg in legs) {
+    for (var leg in legs) {
       var curveDetails = await cacheProvider.curveDetailsCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
       leg.hourlyFloatingPrice = await getFloatingPrice(leg.bucket, leg.curveId);
@@ -72,15 +74,16 @@ class ElecSwapCalculator extends CalculatorBase {
 
   /// Get the total dollar value of this calculator.
   /// Need to build() the calculator first.
-  num dollarPrice() {
-    var value = 0.0;
-    for (CommodityLegElecSwap leg in legs) {
-      for (var leaf in leg.leaves) {
-        value += leaf.dollarPrice();
-      }
-    }
-    return value;
-  }
+  // @override
+  // num dollarPrice() {
+  //   var value = 0.0;
+  //   for (var leg in legs) {
+  //     for (var leaf in leg.leaves) {
+  //       value += leaf.dollarPrice();
+  //     }
+  //   }
+  //   return value;
+  // }
 
   Report flatReport() => FlatReportElecCfd(this);
 
@@ -89,7 +92,7 @@ class ElecSwapCalculator extends CalculatorBase {
   @override
   String showDetails() {
     var table = <Map<String, dynamic>>[];
-    for (CommodityLegElecSwap leg in legs) {
+    for (var leg in legs) {
       for (LeafElecSwap leaf in leg.leaves) {
         table.add({
           'term': leaf.interval.toString(),
@@ -113,6 +116,7 @@ class ElecSwapCalculator extends CalculatorBase {
   /// TODO: implement a copyWith() method.
 
   /// Serialize it.  Don't serialize 'asOfDate' or 'floatingPrice' info.
+  @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'calculatorType': 'elec_swap',

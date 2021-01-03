@@ -1,6 +1,6 @@
 part of elec.calculators.elec_swap;
 
-class CommodityLegElecSwap extends CommodityLeg {
+class CommodityLegElecSwap extends CommodityLegBase {
   String curveId;
   String cashOrPhys;
   Bucket bucket;
@@ -251,7 +251,7 @@ class CommodityLegElecSwap extends CommodityLeg {
   }
 
   /// Make a copy
-  CommodityLeg copyWith({
+  CommodityLegBase copyWith({
     String curveId,
     Bucket bucket,
     TimePeriod timePeriod,

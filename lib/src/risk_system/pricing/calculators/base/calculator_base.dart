@@ -5,17 +5,7 @@ import 'package:elec/risk_system.dart';
 import 'cache_provider.dart';
 import 'commodity_leg.dart';
 
-class CalculatorBase {
-  CalculatorBase();
-
-  // factory CalculatorBase.fromJson(Map<String, dynamic> x) {
-  //   if (x['calculatorType'] == 'elec_swap') {
-  //     return ElecSwapCalculator.fromJson(x);
-  //   } else {
-  //     throw ArgumentError('Unsupported calculator type ${x['calculatorType']}');
-  //   }
-  // }
-
+abstract class CalculatorBase<Leg extends CommodityLegBase> {
   /// A collection of caches for different market and curve data.
   CacheProvider cacheProvider;
 
@@ -51,16 +41,30 @@ class CalculatorBase {
     }
   }
 
-  List<CommodityLeg> _legs;
-  List<CommodityLeg> get legs => _legs ?? <CommodityLeg>[];
-  set legs(List<CommodityLeg> xs) {
-    _legs = <CommodityLeg>[];
+  List<Leg> _legs;
+  List<Leg> get legs => _legs ?? <Leg>[];
+  set legs(List<Leg> xs) {
+    _legs = <Leg>[];
     for (var x in xs) {
       x.term = term;
       x.asOfDate = asOfDate;
       x.buySell = buySell;
       _legs.add(x);
     }
+  }
+
+  /// Get the market data and make the leaves
+  Future<void> build();
+
+  /// Calculate the value of this calculator
+  num dollarPrice() {
+    var value = 0.0;
+    for (var leg in legs) {
+      for (var leaf in leg.leaves) {
+        value += leaf.dollarPrice();
+      }
+    }
+    return value;
   }
 
   /// Communicate an error with the UI.
@@ -71,4 +75,7 @@ class CalculatorBase {
 
   /// What to show in the UI for details.  Each calculator implements it.
   String showDetails() => '';
+
+  /// What to serialize to Mongo.
+  Map<String, dynamic> toJson();
 }

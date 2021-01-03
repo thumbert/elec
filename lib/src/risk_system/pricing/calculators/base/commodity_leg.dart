@@ -1,11 +1,14 @@
 library elec.risk_system.pricing.calculators.base.calculator_base;
 
+import 'package:date/date.dart';
 import 'package:elec/elec.dart';
-
-import 'calculator_base.dart';
+import 'package:elec/risk_system.dart';
 import 'leaf.dart';
 
-abstract class CommodityLeg extends CalculatorBase {
+abstract class CommodityLegBase {
+  Date asOfDate;
+  Term term;
+  BuySell buySell;
   Bucket bucket;
 
   /// Leg leaves

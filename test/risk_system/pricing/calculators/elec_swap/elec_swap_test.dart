@@ -149,7 +149,7 @@ void tests(String rootUrl) async {
       // change the term and reprice
       calc.term = Term.parse('Jan21-Jun21', location);
       await calc.build();
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.price().toStringAsFixed(2), '39.36');
       expect(leg0.showQuantity(), 50);
     });
@@ -176,7 +176,7 @@ void tests(String rootUrl) async {
       var _term = Term.parse('Jan21-Mar21', location);
       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       expect(c1.legs.length, 1);
-      var leg = c1.legs.first as CommodityLegElecSwap;
+      var leg = c1.legs.first;
       expect(leg.curveId, 'isone_energy_4000_da_lmp');
       expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
       expect(leg.fixPrice(), TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
@@ -186,7 +186,7 @@ void tests(String rootUrl) async {
       expect(leg.hasCustomFixPrice, false);
     });
     test('fromJson, custom quantities', () async {
-      var leg = c2.legs.first as CommodityLegElecSwap;
+      var leg = c2.legs.first;
       var _months =
           leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 60, 70]));
@@ -254,7 +254,7 @@ void tests(String rootUrl) async {
       var calc = c1..term = Term.parse('Jan21-Feb21', location);
       await calc.build();
       expect(calc.legs.length, 1);
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.floatingPrice().intervals.toList(), [
         Month(2021, 1, location: location),
         Month(2021, 2, location: location)
@@ -271,7 +271,7 @@ void tests(String rootUrl) async {
       var calc = c1..term = Term.parse('Jan20-Dec20', location);
       await calc.build();
       expect(calc.legs.length, 1);
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.floatingPrice().intervals.length, 12);
       expect(
           leg0
@@ -287,7 +287,7 @@ void tests(String rootUrl) async {
         ..term = Term.parse('Jan21-Feb21', location)
         ..asOfDate = Date(2020, 7, 6);
       await calc.build();
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.floatingPrice().first.value.toStringAsFixed(2), '60.70');
       expect(calc.dollarPrice().round(), 270400);
       var leg = calc.legs.first;
@@ -297,7 +297,7 @@ void tests(String rootUrl) async {
     test('change calculator bucket and reprice', () async {
       var calc = c1..legs.first.bucket = IsoNewEngland.bucket7x8;
       await calc.build();
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.floatingPrice().intervals, [
         Month(2021, 1, location: location),
         Month(2021, 2, location: location),
@@ -314,7 +314,7 @@ void tests(String rootUrl) async {
         ..term = Term.parse('Jan21', location)
         ..legs.first.bucket = Bucket.b7x16;
       await calc.build();
-      CommodityLegElecSwap leg0 = calc.legs.first;
+      var leg0 = calc.legs.first;
       expect(leg0.floatingPrice().intervals, [
         Month(2021, 1, location: location),
       ]);
@@ -415,7 +415,7 @@ total                         50,400        ''';
       var _term = Term.parse('Jan21-Mar21', location);
       var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       expect(c2.legs.length, 2);
-      CommodityLegElecSwap leg1 = c2.legs.first;
+      var leg1 = c2.legs.first;
       expect(leg1.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
       expect(leg1.fixPrice(), TimeSeries<num>.from(_months, [0, 0, 0]));
       expect(leg1.floatingPrice().values.map((e) => e.toStringAsFixed(3)),
