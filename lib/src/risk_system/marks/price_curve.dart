@@ -136,18 +136,23 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   }
 
   /// Get the daily part of the curve.  Can be empty.  All intervals are
-  /// [Date]s.
+  /// [Date]s.  Can be empty.
   PriceCurve dailyComponent() {
     return PriceCurve.fromIterable(where((e) => e.interval is Date));
   }
 
   /// Get the monthly part of the curve.  All intervals are [Month]s.
+  /// Can be empty.
   PriceCurve monthlyComponent() {
     return PriceCurve.fromIterable(where((e) => e.interval is Month));
   }
 
   /// get the first month that is marked
-  Month get firstMonth => firstWhere((e) => e.interval is Month).interval;
+  Month get firstMonth {
+    var aux = firstWhere((e) => e.interval is Month, orElse: () => null);
+    if (aux == null) return null;
+    return aux.interval;
+  }
 
   /// If there are monthly marks before and including [upTo] month, expand them
   /// into to daily marks (same buckets.)
@@ -264,10 +269,10 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     };
   }
 
-  /// Return a time series after aligning  this price curve with the [other]
-  /// price curve.  They now have the same terms.  For example, one had to
-  /// expand some of the monthly marks to daily, etc.  Only the overlapping
-  /// terms are returned.
+  /// Return a time series after aligning this price curve with the [other]
+  /// price curve.  They now have the same terms (if possible).  For example,
+  /// one may had to expand some of the monthly marks to daily, etc.  Only the
+  /// overlapping terms are returned.
   TimeSeries<Tuple2<Map<Bucket, num>, Map<Bucket, num>>> align(
       PriceCurve other) {
     // align their domains first
@@ -281,10 +286,12 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     // expand to daily marks as needed
     var m0x = x.firstMonth;
     var m0y = y.firstMonth;
-    if (m0x.isBefore(m0y)) {
-      x = x.expandToDaily(m0y.previous);
-    } else if (m0y.isBefore(m0x)) {
-      y = y.expandToDaily(m0x.previous);
+    if (m0x != null && m0y != null) {
+      if (m0x.isBefore(m0y)) {
+        x = x.expandToDaily(m0y.previous);
+      } else if (m0y.isBefore(m0x)) {
+        y = y.expandToDaily(m0x.previous);
+      }
     }
 
     // do an inner join

@@ -64,6 +64,13 @@ void tests() {
       var curve0P1 = curve0.expandToDaily(Month(2020, 7, location: location));
       expect(curve0P1.length, curve0.length);
     });
+    test('expand to daily a daily curve doesn\'t fail', () {
+      var curve0d = curve0.dailyComponent();
+      var curve2 = curve0d + curve0;
+      expect(curve2.length, 6);
+      expect(curve2.firstMonth, null);
+      expect(curve2.first.value[Bucket.b2x16H], 55.0);
+    });
     test('toHourly', () {
       var ts = curve0.toHourly();
       expect(
