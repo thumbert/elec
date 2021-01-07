@@ -1,6 +1,7 @@
 part of elec.calculators.elec_swap;
 
-class ElecSwapCalculator extends CalculatorBase<CommodityLegElecSwap> {
+class ElecSwapCalculator
+    extends CalculatorBase<CommodityLegElecSwap, CacheProviderElecSwap> {
   ElecSwapCalculator(
       {Date asOfDate,
       Term term,

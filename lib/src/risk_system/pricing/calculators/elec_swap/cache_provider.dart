@@ -12,14 +12,13 @@ import 'package:more/cache.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 
-class CacheProviderElecSwap extends CacheProvider {
+class CacheProviderElecSwap extends CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection
   @override
   Cache<String, Map<String, dynamic>> curveDetailsCache;
 
   /// The keys of the cache are tuples (asOfDate,curveId).
   /// for daily and monthly marks.  The timeseries data is hourly!
-  @override
   Cache<Tuple2<Date, String>, TimeSeries<num>> forwardMarksCache;
 
   /// A cache for hourly settlement data, if available.  It makes sense for

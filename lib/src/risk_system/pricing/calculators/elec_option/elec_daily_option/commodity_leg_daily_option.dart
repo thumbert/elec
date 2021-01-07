@@ -24,7 +24,6 @@ class CommodityLegDailyOption extends CommodityLegMonthly {
     this.curveId = curveId;
     this.bucket = bucket;
     this.tzLocation = tzLocation;
-    // should I check that it matches the term?
     this.quantity = quantity;
     this.fixPrice = fixPrice;
     this.fixPrice ??= TimeSeries.fill(quantity.intervals, 0);
@@ -32,6 +31,9 @@ class CommodityLegDailyOption extends CommodityLegMonthly {
 
   CallPut callPut;
   TimeSeries<num> strike;
+
+  /// The [asOfDate] value of the underlying as a monthly timeseries.
+  TimeSeries<num> underlyingPrice;
   TimeSeries<num> priceAdjustment;
 
   /// For clarification, values are as treated as numbers, e.g. a 5% adjustment

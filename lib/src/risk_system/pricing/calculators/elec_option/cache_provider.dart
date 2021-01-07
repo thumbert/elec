@@ -12,18 +12,16 @@ import 'package:more/cache.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 
-class CacheProviderElecOption extends CacheProvider {
+class CacheProviderElecOption extends CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection
   @override
   Cache<String, Map<String, dynamic>> curveDetailsCache;
 
   /// The keys of the cache are tuples (asOfDate, curveId).
   /// For monthly marks.  The timeseries data is monthly.
-  @override
-  Cache<Tuple2<Date, String>, TimeSeries<num>> forwardMarksCache;
+  Cache<Tuple2<Date, String>, PriceCurve> forwardMarksCache;
 
   /// The keys of the cache are tuples (asOfDate, curveId).
-  @override
   Cache<Tuple2<Date, String>, VolatilitySurface> volSurfaceCache;
 
   CacheProviderElecOption();
@@ -36,12 +34,12 @@ class CacheProviderElecOption extends CacheProvider {
     var forwardMarksClient = ForwardMarks(client, rootUrl: rootUrl);
 
     /// Populate fwdMarksCache given the asOfDate and the curveId.
-    Future<TimeSeries<num>> _fwdMarksLoader(Tuple2<Date, String> tuple) async {
+    Future<PriceCurve> _fwdMarksLoader(Tuple2<Date, String> tuple) async {
       var aux = await curveDetailsCache.get(tuple.item2);
       var location = getLocation(aux['tzLocation']);
       var marks = await forwardMarksClient
           .getForwardCurve(tuple.item2, tuple.item1, tzLocation: location);
-      return marks.toHourly();
+      return marks.monthlyComponent();
     }
 
     /// Populate volSurfaceCache given the asOfDate and the curveId.
@@ -49,9 +47,8 @@ class CacheProviderElecOption extends CacheProvider {
         Tuple2<Date, String> tuple) async {
       var aux = await curveDetailsCache.get(tuple.item2);
       var location = getLocation(aux['tzLocation']);
-      var vs = await forwardMarksClient
-          .getForwardCurve(tuple.item2, tuple.item1, tzLocation: location);
-      return marks.toHourly();
+      return forwardMarksClient.getVolatilitySurface(tuple.item2, tuple.item1,
+          tzLocation: location);
     }
 
     /// Loader for [curveIdCache] with all curveDetails
@@ -61,8 +58,8 @@ class CacheProviderElecOption extends CacheProvider {
 
     curveDetailsCache =
         Cache<String, Map<String, dynamic>>.lru(loader: _curveIdLoader);
-    forwardMarksCache = Cache<Tuple2<Date, String>, TimeSeries<num>>.lru(
-        loader: _fwdMarksLoader);
+    forwardMarksCache =
+        Cache<Tuple2<Date, String>, PriceCurve>.lru(loader: _fwdMarksLoader);
     volSurfaceCache = Cache<Tuple2<Date, String>, VolatilitySurface>.lru(
         loader: _volSurfaceLoader);
   }

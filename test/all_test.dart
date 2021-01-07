@@ -19,6 +19,8 @@ import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
 import 'risk_system/marks/volatility_surface_test.dart' as volatility_surface;
 import 'risk_system/pricing/calculators/elec_swap/elec_swap_test.dart'
     as elec_swap;
+import 'risk_system/pricing/calculators/elec_option/elec_option_daily_test.dart'
+    as elec_daily_option;
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 
 void main() async {
@@ -43,6 +45,7 @@ void main() async {
   monthly_curve.tests();
   volatility_surface.tests();
   elec_swap.tests(rootUrl);
+  elec_daily_option.tests(rootUrl);
   shape_cost.tests();
   time_aggregation.tests();
   trade_aggregator.tests();

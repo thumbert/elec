@@ -5,6 +5,7 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
@@ -85,13 +86,12 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
   var cacheProvider =
-      CacheProviderElecSwap.test(client: Client(), rootUrl: rootUrl);
-  group('Elec calc cdf tests ISONE, 1 leg:', () {
+      CacheProviderElecOption.test(client: Client(), rootUrl: rootUrl);
+  group('Elec daily option tests ISONE, 1 leg:', () {
     ElecDailyOption c0, c1;
     setUp(() async {
       c0 = ElecDailyOption.fromJson(_calc0())..cacheProvider = cacheProvider;
       c1 = ElecDailyOption.fromJson(_calc1())..cacheProvider = cacheProvider;
-      // await c0.build();
     });
     test('from Json', () {
       expect(c0.term, Term.parse('Jan21-Feb21', UTC));
@@ -127,7 +127,20 @@ void tests(String rootUrl) async {
           {'month': '2021-02', 'value': 0.75});
       expect(leg0['volatilityAdjustment']['value'], 0.05);
     });
-    test('price option', () {});
+    test('cache provider', () async {
+      var asOfDate = Date(2020, 7, 6, location: location);
+      var curveDetails =
+          await cacheProvider.curveDetailsCache.get('isone_energy_4000_da_lmp');
+      var mh = await cacheProvider.forwardMarksCache
+          .get(Tuple2(asOfDate, 'isone_energy_4000_da_lmp'));
+      var vs = await cacheProvider.volSurfaceCache
+          .get(Tuple2(asOfDate, curveDetails['volatilityCurveId']['daily']));
+      expect(vs.strikeRatios, [0.5, 1, 1.5]);
+      expect(mh.length, 17); // just the monthly component
+    });
+    test('price option', () async {
+      await c0.build();
+    });
   });
 }
 

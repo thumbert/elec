@@ -5,7 +5,8 @@ import 'package:elec/risk_system.dart';
 import 'cache_provider.dart';
 import 'commodity_leg.dart';
 
-abstract class CalculatorBase<Leg extends CommodityLegBase> {
+abstract class CalculatorBase<Leg extends CommodityLegBase,
+    CacheProvider extends CacheProviderBase> {
   /// A collection of caches for different market and curve data.
   CacheProvider cacheProvider;
 

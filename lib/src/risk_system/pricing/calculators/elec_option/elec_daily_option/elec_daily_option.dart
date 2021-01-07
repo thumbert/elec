@@ -4,18 +4,20 @@ import 'package:date/date.dart';
 import 'package:elec/calculators.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_leg_monthly.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/commodity_leg_daily_option.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
 import 'package:timezone/timezone.dart';
 
-class ElecDailyOption extends CalculatorBase<CommodityLegDailyOption> {
+class ElecDailyOption
+    extends CalculatorBase<CommodityLegDailyOption, CacheProviderElecOption> {
   ElecDailyOption(
       {Date asOfDate,
       Term term,
       BuySell buySell,
       List<CommodityLegDailyOption> legs,
-      CacheProviderElecSwap cacheProvider}) {
+      CacheProviderElecOption cacheProvider}) {
     this.asOfDate = asOfDate;
     this.term = term;
     this.buySell = buySell;
@@ -66,6 +68,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLegDailyOption> {
     }
   }
 
+  @override
   Future<void> build() async {
     for (var leg in legs) {
       var curveDetails = await cacheProvider.curveDetailsCache.get(leg.curveId);
