@@ -1,16 +1,6 @@
-library risk_system.pricing.calculators.elec_daily_option;
+part of elec.calculators.elec_daily_option;
 
-import 'package:date/date.dart';
-import 'package:elec/calculators.dart';
-import 'package:elec/elec.dart';
-import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_leg_monthly.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
-
-class CommodityLegDailyOption extends CommodityLegMonthly {
+class CommodityLegDailyOption extends CommodityLegMonthly<LeafElecOption> {
   CommodityLegDailyOption(
       {String curveId,
       Bucket bucket,
@@ -29,16 +19,26 @@ class CommodityLegDailyOption extends CommodityLegMonthly {
     this.fixPrice ??= TimeSeries.fill(quantity.intervals, 0);
   }
 
+  String volatilityCurveId;
+
   CallPut callPut;
+
+  /// The strike of the option as a timeseries.  Often, all values are the same.
   TimeSeries<num> strike;
 
   /// The [asOfDate] value of the underlying as a monthly timeseries.
   TimeSeries<num> underlyingPrice;
   TimeSeries<num> priceAdjustment;
 
+  /// The [asOfDate] value of the volatility as a monthly timeseries.
+  TimeSeries<num> volatility;
+
   /// For clarification, values are as treated as numbers, e.g. a 5% adjustment
   /// is entered as 0.05.
   TimeSeries<num> volatilityAdjustment;
+
+  /// The [asOfDate] value of the interest rate as a monthly timeseries.
+  TimeSeries<num> interestRate;
 
   /// Initialize from a Map.
   ///```
@@ -109,6 +109,46 @@ class CommodityLegDailyOption extends CommodityLegMonthly {
             vAdj.cast<Map<String, dynamic>>(), tzLocation);
       }
     }
+  }
+
+  /// Make the leaves for this leg.  One leaf per month.
+  @override
+  void makeLeaves() {
+    leaves = <LeafElecOption>[];
+    var months = term.interval
+        .withTimeZone(tzLocation)
+        .splitLeft((dt) => Month.fromTZDateTime(dt));
+    for (var i = 0; i < months.length; i++) {
+      var _uPrice = underlyingPrice[i].value + priceAdjustment[i].value;
+      var _volatility = volatility[i].value + volatilityAdjustment[i].value;
+      var hours = bucket.countHours(months[i]);
+      leaves.add(LeafElecOption(
+        asOfDate: asOfDate,
+        buySell: buySell,
+        callPut: callPut,
+        month: months[i],
+        quantity: quantity[i].value,
+        riskFreeRate: interestRate[i].value,
+        strike: strike[i].value,
+        underlyingPrice: _uPrice,
+        volatility: _volatility,
+        fixPrice: fixPrice[i].value,
+        hours: hours,
+      ));
+    }
+  }
+
+  /// Calculate the fair value for this commodity leg.
+  /// The quantity weighted option price of this leg.
+  @override
+  num price() {
+    num hpq = 0; // hours * quantity * optionPrice
+    num hq = 0; // hours * quantity
+    for (var leaf in leaves) {
+      hpq += leaf.hours * leaf.quantity * leaf.price();
+      hq += leaf.hours * leaf.quantity;
+    }
+    return hpq / hq;
   }
 
   @override

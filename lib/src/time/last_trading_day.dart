@@ -8,7 +8,9 @@ import 'package:tuple/tuple.dart';
 var _cache = <Tuple2<String, Month>, Date>{};
 
 /// The last business day before the beginning of the month.
-/// Last trading day for the ICE daily options on ISONE .
+/// Last trading day for the ICE daily options on ISONE,
+/// NY Harbor USLD contract, etc.
+///
 Date lastBusinessDayPrior(Month month, {Calendar calendar}) {
   calendar ??= NercCalendar();
   var t2 = Tuple2('-1b', month);
@@ -24,8 +26,6 @@ Date lastBusinessDayPrior(Month month, {Calendar calendar}) {
   _cache[t2] = candidate;
   return candidate;
 }
-
-//TODO: Implement penultimate business day of the month (HO futures)
 
 /// Three business days prior to beginning of the month.
 /// Last trading day for the ICE Henry Hub Natural Gas Futures Contract.

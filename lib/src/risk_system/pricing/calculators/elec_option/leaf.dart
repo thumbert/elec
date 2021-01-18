@@ -1,18 +1,12 @@
 library risk_system.pricing.calculators.elec_option.leaf;
 
 import 'package:date/date.dart';
-import 'package:elec/calculators.dart';
-import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/financial/black_scholes/black_scholes.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/leaf.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_leg_monthly.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
+import 'package:elec/src/time/last_trading_day.dart';
 
-class LeafElecOption extends Leaf {
+class LeafElecOption extends LeafBase {
   LeafElecOption({
     this.asOfDate,
     this.buySell,
@@ -23,8 +17,17 @@ class LeafElecOption extends Leaf {
     this.strike,
     this.underlyingPrice,
     this.volatility,
-  }) {
-    // _bs = BlackScholes(type: callPut, )
+    this.fixPrice,
+    this.hours,
+  }) : expirationDate = lastBusinessDayPrior(month) {
+    _bs = BlackScholes(
+        type: callPut,
+        strike: strike,
+        expirationDate: expirationDate,
+        asOfDate: asOfDate,
+        underlyingPrice: underlyingPrice,
+        volatility: volatility,
+        riskFreeRate: riskFreeRate);
   }
 
   final BuySell buySell;
@@ -36,9 +39,22 @@ class LeafElecOption extends Leaf {
   final num volatility;
   final Date asOfDate;
   final num riskFreeRate;
+  final Date expirationDate;
+
+  final num fixPrice;
+
+  /// number of hours in this period
+  final int hours;
 
   BlackScholes _bs;
 
+  /// The option price
+  num price() => _bs.value();
+
+  /// The delta of the option
+  num delta() => _bs.delta();
+
   @override
-  num dollarPrice() {}
+  num dollarPrice() =>
+      buySell.sign * hours * quantity * (_bs.value() - fixPrice);
 }

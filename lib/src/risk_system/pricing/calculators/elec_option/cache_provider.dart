@@ -18,10 +18,11 @@ class CacheProviderElecOption extends CacheProviderBase {
   Cache<String, Map<String, dynamic>> curveDetailsCache;
 
   /// The keys of the cache are tuples (asOfDate, curveId).
-  /// For monthly marks.  The timeseries data is monthly.
+  /// For monthly price marks and the discount rate.  The timeseries data
+  /// is monthly.
   Cache<Tuple2<Date, String>, PriceCurve> forwardMarksCache;
 
-  /// The keys of the cache are tuples (asOfDate, curveId).
+  /// The keys of the cache are tuples (asOfDate, volatilityCurveId).
   Cache<Tuple2<Date, String>, VolatilitySurface> volSurfaceCache;
 
   CacheProviderElecOption();
@@ -42,7 +43,7 @@ class CacheProviderElecOption extends CacheProviderBase {
       return marks.monthlyComponent();
     }
 
-    /// Populate volSurfaceCache given the asOfDate and the curveId.
+    /// Populate volSurfaceCache given the asOfDate and the volatility curveId.
     Future<VolatilitySurface> _volSurfaceLoader(
         Tuple2<Date, String> tuple) async {
       var aux = await curveDetailsCache.get(tuple.item2);

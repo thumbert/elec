@@ -1,8 +1,9 @@
 part of elec.calculators.elec_swap;
 
-class CommodityLegElecSwap extends CommodityLegBase {
+class CommodityLegElecSwap extends CommodityLegBase<LeafElecSwap> {
   String curveId;
   String cashOrPhys;
+  @override
   Bucket bucket;
   Location tzLocation;
 
@@ -113,7 +114,7 @@ class CommodityLegElecSwap extends CommodityLegBase {
   num price() {
     num hpq = 0; // hours * quantity * floatingPrice
     num hq = 0; // hours * quantity
-    for (LeafElecSwap leaf in leaves) {
+    for (var leaf in leaves) {
       hpq += leaf.hours * leaf.quantity * leaf.floatingPrice;
       hq += leaf.hours * leaf.quantity;
     }
@@ -185,7 +186,7 @@ class CommodityLegElecSwap extends CommodityLegBase {
 
   /// Make the leaves for this leg.  One leaf per period.
   void makeLeaves() {
-    leaves = <Leaf>[];
+    leaves = <LeafElecSwap>[];
     if (timePeriod == TimePeriod.month) {
       var months = term.interval
           .withTimeZone(tzLocation)

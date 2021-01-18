@@ -5,7 +5,7 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'leaf.dart';
 
-abstract class CommodityLegBase {
+abstract class CommodityLegBase<Leaf extends LeafBase> {
   Date asOfDate;
   Term term;
   BuySell buySell;

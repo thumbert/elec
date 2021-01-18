@@ -1,19 +1,12 @@
 library test.risk_system.pricing.elec_option_daily_test;
 
-import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
+import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
-import 'package:elec/calculators/elec_swap.dart';
 import 'package:test/test.dart';
-import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
@@ -135,11 +128,30 @@ void tests(String rootUrl) async {
           .get(Tuple2(asOfDate, 'isone_energy_4000_da_lmp'));
       var vs = await cacheProvider.volSurfaceCache
           .get(Tuple2(asOfDate, curveDetails['volatilityCurveId']['daily']));
-      expect(vs.strikeRatios, [0.5, 1, 1.5]);
+      expect(vs.strikeRatios, [0.5, 1, 2.0]);
       expect(mh.length, 17); // just the monthly component
     });
     test('price option', () async {
       await c0.build();
+      var legs = c0.legs;
+      var leaves = legs.first.leaves;
+      expect(leaves.length, 2);
+      var l0 = leaves[0];
+      expect(l0.expirationDate, Date(2020, 12, 31, location: location));
+      expect(l0.underlyingPrice, 60.7);
+      expect(l0.strike, 100);
+      expect(l0.volatility.toStringAsFixed(5), '1.17949');
+      expect(l0.price().toStringAsFixed(4), '10.2332');
+      var value = c0.dollarPrice();
+      expect(value.toStringAsFixed(0), '332987');
+    });
+    test('show details', () async {
+      await c0.build();
+      var out = c0.showDetails();
+      expect(out, r'''
+ term                   curveId  bucket  type  strike  quantity  fwdPrice  implVol  optionPrice  delta     value
+Jan21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $60.7000   117.95     $10.2332   0.42  $163,731
+Feb21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $57.2000   119.97     $10.5785   0.43  $169,256''');
     });
   });
 }

@@ -1,7 +1,7 @@
 part of elec.calculators.elec_swap;
 
 /// One leaf per period (month or day).
-class LeafElecSwap extends Leaf {
+class LeafElecSwap extends LeafBase {
   BuySell buySell;
   Interval interval;
   num quantity;

@@ -5,12 +5,13 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/commodity_leg.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/leaf.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 
-class CommodityLegMonthly extends CommodityLegBase {
+class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly({
     this.curveId,

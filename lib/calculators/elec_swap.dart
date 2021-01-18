@@ -14,7 +14,6 @@ import 'package:table/table_base.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
-import '../src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/commodity_leg.dart';

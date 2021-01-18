@@ -73,19 +73,6 @@ class ElecSwapCalculator
     }
   }
 
-  /// Get the total dollar value of this calculator.
-  /// Need to build() the calculator first.
-  // @override
-  // num dollarPrice() {
-  //   var value = 0.0;
-  //   for (var leg in legs) {
-  //     for (var leaf in leg.leaves) {
-  //       value += leaf.dollarPrice();
-  //     }
-  //   }
-  //   return value;
-  // }
-
   Report flatReport() => FlatReportElecCfd(this);
 
   Report monthlyPositionReport() => MonthlyPositionReportElecCfd(this);
@@ -94,7 +81,7 @@ class ElecSwapCalculator
   String showDetails() {
     var table = <Map<String, dynamic>>[];
     for (var leg in legs) {
-      for (LeafElecSwap leaf in leg.leaves) {
+      for (var leaf in leg.leaves) {
         table.add({
           'term': leaf.interval.toString(),
           'curveId': leg.curveId,
@@ -106,7 +93,6 @@ class ElecSwapCalculator
               buySell.sign * leaf.quantity * leaf.hours * leaf.floatingPrice),
         });
       }
-      // table.add(emptyRow);
     }
     var _tbl = Table.from(table, options: {
       'columnSeparation': '  ',
@@ -135,9 +121,9 @@ class ElecSwapCalculator
   /// Return a timeseries of hourly prices, for only the hours of interest.
   Future<TimeSeries<num>> getFloatingPrice(
       Bucket bucket, String curveId) async {
-    CacheProviderElecSwap cp = cacheProvider;
-    var curveDetails = await cp.curveDetailsCache.get(curveId);
-    var fwdMarks = await cp.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+    var curveDetails = await cacheProvider.curveDetailsCache.get(curveId);
+    var fwdMarks =
+        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
 
     var location = fwdMarks.first.interval.start.location;
     var _term = term.interval.withTimeZone(location);
@@ -151,7 +137,7 @@ class ElecSwapCalculator
 
     if (curveDetails.containsKey('hourlyShapeCurveId')) {
       /// get the hourly shaping curve if needed
-      var hSchedule = await cp.hourlyShapeCache
+      var hSchedule = await cacheProvider.hourlyShapeCache
           .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
       var hShapeMultiplier = TimeSeries.fromIterable(
           hSchedule.window(term.interval.withTimeZone(location)));
@@ -165,13 +151,13 @@ class ElecSwapCalculator
     if (term.startDate.isBefore(startDate)) {
       /// need to get settlement data, return all hours of the term
       var settlementData =
-          await cp.settlementPricesCache.get(Tuple2(term, curveId));
+          await cacheProvider.settlementPricesCache.get(Tuple2(term, curveId));
       if (term.interval.start.isBefore(settlementData.first.interval.start)) {
         // Clear the settlement cache if term start is earlier than existing
         // term.  This only gets executed once, for the first leg.
-        await cp.settlementPricesCache.invalidateAll();
-        settlementData =
-            await cp.settlementPricesCache.get(Tuple2(term, curveId));
+        await cacheProvider.settlementPricesCache.invalidateAll();
+        settlementData = await cacheProvider.settlementPricesCache
+            .get(Tuple2(term, curveId));
       }
 
       /// select only the bucket you need

@@ -1,14 +1,4 @@
-library risk_system.pricing.calculators.elec_daily_option;
-
-import 'package:date/date.dart';
-import 'package:elec/calculators.dart';
-import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_leg_monthly.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/commodity_leg_daily_option.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
-import 'package:timezone/timezone.dart';
+part of elec.calculators.elec_daily_option;
 
 class ElecDailyOption
     extends CalculatorBase<CommodityLegDailyOption, CacheProviderElecOption> {
@@ -73,9 +63,45 @@ class ElecDailyOption
     for (var leg in legs) {
       var curveDetails = await cacheProvider.curveDetailsCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
-      // leg.hourlyFloatingPrice = await getFloatingPrice(leg.bucket, leg.curveId);
+      leg.volatilityCurveId = curveDetails['volatilityCurveId']['daily'];
+      leg.underlyingPrice = await getUnderlyingPrice(leg.bucket, leg.curveId);
+      var strikeRatio = leg.strike / leg.underlyingPrice;
+      leg.volatility =
+          await getVolatility(leg.bucket, leg.volatilityCurveId, strikeRatio);
+      leg.interestRate = await getInterestRate();
       leg.makeLeaves();
     }
+  }
+
+  Report deltaGammaReport() => DeltaGammaReportElecDailyOption(this);
+  Report flatReport() => FlatReportElecDailyOption(this);
+  Report monthlyPositionReport() => MonthlyPositionReportElecDailyOption(this);
+
+  @override
+  String showDetails() {
+    var table = <Map<String, dynamic>>[];
+    for (var leg in legs) {
+      for (var leaf in leg.leaves) {
+        table.add({
+          'term': leaf.month.toString(),
+          'curveId': leg.curveId,
+          'bucket': leg.bucket.toString(),
+          'type': leg.callPut.toString(),
+          'strike': leaf.strike,
+          'quantity': _fmtQty.format(buySell.sign * leaf.quantity * leaf.hours),
+          'fwdPrice': _fmtCurrency4.format(leaf.underlyingPrice),
+          'implVol': _fmt2.format(leaf.volatility * 100),
+          'optionPrice': _fmtCurrency4.format(leaf.price()),
+          'delta': _fmt2.format(leaf.delta()),
+          'value': _fmtCurrency0
+              .format(buySell.sign * leaf.quantity * leaf.hours * leaf.price()),
+        });
+      }
+    }
+    var _tbl = Table.from(table, options: {
+      'columnSeparation': '  ',
+    });
+    return _tbl.toString();
   }
 
   @override
@@ -88,4 +114,52 @@ class ElecDailyOption
       'legs': [for (var leg in legs) leg.toJson()],
     };
   }
+
+  /// Get the underlying price as of the given [asOfDate].
+  /// Needs to be one of the marked buckets.  Return a monthly time-series.
+  Future<TimeSeries<num>> getUnderlyingPrice(
+      Bucket bucket, String curveId) async {
+    var fwdMarks =
+        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+    var location = fwdMarks.first.interval.start.location;
+    var _term = term.interval.withTimeZone(location);
+    var x = fwdMarks
+        .map((e) => IntervalTuple(e.interval, e.value[bucket]))
+        .toTimeSeries();
+    return TimeSeries.fromIterable(x.window(_term));
+  }
+
+  /// Get the volatility curve for this strike as of the given [asOfDate].
+  /// [strikeRatio] is the value you need the volatility surface interpolated.
+  /// Needs to be one of the marked buckets.  Return a monthly time-series.
+  Future<TimeSeries<num>> getVolatility(Bucket bucket, String volatilityCurveId,
+      TimeSeries<num> strikeRatio) async {
+    var vSurface = await cacheProvider.volSurfaceCache
+        .get(Tuple2(asOfDate, volatilityCurveId));
+    var location = vSurface.terms.first.location;
+    var _term = term.interval.withTimeZone(location);
+    var months = _term.splitLeft((dt) => Month.fromTZDateTime(dt));
+
+    var xs = TimeSeries<num>();
+    for (var i = 0; i < months.length; i++) {
+      var value = vSurface.value(bucket, months[i], strikeRatio[i].value);
+      xs.add(IntervalTuple(months[i], value));
+    }
+    return xs;
+  }
+
+  /// Get the interest rate/discount factor as of the given [asOfDate].
+  /// Return a monthly time-series.
+  Future<TimeSeries<num>> getInterestRate() async {
+    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    // TODO:  FIXME
+    return TimeSeries.fill(months, 0);
+  }
+
+  static final _fmtQty = NumberFormat.currency(symbol: '', decimalDigits: 0);
+  static final _fmtCurrency0 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+  static final _fmtCurrency4 =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 4);
+  static final _fmt2 = NumberFormat.currency(symbol: '', decimalDigits: 2);
 }
