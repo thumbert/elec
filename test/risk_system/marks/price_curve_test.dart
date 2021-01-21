@@ -125,6 +125,27 @@ void tests() {
               .value[Bucket.atc],
           3.16);
     });
+    test('with intervals', () {
+      var pc = PriceCurve.fromMongoDocument({
+        'fromDate': '2020-08-17',
+        'terms': ['2020-10', '2020-11', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [5, 6, 7, 8, 9],
+        }
+      }, UTC);
+      var intervals = [
+        Date(2020, 11, 1), // it's a Sun, won't show up in the output
+        Date(2020, 11, 2),
+        Date(2020, 11, 3),
+        Date(2020, 11, 4),
+        Month(2020, 12),
+        Month(2021, 1),
+        Month(2021, 2),
+      ];
+      var pc2 = pc.withIntervals(intervals);
+      expect(pc2.length, 6);
+      expect(pc2.first.interval, Date(2020, 11, 2));
+    });
     test('align two PriceCurves', () {
       var x = PriceCurve.fromJson([
         {

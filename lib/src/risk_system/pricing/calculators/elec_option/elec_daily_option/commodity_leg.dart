@@ -1,7 +1,7 @@
 part of elec.calculators.elec_daily_option;
 
-class CommodityLegDailyOption extends CommodityLegMonthly<LeafElecOption> {
-  CommodityLegDailyOption(
+class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
+  CommodityLeg(
       {String curveId,
       Bucket bucket,
       TimeSeries<num> quantity,
@@ -64,7 +64,7 @@ class CommodityLegDailyOption extends CommodityLegMonthly<LeafElecOption> {
   ///           },
   ///         }
   ///```
-  CommodityLegDailyOption.fromJson(Map<String, dynamic> x) : super.fromJson(x) {
+  CommodityLeg.fromJson(Map<String, dynamic> x) : super.fromJson(x) {
     if (!x.containsKey('call/put')) {
       throw ArgumentError('Input needs to have \'call/put\' key.');
     }

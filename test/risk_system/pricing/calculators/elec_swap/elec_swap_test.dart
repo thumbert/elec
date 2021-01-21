@@ -3,9 +3,7 @@ library test.risk_system.pricing.elec_calc_cdf_test;
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
@@ -118,8 +116,7 @@ Map<String, dynamic> _calc3() => <String, dynamic>{
 
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var cacheProvider =
-      CacheProviderElecSwap.test(client: Client(), rootUrl: rootUrl);
+  var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
   group('Elec calc cdf tests ISONE, 1 leg:', () {
     ElecSwapCalculator c1, c2;
     setUp(() async {
@@ -134,7 +131,7 @@ void tests(String rootUrl) async {
           term: Term.parse('Jan21-Mar21', location),
           buySell: BuySell.buy,
           legs: [
-            CommodityLegElecSwap(
+            CommodityLeg(
                 curveId: 'isone_energy_4000_da_lmp',
                 tzLocation: location,
                 bucket: Bucket.b5x16,
@@ -159,7 +156,7 @@ void tests(String rootUrl) async {
         ..term = Term.parse('Jan21-Mar21', location)
         ..buySell = BuySell.buy
         ..legs = [
-          CommodityLegElecSwap(
+          CommodityLeg(
               curveId: 'isone_energy_4000_da_lmp',
               tzLocation: location,
               bucket: Bucket.b5x16,

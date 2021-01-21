@@ -298,6 +298,17 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return x.merge(y, f: (a, b) => Tuple2(a, b));
   }
 
+  /// Create a new price curve from this one using a list of intervals.  This
+  /// is useful if the curve is needed with different granularity.
+  /// TODO: make it more efficient
+  PriceCurve withIntervals(List<Interval> intervals) {
+    var aux = align(PriceCurve.fromIterable(
+        intervals.map((e) => IntervalTuple(e, {Bucket.atc: 1}))));
+
+    return PriceCurve.fromIterable(
+        aux.map((e) => IntervalTuple(e.interval, e.value.item1)));
+  }
+
   /// Add two curves observation by observation and bucket by bucket.
   /// If the curves don't match buckets, nothing is done (strict).
   ///

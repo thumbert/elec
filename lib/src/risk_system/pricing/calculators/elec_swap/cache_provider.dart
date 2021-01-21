@@ -1,18 +1,6 @@
-library risk_system.pricing.calculators.elec_swap.cache_provider;
+part of elec.calculators.elec_swap;
 
-import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'package:http/http.dart';
-import 'package:date/date.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
-import 'package:more/cache.dart';
-import 'package:elec_server/client/marks/curves/curve_id.dart';
-import 'package:elec_server/client/marks/forward_marks.dart';
-
-class CacheProviderElecSwap extends CacheProviderBase {
+class CacheProvider extends CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection
   @override
   Cache<String, Map<String, dynamic>> curveDetailsCache;
@@ -30,10 +18,10 @@ class CacheProviderElecSwap extends CacheProviderBase {
   /// A cache for hourly shape curves, e.g. isone_energy_4000_hourlyshape.
   Cache<Tuple2<Date, String>, TimeSeries<num>> hourlyShapeCache;
 
-  CacheProviderElecSwap();
+  CacheProvider();
 
   /// An example of a CacheProvider implementation
-  CacheProviderElecSwap.test(
+  CacheProvider.test(
       {Client client, String rootUrl = 'http://localhost:8080/'}) {
     client ??= Client();
     var curveIdClient = CurveIdClient(client, rootUrl: rootUrl);

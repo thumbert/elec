@@ -1,6 +1,6 @@
 part of elec.calculators.elec_swap;
 
-class CommodityLegElecSwap extends CommodityLegBase<LeafElecSwap> {
+class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   String curveId;
   String cashOrPhys;
   @override
@@ -22,7 +22,7 @@ class CommodityLegElecSwap extends CommodityLegBase<LeafElecSwap> {
   HourlySchedule quantitySchedule;
   HourlySchedule fixPriceSchedule;
 
-  CommodityLegElecSwap({
+  CommodityLeg({
     this.curveId,
     this.bucket,
     this.timePeriod,
@@ -35,7 +35,7 @@ class CommodityLegElecSwap extends CommodityLegBase<LeafElecSwap> {
 
   /// Support hourly, daily and monthly quantities/fixPrices.
   /// Method is async because it uses [curveIdCache] and [forwardMarksCache].
-  CommodityLegElecSwap.fromJson(Map<String, dynamic> x) {
+  CommodityLeg.fromJson(Map<String, dynamic> x) {
     // time zone of the curve, may be different than the calc
     if (x['tzLocation'] == null) {
       throw ArgumentError('Json input is missing the key tzLocation');
@@ -263,7 +263,7 @@ class CommodityLegElecSwap extends CommodityLegBase<LeafElecSwap> {
     Term term,
     BuySell buySell,
   }) =>
-      CommodityLegElecSwap(
+      CommodityLeg(
           curveId: curveId ?? this.curveId,
           bucket: bucket ?? this.bucket,
           timePeriod: timePeriod ?? this.timePeriod,

@@ -1,12 +1,12 @@
 part of elec.calculators.elec_daily_option;
 
 class ElecDailyOption
-    extends CalculatorBase<CommodityLegDailyOption, CacheProviderElecOption> {
+    extends CalculatorBase<CommodityLeg, CacheProviderElecOption> {
   ElecDailyOption(
       {Date asOfDate,
       Term term,
       BuySell buySell,
-      List<CommodityLegDailyOption> legs,
+      List<CommodityLeg> legs,
       CacheProviderElecOption cacheProvider}) {
     this.asOfDate = asOfDate;
     this.term = term;
@@ -47,13 +47,13 @@ class ElecDailyOption
       throw ArgumentError('Json input is missing the key: legs');
     }
 
-    legs = <CommodityLegDailyOption>[];
+    legs = <CommodityLeg>[];
     var _aux = x['legs'] as List;
     for (Map<String, dynamic> e in _aux) {
       e['asOfDate'] = x['asOfDate'];
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
-      var leg = CommodityLegDailyOption.fromJson(e);
+      var leg = CommodityLeg.fromJson(e);
       legs.add(leg);
     }
   }

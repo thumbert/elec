@@ -1,13 +1,13 @@
 part of elec.calculators.elec_swap;
 
 class ElecSwapCalculator
-    extends CalculatorBase<CommodityLegElecSwap, CacheProviderElecSwap> {
+    extends CalculatorBase<CommodityLeg, CacheProvider> {
   ElecSwapCalculator(
       {Date asOfDate,
       Term term,
       BuySell buySell,
-      List<CommodityLegElecSwap> legs,
-      CacheProviderElecSwap cacheProvider}) {
+      List<CommodityLeg> legs,
+      CacheProvider cacheProvider}) {
     this.asOfDate = asOfDate;
     this.term = term;
     this.buySell = buySell;
@@ -47,13 +47,13 @@ class ElecSwapCalculator
       throw ArgumentError('Json input is missing the key: legs');
     }
 
-    legs = <CommodityLegElecSwap>[];
+    legs = <CommodityLeg>[];
     var _aux = x['legs'] as List;
     for (Map<String, dynamic> e in _aux) {
       e['asOfDate'] = x['asOfDate'];
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
-      var leg = CommodityLegElecSwap.fromJson(e);
+      var leg = CommodityLeg.fromJson(e);
       legs.add(leg);
     }
   }

@@ -66,7 +66,7 @@ class MonthlyPositionReportElecCfd implements Report {
   Map<String, dynamic> toJson() {
     if (_json == null) {
       var table = <Map<String, dynamic>>[];
-      for (CommodityLegElecSwap leg in calculator.legs) {
+      for (CommodityLeg leg in calculator.legs) {
         for (LeafElecSwap leaf in leg.leaves) {
           table.add({
             'term': leaf.interval.toString(),

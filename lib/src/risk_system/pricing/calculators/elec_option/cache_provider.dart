@@ -1,16 +1,7 @@
-library risk_system.pricing.calculators.elec_option.elec_option.cache_provider;
+// library risk_system.pricing.calculators.elec_option.elec_option.cache_provider;
+//
 
-import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
-import 'package:http/http.dart';
-import 'package:date/date.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart';
-import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
-import 'package:more/cache.dart';
-import 'package:elec_server/client/marks/curves/curve_id.dart';
-import 'package:elec_server/client/marks/forward_marks.dart';
+part of elec.calculators.elec_daily_option;
 
 class CacheProviderElecOption extends CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection

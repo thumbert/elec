@@ -2,7 +2,6 @@ library test.risk_system.pricing.elec_option_daily_test;
 
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec/src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
 import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
