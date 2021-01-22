@@ -56,15 +56,21 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// ```
   PriceCurve.fromMongoDocument(
       Map<String, dynamic> document, Location location) {
-    var buckets = {for (var b in document['buckets'].keys) b: Bucket.parse(b)};
+    var buckets = {
+      for (String b in document['buckets'].keys) b: Bucket.parse(b)
+    };
     final bKeys = buckets.keys.toList();
     var terms = document['terms'] as List;
     var xs = <IntervalTuple<Map<Bucket, num>>>[];
     for (var i = 0; i < terms.length; i++) {
-      var value = {
-        for (var bucket in bKeys)
-          buckets[bucket]: document['buckets'][bucket][i] as num
-      };
+      var value = <Bucket, num>{};
+      for (var bucket in bKeys) {
+        num v = document['buckets'][bucket][i];
+        if (v != null) {
+          value[buckets[bucket]] = v;
+        }
+      }
+      ;
       Interval term;
       if (terms[i].length == 7) {
         term = Month.parse(terms[i], location: location);

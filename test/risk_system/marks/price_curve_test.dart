@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
+import 'package:tuple/tuple.dart';
 
 void tests() {
   group('Forward curve tests: ', () {
@@ -21,6 +22,23 @@ void tests() {
     var curve0 = PriceCurve.fromJson(x0, location);
     // a gas curve, 7x24 bucket
     var x1 = (xs[1]['observations'] as List).cast<Map<String, dynamic>>();
+
+    test('fromMongoDocument', () {
+      var document = {
+        'fromDate': '2020-08-17',
+        'curveId': '1',
+        'terms': ['2020-11-01', '2020-11-02', '2020-12', '2021-01', '2021-02'],
+        'buckets': {
+          '5x16': [null, 6, 7, 8, 9],
+          '2x16H': [6.2, null, 7.2, 8.2, 9.2],
+          '7x8': [2.1, 2.1, 3.1, 4.1, 5.1],
+        }
+      };
+      var pc = PriceCurve.fromMongoDocument(document, UTC);
+      expect(pc.length, 5);
+      expect(pc[0].value, {Bucket.b2x16H: 6.2, Bucket.b7x8: 2.1});
+      expect(pc[1].value, {Bucket.b5x16: 6, Bucket.b7x8: 2.1});
+    });
 
     test('from the 3 standard buckets', () {
       expect(curve0.length, 11);
@@ -149,74 +167,76 @@ void tests() {
     test('align two PriceCurves', () {
       var x = PriceCurve.fromJson([
         {
-          'term': '2020-01-29',
-          'value': {'5x16': 69}
+          'term': '2021-01-29',
+          'value': {'5x16': 69, '7x8': 40}
         },
         {
-          'term': '2020-01-30',
-          'value': {'5x16': 68}
+          'term': '2021-01-30',
+          'value': {'2x16H': 68, '7x8': 42}
         },
         {
-          'term': '2020-01-31',
-          'value': {'5x16': 67}
+          'term': '2021-01-31',
+          'value': {'2x16H': 67, '7x8': 43}
         },
         {
-          'term': '2020-02-13',
-          'value': {'5x16': 52}
+          'term': '2021-02-13',
+          'value': {'2x16H': 52, '7x8': 42}
         },
         {
-          'term': '2020-03',
+          'term': '2021-03',
           'value': {'5x16': 53}
         },
         {
-          'term': '2020-04',
+          'term': '2021-04',
           'value': {'5x16': 54}
         },
       ], UTC);
       var y = PriceCurve.fromJson([
         {
-          'term': '2019-11',
+          'term': '2020-11',
           'value': {'5x16': 69.2}
         },
         {
-          'term': '2019-12',
+          'term': '2020-12',
           'value': {'5x16': 68.2}
         },
         {
-          'term': '2020-01',
-          'value': {'5x16': 67.2}
+          'term': '2021-01',
+          'value': {'5x16': 67.2, '2x16H': 65.2, '7x8': 40.2}
         },
         {
-          'term': '2020-02',
-          'value': {'5x16': 52.2}
+          'term': '2021-02',
+          'value': {'5x16': 52.2, '2x16H': 47.2, '7x8': 36.2}
         },
         {
-          'term': '2020-03',
+          'term': '2021-03',
           'value': {'5x16': 53.2}
         },
         {
-          'term': '2020-04',
+          'term': '2021-04',
           'value': {'5x16': 54.2}
         },
         {
-          'term': '2020-05',
+          'term': '2021-05',
           'value': {'5x16': 55.2}
         },
         {
-          'term': '2020-06',
+          'term': '2021-06',
           'value': {'5x16': 56.2}
         },
       ], UTC);
       var out = x.align(y);
       expect(out.length, 6);
       expect(out.intervals.toList(), [
-        Date(2020, 1, 29),
-        Date(2020, 1, 30),
-        Date(2020, 1, 31),
-        Date(2020, 2, 13),
-        Month(2020, 3),
-        Month(2020, 4),
+        Date(2021, 1, 29),
+        Date(2021, 1, 30),
+        Date(2021, 1, 31),
+        Date(2021, 2, 13),
+        Month(2021, 3),
+        Month(2021, 4),
       ]);
+      expect(out.values.first.item1, {Bucket.b5x16: 69, Bucket.b7x8: 40});
+      expect(out.values.first.item2, {Bucket.b5x16: 67.2, Bucket.b7x8: 40.2});
     });
 
     test('add two forward curves element by element', () {
