@@ -172,8 +172,7 @@ Feb21  isone_energy_4000_da_lmp    5x16  2021-01-29     100  Call           32,0
 Value: $407,578
 ''';
       expect(aux.join('\n'), out);
-    }, solo: true);
-
+    });
     test('monthly position report', () async {
       await c0.build();
       var report = c0.monthlyPositionReport();
