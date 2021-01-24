@@ -61,13 +61,13 @@ class MonthlyPositionReportElecCfd implements Report {
     return out.toString();
   }
 
-  /// Output a flat report in json format.
+  /// Output a monthly position report in json format.
   @override
   Map<String, dynamic> toJson() {
     if (_json == null) {
       var table = <Map<String, dynamic>>[];
-      for (CommodityLeg leg in calculator.legs) {
-        for (LeafElecSwap leaf in leg.leaves) {
+      for (var leg in calculator.legs) {
+        for (var leaf in leg.leaves) {
           table.add({
             'term': leaf.interval.toString(),
             'curveId': 'USD',

@@ -18,8 +18,9 @@ class DeltaGammaReportElecDailyOption implements Report {
   /// List of underlying price shocks as a percent of underlying.  See [defaultShocks].
   List<num> shocks;
 
-  static final _fmt0 = NumberFormat()..maximumIntegerDigits = 0;
+  static final _fmt0 = NumberFormat('#,###');
   static final _fmtDt = DateFormat.yMMMMd('en_US').add_jm();
+  static final _fmtPct = NumberFormat.decimalPercentPattern(decimalDigits: 0);
 
   /// json output
   Map<String, dynamic> _json;
@@ -32,39 +33,33 @@ class DeltaGammaReportElecDailyOption implements Report {
     _json ?? toJson();
     var out = StringBuffer();
     out.writeln('DeltaGamma Report');
-    out.writeln(
-        'Recalculate the option deltas for different underlying prices.');
+    out.writeln('Recalculate option deltas for different underlying prices.');
     out.writeln('As of date: ${_json['asOfDate']}');
     out.writeln('Printed: ${_fmtDt.format(DateTime.now())}');
     out.writeln('');
-    var tbl = _json['table'] as List;
-    tbl = tbl.where((e) => e['curveId'] != 'USD').toList();
+    var tbl = (_json['table'] as List)
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
 
-    /// calculate totals by period
+    /// Aggregate deltas by period, curveId, bucket, shock
     var nest = Nest()
       ..key((e) => e['term'])
-      ..rollup(
-          (List xs) => _fmt0.format(sum(xs.map((e) => e['nominalQuantity']))));
-    var totalsByTerm = flattenMap(nest.map(tbl), ['term', 'total'])
-      ..add({'term': 'total', 'total': ''});
-
-    /// add the totals by curveId and bucket to the table
-    nest = Nest()
       ..key((e) => e['curveId'])
       ..key((e) => e['bucket'])
-      ..rollup((List xs) => sum(xs.map((e) => e['nominalQuantity'])));
-    var totalCurveId =
-        flattenMap(nest.map(tbl), ['curveId', 'bucket', 'nominalQuantity']);
-    for (var row in totalCurveId) {
-      tbl.add(<String, dynamic>{'term': 'total', ...row});
+      ..key((e) => e['shock'])
+      ..rollup((List xs) => _fmt0.format(sum(xs.map((e) => e['delta']))));
+    var totals = flattenMap(
+        nest.map(tbl), ['term', 'curveId', 'bucket', 'shock', 'delta']);
+
+    /// format the shock to a percent
+    for (var x in totals) {
+      x['shock'] = _fmtPct.format(x['shock']);
     }
 
-    for (var row in tbl) {
-      row['nominalQuantity'] = _fmt0.format(row['nominalQuantity'] as num);
-    }
-    var aux = reshape(tbl, ['term'], ['curveId', 'bucket'], 'nominalQuantity');
+    /// add the totals by curveId and bucket to the table
+    var aux =
+        reshape(totals, ['term', 'curveId', 'bucket'], ['shock'], 'delta');
 
-    aux = join(aux, totalsByTerm);
     var _tbl = Table.from(aux, options: {'columnSeparation': '  '});
     out.write(_tbl.toString());
     return out.toString();
@@ -78,11 +73,15 @@ class DeltaGammaReportElecDailyOption implements Report {
       for (var leg in calculator.legs) {
         for (var leaf in leg.leaves) {
           for (var shock in shocks) {
+            var newPrice = leaf.underlyingPrice * (1 + shock);
+            var newLeaf = leaf.copyWith(underlyingPrice: newPrice);
             table.add({
               'term': leaf.month.toString(),
               'curveId': leg.curveId,
               'bucket': leg.bucket.toString(),
               'underlyingPrice': leaf.underlyingPrice,
+              'shock': shock,
+              'delta': newLeaf.delta() * newLeaf.quantityTerm, // in MWh
             });
           }
         }

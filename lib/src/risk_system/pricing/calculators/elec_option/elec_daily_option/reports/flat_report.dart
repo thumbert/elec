@@ -23,6 +23,9 @@ class FlatReportElecDailyOption implements Report {
     var tbl = _json['table'] as List;
     for (var row in tbl) {
       row['forwardPrice'] = (row['forwardPrice'] as num).toStringAsFixed(2);
+      if (row['optionPrice'] is num) {
+        row['optionPrice'] = row['optionPrice'].toStringAsFixed(2);
+      }
       row['nominalQuantity'] = _fmt0.format(row['nominalQuantity'] as num);
       row['value'] = _fmtCurrency2.format(row['value'] as num);
     }
@@ -59,31 +62,33 @@ class FlatReportElecDailyOption implements Report {
       var table = <Map<String, dynamic>>[];
       for (var leg in calculator.legs) {
         for (var leaf in leg.leaves) {
+          // cash lines first
           table.add({
             'term': leaf.month.toString(),
             'curveId': 'USD',
             'bucket': '',
-            'nominalQuantity': -calculator.buySell.sign *
-                leaf.quantity *
-                leaf.hours *
-                leaf.fixPrice,
+            'expiration': leaf.month.endDate,
+            'strike': '',
+            'type': '',
+            'nominalQuantity':
+                -calculator.buySell.sign * leaf.quantityTerm * leaf.fixPrice,
             'forwardPrice': 1,
-            'value': -calculator.buySell.sign *
-                leaf.quantity *
-                leaf.hours *
-                leaf.fixPrice,
+            'optionPrice': '',
+            'value':
+                -calculator.buySell.sign * leaf.quantityTerm * leaf.fixPrice,
           });
+          // commodity lines
           table.add({
             'term': leaf.month.toString(),
             'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
-            'nominalQuantity':
-                calculator.buySell.sign * leaf.quantity * leaf.hours,
-            // 'forwardPrice': leaf.floatingPrice,
-            // 'value': calculator.buySell.sign *
-            //     leaf.quantity *
-            //     leaf.hours *
-            //     leaf.floatingPrice,
+            'expiration': leaf.expirationDate,
+            'strike': leaf.strike,
+            'type': leaf.callPut,
+            'nominalQuantity': calculator.buySell.sign * leaf.quantityTerm,
+            'forwardPrice': leaf.underlyingPrice,
+            'optionPrice': leaf.price(),
+            'value': calculator.buySell.sign * leaf.quantityTerm * leaf.price()
           });
         }
       }

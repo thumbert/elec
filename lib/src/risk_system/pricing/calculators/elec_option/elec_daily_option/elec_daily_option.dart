@@ -73,7 +73,11 @@ class ElecDailyOption
     }
   }
 
-  Report deltaGammaReport() => DeltaGammaReportElecDailyOption(this);
+  /// Calculate the delta-gamma report.
+  /// Shocks are multipliers to the underlying price, e.g. [-0.1, 0.1] are
+  /// -10%, +10% shock in the underlying, respectively.
+  Report deltaGammaReport({List<num> shocks}) =>
+      DeltaGammaReportElecDailyOption(this, shocks: shocks);
   Report flatReport() => FlatReportElecDailyOption(this);
   Report monthlyPositionReport() => MonthlyPositionReportElecDailyOption(this);
 
@@ -88,13 +92,13 @@ class ElecDailyOption
           'bucket': leg.bucket.toString(),
           'type': leg.callPut.toString(),
           'strike': leaf.strike,
-          'quantity': _fmtQty.format(buySell.sign * leaf.quantity * leaf.hours),
+          'quantity': _fmtQty.format(buySell.sign * leaf.quantityTerm),
           'fwdPrice': _fmtCurrency4.format(leaf.underlyingPrice),
           'implVol': _fmt2.format(leaf.volatility * 100),
           'optionPrice': _fmtCurrency4.format(leaf.price()),
           'delta': _fmt2.format(leaf.delta()),
           'value': _fmtCurrency0
-              .format(buySell.sign * leaf.quantity * leaf.hours * leaf.price()),
+              .format(buySell.sign * leaf.quantityTerm * leaf.price()),
         });
       }
     }

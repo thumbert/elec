@@ -10,9 +10,7 @@ import 'package:table/table_base.dart';
 class MonthlyPositionReportElecDailyOption implements Report {
   ElecDailyOption calculator;
 
-  static final _fmtCurrency2 =
-      NumberFormat.currency(symbol: '\$', decimalDigits: 0);
-  static final _fmt0 = NumberFormat()..maximumIntegerDigits = 0;
+  static final _fmt0 = NumberFormat('#,###');
   static final _fmtDt = DateFormat.yMMMMd('en_US').add_jm();
 
   /// json output
@@ -28,14 +26,14 @@ class MonthlyPositionReportElecDailyOption implements Report {
     out.writeln('As of date: ${_json['asOfDate']}');
     out.writeln('Printed: ${_fmtDt.format(DateTime.now())}');
     out.writeln('');
-    var tbl = _json['table'] as List;
-    tbl = tbl.where((e) => e['curveId'] != 'USD').toList();
+    var tbl = (_json['table'] as List)
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
 
     /// calculate totals by period
     var nest = Nest()
       ..key((e) => e['term'])
-      ..rollup(
-          (List xs) => _fmt0.format(sum(xs.map((e) => e['nominalQuantity']))));
+      ..rollup((List xs) => _fmt0.format(sum(xs.map((e) => e['value']))));
     var totalsByTerm = flattenMap(nest.map(tbl), ['term', 'total'])
       ..add({'term': 'total', 'total': ''});
 
@@ -43,17 +41,19 @@ class MonthlyPositionReportElecDailyOption implements Report {
     nest = Nest()
       ..key((e) => e['curveId'])
       ..key((e) => e['bucket'])
-      ..rollup((List xs) => sum(xs.map((e) => e['nominalQuantity'])));
+      ..rollup((List xs) => sum(xs.map((e) => e['value'])));
     var totalCurveId =
-        flattenMap(nest.map(tbl), ['curveId', 'bucket', 'nominalQuantity']);
+        flattenMap(nest.map(tbl), ['curveId', 'bucket', 'value']);
     for (var row in totalCurveId) {
       tbl.add(<String, dynamic>{'term': 'total', ...row});
     }
 
     for (var row in tbl) {
-      row['nominalQuantity'] = _fmt0.format(row['nominalQuantity'] as num);
+      if (row['value'] is num) {
+        row['value'] = _fmt0.format(row['value'] as num);
+      }
     }
-    var aux = reshape(tbl, ['term'], ['curveId', 'bucket'], 'nominalQuantity');
+    var aux = reshape(tbl, ['term'], ['curveId', 'bucket'], 'value');
 
     aux = join(aux, totalsByTerm);
     var _tbl = Table.from(aux, options: {'columnSeparation': '  '});
@@ -61,7 +61,7 @@ class MonthlyPositionReportElecDailyOption implements Report {
     return out.toString();
   }
 
-  /// Output a flat report in json format.
+  /// Output a monthly position report in json format.
   @override
   Map<String, dynamic> toJson() {
     if (_json == null) {
@@ -70,29 +70,9 @@ class MonthlyPositionReportElecDailyOption implements Report {
         for (var leaf in leg.leaves) {
           table.add({
             'term': leaf.month.toString(),
-            'curveId': 'USD',
-            'bucket': '',
-            'nominalQuantity': -calculator.buySell.sign *
-                leaf.quantity *
-                leaf.hours *
-                leaf.fixPrice,
-            'forwardPrice': 1,
-            'value': -calculator.buySell.sign *
-                leaf.quantity *
-                leaf.hours *
-                leaf.fixPrice,
-          });
-          table.add({
-            'term': leaf.month.toString(),
             'curveId': leg.curveId,
             'bucket': leg.bucket.toString(),
-            'nominalQuantity':
-                calculator.buySell.sign * leaf.quantity * leaf.hours,
-            // 'forwardPrice': leaf.floatingPrice,
-            // 'value': calculator.buySell.sign *
-            //     leaf.quantity *
-            //     leaf.hours *
-            //     leaf.floatingPrice,
+            'value': calculator.buySell.sign * leaf.quantityTerm * leaf.delta()
           });
         }
       }
@@ -100,7 +80,6 @@ class MonthlyPositionReportElecDailyOption implements Report {
         'asOfDate': calculator.asOfDate.toString(),
         'reportDate': DateTime.now().toString(),
         'table': table,
-        'totalValue': calculator.dollarPrice(),
       };
       _json = out;
     }

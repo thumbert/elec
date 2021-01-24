@@ -12,13 +12,12 @@ class LeafElecOption extends LeafBase {
     this.buySell,
     this.callPut,
     this.month,
-    this.quantity,
+    this.quantityTerm,
     this.riskFreeRate,
     this.strike,
     this.underlyingPrice,
     this.volatility,
     this.fixPrice,
-    this.hours,
   }) : expirationDate = lastBusinessDayPrior(month) {
     _bs = BlackScholes(
         type: callPut,
@@ -32,7 +31,9 @@ class LeafElecOption extends LeafBase {
 
   final BuySell buySell;
   final Month month;
-  final num quantity;
+
+  /// the notional volume for the option, in MWh
+  final num quantityTerm;
   final num underlyingPrice;
   final num strike;
   final CallPut callPut;
@@ -43,9 +44,6 @@ class LeafElecOption extends LeafBase {
 
   final num fixPrice;
 
-  /// number of hours in this period
-  final int hours;
-
   BlackScholes _bs;
 
   /// The option price
@@ -54,7 +52,48 @@ class LeafElecOption extends LeafBase {
   /// The delta of the option
   num delta() => _bs.delta();
 
+  /// The gamma of the option
+  num gamma() => _bs.gamma();
+
+  /// The vega of the option
+  num vega() => _bs.vega();
+
   @override
-  num dollarPrice() =>
-      buySell.sign * hours * quantity * (_bs.value() - fixPrice);
+  num dollarPrice() => buySell.sign * quantityTerm * (_bs.value() - fixPrice);
+
+  LeafElecOption copyWith({
+    Date asOfDate,
+    BuySell buySell,
+    CallPut callPut,
+    Month month,
+    num quantityTerm,
+    num riskFreeRate,
+    num strike,
+    num underlyingPrice,
+    num volatility,
+    num fixPrice,
+  }) {
+    var _asOfDate = asOfDate ?? this.asOfDate;
+    var _buySell = buySell ?? this.buySell;
+    var _callPut = callPut ?? this.callPut;
+    var _month = month ?? this.month;
+    var _quantityTerm = quantityTerm ?? this.quantityTerm;
+    var _riskFreeRate = riskFreeRate ?? this.riskFreeRate;
+    var _strike = strike ?? this.strike;
+    var _underlyingPrice = underlyingPrice ?? this.underlyingPrice;
+    var _volatility = volatility ?? this.volatility;
+    var _fixPrice = fixPrice ?? this.fixPrice;
+
+    return LeafElecOption(
+        asOfDate: _asOfDate,
+        buySell: _buySell,
+        callPut: _callPut,
+        month: _month,
+        quantityTerm: _quantityTerm,
+        riskFreeRate: _riskFreeRate,
+        strike: _strike,
+        underlyingPrice: _underlyingPrice,
+        volatility: _volatility,
+        fixPrice: _fixPrice);
+  }
 }

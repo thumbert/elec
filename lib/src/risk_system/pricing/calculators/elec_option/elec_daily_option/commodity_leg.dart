@@ -127,13 +127,12 @@ class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
         buySell: buySell,
         callPut: callPut,
         month: months[i],
-        quantity: quantity[i].value,
+        quantityTerm: quantity[i].value * hours,
         riskFreeRate: interestRate[i].value,
         strike: strike[i].value,
         underlyingPrice: _uPrice,
         volatility: _volatility,
         fixPrice: fixPrice[i].value,
-        hours: hours,
       ));
     }
   }
@@ -145,8 +144,8 @@ class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
     num hpq = 0; // hours * quantity * optionPrice
     num hq = 0; // hours * quantity
     for (var leaf in leaves) {
-      hpq += leaf.hours * leaf.quantity * leaf.price();
-      hq += leaf.hours * leaf.quantity;
+      hpq += leaf.quantityTerm * leaf.price();
+      hq += leaf.quantityTerm;
     }
     return hpq / hq;
   }

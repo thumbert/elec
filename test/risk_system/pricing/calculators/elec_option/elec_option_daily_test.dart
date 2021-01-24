@@ -152,6 +152,59 @@ void tests(String rootUrl) async {
 Jan21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $60.7000   117.95     $10.2332   0.42  $163,731
 Feb21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $57.2000   119.97     $10.5785   0.43  $169,256''');
     });
+    test('flat report', () async {
+      await c1.build();
+      var report = c1.flatReport();
+      var aux = report.toString().split('\n');
+      aux.removeAt(2); // remove line with Printed: xxxxxxxx
+      var out = r'''
+Flat Report
+As of date: 2020-07-06
+
+ term                   curveId  bucket  expiration  strike  type  nominalQuantity  forwardPrice  optionPrice     value
+Jan21                       USD          2021-01-31                        -50,400          1.00               -$50,400
+Feb21                       USD          2021-02-28                        -99,200          1.00               -$99,200
+
+ term                   curveId  bucket  expiration  strike  type  nominalQuantity  forwardPrice  optionPrice     value
+Jan21  isone_energy_4000_da_lmp    5x16  2020-12-31     100  Call           16,000         61.20        11.29  $180,583
+Feb21  isone_energy_4000_da_lmp    5x16  2021-01-29     100  Call           32,000         57.95        11.77  $376,595
+
+Value: $407,578
+''';
+      expect(aux.join('\n'), out);
+    }, solo: true);
+
+    test('monthly position report', () async {
+      await c0.build();
+      var report = c0.monthlyPositionReport();
+      var aux = report.toString().split('\n');
+      aux.removeAt(2); // remove line with Printed: xxxxxxxx
+      var out = r'''
+Monthly Position Report
+As of date: 2020-07-06
+
+ term  isone_energy_4000_da_lmp_5x16  total
+Jan21                          6,766  6,766
+Feb21                          6,939  6,939
+total                         13,705       ''';
+      expect(aux.join('\n'), out);
+    });
+
+    test('delta-gamma report', () async {
+      await c0.build();
+      var report = c0.deltaGammaReport(shocks: [-0.1, 0, 0.1]);
+      var aux = report.toString().split('\n');
+      aux.removeAt(3); // remove line with Printed: xxxxxxxx
+      var out = r'''
+DeltaGamma Report
+Recalculate option deltas for different underlying prices.
+As of date: 2020-07-06
+
+ term                   curveId  bucket   -10%     0%    10%
+Jan21  isone_energy_4000_da_lmp    5x16  5,976  6,766  7,497
+Feb21  isone_energy_4000_da_lmp    5x16  6,213  6,939  7,608''';
+      expect(aux.join('\n'), out);
+    });
   });
 }
 
