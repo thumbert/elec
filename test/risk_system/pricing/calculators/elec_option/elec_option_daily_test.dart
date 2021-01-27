@@ -77,8 +77,7 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
 
 void tests(String rootUrl) async {
   var location = getLocation('America/New_York');
-  var cacheProvider =
-      CacheProviderElecOption.test(client: Client(), rootUrl: rootUrl);
+  var cacheProvider = CacheProvider.test(client: Client(), rootUrl: rootUrl);
   group('Elec daily option tests ISONE, 1 leg:', () {
     ElecDailyOption c0, c1;
     setUp(() async {

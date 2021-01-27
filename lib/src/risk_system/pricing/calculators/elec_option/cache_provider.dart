@@ -3,7 +3,7 @@
 
 part of elec.calculators.elec_daily_option;
 
-class CacheProviderElecOption extends CacheProviderBase {
+class CacheProvider extends CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection
   @override
   Cache<String, Map<String, dynamic>> curveDetailsCache;
@@ -16,10 +16,10 @@ class CacheProviderElecOption extends CacheProviderBase {
   /// The keys of the cache are tuples (asOfDate, volatilityCurveId).
   Cache<Tuple2<Date, String>, VolatilitySurface> volSurfaceCache;
 
-  CacheProviderElecOption();
+  CacheProvider();
 
   /// An example of a CacheProvider implementation
-  CacheProviderElecOption.test(
+  CacheProvider.test(
       {Client client, String rootUrl = 'http://localhost:8080/'}) {
     client ??= Client();
     var curveIdClient = CurveIdClient(client, rootUrl: rootUrl);

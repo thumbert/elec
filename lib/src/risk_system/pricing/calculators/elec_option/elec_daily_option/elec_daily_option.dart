@@ -1,13 +1,12 @@
 part of elec.calculators.elec_daily_option;
 
-class ElecDailyOption
-    extends CalculatorBase<CommodityLeg, CacheProviderElecOption> {
+class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   ElecDailyOption(
       {Date asOfDate,
       Term term,
       BuySell buySell,
       List<CommodityLeg> legs,
-      CacheProviderElecOption cacheProvider}) {
+      CacheProvider cacheProvider}) {
     this.asOfDate = asOfDate;
     this.term = term;
     this.buySell = buySell;
