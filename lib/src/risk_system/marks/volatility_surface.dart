@@ -90,7 +90,7 @@ class VolatilitySurface extends MarksCurve {
 
   List<num> _strikeRatios;
 
-  /// Strike ratios are ordered in the list.
+  /// Strike ratios = StrikePrice/FwdPrice.  The list is ordered increasingly.
   List<num> get strikeRatios => _strikeRatios;
 
   List<Month> _terms;
@@ -100,18 +100,22 @@ class VolatilitySurface extends MarksCurve {
   Set<Bucket> get buckets => _data.keys.toSet();
 
   /// Calculate the volatility value for a given month and strikeRatio
-  /// by linear interpolation for now.
+  /// by linear interpolation for now.  If the [strikeRatio] is below
+  /// the marked values, return the first marked value.  If the [strikeRatio]
+  /// is above the marked values, return the last marked value.
   ///
   /// Will throw if the bucket or month doesn't exist.
   num value(Bucket bucket, Month month, num strikeRatio) {
+    if (strikeRatio <= strikeRatios.first) {
+      return _data[bucket][strikeRatios.first].observationAt(month).value;
+    } else if (strikeRatio >= strikeRatios.last) {
+      return _data[bucket][strikeRatios.last].observationAt(month).value;
+    }
+    // for sure iMin will now have a value that works
     var iMin = strikeRatios.lastIndexWhere((e) => e <= strikeRatio);
     if (strikeRatios[iMin] == strikeRatio) {
       /// perfect hit, no interpolation needed
       return _data[bucket][strikeRatio].observationAt(month).value;
-    }
-    if (iMin == strikeRatios.last) {
-      throw ArgumentError('No strike ratio greater than $strikeRatio.  '
-          'Can\'t interpolate.  Exiting.');
     }
 
     /// interpolate linearly

@@ -144,9 +144,15 @@ void tests() {
       expect(v0, 0.4);
     });
     test('interpolate strikeRatios for volatility value', () {
-      var ts = vs.value(Bucket.b5x16, Month(2020, 8, location: location), 1.5);
-      expect(ts, 0.625);
+      // vol is marked only for [0.5, 1, 2] strike ratios
+      expect(
+          vs.value(Bucket.b5x16, Month(2020, 8, location: location), 0.3), 0.5);
+      expect(vs.value(Bucket.b5x16, Month(2020, 8, location: location), 1.5),
+          0.625);
+      expect(
+          vs.value(Bucket.b5x16, Month(2020, 8, location: location), 2.2), 0.7);
     });
+
     test('extend periodically by year', () {
       var vsX = vs.extendPeriodicallyByYear(Month(2022, 12, location: location),
           f: (x) => 0.9 * x);

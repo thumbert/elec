@@ -6,6 +6,7 @@ import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:http/http.dart';
 import 'package:date/date.dart';
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
@@ -143,6 +144,24 @@ void tests(String rootUrl) async {
       var value = c0.dollarPrice();
       expect(value.toStringAsFixed(0), '332987');
     });
+    test('change strike and reprice option', () async {
+      var months =
+          c0.legs[0].term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      c0.legs[0].strike = TimeSeries.fill(months, 125);
+      await c0.build();
+      var legs = c0.legs;
+      var leaves = legs.first.leaves;
+      expect(leaves.length, 2);
+      var l0 = leaves[0];
+      expect(l0.expirationDate, Date(2020, 12, 31, location: location));
+      expect(l0.underlyingPrice, 60.7);
+      expect(l0.strike, 125);
+      expect(l0.volatility.toStringAsFixed(5), '1.25000');
+      expect(l0.price().toStringAsFixed(4), '8.2195');
+      var value = c0.dollarPrice();
+      expect(value.toStringAsFixed(0), '267206');
+    });
+
     test('show details', () async {
       await c0.build();
       var out = c0.showDetails();
