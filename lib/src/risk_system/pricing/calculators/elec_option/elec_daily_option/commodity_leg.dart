@@ -15,8 +15,7 @@ class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
     this.bucket = bucket;
     this.tzLocation = tzLocation;
     this.quantity = quantity;
-    this.fixPrice = fixPrice;
-    this.fixPrice ??= TimeSeries.fill(quantity.intervals, 0);
+    this.fixPrice = fixPrice ?? TimeSeries.fill(quantity.intervals, 0);
   }
 
   String volatilityCurveId;
@@ -27,7 +26,6 @@ class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
   TimeSeries<num> strike;
 
   /// The [asOfDate] value of the underlying as a monthly timeseries.
-  TimeSeries<num> underlyingPrice;
   TimeSeries<num> priceAdjustment;
 
   /// The [asOfDate] value of the volatility as a monthly timeseries.

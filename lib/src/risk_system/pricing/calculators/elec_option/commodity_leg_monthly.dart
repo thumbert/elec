@@ -1,6 +1,6 @@
 //part of elec.calculators.elec_swap;
 
-import 'package:dama/dama.dart';
+import 'package:dama/dama.dart' as dama;
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
@@ -31,6 +31,7 @@ class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
 
   TimeSeries<num> quantity;
   TimeSeries<num> fixPrice;
+  TimeSeries<num> underlyingPrice;
 
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly.fromJson(Map<String, dynamic> x) {
@@ -98,12 +99,6 @@ class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
   @override
   num price() => 0;
 
-  /// Get the leg quantity as a monthly timeseries.
-  // TimeSeries<num> quantity() => _quantity;
-
-  /// Get the leg fixPrice as a monthly timeseries
-  // TimeSeries<num> fixPrice() => _fixPrice;
-
   /// Return [true] if the calculator has custom quantity, i.e.
   /// not the same value for all time intervals.
   bool get hasCustomQuantity {
@@ -151,20 +146,25 @@ class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
     };
   }
 
-  /// if custom quantities, what to show on the screen in the UI
-  num showQuantity() {
-    if (!hasCustomQuantity) {
-      return quantity.first.value;
-    }
-    return 1.0;
-  }
-
   /// if custom fixPrice, what to show on the screen in the UI
   num showFixPrice() {
-    if (!hasCustomFixPrice) {
-      return fixPrice.first.value;
-    }
-    return 1.0;
+    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var hours = months.map((month) => bucket.countHours(month));
+    return dama.weightedMean(fixPrice.values, hours);
+  }
+
+  /// if custom quantities, what to show on the screen in the UI
+  num showQuantity() {
+    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var hours = months.map((month) => bucket.countHours(month));
+    return dama.weightedMean(quantity.values, hours);
+  }
+
+  /// what to show on the screen in the UI for the underlying price
+  num showUnderlyingPrice() {
+    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var hours = months.map((month) => bucket.countHours(month));
+    return dama.weightedMean(underlyingPrice.values, hours);
   }
 
   /// Make a copy
