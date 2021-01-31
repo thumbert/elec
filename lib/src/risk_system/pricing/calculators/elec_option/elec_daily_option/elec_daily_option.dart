@@ -57,6 +57,28 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
     }
   }
 
+  Term _term;
+  @override
+  Term get term => _term;
+
+  @override
+  set term(Term term) {
+    _term = term;
+    // push the term into the legs
+    // all timeseries need to be reset
+    for (var leg in legs) {
+      leg.term = term;
+      var months = term.interval
+          .withTimeZone(leg.tzLocation)
+          .splitLeft((dt) => Month.fromTZDateTime(dt));
+      leg.quantity = TimeSeries.fill(months, leg.quantity.values.first);
+      leg.fixPrice = TimeSeries.fill(months, 0);
+      leg.strike = TimeSeries.fill(months, leg.strike.values.first);
+      leg.priceAdjustment = TimeSeries.fill(months, 0);
+      leg.volatilityAdjustment = TimeSeries.fill(months, 0);
+    }
+  }
+
   @override
   Future<void> build() async {
     for (var leg in legs) {

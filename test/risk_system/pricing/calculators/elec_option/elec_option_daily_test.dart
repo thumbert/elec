@@ -161,7 +161,11 @@ void tests(String rootUrl) async {
       var value = c0.dollarPrice();
       expect(value.toStringAsFixed(0), '267206');
     });
-
+    test('change term and reprice', () async {
+      var calc = c1..term = Term.parse('Mar21-Apr21', UTC);
+      await calc.build();
+      expect(calc.dollarPrice().round(), 72213);
+    });
     test('show details', () async {
       await c0.build();
       var out = c0.showDetails();
