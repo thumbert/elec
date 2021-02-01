@@ -1,6 +1,6 @@
 part of elec.calculators.elec_daily_option;
 
-class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
+class CommodityLeg extends CommodityLegMonthly {
   CommodityLeg(
       {String curveId,
       Bucket bucket,
@@ -185,4 +185,31 @@ class CommodityLeg extends CommodityLegMonthly<LeafElecOption> {
 
     return out;
   }
+
+  /// Make a copy
+  CommodityLeg copyWith({
+    String curveId,
+    Bucket bucket,
+    TimeSeries<num> quantity,
+    TimeSeries<num> fixPrice,
+    Location tzLocation,
+    CallPut callPut,
+    TimeSeries<num> strike,
+    TimeSeries<num> priceAdjustment,
+    TimeSeries<num> volatilityAdjustment,
+  }) =>
+      CommodityLeg(
+        curveId: curveId ?? this.curveId,
+        bucket: bucket ?? this.bucket,
+        quantity: quantity ?? this.quantity,
+        fixPrice: fixPrice ?? this.fixPrice,
+        tzLocation: tzLocation ?? this.tzLocation,
+        callPut: callPut ?? this.callPut,
+        strike: strike ?? this.strike,
+        priceAdjustment: priceAdjustment ?? this.priceAdjustment,
+        volatilityAdjustment: volatilityAdjustment ?? this.volatilityAdjustment,
+      )
+        ..asOfDate = asOfDate
+        ..term = term
+        ..buySell = buySell;
 }

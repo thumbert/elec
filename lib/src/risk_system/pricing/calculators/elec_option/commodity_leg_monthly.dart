@@ -1,17 +1,18 @@
-//part of elec.calculators.elec_swap;
-
 import 'package:dama/dama.dart' as dama;
 import 'package:date/date.dart';
+import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/commodity_leg.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/leaf.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 
-class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
+/// TODO:  this commodity leg monthly shouldn't have LeafElecOption as a type!
+/// but LeafElecMonthly.
+
+class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly({
     this.curveId,
@@ -21,8 +22,6 @@ class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
     this.tzLocation,
   }) {
     this.bucket = bucket;
-    // should I check that it matches the term?
-    fixPrice ??= TimeSeries.fill(quantity.intervals, 0);
   }
 
   String curveId;
@@ -168,26 +167,26 @@ class CommodityLegMonthly<Leaf> extends CommodityLegBase<LeafElecOption> {
   }
 
   /// Make a copy
-  CommodityLegMonthly copyWith({
-    String curveId,
-    Bucket bucket,
-    TimePeriod timePeriod,
-    TimeSeries<num> quantity,
-    TimeSeries<num> fixPrice,
-    Location tzLocation,
-    Date asOfDate,
-    Term term,
-    BuySell buySell,
-  }) =>
-      CommodityLegMonthly(
-          curveId: curveId ?? this.curveId,
-          bucket: bucket ?? this.bucket,
-          quantity: quantity ?? this.quantity,
-          fixPrice: fixPrice ?? this.fixPrice,
-          tzLocation: tzLocation ?? this.tzLocation)
-        ..asOfDate = asOfDate ?? this.asOfDate
-        ..term = term ?? this.term
-        ..buySell = buySell ?? this.buySell;
+  // CommodityLegMonthly copyWith({
+  //   String curveId,
+  //   Bucket bucket,
+  //   TimePeriod timePeriod,
+  //   TimeSeries<num> quantity,
+  //   TimeSeries<num> fixPrice,
+  //   Location tzLocation,
+  //   Date asOfDate,
+  //   Term term,
+  //   BuySell buySell,
+  // }) =>
+  //     CommodityLegMonthly(
+  //         curveId: curveId ?? this.curveId,
+  //         bucket: bucket ?? this.bucket,
+  //         quantity: quantity ?? this.quantity,
+  //         fixPrice: fixPrice ?? this.fixPrice,
+  //         tzLocation: tzLocation ?? this.tzLocation)
+  //       ..asOfDate = asOfDate ?? this.asOfDate
+  //       ..term = term ?? this.term
+  //       ..buySell = buySell ?? this.buySell;
 
   /// Input [xs] is a monthly series.
   /// Each element is one of the following formats

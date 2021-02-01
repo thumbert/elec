@@ -33,7 +33,7 @@ class DeltaGammaReportElecDailyOption implements Report {
     _json ?? toJson();
     var out = StringBuffer();
     out.writeln('DeltaGamma Report');
-    out.writeln('Recalculate option deltas for different underlying prices.');
+    out.writeln('Recalculate option deltas for different underlying prices');
     out.writeln('As of date: ${_json['asOfDate']}');
     out.writeln('Printed: ${_fmtDt.format(DateTime.now())}');
     out.writeln('');

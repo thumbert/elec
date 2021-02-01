@@ -1,5 +1,6 @@
 library elec.calculators.elec_daily_option;
 
+import 'package:elec/calculators.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/reports/delta_gamma_report.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/reports/flat_report.dart';

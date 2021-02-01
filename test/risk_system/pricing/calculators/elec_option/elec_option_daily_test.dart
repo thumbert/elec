@@ -166,6 +166,19 @@ void tests(String rootUrl) async {
       await calc.build();
       expect(calc.dollarPrice().round(), 72213);
     });
+    test('add another leg and reprice', () async {
+      var calc = c0;
+      var months = calc.legs[0].term.interval
+          .splitLeft((dt) => Month.fromTZDateTime(dt));
+      var leg1 = calc.legs[0].copyWith(
+        callPut: CallPut.put,
+        strike: TimeSeries.fill(months, 50),
+      );
+      calc.legs.add(leg1);
+      await calc.build();
+      expect(calc.dollarPrice().round(), 704910);
+    });
+
     test('show details', () async {
       await c0.build();
       var out = c0.showDetails();
@@ -218,7 +231,7 @@ total                         13,705       ''';
       aux.removeAt(3); // remove line with Printed: xxxxxxxx
       var out = r'''
 DeltaGamma Report
-Recalculate option deltas for different underlying prices.
+Recalculate option deltas for different underlying prices
 As of date: 2020-07-06
 
  term                   curveId  bucket   -10%     0%    10%
@@ -229,7 +242,31 @@ Feb21  isone_energy_4000_da_lmp    5x16  6,213  6,939  7,608''';
   });
 }
 
+class A {
+  A({this.quantity, this.price}) {
+    print('in A! quantity: $quantity, price: $price');
+    price ??= quantity;
+  }
+  num quantity, price;
+}
+
+class B extends A {
+  B({num quantity, num price}) {
+    this.quantity = quantity;
+    this.price = price;
+  }
+
+  B copyWith({num quantity, num price}) =>
+      B(quantity: quantity ?? this.quantity, price: price ?? this.price);
+}
+
 void main() async {
   await initializeTimeZones();
+
+  // var b = B(quantity: 100, price: 1.1);
+  // print('b initialized');
+  // var b2 = b.copyWith(price: 3.1);
+  // print('b2.quantity = ${b2.quantity}, b2.price = ${b2.price}');
+
   await tests('http://localhost:8080/');
 }
