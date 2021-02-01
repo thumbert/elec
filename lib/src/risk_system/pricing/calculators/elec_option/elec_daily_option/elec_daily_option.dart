@@ -67,10 +67,9 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
     // push the term into the legs
     // all timeseries need to be reset
     for (var leg in legs) {
-      leg.term = term;
-      var months = term.interval
-          .withTimeZone(leg.tzLocation)
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+      leg.term = Term.fromInterval(term.interval.withTimeZone(leg.tzLocation));
+      var months =
+          leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
       leg.quantity = TimeSeries.fill(months, leg.quantity.values.first);
       leg.fixPrice = TimeSeries.fill(months, 0);
       leg.strike = TimeSeries.fill(months, leg.strike.values.first);
@@ -84,6 +83,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
     for (var leg in legs) {
       var curveDetails = await cacheProvider.curveDetailsCache.get(leg.curveId);
       leg.tzLocation = getLocation(curveDetails['tzLocation']);
+      leg.term = Term.fromInterval(term.interval.withTimeZone(leg.tzLocation));
       leg.volatilityCurveId = curveDetails['volatilityCurveId']['daily'];
       leg.underlyingPrice = await getUnderlyingPrice(leg.bucket, leg.curveId);
       var strikeRatio = leg.strike / leg.underlyingPrice;
