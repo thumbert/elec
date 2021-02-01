@@ -117,7 +117,8 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
           'fwdPrice': _fmtCurrency4.format(leaf.underlyingPrice),
           'implVol': _fmt2.format(leaf.volatility * 100),
           'optionPrice': _fmtCurrency4.format(leaf.price()),
-          'delta': _fmt2.format(leaf.delta()),
+          'delta': _fmt2
+              .format(leaf.delta() * buySell.sign * leaf.quantityTerm.sign),
           'value': _fmtCurrency0
               .format(buySell.sign * leaf.quantityTerm * leaf.price()),
         });

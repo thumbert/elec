@@ -237,7 +237,32 @@ Feb21                          6,939  6,939
 total                         13,705       ''';
       expect(aux.join('\n'), out);
     });
+    test('monthly position report, multiple legs', () async {
+      var calc = c0;
+      var months = calc.legs[0].term.interval
+          .splitLeft((dt) => Month.fromTZDateTime(dt));
+      var leg0 = calc.legs[0]
+        ..quantity = TimeSeries.fill(months, 100)
+        ..strike = TimeSeries.fill(months, 60);
+      var leg1 = leg0.copyWith(
+        quantity: TimeSeries.fill(months, -200),
+        strike: TimeSeries.fill(months, 80),
+      );
+      calc.legs.add(leg1);
+      await calc.build();
+      var report = calc.monthlyPositionReport();
+      var aux = report.toString().split('\n');
+      aux.removeAt(2); // remove line with Printed: xxxxxxxx
+      var out = r'''
+Monthly Position Report
+As of date: 2020-07-06
 
+ term  isone_energy_4000_da_lmp_5x16    total
+Jan21                        -12,101  -12,101
+Feb21                        -12,539  -12,539
+total                        -24,641         ''';
+      expect(aux.join('\n'), out);
+    });
     test('delta-gamma report', () async {
       await c0.build();
       var report = c0.deltaGammaReport(shocks: [-0.1, 0, 0.1]);

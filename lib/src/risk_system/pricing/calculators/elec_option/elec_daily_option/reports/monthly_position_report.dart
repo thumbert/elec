@@ -26,12 +26,21 @@ class MonthlyPositionReportElecDailyOption implements Report {
     out.writeln('As of date: ${_json['asOfDate']}');
     out.writeln('Printed: ${_fmtDt.format(DateTime.now())}');
     out.writeln('');
-    var tbl = (_json['table'] as List)
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
+    // var tbl = (_json['table'] as List)
+    //     .map((e) => Map<String, dynamic>.from(e))
+    //     .toList();
+
+    /// aggregate position by curveId, bucket, term
+    var nest = Nest()
+      ..key((e) => e['term'])
+      ..key((e) => e['curveId'])
+      ..key((e) => e['bucket'])
+      ..rollup((List xs) => sum(xs.map((e) => e['value'])));
+    var tbl = flattenMap(nest.map(_json['table'] as List),
+        ['term', 'curveId', 'bucket', 'value']);
 
     /// calculate totals by period
-    var nest = Nest()
+    nest = Nest()
       ..key((e) => e['term'])
       ..rollup((List xs) => _fmt0.format(sum(xs.map((e) => e['value']))));
     var totalsByTerm = flattenMap(nest.map(tbl), ['term', 'total'])
