@@ -3,6 +3,7 @@ library test_all;
 import 'package:timezone/standalone.dart';
 import 'analysis/filter/filter_test.dart' as filter;
 import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
+import 'financial/black_scholes/black_scholes_test.dart' as black_scholes;
 import 'physical/gas/time_aggregation_test.dart' as time_aggregation;
 import 'physical/gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
 import 'time/bucket/bucket_test.dart' as bucket;
@@ -31,6 +32,7 @@ void main() async {
   filter.tests();
   seasonal_analysis.tests();
   solar_elevation.tests();
+  black_scholes.tests();
   bucket.tests();
   bucket.aggregateByBucketMonth();
 

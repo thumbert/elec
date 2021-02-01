@@ -39,6 +39,9 @@ class BlackScholes {
     _tExp = _timeToExpiration(asOfDate, expirationDate);
   }
 
+  num get timeToExpiration =>
+      _tExp ?? _timeToExpiration(asOfDate, expirationDate);
+
   num get volatility => _volatility;
   set volatility(num value) {
     if (value <= 0) {
@@ -96,8 +99,8 @@ class BlackScholes {
         res = _nd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate);
         break;
       case CallPut.put:
-        res = -Phi(
-            -_nd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
+        res =
+            _nd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) - 1;
         break;
     }
     return res;
@@ -114,11 +117,11 @@ class BlackScholes {
   /// Calculate the theta of the option (sensitivity with respect to time.)
   /// for 1 day change in time to expiration
   double theta() {
+    double res;
     var t1 = -_volatility *
         underlyingPrice *
         _dNd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) /
         (2 * sqrt(_tExp));
-    double res;
     switch (type) {
       case CallPut.call:
         res = t1 -
@@ -128,12 +131,11 @@ class BlackScholes {
                 _nd2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate);
         break;
       case CallPut.put:
-        res = t1 -
-            riskFreeRate *
-                strike *
-                exp(-riskFreeRate * _tExp) *
-                Phi(-_nd2(
-                    _tExp, _volatility, underlyingPrice, strike, riskFreeRate));
+        var t2 = riskFreeRate *
+            strike *
+            exp(-riskFreeRate * _tExp) *
+            Phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
+        res = t1 + t2;
         break;
     }
     return res / 365.25;
@@ -161,11 +163,11 @@ class BlackScholes {
             _nd2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate);
         break;
       case CallPut.put:
-        res = 0.0001 *
+        res = -0.0001 *
             strike *
             _tExp *
             exp(-riskFreeRate * _tExp) *
-            Phi(-_nd2(
+            Phi(-_d2(
                 _tExp, _volatility, underlyingPrice, strike, riskFreeRate));
         break;
     }
@@ -229,6 +231,7 @@ double _d1(num _tExp, num volatility, num underlyingPrice, num strike,
 double _nd1(num _tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
     Phi(_d1(_tExp, volatility, underlyingPrice, strike, interestRate));
+
 double _d2(num _tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
   double d2;
@@ -236,9 +239,8 @@ double _d2(num _tExp, num volatility, num underlyingPrice, num strike,
     d2 = double.infinity;
   } else {
     d2 = (log(underlyingPrice / strike) +
-                (interestRate + 0.5 * volatility * volatility) * _tExp) /
-            (volatility * sqrt(_tExp)) -
-        volatility * sqrt(_tExp);
+            (interestRate - 0.5 * volatility * volatility) * _tExp) /
+        (volatility * sqrt(_tExp));
   }
   return d2;
 }
@@ -246,6 +248,7 @@ double _d2(num _tExp, num volatility, num underlyingPrice, num strike,
 double _nd2(num _tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
     Phi(_d2(_tExp, volatility, underlyingPrice, strike, interestRate));
+
 double _dNd1(num _tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
   num d1 = _d1(_tExp, volatility, underlyingPrice, strike, interestRate);

@@ -22,7 +22,6 @@ void tests() {
         ..asOfDate = Date(2020, 11, 19)
         ..volatility = 1.6231
         ..riskFreeRate = 0;
-      print(c100.value());
       expect(c100.value() > 1, true);
     });
     test('Call', () {
@@ -39,6 +38,31 @@ void tests() {
       expect(c1.theta().toStringAsFixed(4), '-0.0516');
       expect(c1.rho().toStringAsFixed(4), '0.0004');
       expect(c1.impliedVolatility(2.978962).toStringAsFixed(4), '0.2500');
+    });
+    test('Put theta, r=0', () {
+      var c1 = BlackScholes(
+          type: CallPut.put, strike: 100, expirationDate: Date(2015, 1, 31))
+        ..underlyingPrice = 100
+        ..asOfDate = Date(2015, 1, 1)
+        ..volatility = 0.25
+        ..riskFreeRate = 0.0;
+      expect(c1.theta().toStringAsFixed(4), '-0.0476');
+    });
+
+    test('Put', () {
+      var c1 = BlackScholes(
+          type: CallPut.put, strike: 100, expirationDate: Date(2015, 1, 31))
+        ..underlyingPrice = 100
+        ..asOfDate = Date(2015, 1, 1)
+        ..volatility = 0.25
+        ..riskFreeRate = 0.03;
+      expect(c1.value().toStringAsFixed(4), '2.7329');
+      expect(c1.delta().toStringAsFixed(4), '-0.4720');
+      expect(c1.gamma().toStringAsFixed(4), '0.0555');
+      expect(c1.vega().toStringAsFixed(4), '0.1141');
+      expect(c1.theta().toStringAsFixed(4), '-0.0434');
+      expect((c1.rho() * 10000).toStringAsFixed(3), '-4.101');
+      expect(c1.impliedVolatility(2.7329).toStringAsFixed(4), '0.2500');
     });
   });
 }
