@@ -107,6 +107,15 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     }
   }
 
+  /// TODO: What to do with the quantitySchedule and the fixPriceSchedule when
+  /// you change the term on a calculator.  How to do you extend them?
+  /// Ignore this for now.
+  // @override
+  // set term(Term term) {
+  //   // What to do with the quantitySchedule and the fixPriceSchedule when
+  //   // you change the term on a calculator.  How to do you extend them?
+  // }
+
   /// Fair value for this commodity leg.
   /// Get the quantity weighted floating price for this leg.
   /// Needs [leaves] to be populated.
@@ -228,16 +237,16 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     return <String, dynamic>{
       'curveId': curveId,
       'tzLocation': tzLocation.name,
-      'cash/physical': cashOrPhys,
+      'cash/physical': cashOrPhys ?? 'cash',
       'bucket': bucket.toString(),
       'quantity': q,
       'fixPrice': fp,
     };
   }
 
-  /// if custom quantities, what to show on the screen in the UI
+  /// What quantities to show on the screen in the UI.
   num showQuantity() {
-    if (!hasCustomQuantity) {
+    if (quantitySchedule is HourlyScheduleFilled) {
       return (quantitySchedule as HourlyScheduleFilled).value;
     }
     return 1.0;
