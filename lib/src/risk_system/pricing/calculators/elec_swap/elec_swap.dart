@@ -166,7 +166,7 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
       res = TimeSeries<num>()
         ..addAll([
           ...sData,
-          ...res.window(Interval(sData.last.interval.end, term.interval.end)),
+          ...res.window(Interval(sData.last.interval.end, _term.end)),
         ]);
     }
 
