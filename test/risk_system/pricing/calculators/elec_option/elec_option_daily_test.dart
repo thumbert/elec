@@ -128,7 +128,7 @@ void tests(String rootUrl) async {
       var vs = await cacheProvider.volSurfaceCache
           .get(Tuple2(asOfDate, curveDetails['volatilityCurveId']['daily']));
       expect(vs.strikeRatios, [0.5, 1, 2.0]);
-      expect(mh.length, 17); // just the monthly component
+      expect(mh.length, 65); // just the monthly component
     });
     test('price option', () async {
       await c0.build();
