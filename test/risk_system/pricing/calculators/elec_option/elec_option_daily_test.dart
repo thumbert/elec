@@ -166,6 +166,17 @@ void tests(String rootUrl) async {
       await calc.build();
       expect(calc.dollarPrice().round(), 72213);
     });
+    test('make a 10% vol Adjustment', () async {
+      await c0.build();
+      var v0 = c0.dollarPrice();
+      c0.legs[0].volatilityAdjustment = TimeSeries.fill([
+        Month(2021, 1, location: location),
+        Month(2021, 2, location: location),
+      ], 0.1);
+      await c0.build();
+      var v1 = c0.dollarPrice();
+      expect(v1 > v0, true);
+    });
     test('add another leg and reprice', () async {
       var calc = c0;
       var months = calc.legs[0].term.interval

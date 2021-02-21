@@ -261,7 +261,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   }
 
   /// Make a copy
-  CommodityLegBase copyWith({
+  CommodityLeg copyWith({
     String curveId,
     Bucket bucket,
     TimePeriod timePeriod,

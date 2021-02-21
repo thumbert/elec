@@ -59,23 +59,28 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
 
   Term _term;
   @override
+
+  /// in UTC
   Term get term => _term;
 
   @override
   set term(Term term) {
-    _term = term;
-    // push the term into the legs
-    // all timeseries need to be reset
-    for (var leg in legs) {
-      leg.term = Term.fromInterval(term.interval.withTimeZone(leg.tzLocation));
-      var months =
-          leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
-      leg.quantity = TimeSeries.fill(months, leg.quantity.values.first);
-      leg.fixPrice = TimeSeries.fill(months, 0);
-      leg.strike = TimeSeries.fill(months, leg.strike.values.first);
-      leg.priceAdjustment = TimeSeries.fill(months, 0);
-      leg.volatilityAdjustment = TimeSeries.fill(months, 0);
+    if (term != _term) {
+      // push the term into the legs
+      // all timeseries need to be reset only if the term is different
+      for (var leg in legs) {
+        leg.term =
+            Term.fromInterval(term.interval.withTimeZone(leg.tzLocation));
+        var months =
+            leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+        leg.quantity = TimeSeries.fill(months, leg.quantity.values.first);
+        leg.strike = TimeSeries.fill(months, leg.strike.values.first);
+        leg.fixPrice = TimeSeries.fill(months, 0);
+        leg.priceAdjustment = TimeSeries.fill(months, 0);
+        leg.volatilityAdjustment = TimeSeries.fill(months, 0);
+      }
     }
+    _term = term;
   }
 
   @override
