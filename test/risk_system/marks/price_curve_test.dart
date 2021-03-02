@@ -283,6 +283,28 @@ void tests() {
       expect(c3[2].value, {Bucket.b5x16: 62.1});
       expect(c3[3].value, {Bucket.b5x16: 57.2});
     });
+    test('add two price curves, non-matching terms with expansion, and nulls',
+        () {
+      var c1 = PriceCurve.fromIterable([
+        IntervalTuple(Date(2020, 1, 29), {Bucket.b5x16: 60}),
+        IntervalTuple(Date(2020, 1, 30), {Bucket.b5x16: null}),
+        IntervalTuple(Date(2020, 1, 31), {Bucket.b5x16: null}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47}),
+      ]);
+      var c2 = PriceCurve.fromIterable([
+        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1}),
+        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2}),
+        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3}),
+      ]);
+      var c3 = c1 + c2;
+      expect(c3.length, 5);
+      expect(c3.first.interval, Date(2020, 1, 29));
+      expect(c3[0].value, {Bucket.b5x16: 60.1});
+      expect(c3[1].value, {Bucket.b5x16: null});
+      expect(c3[2].value, {Bucket.b5x16: null});
+      expect(c3[3].value, {Bucket.b5x16: 57.2});
+    });
 
     test('subtract two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([

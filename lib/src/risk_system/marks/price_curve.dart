@@ -317,7 +317,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
 
   /// Add two curves observation by observation and bucket by bucket.
   /// If the curves don't match buckets, nothing is done (strict).
-  ///
+  /// If any of the values is null, return null for that term/bucket.
   @override
   PriceCurve operator +(PriceCurve other) {
     var zs = align(other);
@@ -329,7 +329,11 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          one[bucket] = x[bucket] + y[bucket];
+          if (x[bucket] == null || y[bucket] == null) {
+            one[bucket] = null;
+          } else {
+            one[bucket] = x[bucket] + y[bucket];
+          }
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -349,7 +353,11 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          one[bucket] = x[bucket] - y[bucket];
+          if (x[bucket] == null || y[bucket] == null) {
+            one[bucket] = null;
+          } else {
+            one[bucket] = x[bucket] - y[bucket];
+          }
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -369,7 +377,11 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          one[bucket] = x[bucket] * y[bucket];
+          if (x[bucket] == null || y[bucket] == null) {
+            one[bucket] = null;
+          } else {
+            one[bucket] = x[bucket] * y[bucket];
+          }
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -389,7 +401,11 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          one[bucket] = x[bucket] / y[bucket];
+          if (x[bucket] == null || y[bucket] == null) {
+            one[bucket] = null;
+          } else {
+            one[bucket] = x[bucket] / y[bucket];
+          }
         }
       }
       out.add(IntervalTuple(z.interval, one));
