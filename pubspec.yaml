@@ -2,31 +2,34 @@ name: elec
 description: A collection of elec functionality
 version: 1.0.0
 author: Tony Humbert <tony.humbert@yahoo.com>
-#homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.4.0 <3.0.0'
+  sdk: '>=2.7.0 <3.0.0'
 
 dependencies:
   csv: '>=4.0.0 <5.0.0'
   date:
     git:
-        url: git://github.com/thumbert/date.git
+      url: git://github.com/thumbert/date.git
+      ref: 2.5.0
   dama:
     git:
       url: git://github.com/thumbert/dama.git
+      ref: non-null
   elec_server:
       git:
-          url: git://github.com/thumbert/elec-server.git
+        url: git://github.com/thumbert/elec-server.git
   intl: '>=0.15.7 <1.0.0'
   mongo_dart: '>=0.3.6 <1.0.0'
   quiver: '>=2.0.0 <3.0.0'
   table:
-      git:
-          url: git://github.com/thumbert/table.git
+    git:
+      url: git://github.com/thumbert/table.git
+      ref: non-null
   timeseries:
-      git:
-          url: git://github.com/thumbert/timeseries.git
+    git:
+      url: git://github.com/thumbert/timeseries.git
+      ref: non-null
   timezone: '>=0.5.5 <1.0.0'
   tuple: '>=1.0.0 <2.0.0'
   xml: '>=4.0.0 <5.0.0'
