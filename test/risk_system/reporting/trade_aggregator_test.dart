@@ -4,9 +4,10 @@ import 'package:date/date.dart';
 import 'package:elec/src/risk_system/reporting/trade_aggregator.dart';
 import 'package:table/table.dart';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 
-tests() async {
+void tests() async {
   group('Trade aggregator:', () {
     var location = getLocation('America/New_York');
     test('Check splitting of Flat bucket trade into Peak/Offpeak trades', () {
@@ -72,9 +73,13 @@ tests() async {
       expect(tbl.length, 15);
 //      tbl.forEach(print);
       var mwOff = List.generate(15, (i) {
-        if (i < 3) return 25;
-        else if (i >= 9 && i < 11) return 10;
-        else return 0;
+        if (i < 3) {
+          return 25;
+        } else if (i >= 9 && i < 11) {
+          return 10;
+        } else {
+          return 0;
+        }
       });
       expect(tbl.map((e) => e['Offpeak']).toList(), mwOff);
     });
@@ -83,7 +88,7 @@ tests() async {
 }
 
 
-main() async {
-  await initializeTimeZone();
-  await tests();
+void main() async {
+  initializeTimeZones();
+  tests();
 }

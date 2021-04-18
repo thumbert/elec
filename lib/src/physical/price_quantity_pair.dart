@@ -7,14 +7,18 @@ class PriceQuantityPair {
   final num quantity;
 
   PriceQuantityPair(this.price, this.quantity) {
-    if (price == null || !price.isFinite)
+    if (price == null || !price.isFinite) {
       throw ArgumentError('Invalid price input $price');
-    if (quantity == null || !quantity.isFinite)
+    }
+    if (quantity == null || !quantity.isFinite) {
       throw ArgumentError('Invalid quantity input $quantity');
+    }
   }
 
+  @override
   int get hashCode => hash2(price, quantity);
 
+  @override
   bool operator ==(dynamic other) {
     if (other != PriceQuantityPair) return false;
     PriceQuantityPair pq = other;

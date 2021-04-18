@@ -3,7 +3,7 @@ library test.weather.dual_strike_option_test;
 import 'package:test/test.dart';
 import 'package:elec/src/weather/dual_strike_option.dart';
 
-tests() {
+void tests() {
   group('Dual strike options', () {
     var data = [
       {'temperature': 35, 'price': 89},
@@ -11,8 +11,7 @@ tests() {
       {'temperature': 30, 'price': 168},
       {'temperature': 22, 'price': 160},
     ];
-    var ds1 = new DualStrikeOption(cold2Payoff(32, 150), maxPayout: 50);
-    var ds2 = new DualStrikeOption(warm2Payoff(50, 60));
+    var ds1 = DualStrikeOption(cold2Payoff(32, 150), maxPayout: 50);
 
     test('one option', () {
       var payoffs = data.map((Map e) => ds1.value(e['temperature'], e['price']));
@@ -27,6 +26,6 @@ tests() {
 }
 
 
-main() {
+void main() {
   tests();
 }

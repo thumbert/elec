@@ -7,11 +7,11 @@ class DualStrikeOption {
   num maxPayout;
 
   DualStrikeOption(this.unitPayoff,
-      {this.quantity: 1, this.maxPayout: double.infinity}) {}
+      {this.quantity = 1, this.maxPayout = double.infinity});
 
   /// Calculate the daily payout given a [temperature] and [price]
   num value(num temperature, num price) {
-    num res = quantity * unitPayoff(temperature, price);
+    var res = quantity * unitPayoff(temperature, price);
     return res.clamp(0, maxPayout);
   }
 }
@@ -19,8 +19,9 @@ class DualStrikeOption {
 Function cold1Payoff(num temperatureStrike, num priceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature <= temperatureStrike && price >= priceStrike)
+    if (temperature <= temperatureStrike && price >= priceStrike) {
       payoff = (price - priceStrike);
+    }
     return payoff;
   };
 }
@@ -28,8 +29,9 @@ Function cold1Payoff(num temperatureStrike, num priceStrike) {
 Function warm1Payoff(num temperatureStrike, num priceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature >= temperatureStrike && price <= priceStrike)
+    if (temperature >= temperatureStrike && price <= priceStrike) {
       payoff = priceStrike - price;
+    }
     return payoff;
   };
 }
@@ -38,8 +40,9 @@ Function warm1Payoff(num temperatureStrike, num priceStrike) {
 Function cold2Payoff(num temperatureStrike, num priceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature <= temperatureStrike && price >= priceStrike)
+    if (temperature <= temperatureStrike && price >= priceStrike) {
       payoff = (price - priceStrike) * (temperatureStrike - temperature);
+    }
     return payoff;
   };
 }
@@ -48,8 +51,9 @@ Function cold2Payoff(num temperatureStrike, num priceStrike) {
 Function warm2Payoff(num temperatureStrike, num priceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature >= temperatureStrike && price <= priceStrike)
+    if (temperature >= temperatureStrike && price <= priceStrike) {
       payoff = (priceStrike - price) * (temperature - temperatureStrike);
+    }
     return payoff;
   };
 }
@@ -62,10 +66,12 @@ Function minMaxTempPrice1Payoff(num minTemperatureStrike, maxTemperatureStrike,
     num minPriceStrike, num maxPriceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature <= minTemperatureStrike && price >= maxPriceStrike)
+    if (temperature <= minTemperatureStrike && price >= maxPriceStrike) {
       payoff = (price - maxPriceStrike);
-    if (temperature >= maxTemperatureStrike && price <= minPriceStrike)
+    }
+    if (temperature >= maxTemperatureStrike && price <= minPriceStrike) {
       payoff = (minPriceStrike - price);
+    }
     return payoff;
   };
 }
@@ -79,10 +85,12 @@ Function minMaxTempPrice2Payoff(num minTemperatureStrike, maxTemperatureStrike,
     num minPriceStrike, num maxPriceStrike) {
   return (num temperature, num price) {
     num payoff = 0;
-    if (temperature <= minTemperatureStrike && price >= maxPriceStrike)
+    if (temperature <= minTemperatureStrike && price >= maxPriceStrike) {
       payoff = (price - maxPriceStrike) * (minTemperatureStrike - temperature);
-    if (temperature >= maxTemperatureStrike && price <= minPriceStrike)
+    }
+    if (temperature >= maxTemperatureStrike && price <= minPriceStrike) {
       payoff = (minPriceStrike - price) * (temperature - maxTemperatureStrike);
+    }
     return payoff;
   };
 }

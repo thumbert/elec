@@ -6,12 +6,15 @@ import '../_holiday_utils.dart';
 /// Thanksgiving is a Federal holiday (and a NERC holiday).
 /// Falls on the 4th Thursday in Nov.
 class Thanksgiving implements Holiday {
+  @override
   HolidayType holidayType = HolidayType.thanksgiving;
 
+  @override
   Date forYear(int year, {Location location}) {
     return makeHoliday(year, 11, 4, DateTime.thursday, location: location);
   }
 
+  @override
   bool isDate(Date date) =>
-      this.forYear(date.year, location: date.location) == date;
+      forYear(date.year, location: date.location) == date;
 }

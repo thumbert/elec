@@ -135,7 +135,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     if (timePeriod == TimePeriod.month) {
       return toMonthly(hourlyFloatingPrice, mean);
     } else {
-      throw UnimplementedError('Not implemented ${timePeriod}');
+      throw UnimplementedError('Not implemented $timePeriod');
     }
   }
 
@@ -148,7 +148,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
       var aux = quantitySchedule.toHourly(_term);
       return toMonthly(aux, mean);
     } else {
-      throw UnimplementedError('Not implemented ${timePeriod}');
+      throw UnimplementedError('Not implemented $timePeriod');
     }
   }
 
@@ -166,7 +166,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
       var aux = fixPriceSchedule.toHourly(_term);
       return toMonthly(aux, mean);
     } else {
-      throw UnimplementedError('Not implemented ${timePeriod}');
+      throw UnimplementedError('Not implemented $timePeriod');
     }
   }
 

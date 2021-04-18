@@ -42,8 +42,8 @@ class Virtual {
 }
 
 /// Make the xml file
-String toXml(List<Virtual> virtuals, {String subaccountName: 'VIRT'}) {
-  var builder = new xml.XmlBuilder();
+String toXml(List<Virtual> virtuals, {String subaccountName = 'VIRT'}) {
+  var builder = xml.XmlBuilder();
   builder.processing('xml', 'version="1.0" encoding="utf-8"');
   builder.element('soapenv:Envelope', nest: () {
     builder.attribute(
@@ -64,9 +64,9 @@ String toXml(List<Virtual> virtuals, {String subaccountName: 'VIRT'}) {
   return out.toXmlString(pretty: true);
 }
 
-_buildOneVirtual(xml.XmlBuilder builder, Virtual virtual) {
+void _buildOneVirtual(xml.XmlBuilder builder, Virtual virtual) {
   builder.element('mes:DemandBid', nest: () {
-    String type = virtual.virtualType == VirtualType.decrement
+    var type = virtual.virtualType == VirtualType.decrement
         ? 'Decrement'
         : 'Increment';
     builder.attribute('ID', virtual.ptid.toString());

@@ -9,20 +9,23 @@ import 'federal_holidays_calendar.dart';
 /// RI has Victory Day and Election Day in addition to the
 /// 10 Federal holidays.
 class RiStateHolidayCalendar extends Calendar {
-  static final _federalCalendar = new FederalHolidaysCalendar();
-  static final Holiday _victoryDay = new VictoryDay();
-  static final Holiday _electionDay = new ElectionDay();
+  static final _federalCalendar = FederalHolidaysCalendar();
+  static final Holiday _victoryDay = VictoryDay();
+  static final Holiday _electionDay = ElectionDay();
 
   HolidayType _holidayType;
 
+  @override
   HolidayType getHolidayType(Date date) {
-    if (!isHoliday(date))
-      throw new ArgumentError('$date is not a RI State holiday');
+    if (!isHoliday(date)) {
+      throw ArgumentError('$date is not a RI State holiday');
+    }
     return _holidayType;
   }
 
+  @override
   bool isHoliday(Date date) {
-    bool res = false;
+    var res = false;
     if (_federalCalendar.isHoliday(date)) {
       _holidayType = _federalCalendar.getHolidayType(date);
       return true;

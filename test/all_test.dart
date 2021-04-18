@@ -1,5 +1,6 @@
 library test_all;
 
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'analysis/filter/filter_test.dart' as filter;
 import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
@@ -25,9 +26,9 @@ import 'risk_system/pricing/calculators/elec_option/elec_option_daily_test.dart'
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
 
-  var rootUrl = 'http://localhost:8080/';
+  var rootUrl = 'http://localhost:8080';
 
   filter.tests();
   seasonal_analysis.tests();

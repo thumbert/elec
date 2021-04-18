@@ -5,13 +5,16 @@ import '../holiday.dart';
 /// Memorial Day is a Federal holiday (and a NERC holiday).
 /// Falls on the last Monday in May.
 class MemorialDay implements Holiday {
+  @override
   HolidayType holidayType = HolidayType.memorialDay;
 
+  @override
   Date forYear(int year, {Location location}) {
-    int wday = new Date(year, 5, 31).weekday;
-    return new Date(year, 5, 32-wday, location: location);
+    var wday = Date(year, 5, 31).weekday;
+    return Date(year, 5, 32-wday, location: location);
   }
 
+  @override
   bool isDate(Date date) =>
-      this.forYear(date.year, location: date.location) == date;
+      forYear(date.year, location: date.location) == date;
 }

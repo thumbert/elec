@@ -115,13 +115,13 @@ void speedTests(String rootUrl) async {
   var interval = term.interval;
   var hSchedule = HourlySchedule.fromHourlyShape(hs);
   var sw = Stopwatch()..start();
-  var ts = hSchedule.toHourly(interval);
+  hSchedule.toHourly(interval);
   sw.stop();
   print('From HourlySchedule.fromHourlyShape: ${sw.elapsedMilliseconds}');
 
   sw.reset();
   sw.start();
-  var ts7 = hs.toHourly(interval: interval);
+  hs.toHourly(interval: interval);
   sw.stop();
   print('From HourlyShape toHourly: ${sw.elapsedMilliseconds}');
 
@@ -129,7 +129,7 @@ void speedTests(String rootUrl) async {
   var hSchedule4 = HourlySchedule.byBucket(
       {Bucket.b2x16H: 15, Bucket.b7x8: 8, Bucket.b5x16: 25});
   sw.start();
-  var ts4 = hSchedule4.toHourly(interval);
+  hSchedule4.toHourly(interval);
   sw.stop();
   print('From HourlySchedule.byBucket: ${sw.elapsedMilliseconds}');
 
@@ -138,26 +138,26 @@ void speedTests(String rootUrl) async {
   var tss2 = TimeSeries.from(months, List.filled(months.length, 10));
   var hSchedule6 = HourlySchedule.fromTimeSeries(tss2);
   sw.start();
-  var ts6 = hSchedule6.toHourly(interval);
+  hSchedule6.toHourly(interval);
   sw.stop();
   print('From HourlySchedule.fromTimeSeries: ${sw.elapsedMilliseconds}');
 
   sw.reset();
   sw.start();
-  var ts8 = tss2.interpolate(Duration(hours: 1));
+  tss2.interpolate(Duration(hours: 1));
   sw.stop();
   print('From from TimeSeries.interpolate: ${sw.elapsedMilliseconds}');
 
   var hSchedule2 = HourlySchedule.filled(50);
   sw.reset();
   sw.start();
-  var ts2 = hSchedule2.toHourly(interval);
+  hSchedule2.toHourly(interval);
   sw.stop();
   print('From HourlySchedule.fill: ${sw.elapsedMilliseconds}');
 
   sw.reset();
   sw.start();
-  var ts3 = TimeSeries.fill(term.hours(), 50);
+  TimeSeries.fill(term.hours(), 50);
   sw.stop();
   print('From TimeSeries.fill: ${sw.elapsedMilliseconds}');
 
@@ -175,7 +175,7 @@ void speedTests(String rootUrl) async {
 void main() async {
   await initializeTimeZone();
   var rootUrl = 'http://localhost:8080/'; // testing
-  await tests(rootUrl);
+  tests(rootUrl);
 
   // await speedTests(rootUrl);
 }

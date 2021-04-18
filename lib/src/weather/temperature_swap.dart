@@ -25,13 +25,17 @@ abstract class WeatherInstrument {
 }
 
 class TemperatureSwap implements WeatherInstrument {
+  @override
   BuySell buySell;
   IndexType indexType;
+  @override
   num quantity;
   num strike;
+  @override
   Interval term;
   /// limits both the loss and the gain
   num maxPayoff;
+  @override
   String airportCode;
 
   Function _function;
@@ -55,17 +59,20 @@ class TemperatureSwap implements WeatherInstrument {
       default:
         throw 'Unknown indexType!';
     }
-    if (maxPayoff < 0)
-      throw new ArgumentError('maxPayoff needs to be > 0');
+    if (maxPayoff < 0) {
+      throw ArgumentError('maxPayoff needs to be > 0');
+    }
 
     /// calculate the number of days in the term
     _nDays = term.splitLeft((dt) => Date.fromTZDateTime(dt)).length;
   }
 
   /// Value the temperature swap if you know the daily temperature
+  @override
   num value(List<num> index) {
-    if (_nDays != index.length)
+    if (_nDays != index.length) {
       throw 'Index doesn\'t have complete data for the term ' + term.toString();
+    }
     num cumulativeIndex = index
         .map((num temperature) => _function(temperature))
         .reduce((a, b) => a + b);

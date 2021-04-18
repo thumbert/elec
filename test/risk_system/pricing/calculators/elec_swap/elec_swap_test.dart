@@ -471,6 +471,6 @@ total                         50,400                            57,550        ''
 }
 
 void main() async {
-  await initializeTimeZones();
-  await tests('http://localhost:8080/');
+  initializeTimeZones();
+  tests('http://localhost:8080');
 }

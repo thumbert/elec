@@ -17,6 +17,5 @@ abstract class Calendar {
     }
     return candidate;
   }
-
 }
 
