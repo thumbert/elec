@@ -9,7 +9,7 @@ class MemorialDay implements Holiday {
   HolidayType holidayType = HolidayType.memorialDay;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     var wday = Date(year, 5, 31).weekday;
     return Date(year, 5, 32-wday, location: location);
   }

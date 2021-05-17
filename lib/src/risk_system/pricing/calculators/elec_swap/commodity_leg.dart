@@ -1,26 +1,26 @@
 part of elec.calculators.elec_swap;
 
 class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
-  String curveId;
+  String/*!*/ curveId;
   String cashOrPhys;
   @override
   Bucket bucket;
-  Location tzLocation;
+  Location/*!*/ tzLocation;
 
   /// The time period of the leg which applies to all the leaves.  It is set at
   /// the lower time period of quantity and fixPrice.  For example, if quantity
   /// is [TimePeriod.month] and fixPrice is [TimePeriod.hour], the timePeriod
   /// for the leg is set to [TimePeriod.hour].
   ///
-  TimePeriod timePeriod;
+  TimePeriod/*!*/ timePeriod;
 
   /// An hourly time series.
   TimeSeries<num> hourlyFloatingPrice;
 
   /// If you have a custom quantity, only intervals included in the
   /// [term] are valid.
-  HourlySchedule quantitySchedule;
-  HourlySchedule fixPriceSchedule;
+  HourlySchedule/*!*/ quantitySchedule;
+  /*late*/ HourlySchedule fixPriceSchedule;
 
   CommodityLeg({
     this.curveId,

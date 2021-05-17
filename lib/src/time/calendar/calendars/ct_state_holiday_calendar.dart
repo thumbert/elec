@@ -13,10 +13,10 @@ class CtStateHolidayCalendar extends Calendar {
   static final Holiday _lincolnBirthday = LincolnBirthday();
   static final Holiday _goodFriday = GoodFriday();
 
-  HolidayType _holidayType;
+  /*late*/ HolidayType/*!*/ _holidayType;
 
   @override
-  HolidayType getHolidayType(Date date) {
+  HolidayType/*!*/ getHolidayType(Date date) {
     if (!isHoliday(date)) {
       throw ArgumentError('$date is not a CT State holiday');
     }

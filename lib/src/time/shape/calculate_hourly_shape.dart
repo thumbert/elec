@@ -13,7 +13,7 @@ import 'package:elec/src/time/shape/hourly_bucket_weights.dart';
 ///
 ///
 ///
-List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
+List<Map<Bucket/*!*/, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
     {List<Bucket> buckets}) {
   buckets ??= [
       Bucket.b5x16,
@@ -46,7 +46,7 @@ List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
     });
   }
 
-  var data = List.generate(12, (i) => <Bucket, HourlyBucketWeights>{});
+  var data = List.generate(12, (i) => <Bucket/*!*/, HourlyBucketWeights>{});
   var g1 = groupBy(weights.entries, (e) => e.key.item1 as int);
   for (var month in g1.keys) {
     var g2 = groupBy(g1[month], (e) => e.key.item2 as Bucket);

@@ -4,9 +4,9 @@ part of elec.calculators.elec_swap;
 class LeafElecSwap extends LeafBase {
   BuySell buySell;
   Interval interval;
-  num quantity;
-  num fixPrice;
-  num floatingPrice;
+  num/*!*/ quantity;
+  num/*!*/ fixPrice;
+  num/*!*/ floatingPrice;
 
   /// number of hours in this period
   int hours;

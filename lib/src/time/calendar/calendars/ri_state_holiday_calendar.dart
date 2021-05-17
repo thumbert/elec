@@ -13,7 +13,7 @@ class RiStateHolidayCalendar extends Calendar {
   static final Holiday _victoryDay = VictoryDay();
   static final Holiday _electionDay = ElectionDay();
 
-  HolidayType _holidayType;
+  /*late*/ HolidayType _holidayType;
 
   @override
   HolidayType getHolidayType(Date date) {

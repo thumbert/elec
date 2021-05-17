@@ -16,7 +16,7 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly({
     this.curveId,
-    Bucket bucket,
+    Bucket/*!*/ bucket,
     this.quantity,
     this.fixPrice,
     this.tzLocation,
@@ -24,12 +24,12 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
     this.bucket = bucket;
   }
 
-  String curveId;
+  String/*!*/ curveId;
   String cashOrPhys;
-  Location tzLocation;
+  Location/*!*/ tzLocation;
 
-  TimeSeries<num> quantity;
-  TimeSeries<num> fixPrice;
+  TimeSeries<num/*!*/>/*!*/ quantity;
+  TimeSeries<num/*!*/>/*!*/ fixPrice;
   TimeSeries<num> underlyingPrice;
 
   /// A commodity leg with monthly granularity.
@@ -203,7 +203,7 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
       throw ArgumentError('Only months are allowed, got ${xs.first}');
     }
     for (var e in xs) {
-      ts.add(IntervalTuple(parser(e), e['value'] as num));
+      ts.add(IntervalTuple(parser(e), e['value'] as num/*!*/));
     }
     return ts;
   }

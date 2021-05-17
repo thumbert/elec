@@ -8,7 +8,7 @@ import 'package:timeseries/timeseries.dart';
 
 /// Calculate the shaping cost by bucket and aggregation.
 ///
-Map<Bucket,TimeSeries<num>> shapeCost(TimeSeries<num> price,
+Map<Bucket,TimeSeries<num/*!*/>> shapeCost(TimeSeries<num> price,
     TimeSeries<num> quantity, List<Bucket> buckets,
   {TimeAggregation timeAggregation = TimeAggregation.term}) {
 

@@ -22,7 +22,7 @@ class HourlyShape extends MarksCurve {
   /// that for most buckets the sum of the List elements will add up to the
   /// numbers of hours in the bucket.  It is not the case for 7x8, in Mar and
   /// Nov because of DST.
-  TimeSeries<Map<Bucket, List<num>>> data;
+  TimeSeries<Map<Bucket, List<num>>/*!*/> data;
 
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
@@ -93,7 +93,7 @@ class HourlyShape extends MarksCurve {
     }
     var _buckets = (x['buckets'] as Map).keys;
     var months = (x['terms'] as List).cast<String>();
-    var aux = x['buckets'] as Map;
+    var aux = x['buckets'] as Map/*!*/;
     buckets = _buckets.map((e) => Bucket.parse(e)).toSet();
     data = TimeSeries<Map<Bucket, List<num>>>();
     for (var i = 0; i < months.length; i++) {
@@ -106,9 +106,9 @@ class HourlyShape extends MarksCurve {
     }
   }
 
-  TimeSeries<num> toHourly({Interval interval}) {
+  TimeSeries<num/*!*/> toHourly({Interval/*!*/ interval}) {
     interval ??= data.domain;
-    var ts = TimeSeries<num>();
+    var ts = TimeSeries<num/*!*/>();
     // need to extend the interval to make sure it matches the data boundaries
     var extInterval = Interval(Month.fromTZDateTime(interval.start).start,
         Month.fromTZDateTime(interval.end.subtract(Duration(seconds: 1))).end);
@@ -125,7 +125,7 @@ class HourlyShape extends MarksCurve {
     };
     for (var x in xs) {
       var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
-      num value;
+      /*late*/ num value;
       for (var hour in hours) {
         for (var bucket in buckets) {
           if (bucket.containsHour(hour)) {

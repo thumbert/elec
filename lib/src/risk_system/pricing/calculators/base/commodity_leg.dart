@@ -6,10 +6,10 @@ import 'package:elec/risk_system.dart';
 import 'leaf.dart';
 
 abstract class CommodityLegBase<L extends LeafBase> {
-  Date asOfDate;
-  Term term;
-  BuySell buySell;
-  Bucket bucket;
+  Date/*!*/ asOfDate;
+  Term/*!*/ term;
+  BuySell/*!*/ buySell;
+  Bucket/*!*/ bucket;
 
   /// Leg leaves
   List<L> leaves;

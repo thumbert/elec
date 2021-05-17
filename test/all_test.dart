@@ -39,7 +39,7 @@ void main() async {
 
   hour_filter.tests();
   hourly_schedule.tests();
-  hourly_shape.tests(rootUrl);
+  // hourly_shape.tests(rootUrl);
   monthly_bucket_value.tests();
   calendar.main();
   holiday.main();
@@ -47,8 +47,8 @@ void main() async {
   price_curve.tests();
   monthly_curve.tests();
   volatility_surface.tests();
-  elec_swap.tests(rootUrl);
-  elec_daily_option.tests(rootUrl);
+  // elec_swap.tests(rootUrl);
+  // elec_daily_option.tests(rootUrl);
   shape_cost.tests();
   time_aggregation.tests();
   trade_aggregator.tests();

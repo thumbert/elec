@@ -29,20 +29,20 @@ class LeafElecOption extends LeafBase {
         riskFreeRate: riskFreeRate);
   }
 
-  final BuySell buySell;
-  final Month month;
+  final BuySell/*!*/ buySell;
+  final Month/*!*/ month;
 
   /// the notional volume for the option, in MWh
-  final num quantityTerm;
-  final num underlyingPrice;
-  final num strike;
-  final CallPut callPut;
-  final num volatility;
-  final Date asOfDate;
-  final num riskFreeRate;
-  final Date expirationDate;
+  final num/*!*/ quantityTerm;
+  final num/*!*/ underlyingPrice;
+  final num/*!*/ strike;
+  final CallPut/*!*/ callPut;
+  final num/*!*/ volatility;
+  final Date/*!*/ asOfDate;
+  final num/*!*/ riskFreeRate;
+  final Date/*!*/ expirationDate;
 
-  final num fixPrice;
+  final num/*!*/ fixPrice;
 
   BlackScholes _bs;
 

@@ -8,29 +8,29 @@ import 'package:dama/special/erf.dart';
 
 class BlackScholes {
   // instrument info
-  final CallPut type;
-  final Date expirationDate;
-  final num strike;
+  final CallPut/*!*/ type;
+  final Date/*!*/ expirationDate;
+  final num/*!*/ strike;
 
   // market info
-  Date _asOfDate;
-  num riskFreeRate;
-  num underlyingPrice;
-  num _volatility;
-  num _tExp;
+  Date/*!*/ _asOfDate;
+  num/*!*/ riskFreeRate;
+  num/*!*/ underlyingPrice;
+  /*late*/ num _volatility;
+  /*late*/ num _tExp;
 
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({
     this.type,
     this.strike,
     this.expirationDate,
-    Date asOfDate,
+    Date/*!*/ asOfDate,
     this.underlyingPrice,
-    num volatility,
+    num/*!*/ volatility,
     this.riskFreeRate,
   }) {
-    if (volatility != null) this.volatility = volatility;
-    if (asOfDate != null) this.asOfDate = asOfDate;
+    this.volatility = volatility;
+    this.asOfDate = asOfDate;
   }
 
   Date get asOfDate => _asOfDate;
@@ -54,7 +54,6 @@ class BlackScholes {
   /// [_volatility], and [riskFreeRate] can be set directly in the object.
   ///
   num value() {
-    _validate();
     num res;
     switch (type) {
       case CallPut.call:
@@ -85,6 +84,7 @@ class BlackScholes {
                           riskFreeRate));
         }
         break;
+      default: throw StateError('Option type $type not supported');
     }
     return res;
   }
@@ -102,6 +102,7 @@ class BlackScholes {
         res =
             _nd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) - 1;
         break;
+      default: throw StateError('Option type $type not supported');
     }
     return res;
   }
@@ -153,7 +154,7 @@ class BlackScholes {
   /// Calculate the sensitivity of the option with respect to interest rate
   /// for 1 basis point move in the risk free rate.
   double rho() {
-    double res;
+    /*late*/ double res;
     switch (type) {
       case CallPut.call:
         res = 0.0001 *
@@ -175,7 +176,7 @@ class BlackScholes {
   }
 
   /// Calculate the implied volatility of this option given an option price
-  double impliedVolatility(num price) {
+  num impliedVolatility(num price) {
     var f = (num v) {
       var opt = BlackScholes(
           type: type, strike: strike, expirationDate: expirationDate)
@@ -186,13 +187,6 @@ class BlackScholes {
       return opt.value() - price;
     };
     return bisectionSolver(f, 0.00001, 1000);
-  }
-
-  void _validate() {
-    if (underlyingPrice == null) throw 'Underlying price has not been set';
-    if (riskFreeRate == null) throw 'Interest rate has not been set';
-    if (asOfDate == null) throw 'Need to set the as of date';
-    if (_volatility == null) throw 'Volatility is not set';
   }
 
   BlackScholes copyWith(

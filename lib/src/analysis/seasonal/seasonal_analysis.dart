@@ -9,9 +9,9 @@ import 'seasonality.dart';
 
 class SeasonalAnalysis {
   final TimeSeries<num> xs;
-  Seasonality _seasonality;
-  Map<int, TimeSeries<num>> _groups;
-  Map<Interval, TimeSeries<num>> _paths;
+  /*late*/ Seasonality _seasonality;
+  /*late*/ Map<int, TimeSeries<num>> _groups;
+  /*late*/ Map<Interval, TimeSeries<num>> _paths;
 
   /// Input time series needs to be monthly.
   /// Groups are the months of the year, e.g. the keys are 1, 2, ... 12.  For
@@ -119,7 +119,7 @@ class SeasonalAnalysis {
     var _daysOfYear = List.generate(366, (i) => i + 1);
     var _grps = <int, TimeSeries<num>>{};
     for (var d in _daysOfYear) {
-      var res = TimeSeries<num>();
+      var res = TimeSeries<num/*!*/>();
       var obs = xs.where((e) => (e.interval as Date).dayOfYear() == d);
       for (var e in obs) {
         var date = e.interval as Date;
@@ -139,12 +139,12 @@ class SeasonalAnalysis {
   /// each entity of the [groups] has as key the day of the year, and as values
   /// a daily TimeSeries for all the years in the input that correspond to this
   /// day of the year, e.g. for key = 1, all 1-Jan in the input time series.
-  Map<int, TimeSeries<num>> get groups => _groups;
+  Map<int, TimeSeries<num/*!*/>> get groups => _groups;
 
   /// Get the data grouped by the paths.  For example, for
   /// [Seasonality.dayOfYear], each entity of the [paths] has as key a calendar
   /// year and as value a daily TimeSeries.
-  Map<Interval, TimeSeries<num>> get paths => _paths;
+  Map<Interval, TimeSeries<num/*!*/>> get paths => _paths;
 
   set groups(Map<int, TimeSeries> value) => _groups = value;
 

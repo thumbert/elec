@@ -1,6 +1,6 @@
 part of elec.risk_system;
 
-class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
+class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   /// A simple forward curve model for daily and monthly values extending
@@ -10,7 +10,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   /// Support only daily and monthly observations.
-  PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
+  PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket/*!*/, num>/*!*/>> xs) {
     addAll(xs);
   }
 
@@ -90,17 +90,17 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return _buckets;
   }
 
-  Set<Bucket> _buckets;
+  /*late*/ Set<Bucket> _buckets;
 
   /// an hourly timeseries cache
-  TimeSeries<num> _ts;
+  /*late*/ TimeSeries<num/*!*/> _ts;
 
   /// Get the entire curve as an hourly timeseries
   /// If the forward curve contains only one bucket, say 2x16H, only the hours
   /// associated with that bucket will be returned in the interval.
-  TimeSeries<num> toHourly() {
+  TimeSeries<num/*!*/> toHourly() {
     if (_ts != null) return _ts;
-    _ts = TimeSeries<num>();
+    _ts = TimeSeries<num/*!*/>();
     var buckets = <Bucket>{...expand((e) => e.value.keys)};
     if (buckets == {Bucket.b7x8, Bucket.b2x16H, Bucket.b5x16}) {
       // this is fastest
@@ -234,7 +234,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       }
       out.add(one);
     }
-    return listOfMapToCsv(out);
+    //return listOfMapToCsv(out);
+    return '';  // TODO: fix me
   }
 
   /// Construct a Mongo document from a [PriceCurve].

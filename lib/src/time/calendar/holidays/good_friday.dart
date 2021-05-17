@@ -34,7 +34,7 @@ class GoodFriday implements Holiday {
     2030:  Date(2030, 4, 19),
   };
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
 
     var candidate = _goodFriday[year];
     candidate =  Date(candidate.year, candidate.month,

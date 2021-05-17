@@ -4,7 +4,7 @@ import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 
 abstract class Bucket {
-  String get name;
+  String/*!*/ get name;
 
   /// The permissible hour beginnings for this bucket.  Used by hourly bucket
   /// weights.  Should be a sorted list.
@@ -16,7 +16,7 @@ abstract class Bucket {
   String toString() => name;
 
   /// a cache for the number of hours in the interval for this bucket
-  Map<Interval, int> _hoursCache;
+  Map<Interval, int> _hoursCache = {};
 
   static final atc = Bucket7x24();
   static final b2x8 = Bucket2x8();
@@ -92,7 +92,7 @@ abstract class Bucket {
 
   /// Count the number of hours in the interval
   int countHours(Interval interval) {
-    _hoursCache ??= <Interval, int>{};
+    //_hoursCache ??= <Interval, int>{};
     if (!_hoursCache.containsKey(interval)) {
       if (!isBeginningOfHour(interval.start) ||
           !isBeginningOfHour(interval.end)) {
@@ -102,7 +102,7 @@ abstract class Bucket {
       var hrs = interval.splitLeft((dt) => Hour.beginning(dt));
       _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
     }
-    return _hoursCache[interval];
+    return _hoursCache[interval]/*!*/;
   }
 }
 

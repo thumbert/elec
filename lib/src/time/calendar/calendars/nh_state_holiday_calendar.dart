@@ -11,7 +11,7 @@ class NhStateHolidayCalendar extends Calendar {
   static final _federalCalendar = FederalHolidaysCalendar();
   static final Holiday _dayAfterThanksgiving = DayAfterThanksgiving();
 
-  HolidayType _holidayType;
+  /*late*/ HolidayType _holidayType;
 
   @override
   HolidayType getHolidayType(Date date) {

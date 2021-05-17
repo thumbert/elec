@@ -11,7 +11,7 @@ class ElectionDay implements Holiday {
   HolidayType holidayType = HolidayType.electionDay;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     return makeHoliday(year, 11, 1, DateTime.tuesday, location: location);
   }
 

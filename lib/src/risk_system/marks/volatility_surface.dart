@@ -9,14 +9,14 @@ class VolatilitySurface extends MarksCurve {
     _strikeRatios.sort();
     _terms = xs.values.first.intervals.toList().cast<Month>();
 
-    _data = <Bucket, Map<num, TimeSeries<num>>>{};
+    _data = <Bucket, Map<num/*!*/, TimeSeries<num>/*!*/>>{};
     for (var key in xs.keys) {
       var bucket = key.item1;
       if (!_data.containsKey(bucket)) {
-        _data[bucket] = <num, TimeSeries<num>>{};
+        _data[bucket] = <num/*!*/, TimeSeries<num>/*!*/>{};
       }
       var strikeRatio = key.item2;
-      _data[bucket][strikeRatio] = xs[key];
+      _data[bucket]/*!*/[strikeRatio] = xs[key];
     }
   }
 
@@ -30,20 +30,21 @@ class VolatilitySurface extends MarksCurve {
   ///   (at the money), must always be there.
   VolatilitySurface.fromIterable(List<Map<String, dynamic>> xs,
       {Location location}) {
-    _data = <Bucket, Map<num, TimeSeries<num>>>{};
+    _data = <Bucket, Map<num/*!*/, TimeSeries<num>/*!*/>>{};
 
     for (var x in xs) {
       var bucket = Bucket.parse(x['bucket']);
       if (!_data.containsKey(bucket)) {
-        _data[bucket] = <num, TimeSeries<num>>{};
+        _data[bucket] = <num/*!*/, TimeSeries<num>/*!*/>{};
       }
-      num strikeRatio = x['strikeRatio'];
-      if (!_data[bucket].containsKey(strikeRatio)) {
-        _data[bucket][strikeRatio] = TimeSeries<num>();
+      num/*!*/ strikeRatio = x['strikeRatio'];
+      if (!_data[bucket]/*!*/.containsKey(strikeRatio)) {
+        _data[bucket]/*!*/[strikeRatio] = TimeSeries<num>();
       }
       var month = Month.parse(x['term'], location: location);
-      _data[bucket][strikeRatio].add(IntervalTuple(month, x['value'] as num));
+      _data[bucket]/*!*/[strikeRatio]/*!*/.add(IntervalTuple(month, x['value'] as num/*!*/));
     }
+    // FIXME: why get the 1.0?
     _terms = _data.values.first[1.0].intervals.map((e) => e as Month).toList();
     _strikeRatios = _data.values.first.keys.toList();
     _strikeRatios.sort();
@@ -88,7 +89,7 @@ class VolatilitySurface extends MarksCurve {
   /// The inner map has strikeRatios as keys.  The timeseries are all monthly.
   Map<Bucket, Map<num, TimeSeries<num>>> _data;
 
-  List<num> _strikeRatios;
+  List<num>/*!*//*!*//*!*/ _strikeRatios;
 
   /// Strike ratios = StrikePrice/FwdPrice.  The list is ordered increasingly.
   List<num> get strikeRatios => _strikeRatios;

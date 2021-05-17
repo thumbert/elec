@@ -11,8 +11,8 @@ import '../bucket/bucket.dart';
 /// Additional customization can be achieved if is associated with a
 /// particular calendar month.
 class HourlyBucketWeights {
-  Bucket bucket;
-  Map<int, num> _values;
+  Bucket/*!*/ bucket;
+  /*late*/ Map<int, num> _values;
 
   /// Store the weights for the given time [bucket], as a list of numbers with
   /// an average of 1.  This class is used when dealing with [HourlyShape].

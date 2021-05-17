@@ -11,7 +11,7 @@ class MonthlyCurve {
   final Bucket bucket;
 
   /// a monthly timeseries.
-  final TimeSeries<num> timeseries;
+  final TimeSeries<num/*!*/> timeseries;
 
   /// A simple forward curve model for monthly values.
   MonthlyCurve(this.bucket, this.timeseries);

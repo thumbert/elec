@@ -24,7 +24,7 @@ enum HolidayType {
 
 abstract class Holiday {
   HolidayType holidayType;
-  Date forYear(int year, {Location location});
+  Date forYear(int year, {Location/*!*/ location});
   bool isDate(Date date);
 }
 

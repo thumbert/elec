@@ -10,7 +10,7 @@ class Thanksgiving implements Holiday {
   HolidayType holidayType = HolidayType.thanksgiving;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     return makeHoliday(year, 11, 4, DateTime.thursday, location: location);
   }
 

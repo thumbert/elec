@@ -8,7 +8,7 @@ class VeteransDay implements Holiday {
   HolidayType holidayType = HolidayType.veteransDay;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     var candidate = Date(year, 11, 11, location: location);
     // if it falls on Sunday, it gets observed on Monday
     if (candidate.weekday == 7) candidate = candidate.add(1);

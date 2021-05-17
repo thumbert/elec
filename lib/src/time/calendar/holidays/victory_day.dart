@@ -10,7 +10,7 @@ class VictoryDay implements Holiday {
   HolidayType holidayType = HolidayType.victoryDay;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     return makeHoliday(year, 8, 2, DateTime.monday, location: location);
   }
 

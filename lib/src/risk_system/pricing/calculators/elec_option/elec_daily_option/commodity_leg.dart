@@ -2,11 +2,11 @@ part of elec.calculators.elec_daily_option;
 
 class CommodityLeg extends CommodityLegMonthly {
   CommodityLeg(
-      {String curveId,
-      Bucket bucket,
-      TimeSeries<num> quantity,
-      TimeSeries<num> fixPrice,
-      Location tzLocation,
+      {String/*!*/ curveId,
+      Bucket/*!*/ bucket,
+      TimeSeries<num/*!*/>/*!*/ quantity,
+      TimeSeries<num/*!*/>/*!*/ fixPrice,
+      Location/*!*/ tzLocation,
       this.callPut,
       this.strike,
       this.priceAdjustment,
@@ -18,22 +18,22 @@ class CommodityLeg extends CommodityLegMonthly {
     this.fixPrice = fixPrice ?? TimeSeries.fill(quantity.intervals, 0);
   }
 
-  String volatilityCurveId;
+  /*late*/ String volatilityCurveId;
 
-  CallPut callPut;
+  CallPut/*!*/ callPut;
 
   /// The strike of the option as a timeseries.  Often, all values are the same.
-  TimeSeries<num> strike;
+  TimeSeries<num/*!*/>/*!*/ strike;
 
   /// The [asOfDate] value of the underlying as a monthly timeseries.
-  TimeSeries<num> priceAdjustment;
+  TimeSeries<num/*!*/> priceAdjustment;
 
   /// The [asOfDate] value of the volatility as a monthly timeseries.
   TimeSeries<num> volatility;
 
   /// For clarification, values are as treated as numbers, e.g. a 5% adjustment
   /// is entered as 0.05.
-  TimeSeries<num> volatilityAdjustment;
+  TimeSeries<num/*!*/> volatilityAdjustment;
 
   /// The [asOfDate] value of the interest rate as a monthly timeseries.
   TimeSeries<num> interestRate;

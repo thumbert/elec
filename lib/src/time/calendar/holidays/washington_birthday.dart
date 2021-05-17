@@ -10,7 +10,7 @@ class WashingtonBirthday implements Holiday {
   HolidayType holidayType = HolidayType.washingtonBirthday;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     return makeHoliday(year, 2, 3, DateTime.monday, location: location);
   }
 

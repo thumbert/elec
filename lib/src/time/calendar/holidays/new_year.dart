@@ -9,7 +9,7 @@ class NewYear implements Holiday {
   HolidayType holidayType = HolidayType.newYear;
 
   @override
-  Date forYear(int year, {Location location}) {
+  Date forYear(int year, {Location/*!*/ location}) {
     var candidate = Date(year, 1, 1, location: location);
 
     /// If it falls on Sun, celebrate it on Monday
