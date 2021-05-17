@@ -19,6 +19,7 @@ dependencies:
   elec_server:
       git:
         url: git://github.com/thumbert/elec-server.git
+        ref: 1.2.1
   intl: '>=0.15.7 <1.0.0'
   mongo_dart: '>=0.3.6 <1.0.0'
   quiver: '>=2.0.0 <3.0.0'
