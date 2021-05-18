@@ -2,10 +2,10 @@ part of elec.risk_system;
 
 
 class EnergyFutures extends Object with BaseTrade {
-  EnergyHub hub;
-  Bucket bucket;
-  num fixedPrice;
-  num mw;
+  EnergyHub/*!*/ hub;
+  Bucket/*!*/ bucket;
+  num/*!*/ fixedPrice;
+  num/*!*/ mw;
 
   EnergyFutures(Date tradeDate, Interval term, BuySell buySell,
       this.mw, this.hub, this.bucket, this.fixedPrice) {

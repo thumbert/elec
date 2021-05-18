@@ -87,15 +87,15 @@ class VolatilitySurface extends MarksCurve {
   }
 
   /// The inner map has strikeRatios as keys.  The timeseries are all monthly.
-  Map<Bucket, Map<num, TimeSeries<num>>> _data;
+  Map<Bucket, Map<num, TimeSeries<num>/*!*/>> _data;
 
   List<num>/*!*//*!*//*!*/ _strikeRatios;
 
   /// Strike ratios = StrikePrice/FwdPrice.  The list is ordered increasingly.
   List<num> get strikeRatios => _strikeRatios;
 
-  List<Month> _terms;
-  List<Month> get terms => _terms;
+  List<Month>/*!*/ _terms;
+  List<Month>/*!*/ get terms => _terms;
 
   @override
   Set<Bucket> get buckets => _data.keys.toSet();

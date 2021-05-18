@@ -20,13 +20,13 @@ abstract class WeatherInstrument {
   BuySell buySell;
   num quantity;
   String airportCode;
-  Interval term;
+  Interval/*!*/ term;
   num value(List<num> index);
 }
 
 class TemperatureSwap implements WeatherInstrument {
   @override
-  BuySell buySell;
+  BuySell/*!*/ buySell;
   IndexType indexType;
   @override
   num quantity;

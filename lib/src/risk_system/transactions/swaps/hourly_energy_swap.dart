@@ -19,25 +19,25 @@ class HourlyEnergySwap {
   BuySell buySell;
 
   /// Hourly timeseries.  Can be a combination of realized and forward prices.
-  TimeSeries<num> _floatingPrice;
+  TimeSeries<num> floatingPrice;
 
   /// A general class for valuing fixed quantity shape energy swaps.
   /// For example, an FTR can be modeled and valued this way.  Or a fixed
   /// shape energy transaction.
   HourlyEnergySwap(this.energyIndex, this.quantity, this.fixedPrice) {
-    if (quantity.length != fixedPrice.length)
+    if (quantity.length != fixedPrice.length) {
       throw ArgumentError('length of quantity != length of fixedPrice');
-    if (quantity.first.interval != fixedPrice.first.interval)
+    }
+    if (quantity.first.interval != fixedPrice.first.interval) {
       throw ArgumentError('quantity and fixedPrice timeseries are not aligned');
-    if (!(quantity.first.interval is Hour))
+    }
+    if (!(quantity.first.interval is Hour)) {
       throw ArgumentError('quantity needs to be an hourly timeseries');
-    if (!(fixedPrice.first.interval is Hour))
+    }
+    if (!(fixedPrice.first.interval is Hour)) {
       throw ArgumentError('fixedPrice needs to be an hourly timeseries');
+    }
   }
-
-  set floatingPrice(TimeSeries<num> price) => _floatingPrice = price;
-
-  TimeSeries<num> get floatingPrice => _floatingPrice;
 
   /// Calculate the realized value for an [interval].
   TimeSeries<num> realizedValue(Interval interval) {
