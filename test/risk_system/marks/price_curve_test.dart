@@ -8,6 +8,7 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
@@ -53,7 +54,7 @@ void tests() {
     });
     test('toMongoDocument', () {
       var out =
-          curve0.toMongoDocument(Date(2020, 10, 1), 'isone_energy_4000_da_lmp');
+          curve0.toMongoDocument(Date.utc(2020, 10, 1), 'isone_energy_4000_da_lmp');
       expect(out['fromDate'], '2020-10-01');
       expect(out['curveId'], 'isone_energy_4000_da_lmp');
       expect((out['terms'] as List).length, 11);
@@ -152,17 +153,17 @@ void tests() {
         }
       }, UTC);
       var intervals = [
-        Date(2020, 11, 1), // it's a Sun, won't show up in the output
-        Date(2020, 11, 2),
-        Date(2020, 11, 3),
-        Date(2020, 11, 4),
-        Month(2020, 12),
-        Month(2021, 1),
-        Month(2021, 2),
+        Date.utc(2020, 11, 1), // it's a Sun, won't show up in the output
+        Date.utc(2020, 11, 2),
+        Date.utc(2020, 11, 3),
+        Date.utc(2020, 11, 4),
+        Month.utc(2020, 12),
+        Month.utc(2021, 1),
+        Month.utc(2021, 2),
       ];
       var pc2 = pc.withIntervals(intervals);
       expect(pc2.length, 6);
-      expect(pc2.first.interval, Date(2020, 11, 2));
+      expect(pc2.first.interval, Date.utc(2020, 11, 2));
     });
     test('align two PriceCurves', () {
       var x = PriceCurve.fromJson([
@@ -228,12 +229,12 @@ void tests() {
       var out = x.align(y);
       expect(out.length, 6);
       expect(out.intervals.toList(), [
-        Date(2021, 1, 29),
-        Date(2021, 1, 30),
-        Date(2021, 1, 31),
-        Date(2021, 2, 13),
-        Month(2021, 3),
-        Month(2021, 4),
+        Date.utc(2021, 1, 29),
+        Date.utc(2021, 1, 30),
+        Date.utc(2021, 1, 31),
+        Date.utc(2021, 2, 13),
+        Month.utc(2021, 3),
+        Month.utc(2021, 4),
       ]);
       expect(out.values.first.item1, {Bucket.b5x16: 69, Bucket.b7x8: 40});
       expect(out.values.first.item2, {Bucket.b5x16: 67.2, Bucket.b7x8: 40.2});
@@ -241,121 +242,121 @@ void tests() {
 
     test('add two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
       var c2 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
       ]);
       var c3 = c1 + c2;
       expect(c3.length, 3);
-      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.interval, Month.utc(2020, 1));
       expect(c3.first.value,
           {Bucket.b5x16: 60.1, Bucket.b2x16H: 50.11, Bucket.b7x8: 45.21});
     });
     test('add two price curves, non-matching terms with expansion', () {
       var c1 = PriceCurve.fromIterable([
-        IntervalTuple(Date(2020, 1, 29), {Bucket.b5x16: 60}),
-        IntervalTuple(Date(2020, 1, 30), {Bucket.b5x16: 61}),
-        IntervalTuple(Date(2020, 1, 31), {Bucket.b5x16: 62}),
-        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57}),
-        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47}),
+        IntervalTuple(Date.utc(2020, 1, 29), {Bucket.b5x16: 60}),
+        IntervalTuple(Date.utc(2020, 1, 30), {Bucket.b5x16: 61}),
+        IntervalTuple(Date.utc(2020, 1, 31), {Bucket.b5x16: 62}),
+        IntervalTuple(Month.utc(2020, 2), {Bucket.b5x16: 57}),
+        IntervalTuple(Month.utc(2020, 3), {Bucket.b5x16: 47}),
       ]);
       var c2 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1}),
-        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2}),
-        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3}),
+        IntervalTuple(Month.utc(2020, 1), {Bucket.b5x16: 0.1}),
+        IntervalTuple(Month.utc(2020, 2), {Bucket.b5x16: 0.2}),
+        IntervalTuple(Month.utc(2020, 3), {Bucket.b5x16: 0.3}),
       ]);
       var c3 = c1 + c2;
       expect(c3.length, 5);
-      expect(c3.first.interval, Date(2020, 1, 29));
+      expect(c3.first.interval, Date.utc(2020, 1, 29));
       expect(c3[0].value, {Bucket.b5x16: 60.1});
       expect(c3[1].value, {Bucket.b5x16: 61.1});
       expect(c3[2].value, {Bucket.b5x16: 62.1});
       expect(c3[3].value, {Bucket.b5x16: 57.2});
     });
-    test('add two price curves, non-matching terms with expansion, and nulls',
+    test('add two price curves, non-matching terms with expansion',
         () {
       var c1 = PriceCurve.fromIterable([
-        IntervalTuple(Date(2020, 1, 29), {Bucket.b5x16: 60}),
-        IntervalTuple(Date(2020, 1, 30), {Bucket.b5x16: null}),
-        IntervalTuple(Date(2020, 1, 31), {Bucket.b5x16: null}),
-        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 57}),
-        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 47}),
+        IntervalTuple(Date.utc(2020, 1, 29), {Bucket.b5x16: 60}),
+        IntervalTuple(Month.utc(2020, 2), {Bucket.b5x16: 57}),
+        IntervalTuple(Month.utc(2020, 3), {Bucket.b5x16: 47}),
       ]);
       var c2 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1), {Bucket.b5x16: 0.1}),
-        IntervalTuple(Month(2020, 2), {Bucket.b5x16: 0.2}),
-        IntervalTuple(Month(2020, 3), {Bucket.b5x16: 0.3}),
+        IntervalTuple(Month.utc(2020, 1), {Bucket.b5x16: 0.1}),
+        IntervalTuple(Month.utc(2020, 2), {Bucket.b5x16: 0.2}),
+        IntervalTuple(Month.utc(2020, 3), {Bucket.b5x16: 0.3}),
       ]);
       var c3 = c1 + c2;
-      expect(c3.length, 5);
-      expect(c3.first.interval, Date(2020, 1, 29));
+      expect(c3.length, 3);
+      expect(c3.first.interval, Date.utc(2020, 1, 29));
       expect(c3[0].value, {Bucket.b5x16: 60.1});
-      expect(c3[1].value, {Bucket.b5x16: null});
-      expect(c3[2].value, {Bucket.b5x16: null});
-      expect(c3[3].value, {Bucket.b5x16: 57.2});
+      expect(c3[1].value, {Bucket.b5x16: 57.2});
     });
 
     test('subtract two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
       var c2 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 0.1, Bucket.b2x16H: 0.11, Bucket.b7x8: 0.21}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
       ]);
       var c3 = c1 - c2;
       expect(c3.length, 3);
-      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.interval, Month.utc(2020, 1));
       expect(c3.first.value,
           {Bucket.b5x16: 59.9, Bucket.b2x16H: 49.89, Bucket.b7x8: 44.79});
     });
     test('multiply two forward curves element by element', () {
       var c1 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 60, Bucket.b2x16H: 50, Bucket.b7x8: 45}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 57, Bucket.b2x16H: 48, Bucket.b7x8: 41}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 47, Bucket.b2x16H: 36, Bucket.b7x8: 29}),
       ]);
       var c2 = PriceCurve.fromIterable([
-        IntervalTuple(Month(2020, 1),
+        IntervalTuple(Month.utc(2020, 1),
             {Bucket.b5x16: 2, Bucket.b2x16H: 5, Bucket.b7x8: 3}),
-        IntervalTuple(Month(2020, 2),
+        IntervalTuple(Month.utc(2020, 2),
             {Bucket.b5x16: 0.2, Bucket.b2x16H: 0.12, Bucket.b7x8: 0.22}),
-        IntervalTuple(Month(2020, 3),
+        IntervalTuple(Month.utc(2020, 3),
             {Bucket.b5x16: 0.3, Bucket.b2x16H: 0.13, Bucket.b7x8: 0.23}),
       ]);
       var c3 = c1 / c2;
       expect(c3.length, 3);
-      expect(c3.first.interval, Month(2020, 1));
+      expect(c3.first.interval, Month.utc(2020, 1));
       expect(c3.first.value,
           {Bucket.b5x16: 30, Bucket.b2x16H: 10, Bucket.b7x8: 15});
     });
   });
 }
 
+
+
+
+
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   tests();
 }

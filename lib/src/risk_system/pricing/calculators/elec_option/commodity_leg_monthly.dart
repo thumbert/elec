@@ -15,22 +15,22 @@ import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly({
-    this.curveId,
-    Bucket/*!*/ bucket,
-    this.quantity,
-    this.fixPrice,
-    this.tzLocation,
+    required this.curveId,
+    required Bucket bucket,
+    required this.quantity,
+    required this.fixPrice,
+    required this.tzLocation,
   }) {
     this.bucket = bucket;
   }
 
-  String/*!*/ curveId;
-  String cashOrPhys;
-  Location/*!*/ tzLocation;
+  late String curveId;
+  String? cashOrPhys;
+  late Location tzLocation;
 
-  TimeSeries<num/*!*/>/*!*/ quantity;
-  TimeSeries<num/*!*/>/*!*/ fixPrice;
-  TimeSeries<num> underlyingPrice;
+  late TimeSeries<num> quantity;
+  late TimeSeries<num> fixPrice;
+  late TimeSeries<num> underlyingPrice;
 
   /// A commodity leg with monthly granularity.
   CommodityLegMonthly.fromJson(Map<String, dynamic> x) {
@@ -203,14 +203,14 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
       throw ArgumentError('Only months are allowed, got ${xs.first}');
     }
     for (var e in xs) {
-      ts.add(IntervalTuple(parser(e), e['value'] as num/*!*/));
+      ts.add(IntervalTuple(parser(e), e['value'] as num));
     }
     return ts;
   }
 
   /// The opposite of _parseSeries
   static List<Map<String, dynamic>> serializeSeries(TimeSeries<num> xs) {
-    Map<String, dynamic> Function(IntervalTuple) fun;
+    late Map<String, dynamic> Function(IntervalTuple) fun;
     if (xs.first.interval is Month) {
       fun = (e) =>
           {'month': (e.interval as Month).toIso8601String(), 'value': e.value};

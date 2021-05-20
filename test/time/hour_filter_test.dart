@@ -4,6 +4,7 @@ import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/hour_filter.dart';
 import 'package:test/test.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 
 void tests() {
@@ -26,12 +27,10 @@ void tests() {
       expect(hours.first.start, TZDateTime(location, 2019, 12, 1, 16));
       expect(hours.last.start, TZDateTime(location, 2019, 12, 29, 18));
     });
-
-
   });
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   tests();
 }

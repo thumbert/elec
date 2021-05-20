@@ -10,7 +10,7 @@ class DualStrikeOption {
       {this.quantity = 1, this.maxPayout = double.infinity});
 
   /// Calculate the daily payout given a [temperature] and [price]
-  num value(num temperature, num price) {
+  num value(num? temperature, num? price) {
     var res = quantity * unitPayoff(temperature, price);
     return res.clamp(0, maxPayout);
   }

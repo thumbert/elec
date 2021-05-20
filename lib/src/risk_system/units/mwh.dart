@@ -9,7 +9,7 @@ class Mw {
     Mw x = other;
     return x.value == value;
   }
-  int get hashCode => value;
+  int get hashCode => value as int;
 }
 
 class Mwh {
@@ -21,5 +21,5 @@ class Mwh {
     Mwh x = other;
     return x.value == value;
   }
-  int get hashCode => value;
+  int get hashCode => value as int;
 }

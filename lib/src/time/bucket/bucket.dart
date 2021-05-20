@@ -4,11 +4,11 @@ import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 
 abstract class Bucket {
-  String/*!*/ get name;
+  String get name;
 
   /// The permissible hour beginnings for this bucket.  Used by hourly bucket
   /// weights.  Should be a sorted list.
-  List<int> hourBeginning;
+  late List<int> hourBeginning;
 
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
@@ -102,18 +102,18 @@ abstract class Bucket {
       var hrs = interval.splitLeft((dt) => Hour.beginning(dt));
       _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
     }
-    return _hoursCache[interval]/*!*/;
+    return _hoursCache[interval]!;
   }
 }
 
 class CustomBucket extends Bucket {
   @override
-  String name;
+  late String name;
   final Bucket bucket;
   @override
   final List<int> hourBeginning;
 
-  Set<int> _hours;
+  late Set<int> _hours;
 
   /// Define a custom bucket by starting from a bucket and adding on an hour
   /// filter, that is, retain only a list of hours.

@@ -27,7 +27,7 @@ class BuySell {
   @override
   bool operator ==(dynamic other) {
     if (other is! BuySell) return false;
-    BuySell bs = other;
+    var bs = other;
     return bs.sign == sign;
   }
 

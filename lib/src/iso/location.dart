@@ -7,8 +7,8 @@ import 'package:elec/src/time/bucket/bucket.dart';
 
 
 abstract class Location {
-  String name;
-  Iso iso;
+  String? name;
+  Iso? iso;
   tz.Location get tzLocation;
 }
 

@@ -21,7 +21,7 @@ class SimpleTradeAggregator {
 
   Map<Tuple2<Bucket, Month>, int> _hours = {};
 
-  Nest _nestMw, _nestMwh, _nestMtm;
+  late Nest _nestMw, _nestMwh, _nestMtm;
 
   final _mustHaveColumns = <String>{'buy/sell', 'term', 'bucket', 'mw', 'price'};
 
@@ -40,19 +40,19 @@ class SimpleTradeAggregator {
       ..key((e) => e['bucket'])
       ..key((e) => e['month'])
       ..rollup((List trades) =>
-          sum(trades.map((e) => e['buy/sell'].sign * e['mw'])));
+          sum(trades.map(((e) => e['buy/sell'].sign * e['mw']))));
 
     _nestMwh = Nest()
       ..key((e) => e['bucket'])
       ..key((e) => e['month'])
       ..rollup((List trades) =>
-          sum(trades.map((e) => e['buy/sell'].sign * e['mw'] * e['hours'])));
+          sum(trades.map(((e) => e['buy/sell'].sign * e['mw'] * e['hours']))));
 
     _nestMtm = Nest()
       ..key((e) => e['bucket'])
       ..key((e) => e['month'])
       ..rollup((List trades) => sum(trades
-          .map((e) => e['buy/sell'].sign * e['mw'] * e['hours'] * e['price'])));
+          .map(((e) => e['buy/sell'].sign * e['mw'] * e['hours'] * e['price']))));
 
     var months = aggregationTerm
         .splitLeft((dt) => Month.fromTZDateTime(dt))
@@ -89,7 +89,7 @@ class SimpleTradeAggregator {
         var mw = aux['mw'];
         var price = aux['price'];
         var _months =
-            term.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+            term!.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
         for (var month in _months) {
           if (!_hours.containsKey(Tuple2(bucket, month))) {
             _hours[Tuple2(bucket, month)] = _calculateHours(bucket, month);
@@ -111,7 +111,7 @@ class SimpleTradeAggregator {
   /// The 'Flat' bucket trades will be split into a 'Peak' and 'Offpeak' trade
   /// with the same price.
   /// TODO: this should return a MonthlyBucketCurve object
-  List<Map<String, dynamic>> aggregate(
+  List<Map<String, dynamic>>? aggregate(
       AggregationVariable aggregationVariable) {
     var out;
     if (aggregationVariable == AggregationVariable.mw) {

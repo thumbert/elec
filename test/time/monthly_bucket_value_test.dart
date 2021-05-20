@@ -4,9 +4,10 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/bucket/month_bucket_value.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 
-tests() {
+void tests() {
   var location = getLocation('America/New_York');
   group('Monthly bucket value:', () {
     test('equality check', () {
@@ -29,7 +30,7 @@ tests() {
 }
 
 
-main() async {
-  await initializeTimeZone();
+void main() async {
+  initializeTimeZones();
   tests();
 }

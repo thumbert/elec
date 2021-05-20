@@ -23,7 +23,7 @@
 //   group('HourlyShape tests:', () {
 //     setUp(() async {
 //       ts = await client.getHourlyLmp(
-//           4000, LmpComponent.lmp, Date(2019, 1, 1), Date(2019, 12, 31));
+//           4000, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 12, 31));
 //     });
 //     test('from timeseries', () {
 //       var hs = HourlyShape.fromTimeSeries(ts, buckets);
@@ -107,7 +107,7 @@
 //   var curveId = 'isone_energy_4000_hourlyshape';
 //   var client = ForwardMarks(Client(), rootUrl: rootUrl);
 //
-//   var hs = await client.getHourlyShape(curveId, Date(2020, 5, 29),
+//   var hs = await client.getHourlyShape(curveId, Date.utc(2020, 5, 29),
 //       tzLocation: location);
 //
 //   print('Use toHourly() on an HourlySchedule for an Jan21-Dec26 interval.');

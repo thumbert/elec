@@ -5,6 +5,7 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 import 'package:tuple/tuple.dart';
@@ -115,7 +116,7 @@ void tests() {
     var vs = VolatilitySurface.fromJson(_getJson(), location: location);
     test('from TimeSeries', () {
       var vs = VolatilitySurface.fromTimeSeries(_getTimeSeries());
-      var ts = vs.value(Bucket.b5x16, Month(2020, 8), 1.5);
+      var ts = vs.value(Bucket.b5x16, Month.utc(2020, 8), 1.5);
       expect(ts, 0.625);
     });
     test('from Json', () {
@@ -161,14 +162,14 @@ void tests() {
       expect(
           v1
               .observationAt(Month(2021, 8, location: location))
-              .value
+              .value!
               .toStringAsFixed(3),
           '0.495');
       expect(v1.intervals.last, Month(2022, 12, location: location));
       expect(
           v1
               .observationAt(Month(2022, 12, location: location))
-              .value
+              .value!
               .toStringAsFixed(3),
           '0.405');
     });
@@ -181,6 +182,6 @@ void tests() {
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   tests();
 }

@@ -11,10 +11,10 @@ var _cache = <Tuple2<String, Month>, Date>{};
 /// Last trading day for the ICE daily options on ISONE,
 /// NY Harbor USLD contract, etc.
 ///
-Date/*!*/ lastBusinessDayPrior(Month month, {Calendar calendar}) {
+Date lastBusinessDayPrior(Month month, {Calendar? calendar}) {
   calendar ??= NercCalendar();
   var t2 = Tuple2('-1b', month);
-  if (_cache.containsKey(t2)) return _cache[t2];
+  if (_cache.containsKey(t2)) return _cache[t2]!;
   var i = 0;
   var candidate = month.startDate;
   while (i < 1) {
@@ -31,10 +31,10 @@ Date/*!*/ lastBusinessDayPrior(Month month, {Calendar calendar}) {
 /// Last trading day for the ICE Henry Hub Natural Gas Futures Contract.
 ///
 /// See https://www.energygps.com/HomeTools/ExpiryCalendar
-Date/*!*/ threeBusinessDaysPrior(Month month, {Calendar calendar}) {
+Date threeBusinessDaysPrior(Month month, {Calendar? calendar}) {
   calendar ??= NercCalendar();
   var t2 = Tuple2('-3b', month);
-  if (_cache.containsKey(t2)) return _cache[t2];
+  if (_cache.containsKey(t2)) return _cache[t2]!;
   var i = 0;
   var candidate = month.startDate;
   while (i < 3) {
@@ -56,10 +56,10 @@ Date/*!*/ threeBusinessDaysPrior(Month month, {Calendar calendar}) {
 /// 25th calendar day of the month preceding the contract month.
 ///
 /// See https://www.energygps.com/HomeTools/ExpiryCalendar
-Date/*!*/ fourBusinessDaysPriorTo25thPreceding(Month month, {Calendar calendar}) {
+Date fourBusinessDaysPriorTo25thPreceding(Month month, {Calendar? calendar}) {
   calendar ??= NercCalendar();
   var t2 = Tuple2('-1m+25d-4b', month);
-  if (_cache.containsKey(t2)) return _cache[t2];
+  if (_cache.containsKey(t2)) return _cache[t2]!;
   var candidate = month.previous.startDate.add(24); // the 25th calendar day
   if (candidate.weekday > 5 || calendar.isHoliday(candidate)) {
     candidate = candidate.subtract(1);

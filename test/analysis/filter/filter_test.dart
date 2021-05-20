@@ -10,7 +10,7 @@ void tests() async {
       var filter = DateFilter()
         ..add(DaysBeforeFilter(Date.utc(2020, 4, 9), dayCount: 10))
         ..add(WeekdayFilter());
-      var days = parseTerm('25Mar20-15Apr20')
+      var days = parseTerm('25Mar20-15Apr20')!
           .splitLeft((dt) => Date.fromTZDateTime(dt));
       var filteredDays = days.where((e) => filter.contains(e)).toList();
       expect(filteredDays.length, 8);

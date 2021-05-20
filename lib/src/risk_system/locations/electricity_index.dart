@@ -6,7 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'location.dart';
 
 class ElectricityIndex extends Location {
-  Iso iso;
+  Iso? iso;
   int ptid;
   Market market;
   LmpComponent lmpComponent;

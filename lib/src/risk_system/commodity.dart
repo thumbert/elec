@@ -28,7 +28,7 @@ class Commodity {
       throw ArgumentError('Can\'t parse $x as a Commodity.');
     }
 
-    Commodity out;
+    late Commodity out;
     if (y == 'elec' || y == 'electricity') {
       out = electricity;
     } else if (y == 'ng' || y == 'natural gas') {

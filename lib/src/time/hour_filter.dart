@@ -4,15 +4,15 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 
 class HourlyFilter {
-  final Interval interval;
+  final Interval? interval;
 
-  bool Function(Hour) _f;
+  late bool Function(Hour) _f;
 
   bool call(Hour hour) => _f(hour);
 
   /// Construct an hourly filter for a given interval.
   HourlyFilter(this.interval) {
-    _f = (Hour hour) => interval.containsInterval(hour);
+    _f = (Hour hour) => interval!.containsInterval(hour);
   }
 
   HourlyFilter withBucket(Bucket bucket) {
@@ -52,7 +52,7 @@ class HourlyFilter {
 
   /// Return the iterable of hours that satisfy this filter
   Iterable<Hour> hours() {
-    return interval
+    return interval!
         .splitLeft((dt) => Hour.beginning(dt))
         .where((hour) => _f(hour));
   }

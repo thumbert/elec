@@ -1,7 +1,7 @@
 part of elec.risk_system;
 
 abstract class MarksCurve {
-  Set<Bucket/*!*/>/*!*/ buckets;
+  late Set<Bucket> buckets;
   Map<String, dynamic> toMongoDocument(Date fromDate, String curveId);
 }
 

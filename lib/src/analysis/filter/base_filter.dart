@@ -7,7 +7,7 @@ abstract class BaseFilter {
 }
 
 class DateFilter extends BaseFilter {
-  List<BaseFilter> _filters;
+  late List<BaseFilter> _filters;
 
   DateFilter() {
     _filters = <BaseFilter>[];

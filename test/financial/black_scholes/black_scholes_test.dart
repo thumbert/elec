@@ -1,5 +1,5 @@
 import 'package:elec/src/financial/black_scholes/black_scholes.dart';
-import 'package:timezone/standalone.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
@@ -17,20 +17,24 @@ void tests() {
     // });
     test('futures option', () {
       var c100 = BlackScholes(
-          type: CallPut.call, strike: 100, expirationDate: Date(2021, 1, 15))
-        ..underlyingPrice = 46.0
-        ..asOfDate = Date(2020, 11, 19)
-        ..volatility = 1.6231
-        ..riskFreeRate = 0;
+          type: CallPut.call,
+          strike: 100,
+          expirationDate: Date.utc(2021, 1, 15),
+          underlyingPrice: 46.0,
+          asOfDate: Date.utc(2020, 11, 19),
+          volatility: 1.6231,
+          riskFreeRate: 0);
       expect(c100.value() > 1, true);
     });
     test('Call', () {
       var c1 = BlackScholes(
-          type: CallPut.call, strike: 100, expirationDate: Date(2015, 1, 31))
-        ..underlyingPrice = 100
-        ..asOfDate = Date(2015, 1, 1)
-        ..volatility = 0.25
-        ..riskFreeRate = 0.03;
+          type: CallPut.call,
+          strike: 100,
+          expirationDate: Date.utc(2015, 1, 31),
+          underlyingPrice: 100,
+          asOfDate: Date.utc(2015, 1, 1),
+          volatility: 0.25,
+          riskFreeRate: 0.03);
       expect(c1.value().toStringAsFixed(4), '2.9790');
       expect(c1.delta().toStringAsFixed(4), '0.5280');
       expect(c1.gamma().toStringAsFixed(4), '0.0555');
@@ -41,21 +45,25 @@ void tests() {
     });
     test('Put theta, r=0', () {
       var c1 = BlackScholes(
-          type: CallPut.put, strike: 100, expirationDate: Date(2015, 1, 31))
-        ..underlyingPrice = 100
-        ..asOfDate = Date(2015, 1, 1)
-        ..volatility = 0.25
-        ..riskFreeRate = 0.0;
+          type: CallPut.put,
+          strike: 100,
+          expirationDate: Date.utc(2015, 1, 31),
+          underlyingPrice: 100,
+          asOfDate: Date.utc(2015, 1, 1),
+          volatility: 0.25,
+          riskFreeRate: 0.0);
       expect(c1.theta().toStringAsFixed(4), '-0.0476');
     });
 
     test('Put', () {
       var c1 = BlackScholes(
-          type: CallPut.put, strike: 100, expirationDate: Date(2015, 1, 31))
-        ..underlyingPrice = 100
-        ..asOfDate = Date(2015, 1, 1)
-        ..volatility = 0.25
-        ..riskFreeRate = 0.03;
+          type: CallPut.put,
+          strike: 100,
+          expirationDate: Date.utc(2015, 1, 31),
+          underlyingPrice: 100,
+          asOfDate: Date.utc(2015, 1, 1),
+          volatility: 0.25,
+          riskFreeRate: 0.03);
       expect(c1.value().toStringAsFixed(4), '2.7329');
       expect(c1.delta().toStringAsFixed(4), '-0.4720');
       expect(c1.gamma().toStringAsFixed(4), '0.0555');
@@ -68,6 +76,6 @@ void tests() {
 }
 
 void main() async {
-  await initializeTimeZone();
+  initializeTimeZones();
   tests();
 }

@@ -16,7 +16,7 @@ class TradeStatus {
     var y = x.toLowerCase();
     if (!_allowed.contains(y))
       throw ArgumentError('Invalid trade status.');
-    TradeStatus out;
+    late TradeStatus out;
     switch (y) {
       case 'live': out = live; break;
       case 'closed': out = closed; break;

@@ -9,9 +9,13 @@ import 'seasonality.dart';
 
 class SeasonalAnalysis {
   final TimeSeries<num> xs;
-  /*late*/ Seasonality _seasonality;
-  /*late*/ Map<int, TimeSeries<num>> _groups;
-  /*late*/ Map<Interval, TimeSeries<num>> _paths;
+  late Seasonality _seasonality;
+  /// Get the data grouped by the groups.  For example, for Seasonality.dayOfYear
+  /// each entity of the [groups] has as key the day of the year, and as values
+  /// a daily TimeSeries for all the years in the input that correspond to this
+  /// day of the year, e.g. for key = 1, all 1-Jan in the input time series.
+  late Map<int, TimeSeries<num>> groups;
+  late Map<Interval, TimeSeries<num>> _paths;
 
   /// Input time series needs to be monthly.
   /// Groups are the months of the year, e.g. the keys are 1, 2, ... 12.  For
@@ -20,7 +24,7 @@ class SeasonalAnalysis {
   /// monthly time series of 12 values.
   SeasonalAnalysis.monthOfYear(this.xs) {
     _seasonality = Seasonality.monthOfYear;
-    _groups = _groupByIndex(xs, (e) => e.start.month);
+    groups = _groupByIndex(xs, (e) => e.start.month);
     _paths = _toPath(xs, (e) {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
@@ -36,7 +40,7 @@ class SeasonalAnalysis {
   /// weekly time series of 52/53 values.
   SeasonalAnalysis.weekOfYear(this.xs) {
     _seasonality = Seasonality.weekOfYear;
-    _groups = _groupByIndex(xs, (e) => Week.fromTZDateTime(e.start).week);
+    groups = _groupByIndex(xs, (e) => Week.fromTZDateTime(e.start).week);
     _paths = _toPath(xs, (e) {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
@@ -52,7 +56,7 @@ class SeasonalAnalysis {
   /// a daily time series of 365/366 values.
   SeasonalAnalysis.dayOfYear(this.xs) {
     _seasonality = Seasonality.dayOfYear;
-    _groups =
+    groups =
         _groupByIndex(xs, (e) => Date.fromTZDateTime(e.start).dayOfYear());
     _paths = _toPath(xs, (e) {
       var year = Interval(
@@ -69,7 +73,7 @@ class SeasonalAnalysis {
   /// a daily time series of 7 values.
   SeasonalAnalysis.dayOfWeek(this.xs) {
     _seasonality = Seasonality.dayOfWeek;
-    _groups = _groupByIndex(xs, (e) => e.start.weekday);
+    groups = _groupByIndex(xs, (e) => e.start.weekday);
     _paths =
         _toPath(xs, (e) => Tuple2(Week.fromTZDateTime(e.interval.start), e));
   }
@@ -81,7 +85,7 @@ class SeasonalAnalysis {
   /// an hourly time series of 23/24/25 values.
   SeasonalAnalysis.hourOfDay(this.xs) {
     _seasonality = Seasonality.hourOfDay;
-    _groups = _groupByIndex(xs, (e) => e.start.hour);
+    groups = _groupByIndex(xs, (e) => e.start.hour);
     _paths =
         _toPath(xs, (e) => Tuple2(Date.fromTZDateTime(e.interval.start), e));
   }
@@ -94,7 +98,7 @@ class SeasonalAnalysis {
   /// dayOfMonth, etc.
   SeasonalAnalysis.dayOfTerm(this.xs, List<Term> terms) {
     _seasonality = Seasonality.dayOfTerm;
-    _groups = <int, TimeSeries<num>>{};
+    groups = <int, TimeSeries<num>>{};
     _paths = <Interval, TimeSeries<num>>{};
     for (var term in terms) {
       var ts = xs.window(term.interval);
@@ -102,7 +106,7 @@ class SeasonalAnalysis {
       var startDate = ts.first.interval as Date;
       for (var e in ts) {
         var _dayOfTerm = (e.interval as Date).value - startDate.value + 1;
-        _groups.putIfAbsent(_dayOfTerm, () => TimeSeries<num>()).add(e);
+        groups.putIfAbsent(_dayOfTerm, () => TimeSeries<num>()).add(e);
         _paths[term.interval] = TimeSeries.fromIterable(ts);
       }
     }
@@ -119,7 +123,7 @@ class SeasonalAnalysis {
     var _daysOfYear = List.generate(366, (i) => i + 1);
     var _grps = <int, TimeSeries<num>>{};
     for (var d in _daysOfYear) {
-      var res = TimeSeries<num/*!*/>();
+      var res = TimeSeries<num>();
       var obs = xs.where((e) => (e.interval as Date).dayOfYear() == d);
       for (var e in obs) {
         var date = e.interval as Date;
@@ -135,37 +139,33 @@ class SeasonalAnalysis {
 
   Seasonality get seasonality => _seasonality;
 
-  /// Get the data grouped by the groups.  For example, for Seasonality.dayOfYear
-  /// each entity of the [groups] has as key the day of the year, and as values
-  /// a daily TimeSeries for all the years in the input that correspond to this
-  /// day of the year, e.g. for key = 1, all 1-Jan in the input time series.
-  Map<int, TimeSeries<num/*!*/>> get groups => _groups;
+  // Map<int, TimeSeries<num>> get groups => _groups;
 
   /// Get the data grouped by the paths.  For example, for
   /// [Seasonality.dayOfYear], each entity of the [paths] has as key a calendar
   /// year and as value a daily TimeSeries.
-  Map<Interval, TimeSeries<num/*!*/>> get paths => _paths;
+  Map<Interval, TimeSeries<num>> get paths => _paths;
 
-  set groups(Map<int, TimeSeries> value) => _groups = value;
+  // set groups(Map<int, TimeSeries<num>> value) => _groups = value;
 
   /// Calculate the mean by group.
   Map<int, num> meanByGroup() {
-    return {for (var key in _groups.keys) key: mean(_groups[key].values)};
+    return {for (var key in groups.keys) key: mean(groups[key]!.values)};
   }
 
   /// Calculate the summary statistics by group
   Map<int, Map<String, num>> summaryByGroup() =>
-      {for (var group in _groups.keys) group: summary(_groups[group].values)};
+      {for (var group in groups.keys) group: summary(groups[group]!.values as Iterable<num>)};
 
   /// Calculate the summary statistics by path
   Map<Interval, Map<String, num>> summaryByPath() =>
-      {for (var key in _paths.keys) key: summary(_paths[key].values)};
+      {for (var key in _paths.keys) key: summary(_paths[key]!.values as Iterable<num>)};
 
   /// Calculate the quantile by group.
   Map<int, List<QuantilePair>> quantileByGroup(List<num> probabilities) {
     var out = <int, List<QuantilePair>>{}; // group -> probabilities
-    for (var group in _groups.keys) {
-      var quantile = Quantile(_groups[group].values.toList());
+    for (var group in groups.keys) {
+      var quantile = Quantile(groups[group]!.values.toList() as List<num>);
       out[group] = [
         for (var p in probabilities) QuantilePair(p, quantile.value(p))
       ];
@@ -180,7 +180,7 @@ Map<Interval, TimeSeries<num>> _toPath(TimeSeries<num> xs,
   var n = xs.length;
   for (var i = 0; i < n; i++) {
     var t2 = f(xs[i]);
-    grp.putIfAbsent(t2.item1, () => TimeSeries<num>()).add(t2.item2);
+    grp.putIfAbsent(t2.item1, () => TimeSeries<num>()).add(t2.item2 as IntervalTuple<num>);
   }
   return grp;
 }

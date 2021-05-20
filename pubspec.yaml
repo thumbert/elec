@@ -1,10 +1,10 @@
 name: elec
 description: A collection of elec functionality
-version: 1.0.0
+version: 2.0.0
 author: Tony Humbert <tony.humbert@yahoo.com>
 
 environment:
-  sdk: '>=2.7.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   csv: ^5.0.0
@@ -29,6 +29,7 @@ dependencies:
   timezone: ^0.7.0
   tuple: ^2.0.0
   xml: ^5.1.0
+  collection: ^1.15.0-nullsafety.4
 
 dev_dependencies:
   pedantic: ^1.11.0

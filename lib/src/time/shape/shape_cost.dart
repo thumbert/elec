@@ -8,7 +8,7 @@ import 'package:timeseries/timeseries.dart';
 
 /// Calculate the shaping cost by bucket and aggregation.
 ///
-Map<Bucket,TimeSeries<num/*!*/>> shapeCost(TimeSeries<num> price,
+Map<Bucket,TimeSeries<num>> shapeCost(TimeSeries<num> price,
     TimeSeries<num> quantity, List<Bucket> buckets,
   {TimeAggregation timeAggregation = TimeAggregation.term}) {
 
@@ -17,18 +17,20 @@ Map<Bucket,TimeSeries<num/*!*/>> shapeCost(TimeSeries<num> price,
 
   var out = <Bucket,TimeSeries<num>>{};
   for (var bucket in buckets) {
-    TimeSeries<num> pq, pAvg, qSum;
-    var _pq = TimeSeries.fromIterable(pBucket[bucket]).merge(
-        TimeSeries.fromIterable(qBucket[bucket]), f: (x,y) => x*y);
+    late TimeSeries<num> pq;
+    late TimeSeries<num> pAvg;
+    late TimeSeries<num> qSum;
+    var _pq = TimeSeries.fromIterable(pBucket[bucket]!).merge(
+        TimeSeries.fromIterable(qBucket[bucket]!), f: (x,dynamic y) => x!*y);
 
     if (timeAggregation == TimeAggregation.month) {
-      qSum = toMonthly(qBucket[bucket], sum);
-      pAvg = toMonthly(pBucket[bucket], mean);
+      qSum = toMonthly(qBucket[bucket]!, sum);
+      pAvg = toMonthly(pBucket[bucket]!, mean);
       pq = toMonthly(_pq, sum);
 
     } else if (timeAggregation == TimeAggregation.year) {
-      qSum = toYearly(qBucket[bucket], sum);
-      pAvg = toYearly(pBucket[bucket], mean);
+      qSum = toYearly(qBucket[bucket]!, sum);
+      pAvg = toYearly(pBucket[bucket]!, mean);
       pq = toYearly(_pq, sum);
 
     } else if (timeAggregation == TimeAggregation.term) {
@@ -37,9 +39,9 @@ Map<Bucket,TimeSeries<num/*!*/>> shapeCost(TimeSeries<num> price,
         throw ArgumentError('Domains of price and quantity are different');
       }
       qSum = TimeSeries.fromIterable([
-        IntervalTuple(term, sum(qBucket[bucket].map((e) => e.value)))]);
+        IntervalTuple(term, sum(qBucket[bucket]!.map((e) => e.value)))]);
       pAvg = TimeSeries.fromIterable([
-        IntervalTuple(term, mean(pBucket[bucket].map((e) => e.value)))]);
+        IntervalTuple(term, mean(pBucket[bucket]!.map((e) => e.value)))]);
       pq = TimeSeries.fromIterable([
         IntervalTuple(term, sum(_pq.map((e) => e.value)))]);
     }

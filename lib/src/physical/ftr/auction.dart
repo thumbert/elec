@@ -8,15 +8,15 @@ enum FtrAuctionType { annual, monthly, bpp }
 
 /// A class representing an FTR Auction for ISONE.
 class FtrAuction implements Comparable<FtrAuction> {
-  Interval interval;
-  Date start;
+  late Interval interval;
+  late Date start;
 
   /// number of months for this auction
-  int noMonths;
-  int round;
+  late int noMonths;
+  late int round;
   Location location = getLocation('America/New_York');
-  String name;
-  FtrAuctionType auctionType;
+  String? name;
+  FtrAuctionType? auctionType;
 
   /// Construct an Auction from an auction name.  Valid auction names are
   /// 'F18-1Y-R1', 'F18-1Y-R2', etc. for annual auctions,
@@ -24,23 +24,23 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// Rounds were added to the annual auctions starting in 2013.
   FtrAuction.parse(this.name) {
     round = 0;
-    if (name.length == 3) {
+    if (name!.length == 3) {
       /// it's a monthly auction
-      var month = parseMonth(name, location: location);
+      var month = parseMonth(name!, location: location);
       interval = month.toInterval();
       start = month.startDate;
       noMonths = 1;
       auctionType = FtrAuctionType.monthly;
-    } else if (name.contains('-')) {
+    } else if (name!.contains('-')) {
       /// it's an annual auction
-      var year = 2000 + int.parse(name.substring(1, 3));
+      var year = 2000 + int.parse(name!.substring(1, 3));
       interval =
           Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
       start = Date(interval.start.year, interval.start.month, 1,
           location: location);
       auctionType = FtrAuctionType.annual;
       if (year > 2012) {
-        round = int.parse(name.substring(8));
+        round = int.parse(name!.substring(8));
       }
       noMonths = 12;
     }
@@ -77,13 +77,13 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// period hasn't started yet.
   static List<FtrAuction> auctionsWithSettle(Date fromDate) {
     var year = fromDate.year;
-    var today = Date.today();
+    var today = Date.today(location: fromDate.location);
     var res = <FtrAuction>[];
     for (var i = year; i <= today.year; i++) {
       res.add(FtrAuction.annual(i, 1));
       res.add(FtrAuction.annual(i, 2));
       for (var m = 1; m <= 12; m++) {
-        var auction = FtrAuction.monthly(Month(i, m));
+        var auction = FtrAuction.monthly(Month(i, m, location: fromDate.location));
         if (auction.start.isAfter(fromDate) && auction.start.isBefore(today)) {
           res.add(auction);
         }
@@ -107,7 +107,7 @@ class FtrAuction implements Comparable<FtrAuction> {
   }
 
   @override
-  String toString() => name;
+  String toString() => name!;
 
   /// Get the number of hours in this bucket; e.g. how many peak hours are
   /// in this auction term?

@@ -46,7 +46,7 @@ insertTemperatureDataMongo(List<Map> data) async {
     'date': 1,
   });
   var coll = db.collection('daily');
-  await coll.insertAll(data, writeConcern: WriteConcern.ACKNOWLEDGED);
+  await coll.insertAll(data as List<Map<String, dynamic>>, writeConcern: WriteConcern.ACKNOWLEDGED);
   await db.close();
 }
 
@@ -55,7 +55,7 @@ insertTemperatureDataMongo(List<Map> data) async {
 DateTime _parseDate(num yyyymmdd) {
   int year = (yyyymmdd / 10000).truncate();
   int month = ((yyyymmdd - 10000 * year) / 100).truncate();
-  int day = yyyymmdd - 10000 * year - 100 * month;
+  int day = yyyymmdd - 10000 * year - 100 * month as int;
   return new DateTime.utc(year, month, day);
 }
 

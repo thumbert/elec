@@ -11,21 +11,21 @@ class MonthlyCurve {
   final Bucket bucket;
 
   /// a monthly timeseries.
-  final TimeSeries<num/*!*/> timeseries;
+  final TimeSeries<num> timeseries;
 
   /// A simple forward curve model for monthly values.
   MonthlyCurve(this.bucket, this.timeseries);
 
-  Month get startMonth => timeseries.first.interval;
+  Month get startMonth => timeseries.first.interval as Month;
 
-  Month get endMonth => timeseries.last.interval;
+  Month get endMonth => timeseries.last.interval as Month;
 
   Interval get domain =>
       Interval(timeseries.first.interval.start, timeseries.last.interval.end);
 
   Iterable<Month> get months => timeseries.intervals.cast<Month>();
 
-  Iterable<num> get values => timeseries.values;
+  Iterable<num?> get values => timeseries.values;
 
   IntervalTuple<num> operator [](int i) => timeseries[i];
 
@@ -176,7 +176,7 @@ class MonthlyCurve {
 
   /// Calculate the value for an interval greater than one month by doing
   /// an hour weighted average.
-  num aggregateMonths(Interval interval) {
+  num? aggregateMonths(Interval interval) {
     if (interval.start.isBefore(timeseries.first.interval.start) ||
         (interval.end.isAfter(timeseries.last.interval.end))) {
       throw ArgumentError('Input interval extends beyond the underlying curve');
@@ -193,17 +193,17 @@ class MonthlyCurve {
         interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
     var hours = months.map((month) => bucket.countHours(month));
     var xs = timeseries.window(interval).map((e) => e.value);
-    return dama.weightedMean(xs, hours);
+    return dama.weightedMean(xs as Iterable<num>, hours);
   }
 
   /// Get the curve value for this month.
-  num valueAt(Month month) => timeseries.observationAt(month).value;
+  num? valueAt(Month month) => timeseries.observationAt(month).value;
 
   /// Restrict this MonthlyCurve only to the interval of interest.
   /// Will throw if the [interval] has no overlap with the [domain].
   /// This [interval] should not be smaller than a month!
   MonthlyCurve window(Interval interval) {
-    var _interval = interval.overlap(domain);
+    var _interval = interval.overlap(domain)!;
     var aux = timeseries.window(_interval);
     return MonthlyCurve(bucket, TimeSeries.fromIterable(aux));
   }

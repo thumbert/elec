@@ -60,21 +60,21 @@ abstract class HourlySchedule {
 
   /// return the value in this hour, or [null] if the schedule is not defined
   /// for the hour.
-  num Function(Hour) _f;
+  late num? Function(Hour) _f;
 
   /// Return the value of the schedule associated with this hour.
-  num operator [](Hour hour) => _f(hour);
+  num? operator [](Hour hour) => _f(hour);
 
   /// Return the value of the schedule associated with this hour.
-  num valueAt(Hour hour) => _f(hour);
+  num? valueAt(Hour hour) => _f(hour);
 
   /// Default implementation.  May not be the fastest.
   /// Construct the hourly timeseries associated with this schedule for a
   /// given [interval].  The timeseries will have values only where the
   /// HourlySchedule is defined.
-  TimeSeries<num> toHourly(Interval interval) {
+  TimeSeries<num?> toHourly(Interval interval) {
     var hours = interval.splitLeft((dt) => Hour.beginning(dt));
-    var out = TimeSeries<num>();
+    var out = TimeSeries<num?>();
     for (var hour in hours) {
       var value = _f(hour);
       if (value != null) out.add(IntervalTuple(hour, _f(hour)));
@@ -160,11 +160,11 @@ class _HourlyScheduleByBucketMonth extends HourlySchedule {
   Map<String, dynamic> toJson() {
     var out = <Map<String, dynamic>>[];
     for (var bucket in values.keys) {
-      for (var month in values[bucket].keys) {
+      for (var month in values[bucket]!.keys) {
         out.add({
           'bucket': bucket.toString(),
           'month': month,
-          'value': values[bucket][month],
+          'value': values[bucket]![month],
         });
       }
     }
@@ -238,8 +238,8 @@ class _HourlyScheduleFromHourlyShape extends HourlySchedule {
         var obs = ts.observationContains(hour);
         for (var bucket in obs.value.keys) {
           if (bucket.containsHour(hour)) {
-            var ind = idx[bucket][hour.start.hour];
-            return obs.value[bucket][ind];
+            var ind = idx[bucket]![hour.start.hour]!;
+            return obs.value[bucket]![ind];
           }
         }
         throw ArgumentError(
@@ -268,10 +268,10 @@ class _HourlyScheduleFromForwardCurve extends HourlySchedule {
       if (!forwardCurve.domain.containsInterval(hour)) {
         return null;
       } else {
-        var obs = forwardCurve.observationContains(hour);
-        for (var bucket in obs.value.keys) {
+        IntervalTuple<Map<Bucket, num?>?> obs = forwardCurve.observationContains(hour);
+        for (var bucket in obs.value!.keys) {
           if (bucket.containsHour(hour)) {
-            return obs.value[bucket];
+            return obs.value![bucket];
           }
         }
         return null;
@@ -282,7 +282,7 @@ class _HourlyScheduleFromForwardCurve extends HourlySchedule {
   final PriceCurve forwardCurve;
 
   @override
-  TimeSeries<num> toHourly(Interval interval) {
+  TimeSeries<num?> toHourly(Interval interval) {
     return TimeSeries.fromIterable(forwardCurve.toHourly().window(interval));
   }
 
@@ -308,7 +308,7 @@ class _HourlyScheduleFromTimeSeries extends HourlySchedule {
   final TimeSeries<num> ts;
 
   @override
-  TimeSeries<num> toHourly(Interval interval) {
+  TimeSeries<num?> toHourly(Interval interval) {
     return TimeSeries.fromIterable(
         ts.interpolate(Duration(hours: 1)).window(interval));
   }

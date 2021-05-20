@@ -8,7 +8,7 @@ class DaysAroundFilter extends BaseFilter {
   int dayCount;
 
   /// Days in historical data set that satisfy the filter.
-  Set<Date> days;
+  late Set<Date> days;
 
   /// Get all the [dayCount] days before and after [asOfDate], including
   /// [asOfDate] too.

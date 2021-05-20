@@ -6,7 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'location.dart';
 
 class ElectricityLocation extends Location {
-  Iso iso;
+  Iso? iso;
   int ptid;
   Market market;
   @override

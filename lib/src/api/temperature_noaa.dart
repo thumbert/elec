@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class Result {
-  String result;
+  String? result;
   Result();
 }
 
@@ -12,8 +12,8 @@ class Result {
 ///
 // @ApiClass(name:'noaa', version: 'v1')
 class ApiTemperatureNoaa {
-  Db db;
-  DbCollection coll;
+  late Db db;
+  late DbCollection coll;
 
   ApiTemperatureNoaa() {}
 
@@ -29,7 +29,7 @@ class ApiTemperatureNoaa {
   /// Return a list of strings
   /// [[19800101,26,38], [19800102,26,37], ...]
   // @ApiMethod(path: 'ghcnd/{ghcnd}')
-  Future<List<List<String>>> getTemperature(String ghcnd) async {
+  Future<List<List<String?>>> getTemperature(String ghcnd) async {
     //String ghcnd = 'USW00014739';
     List pipeline = [];
     Map match = {
@@ -39,12 +39,12 @@ class ApiTemperatureNoaa {
     pipeline.add({'\$match': match});
     pipeline.add({'\$limit': 5});
     pipeline.add({'\$project': project});
-    var res = await coll.aggregateToStream(pipeline)
+    var res = await coll.aggregateToStream(pipeline as List<Map<String, Object>>)
         .map((e) => [e['date'], e['tmin'], e['tmax']])
         .toList();
 
     //return new Result()..result = res.toString();
-    return res;
+    return res as FutureOr<List<List<String?>>>;
   }
 
 }

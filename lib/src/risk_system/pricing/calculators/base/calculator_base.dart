@@ -8,9 +8,9 @@ import 'commodity_leg.dart';
 abstract class CalculatorBase<Leg extends CommodityLegBase,
     CacheProvider extends CacheProviderBase> {
   /// A collection of caches for different market and curve data.
-  CacheProvider cacheProvider;
+  CacheProvider? cacheProvider;
 
-  /*late*/ Date _asOfDate;
+  late Date _asOfDate;
 
   /// The pricing date.  It does not need a timezone.  UTC timezone is fine.
   Date get asOfDate => _asOfDate;
@@ -22,7 +22,7 @@ abstract class CalculatorBase<Leg extends CommodityLegBase,
     }
   }
 
-  /*late*/ BuySell _buySell;
+  late BuySell _buySell;
   BuySell get buySell => _buySell;
   set buySell(BuySell buySell) {
     _buySell = buySell;
@@ -32,7 +32,7 @@ abstract class CalculatorBase<Leg extends CommodityLegBase,
     }
   }
 
-  /*late*/ Term _term;
+  late Term _term;
   Term get term => _term;
   set term(Term term) {
     _term = term;
@@ -42,7 +42,7 @@ abstract class CalculatorBase<Leg extends CommodityLegBase,
     }
   }
 
-  /*late*/ List<Leg> _legs;
+  late List<Leg> _legs;
   List<Leg> get legs => _legs ?? <Leg>[];
   set legs(List<Leg> xs) {
     _legs = <Leg>[];

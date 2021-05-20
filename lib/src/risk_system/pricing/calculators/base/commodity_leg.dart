@@ -6,13 +6,13 @@ import 'package:elec/risk_system.dart';
 import 'leaf.dart';
 
 abstract class CommodityLegBase<L extends LeafBase> {
-  Date/*!*/ asOfDate;
-  Term/*!*/ term;
-  BuySell/*!*/ buySell;
-  Bucket/*!*/ bucket;
+  late Date asOfDate;
+  late Term term;
+  late BuySell buySell;
+  late Bucket bucket;
 
   /// Leg leaves
-  List<L> leaves;
+  late List<L> leaves;
 
   /// Fair value for this commodity leg.
   /// Get the quantity weighted floating price for this leg.

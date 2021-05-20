@@ -9,7 +9,7 @@ class LaborDay implements Holiday {
   HolidayType holidayType = HolidayType.laborDay;
 
   @override
-  Date forYear(int year, {Location/*!*/ location}) {
+  Date forYear(int year, {required Location location}) {
     return makeHoliday(year, DateTime.september, 1, DateTime.monday,
         location: location);
   }

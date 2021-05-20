@@ -32,7 +32,7 @@ Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(
   x.forEach((e) {
     buckets.forEach((bucket) {
       if (bucket.containsHour(Hour.beginning(e.interval.start))) {
-        res[bucket].add(e);
+        res[bucket]!.add(e);
       }
     });
   });

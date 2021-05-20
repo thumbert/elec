@@ -1,7 +1,8 @@
 library test_bucket;
 
 import 'dart:math' show pow;
-import 'package:timezone/standalone.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
@@ -32,7 +33,7 @@ void aggregateByBucketMonth() {
   var res = nest.map(lmp);
   var out = flattenMap(res, ['month', 'bucket', 'lmp']);
   test('monthly hub da price', () {
-    expect(round(out[0]['lmp'], digits: 3), 18.993);
+    expect(round(out![0]['lmp'], digits: 3), 18.993);
     expect(round(out[1]['lmp'], digits: 3), 26.950);
     expect(round(out[2]['lmp'], digits: 3), 34.638);
   });
@@ -209,7 +210,7 @@ void speedTest() {
   var values = {Bucket.b5x16: 80, Bucket.b7x8: 56, Bucket.b2x16H: 32};
   var hours = term.hours();
   var buckets = [Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H];
-  var ts = TimeSeries<num>();
+  var ts = TimeSeries<num?>();
   var sw = Stopwatch()..start();
   for (var hour in hours) {
     for (var bucket in buckets) {
@@ -226,10 +227,10 @@ void speedTest() {
 
 
 void main() async {
-  await initializeTimeZone();
-  // tests();
+  initializeTimeZones();
+  tests();
 
   // aggregateByBucketMonth();
 
-  speedTest();
+  // speedTest();
 }

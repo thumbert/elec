@@ -2,10 +2,10 @@ part of elec.risk_system;
 
 
 class EnergyFutures extends Object with BaseTrade {
-  EnergyHub/*!*/ hub;
-  Bucket/*!*/ bucket;
-  num/*!*/ fixedPrice;
-  num/*!*/ mw;
+  late final EnergyHub hub;
+  late final Bucket bucket;
+  late final num fixedPrice;
+  late final num mw;
 
   EnergyFutures(Date tradeDate, Interval term, BuySell buySell,
       this.mw, this.hub, this.bucket, this.fixedPrice) {
@@ -26,8 +26,8 @@ class EnergyFutures extends Object with BaseTrade {
 
   TimeSeries<num> position(Date asOfDate, TimeAggregation timeAggregation) {
     var out = TimeSeries<num>();
-    if (asOfDate.start.isAfter(tradeTerm.end)) return out;
-    var _hours = tradeTerm
+    if (asOfDate.start.isAfter(tradeTerm!.end)) return out;
+    var _hours = tradeTerm!
         .withStart(asOfDate.start)
         .splitLeft((dt) => Hour.beginning(dt))
         .where((hour) => bucket.containsHour(hour)).cast<Hour>();

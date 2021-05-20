@@ -8,16 +8,16 @@ import 'package:elec/src/time/last_trading_day.dart';
 
 class LeafElecOption extends LeafBase {
   LeafElecOption({
-    this.asOfDate,
-    this.buySell,
-    this.callPut,
-    this.month,
-    this.quantityTerm,
-    this.riskFreeRate,
-    this.strike,
-    this.underlyingPrice,
-    this.volatility,
-    this.fixPrice,
+    required this.asOfDate,
+    required this.buySell,
+    required this.callPut,
+    required this.month,
+    required this.quantityTerm,
+    required this.riskFreeRate,
+    required this.strike,
+    required this.underlyingPrice,
+    required this.volatility,
+    required this.fixPrice,
   }) : expirationDate = lastBusinessDayPrior(month) {
     _bs = BlackScholes(
         type: callPut,
@@ -29,22 +29,22 @@ class LeafElecOption extends LeafBase {
         riskFreeRate: riskFreeRate);
   }
 
-  final BuySell/*!*/ buySell;
-  final Month/*!*/ month;
+  final BuySell buySell;
+  final Month month;
 
   /// the notional volume for the option, in MWh
-  final num/*!*/ quantityTerm;
-  final num/*!*/ underlyingPrice;
-  final num/*!*/ strike;
-  final CallPut/*!*/ callPut;
-  final num/*!*/ volatility;
-  final Date/*!*/ asOfDate;
-  final num/*!*/ riskFreeRate;
-  final Date/*!*/ expirationDate;
+  final num quantityTerm;
+  final num underlyingPrice;
+  final num strike;
+  final CallPut callPut;
+  final num volatility;
+  final Date asOfDate;
+  final num riskFreeRate;
+  final Date expirationDate;
 
-  final num/*!*/ fixPrice;
+  final num fixPrice;
 
-  BlackScholes _bs;
+  late BlackScholes _bs;
 
   /// The option price
   num price() => _bs.value();
@@ -62,16 +62,16 @@ class LeafElecOption extends LeafBase {
   num dollarPrice() => buySell.sign * quantityTerm * (_bs.value() - fixPrice);
 
   LeafElecOption copyWith({
-    Date asOfDate,
-    BuySell buySell,
-    CallPut callPut,
-    Month month,
-    num quantityTerm,
-    num riskFreeRate,
-    num strike,
-    num underlyingPrice,
-    num volatility,
-    num fixPrice,
+    Date? asOfDate,
+    BuySell? buySell,
+    CallPut? callPut,
+    Month? month,
+    num? quantityTerm,
+    num? riskFreeRate,
+    num? strike,
+    num? underlyingPrice,
+    num? volatility,
+    num? fixPrice,
   }) {
     var _asOfDate = asOfDate ?? this.asOfDate;
     var _buySell = buySell ?? this.buySell;

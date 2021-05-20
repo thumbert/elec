@@ -16,7 +16,7 @@ class Virtual {
 
   /// the location of the virtual
   int ptid;
-  Date date;
+  Date? date;
 
   Virtual(this.schedule, this.ptid, this.virtualType) {
     isScheduleValid();

@@ -4,7 +4,7 @@ import 'package:elec/risk_system.dart';
 
 class Slicer {
 
-  TimeAggregation timeAggregation;
+  TimeAggregation? timeAggregation;
 
   
 

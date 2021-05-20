@@ -46,5 +46,5 @@ void tests() async {
 
 void main() async {
   initializeTimeZones();
-  await tests();
+  tests();
 }

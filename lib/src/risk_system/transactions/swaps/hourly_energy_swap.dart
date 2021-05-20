@@ -13,13 +13,13 @@ class HourlyEnergySwap {
   /// Hourly fixedPrice timeseries. Gaps in the timeseries are allowed.
   TimeSeries<num> fixedPrice;
 
-  Date tradeDate;
-  Date startDate;
-  Date endDate;
-  BuySell buySell;
+  Date? tradeDate;
+  Date? startDate;
+  Date? endDate;
+  late BuySell buySell;
 
   /// Hourly timeseries.  Can be a combination of realized and forward prices.
-  TimeSeries<num> floatingPrice;
+  late TimeSeries<num> floatingPrice;
 
   /// A general class for valuing fixed quantity shape energy swaps.
   /// For example, an FTR can be modeled and valued this way.  Or a fixed
@@ -42,14 +42,14 @@ class HourlyEnergySwap {
   /// Calculate the realized value for an [interval].
   TimeSeries<num> realizedValue(Interval interval) {
     var qty = TimeSeries.fromIterable(quantity.window(interval));
-    var pq = qty.merge(fixedPrice, f: (x,y) {
-      return <String,num>{
+    var pq = qty.merge(fixedPrice, f: (x,dynamic y) {
+      return <String,num?>{
         'quantity': x,
         'fixedPrice': y,
       };
     });
-    return pq.merge(floatingPrice, f: (x,y) {
-      return buySell.sign * x['quantity'] * (y - x['fixedPrice']);
+    return pq.merge(floatingPrice, f: (x,dynamic y) {
+      return buySell.sign * x!['quantity']! * (y - x['fixedPrice']);
     });
   }
 

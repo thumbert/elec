@@ -11,7 +11,7 @@ class LincolnBirthday implements Holiday {
 
   /// Get Lincoln's birthday for this year
   @override
-  Date forYear(int year, {Location/*!*/ location}) {
+  Date forYear(int year, {required Location location}) {
     var candidate = Date(year, 2, 12, location: location);
     if (candidate.weekday == 7) candidate = candidate.add(1);
     if (candidate.weekday == 6) candidate = candidate.subtract(1);

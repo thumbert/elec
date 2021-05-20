@@ -1,34 +1,34 @@
 part of elec.calculators.elec_swap;
 
 class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
-  String/*!*/ curveId;
-  String cashOrPhys;
+  late String curveId;
+  String? cashOrPhys;
   @override
-  Bucket bucket;
-  Location/*!*/ tzLocation;
+  late Bucket bucket;
+  late Location tzLocation;
 
   /// The time period of the leg which applies to all the leaves.  It is set at
   /// the lower time period of quantity and fixPrice.  For example, if quantity
   /// is [TimePeriod.month] and fixPrice is [TimePeriod.hour], the timePeriod
   /// for the leg is set to [TimePeriod.hour].
   ///
-  TimePeriod/*!*/ timePeriod;
+  late TimePeriod timePeriod;
 
   /// An hourly time series.
-  TimeSeries<num> hourlyFloatingPrice;
+  late TimeSeries<num> hourlyFloatingPrice;
 
   /// If you have a custom quantity, only intervals included in the
   /// [term] are valid.
-  HourlySchedule/*!*/ quantitySchedule;
-  /*late*/ HourlySchedule fixPriceSchedule;
+  late HourlySchedule quantitySchedule;
+  late HourlySchedule? fixPriceSchedule;
 
   CommodityLeg({
-    this.curveId,
-    this.bucket,
-    this.timePeriod,
-    this.quantitySchedule,
+    required this.curveId,
+    required this.bucket,
+    required this.timePeriod,
+    required this.quantitySchedule,
     this.fixPriceSchedule,
-    this.tzLocation,
+    required this.tzLocation,
   }) {
     fixPriceSchedule ??= HourlySchedule.filled(0);
   }
@@ -145,7 +145,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
       /// TODO: maybe I can do better here and not expand to hourly first
-      var aux = quantitySchedule.toHourly(_term);
+      var aux = quantitySchedule.toHourly(_term) as TimeSeries<num>;
       return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented $timePeriod');
@@ -153,7 +153,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   }
 
   /// Get the leg quantity as an hourly timeseries.
-  TimeSeries<num> hourlyQuantity() {
+  TimeSeries<num?> hourlyQuantity() {
     var _term = term.interval.withTimeZone(tzLocation);
     return quantitySchedule.toHourly(_term);
   }
@@ -163,7 +163,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
       /// TODO: maybe I can do better here and not expand to hourly first
-      var aux = fixPriceSchedule.toHourly(_term);
+      var aux = fixPriceSchedule!.toHourly(_term) as TimeSeries<num>;;
       return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented $timePeriod');
@@ -171,9 +171,9 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   }
 
   /// Get the leg fixPrice as an hourly timeseries.
-  TimeSeries<num> hourlyFixPrice() {
+  TimeSeries<num?> hourlyFixPrice() {
     var _term = term.interval.withTimeZone(tzLocation);
-    return fixPriceSchedule.toHourly(_term);
+    return fixPriceSchedule!.toHourly(_term);
   }
 
   /// Return [true] if the calculator has custom quantity, i.e.
@@ -200,8 +200,8 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
       var months = term.interval
           .withTimeZone(tzLocation)
           .splitLeft((dt) => Month.fromTZDateTime(dt));
-      var _quantityM = toMonthly(hourlyQuantity(), mean);
-      var _fixPriceM = toMonthly(hourlyFixPrice(), mean);
+      var _quantityM = toMonthly(hourlyQuantity() as TimeSeries<num>, mean);
+      var _fixPriceM = toMonthly(hourlyFixPrice() as TimeSeries<num>, mean);
       var _floatingPriceM = toMonthly(hourlyFloatingPrice, mean);
       for (var month in months) {
         var _quantity = _quantityM.observationAt(month).value;
@@ -213,7 +213,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
       }
     } else {
       /// TODO: continue me
-      throw UnimplementedError('Not implemented ${timePeriod}');
+      throw UnimplementedError('Not implemented $timePeriod');
     }
   }
 
@@ -262,15 +262,15 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
 
   /// Make a copy
   CommodityLeg copyWith({
-    String curveId,
-    Bucket bucket,
-    TimePeriod timePeriod,
-    HourlySchedule quantitySchedule,
-    HourlySchedule fixPriceSchedule,
-    Location tzLocation,
-    Date asOfDate,
-    Term term,
-    BuySell buySell,
+    String? curveId,
+    Bucket? bucket,
+    TimePeriod? timePeriod,
+    HourlySchedule? quantitySchedule,
+    HourlySchedule? fixPriceSchedule,
+    Location? tzLocation,
+    Date? asOfDate,
+    Term? term,
+    BuySell? buySell,
   }) =>
       CommodityLeg(
           curveId: curveId ?? this.curveId,
@@ -294,7 +294,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
 TimeSeries<Map<Bucket, num>> _parseSeries(
     Iterable<Map<String, dynamic>> xs, Location location, Bucket bucket) {
   var ts = TimeSeries<Map<Bucket, num>>();
-  Interval Function(Map<String, dynamic>) parser;
+  late Interval Function(Map<String, dynamic>) parser;
   if (xs.first.keys.contains('month')) {
     parser = (e) => Month.parse(e['month'], location: location);
   } else if (xs.first.keys.contains('date')) {
@@ -311,7 +311,7 @@ TimeSeries<Map<Bucket, num>> _parseSeries(
 
 ///
 List<Map<String, dynamic>> _serializeSeries(TimeSeries<num> xs) {
-  Map<String, dynamic> Function(IntervalTuple) fun;
+  late Map<String, dynamic> Function(IntervalTuple) fun;
   if (xs.first.interval is Month) {
     fun = (e) =>
         {'month': (e.interval as Month).toIso8601String(), 'value': e.value};

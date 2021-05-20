@@ -18,10 +18,10 @@ class FederalHolidaysCalendar extends Calendar {
   static final Holiday _columbus = ColumbusDay();
   static final Holiday _veterans = VeteransDay();
 
-  /*late*/ HolidayType/*!*/ _holidayType;
+  late HolidayType _holidayType;
 
   @override
-  HolidayType/*!*/ getHolidayType(Date date) {
+  HolidayType getHolidayType(Date date) {
     if (!isHoliday(date)) {
       throw ArgumentError('$date is not a Federal holiday');
     }

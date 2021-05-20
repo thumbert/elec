@@ -2988,10 +2988,10 @@ List<Map> hourlyHubPrices() {
   };
 
   var out = <Map>[];
-  for (var i=0; i<aux['hourBeginning'].length; i++) {
+  for (var i=0; i<aux['hourBeginning']!.length; i++) {
     out.add({
-      'hourBeginning': TZDateTime.parse(_eastern, aux['hourBeginning'][i]),
-      'lmp': aux['lmp'][i]
+      'hourBeginning': TZDateTime.parse(_eastern, aux['hourBeginning']![i] as String),
+      'lmp': aux['lmp']![i]
     });
   }
 

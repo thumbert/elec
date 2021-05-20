@@ -18,7 +18,7 @@ class TimeAggregation {
     if (!_allowed.contains(y)) {
       throw ArgumentError('Invalid time aggregation value $x');
     }
-    TimeAggregation out;
+    late TimeAggregation out;
     switch (y) {
       case 'hour':
         out = hour;

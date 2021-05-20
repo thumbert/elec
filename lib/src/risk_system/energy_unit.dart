@@ -16,7 +16,7 @@ class Unit {
     var y = x.toLowerCase();
     if (!_allowed.contains(y))
       throw ArgumentError('Can\'t parse $x for energy unit.');
-    Unit out;
+    late Unit out;
     switch (y) {
       case 'mwh': out = mwh; break;
       case 'mmbtu': out = mmbtu; break;

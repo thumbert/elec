@@ -10,7 +10,7 @@ class ColumbusDay implements Holiday {
   HolidayType holidayType = HolidayType.columbusDay;
 
   @override
-  Date forYear(int year, {Location/*!*/ location}) {
+  Date forYear(int year, {required Location location}) {
     return makeHoliday(year, 10, 2, DateTime.monday, location: location);
   }
 

@@ -12,11 +12,11 @@ class OmniCurve {
 
   /// The domain of this OmniCurve.  No missing values allowed for any hour
   /// in this interval.
-  Interval domain;
+  late Interval domain;
 
   /// Return the value of the curve for this hour, or [null] if the hour is not
   /// contained in the domain of the OmniCurve.
-  num Function(Hour) _f;
+  late num? Function(Hour) _f;
 
   /// Construct an OmniCurve from a list of [MonthlyCurve]s.
   OmniCurve.fromMonthlyCurves(List<MonthlyCurve> curves) {
@@ -34,9 +34,9 @@ class OmniCurve {
   }
 
   /// Return the value of the schedule associated with this hour.
-  num operator [](Hour hour) => _f(hour);
+  num? operator [](Hour hour) => _f(hour);
 
   /// Return the value of the schedule associated with this hour.
-  num value(Hour hour) => _f(hour);
+  num? value(Hour hour) => _f(hour);
 
 }

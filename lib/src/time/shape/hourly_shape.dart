@@ -15,16 +15,14 @@ import 'package:timezone/timezone.dart';
 class HourlyShape extends MarksCurve {
   /// the covering buckets
   @override
-  Set<Bucket> buckets;
+  late Set<Bucket> buckets;
 
   /// Monthly timeseries.  The values for the bucket keys are the shaping
   /// factors for the hours in that bucket (sorted by hour beginning).  Note
   /// that for most buckets the sum of the List elements will add up to the
   /// numbers of hours in the bucket.  It is not the case for 7x8, in Mar and
   /// Nov because of DST.
-  TimeSeries<Map<Bucket, List<num>>/*!*/> data;
-
-  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
+  late TimeSeries<Map<Bucket, List<num>>> data;
 
   HourlyShape();
 
@@ -34,22 +32,22 @@ class HourlyShape extends MarksCurve {
     var _buckets = buckets.toList();
     var nest = Nest()
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
-      ..key((IntervalTuple e) => assignBucket(e.interval, _buckets))
+      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
       ..key((IntervalTuple e) => e.interval.start.hour)
-      ..rollup((List xs) => dama.mean(xs.map((e) => e.value)));
+      ..rollup((List xs) => dama.mean(xs.map(((e) => e.value) as num Function(dynamic))));
     var aux = nest.map(ts);
     var avg = flattenMap(
-        aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour']);
+        aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour'])!;
 
     // calculate the average price by month/bucket
     var nestB = Nest()
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
-      ..key((IntervalTuple e) => assignBucket(e.interval, _buckets))
+      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
       ..rollup((List xs) {
-        return dama.mean(xs.map((e) => e.value));
+        return dama.mean(xs.map(((e) => e.value) as num Function(dynamic)));
       });
     var _avgPrice = nestB.map(ts);
-    var avgPrice = flattenMap(_avgPrice, ['month', 'bucket', 'averageValue']);
+    var avgPrice = flattenMap(_avgPrice, ['month', 'bucket', 'averageValue'])!;
 
     // join them (by bucket/month) to calculate the shaping factor
     var xs = join(avg, avgPrice);
@@ -93,11 +91,11 @@ class HourlyShape extends MarksCurve {
     }
     var _buckets = (x['buckets'] as Map).keys;
     var months = (x['terms'] as List).cast<String>();
-    var aux = x['buckets'] as Map/*!*/;
+    var aux = x['buckets'] as Map;
     buckets = _buckets.map((e) => Bucket.parse(e)).toSet();
     data = TimeSeries<Map<Bucket, List<num>>>();
     for (var i = 0; i < months.length; i++) {
-      var month = Month.parse(months[i], fmt: _isoFmt, location: location);
+      var month = Month.parse(months[i], location: location);
       var value = <Bucket, List<num>>{};
       for (var _bucket in _buckets) {
         value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
@@ -106,9 +104,9 @@ class HourlyShape extends MarksCurve {
     }
   }
 
-  TimeSeries<num/*!*/> toHourly({Interval/*!*/ interval}) {
+  TimeSeries<num> toHourly({Interval? interval}) {
     interval ??= data.domain;
-    var ts = TimeSeries<num/*!*/>();
+    var ts = TimeSeries<num>();
     // need to extend the interval to make sure it matches the data boundaries
     var extInterval = Interval(Month.fromTZDateTime(interval.start).start,
         Month.fromTZDateTime(interval.end.subtract(Duration(seconds: 1))).end);
@@ -125,12 +123,12 @@ class HourlyShape extends MarksCurve {
     };
     for (var x in xs) {
       var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
-      /*late*/ num value;
+      late num value;
       for (var hour in hours) {
         for (var bucket in buckets) {
           if (bucket.containsHour(hour)) {
-            var ind = idx[bucket][hour.start.hour];
-            value = x.value[bucket][ind];
+            var ind = idx[bucket]![hour.start.hour]!;
+            value = x.value[bucket]![ind];
             break; // the bucket for loop
           }
         }

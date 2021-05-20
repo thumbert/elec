@@ -11,8 +11,8 @@ import '../bucket/bucket.dart';
 /// Additional customization can be achieved if is associated with a
 /// particular calendar month.
 class HourlyBucketWeights {
-  Bucket/*!*/ bucket;
-  /*late*/ Map<int, num> _values;
+  Bucket bucket;
+  late Map<int, num> _values;
 
   /// Store the weights for the given time [bucket], as a list of numbers with
   /// an average of 1.  This class is used when dealing with [HourlyShape].
@@ -26,7 +26,7 @@ class HourlyBucketWeights {
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
 
-  num value(Hour hour) => _values[hour.start.hour];
+  num? value(Hour hour) => _values[hour.start.hour];
 
   /// get the hourly weights
   Iterable<num> get weights => _values.values;

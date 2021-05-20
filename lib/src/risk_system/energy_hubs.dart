@@ -1,18 +1,18 @@
 part of elec.risk_system;
 
 abstract class BaseHub {
-  Commodity commodity;
-  String hub;
+  Commodity? commodity;
+  String? hub;
 }
 
 class EnergyHub implements BaseHub {
   @override
-  Commodity commodity = Commodity.electricity;
+  Commodity? commodity = Commodity.electricity;
   @override
-  String hub;
-  Market market;
-  Iso iso;
-  Location tzLocation;
+  String? hub;
+  Market? market;
+  Iso? iso;
+  Location? tzLocation;
 
   static final _cacheHubs = <Tuple4, EnergyHub>{};
 
@@ -21,7 +21,7 @@ class EnergyHub implements BaseHub {
     if (!_cacheHubs.containsKey(t4)) {
       _cacheHubs[t4] = EnergyHub._internal(hub, market, iso, tzLocation);
     }
-    return _cacheHubs[t4];
+    return _cacheHubs[t4]!;
   }
 
   EnergyHub._internal(this.hub, this.market, this.iso, this.tzLocation) {
@@ -51,8 +51,8 @@ class EnergyHub implements BaseHub {
       'commodity': 'energy',
       'hub': hub,
       'market': market.toString(),
-      'iso': iso.name,
-      'tzLocation': tzLocation.name,
+      'iso': iso!.name,
+      'tzLocation': tzLocation!.name,
     };
   }
 
@@ -60,14 +60,14 @@ class EnergyHub implements BaseHub {
       EnergyHub('MassHub', Market.da, IsoNewEngland(), _eastern);
 
   @override
-  String toString() => '${iso.name} $hub $market';
+  String toString() => '${iso!.name} $hub $market';
 }
 
 class NgHub implements BaseHub {
   @override
-  var commodity = Commodity.ng;
+  Commodity? commodity = Commodity.ng;
   @override
-  String hub;
+  String? hub;
 
   NgHub(this.hub);
 

@@ -10,9 +10,9 @@ import 'auction.dart';
 
 
 class Path {
-  Location source, sink;
-  num quantity;
-  Bucket bucket;
+  Location? source, sink;
+  num? quantity;
+  Bucket? bucket;
 
   Path();
 
@@ -52,8 +52,8 @@ class Path {
 }
 
 class Bid extends Path {
-  num bidPrice;
-  FtrAuction auction;
+  num? bidPrice;
+  FtrAuction? auction;
 
   Bid();
   Bid.from(this.auction, this.bidPrice, Path path) {
@@ -66,8 +66,8 @@ class Bid extends Path {
 }
 
 class Award extends Path {
-  num clearingPrice;
-  FtrAuction auction;
+  num? clearingPrice;
+  FtrAuction? auction;
 
   Award();
   Award.from(this.auction, this.clearingPrice, Path path){

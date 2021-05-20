@@ -108,7 +108,7 @@ final _origin = 25569;
 
 /// An approximation valid between years 1901-2099.
 num _julianDay(DateTime dt) {
-  var shift = Date.fromTZDateTime(dt).value + _origin;
+  var shift = Date.fromTZDateTime(dt as TZDateTime).value + _origin;
   var offset = dt.timeZoneOffset.inHours / 24;
   return shift + 2415018.5 + (dt.hour * 60 + dt.minute) / 1440 - offset;
 }

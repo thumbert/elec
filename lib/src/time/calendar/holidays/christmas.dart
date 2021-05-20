@@ -6,10 +6,10 @@ import '../holiday.dart';
 /// on the following Monday.
 class Christmas implements Holiday {
   @override
-  HolidayType/*!*/ holidayType = HolidayType.christmas;
+  HolidayType holidayType = HolidayType.christmas;
 
   @override
-  Date forYear(int year, {Location/*!*/ location}) {
+  Date forYear(int year, {required Location location}) {
     var candidate = Date(year, 12, 25, location: location);
     /// If it falls on Sun, celebrate it on Monday
     if (candidate.weekday == 7) candidate = candidate.add(1);

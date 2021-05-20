@@ -16,7 +16,7 @@ void tests() async {
       ];
       var aggregationTerm = Interval(TZDateTime(location, 2020), TZDateTime(location, 2021));
       var ta = SimpleTradeAggregator(trades, aggregationTerm);
-      var mw = ta.aggregate(AggregationVariable.mw);
+      var mw = ta.aggregate(AggregationVariable.mw)!;
       expect(mw.length, 24);
       var tbl = reshape(mw, ['month'], ['bucket'], 'mw', fill: 0);
       expect(tbl.length, 12);
@@ -31,7 +31,7 @@ void tests() async {
       ];
       var aggregationTerm = Interval(TZDateTime(location, 2020), TZDateTime(location, 2021));
       var ta = SimpleTradeAggregator(trades, aggregationTerm);
-      var mw = ta.aggregate(AggregationVariable.mw);
+      var mw = ta.aggregate(AggregationVariable.mw)!;
       expect(mw.length, 24);
       var tbl = reshape(mw, ['month'], ['bucket'], 'mw', fill: 0);
       expect(tbl.length, 12);
@@ -48,7 +48,7 @@ void tests() async {
       ];
       var aggregationTerm = Interval(TZDateTime(location, 2020), TZDateTime(location, 2021));
       var ta = SimpleTradeAggregator(trades, aggregationTerm);
-      var mw = ta.aggregate(AggregationVariable.mw);
+      var mw = ta.aggregate(AggregationVariable.mw)!;
       expect(mw.length, 24);
       var tbl = reshape(mw, ['month'], ['bucket'], 'mw', fill: 0);
       expect(tbl.length, 12);
@@ -66,7 +66,7 @@ void tests() async {
       var aggregationTerm = Interval(TZDateTime(location, 2019, 10, 1),
           TZDateTime(location, 2021));
       var ta = SimpleTradeAggregator(trades, aggregationTerm);
-      var mw = ta.aggregate(AggregationVariable.mw);
+      var mw = ta.aggregate(AggregationVariable.mw)!;
       //mw.forEach(print);
       expect(mw.length, 30);
       var tbl = reshape(mw, ['month'], ['bucket'], 'mw', fill: 0);

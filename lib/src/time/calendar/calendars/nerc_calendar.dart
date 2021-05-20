@@ -17,7 +17,7 @@ class NercCalendar extends Calendar {
   static final Holiday _thanksgiving = Thanksgiving();
   static final Holiday _christmas = Christmas();
 
-  /*late*/ HolidayType _holidayType;
+  late HolidayType _holidayType;
 
   @override
   HolidayType getHolidayType(Date date) {

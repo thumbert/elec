@@ -1,6 +1,6 @@
 part of elec.risk_system;
 
-class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve {
+class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   static final DateFormat _isoFmt = DateFormat('yyyy-MM');
 
   /// A simple forward curve model for daily and monthly values extending
@@ -10,7 +10,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   /// Support only daily and monthly observations.
-  PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket/*!*/, num>/*!*/>> xs) {
+  PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
   }
 
@@ -25,7 +25,6 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   ///   ]
   ///   The inputs are time-ordered with no gaps.
   PriceCurve.fromJson(List<Map<String, dynamic>> xs, Location location) {
-    location ??= UTC;
     for (var x in xs) {
       Interval term;
       if ((x['term'] as String).length == 10) {
@@ -65,9 +64,9 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
     for (var i = 0; i < terms.length; i++) {
       var value = <Bucket, num>{};
       for (var bucket in bKeys) {
-        num v = document['buckets'][bucket][i];
+        num? v = document['buckets'][bucket][i];
         if (v != null) {
-          value[buckets[bucket]] = v;
+          value[buckets[bucket]!] = v;
         }
       }
       ;
@@ -87,53 +86,52 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   @override
   Set<Bucket> get buckets {
     _buckets ??= values.map((e) => e.keys).expand((e) => e).toSet();
-    return _buckets;
+    return _buckets!;
   }
 
-  /*late*/ Set<Bucket> _buckets;
+  Set<Bucket>? _buckets;
 
   /// an hourly timeseries cache
-  /*late*/ TimeSeries<num/*!*/> _ts;
+  TimeSeries<num>? _ts ;
 
   /// Get the entire curve as an hourly timeseries
   /// If the forward curve contains only one bucket, say 2x16H, only the hours
   /// associated with that bucket will be returned in the interval.
-  TimeSeries<num/*!*/> toHourly() {
-    if (_ts != null) return _ts;
-    _ts = TimeSeries<num/*!*/>();
-    var buckets = <Bucket>{...expand((e) => e.value.keys)};
-    if (buckets == {Bucket.b7x8, Bucket.b2x16H, Bucket.b5x16}) {
-      // this is fastest
-      buckets = {Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H};
-    }
-    for (var x in this) {
-      var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
-      for (var hour in hours) {
-        for (var bucket in buckets) {
-          if (bucket.containsHour(hour)) {
-            _ts.add(IntervalTuple(hour, x.value[bucket]));
-            break;
+  TimeSeries<num> toHourly() {
+    if (_ts == null) {
+      var ts1 = TimeSeries<num>();
+      var buckets = <Bucket>{...expand((e) => e.value.keys)};
+      if (buckets == {Bucket.b7x8, Bucket.b2x16H, Bucket.b5x16}) {
+        // this is fastest
+        buckets = {Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H};
+      }
+      for (var x in this) {
+        var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
+        for (var hour in hours) {
+          for (var bucket in buckets) {
+            if (bucket.containsHour(hour)) {
+              ts1.add(IntervalTuple(hour, x.value[bucket]!));
+              break;
+            }
           }
         }
       }
+      _ts = ts1;
     }
-    return _ts;
+    return _ts!;
   }
 
   /// Calculate the value for this curve for any term and any bucket.
   ///
-  num value(Interval interval, Bucket bucket, {HourlyShape hourlyShape}) {
-    if (hourlyShape != null) {
-      throw ArgumentError('Not implemented yet');
-    }
+  num value(Interval interval, Bucket bucket) {
     if (!toHourly().domain.containsInterval(interval)) {
       throw ArgumentError('Forward curve not defined for the entire $interval');
     }
     var avg = 0.0;
     var i = 0;
-    var xs = _ts.window(interval);
+    var xs = toHourly().window(interval);
     for (var x in xs) {
-      if (bucket.containsHour(x.interval)) {
+      if (bucket.containsHour(x.interval as Hour)) {
         avg += x.value;
         i += 1;
       }
@@ -154,10 +152,10 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   }
 
   /// get the first month that is marked
-  Month get firstMonth {
-    var aux = firstWhere((e) => e.interval is Month, orElse: () => null);
+  Month? get firstMonth {
+    var aux = firstWhereOrNull((e) => e.interval is Month);
     if (aux == null) return null;
-    return aux.interval;
+    return aux.interval as Month;
   }
 
   /// If there are monthly marks before and including [upTo] month, expand them
@@ -178,7 +176,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
           for (var bucket in buckets) {
             for (var hour in hours) {
               if (bucket.containsHour(hour)) {
-                value[bucket] = mCurve[i].value[bucket];
+                value[bucket] = mCurve[i].value[bucket]!;
                 break;
               }
             }
@@ -235,7 +233,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
       out.add(one);
     }
     //return listOfMapToCsv(out);
-    return '';  // TODO: fix me
+    return ''; // TODO: fix me
   }
 
   /// Construct a Mongo document from a [PriceCurve].
@@ -256,16 +254,16 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
     var _buckets = values.map((e) => e.keys).expand((e) => e).toSet();
     var terms = <String>[];
     var buckets = Map.fromIterables(_buckets.map((e) => e.name),
-        List.generate(_buckets.length, (index) => <num>[]));
+        List.generate(_buckets.length, (index) => <num?>[]));
     for (var obs in observations) {
       if (obs.interval is Month) {
-        Month month = obs.interval;
+        var month = obs.interval as Month;
         terms.add(month.toIso8601String());
       } else {
         terms.add(obs.interval.toString());
       }
       for (var bucket in _buckets) {
-        buckets[bucket.name].add(obs.value[bucket]);
+        buckets[bucket.name]!.add(obs.value[bucket]);
       }
     }
     return {
@@ -279,7 +277,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   /// Return a time series after aligning this price curve with the [other]
   /// price curve.  They now have the same terms (if possible).  For example,
   /// one may had to expand some of the monthly marks to daily, etc.  Only the
-  /// overlapping terms are returned.
+  /// overlapping terms are returned!
   TimeSeries<Tuple2<Map<Bucket, num>, Map<Bucket, num>>> align(
       PriceCurve other) {
     // align their domains first
@@ -302,7 +300,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
     }
 
     // do an inner join
-    return x.merge(y, f: (a, b) => Tuple2(a, b));
+    return x.merge(y, f: (a, dynamic b) => Tuple2(a!, b));
   }
 
   /// Create a new price curve from this one using a list of intervals.  This
@@ -311,14 +309,14 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   PriceCurve withIntervals(List<Interval> intervals) {
     var aux = align(PriceCurve.fromIterable(
         intervals.map((e) => IntervalTuple(e, {Bucket.atc: 1}))));
-
     return PriceCurve.fromIterable(
-        aux.map((e) => IntervalTuple(e.interval, e.value.item1)));
+        aux.map(((e) => IntervalTuple(e.interval, e.value.item1))));
   }
 
   /// Add two curves observation by observation and bucket by bucket.
   /// If the curves don't match buckets, nothing is done (strict).
-  /// If any of the values is null, return null for that term/bucket.
+  /// Remember, no null values are allowed, so no need to worry about adding
+  /// nulls.
   @override
   PriceCurve operator +(PriceCurve other) {
     var zs = align(other);
@@ -330,11 +328,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          if (x[bucket] == null || y[bucket] == null) {
-            one[bucket] = null;
-          } else {
-            one[bucket] = x[bucket] + y[bucket];
-          }
+          one[bucket] = x[bucket]! + y[bucket]!;
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -354,11 +348,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          if (x[bucket] == null || y[bucket] == null) {
-            one[bucket] = null;
-          } else {
-            one[bucket] = x[bucket] - y[bucket];
-          }
+          one[bucket] = x[bucket]! - y[bucket]!;
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -378,11 +368,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          if (x[bucket] == null || y[bucket] == null) {
-            one[bucket] = null;
-          } else {
-            one[bucket] = x[bucket] * y[bucket];
-          }
+          one[bucket] = x[bucket]! * y[bucket]!;
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -402,11 +388,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
-          if (x[bucket] == null || y[bucket] == null) {
-            one[bucket] = null;
-          } else {
-            one[bucket] = x[bucket] / y[bucket];
-          }
+          one[bucket] = x[bucket]! / y[bucket]!;
         }
       }
       out.add(IntervalTuple(z.interval, one));
@@ -418,7 +400,7 @@ class PriceCurve extends TimeSeries<Map<Bucket/*!*/, num>/*!*/> with MarksCurve 
   /// is defined only through Dec25, construct Jan26 by applying function [f]
   /// to Jan25 values, etc.  By default, function [f] is the identity function.
   PriceCurve extendPeriodicallyByYear(Month endMonth,
-      {Map<Bucket, num> Function(Map<Bucket, num>) f}) {
+      {Map<Bucket, num> Function(Map<Bucket, num>)? f}) {
     f ??= (x) => x;
     var n = length;
     var month = (intervals.last as Month).next;

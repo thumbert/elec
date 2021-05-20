@@ -9,7 +9,7 @@ abstract class Iso {
   String get name;
   Set<String> get serviceTypes;
 
-  tz.Location preferredTimeZoneLocation;
+  late tz.Location preferredTimeZoneLocation;
 
   static final Iso newEngland = IsoNewEngland();
 

@@ -8,29 +8,30 @@ import 'package:dama/special/erf.dart';
 
 class BlackScholes {
   // instrument info
-  final CallPut/*!*/ type;
-  final Date/*!*/ expirationDate;
-  final num/*!*/ strike;
+  final CallPut type;
+  final Date expirationDate;
+  final num strike;
 
   // market info
-  Date/*!*/ _asOfDate;
-  num/*!*/ riskFreeRate;
-  num/*!*/ underlyingPrice;
-  /*late*/ num _volatility;
-  /*late*/ num _tExp;
+  late Date _asOfDate;
+  num riskFreeRate;
+  num underlyingPrice;
+  late num _volatility;
+  late num _tExp;
 
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({
-    this.type,
-    this.strike,
-    this.expirationDate,
-    Date/*!*/ asOfDate,
-    this.underlyingPrice,
-    num/*!*/ volatility,
-    this.riskFreeRate,
+    required this.type,
+    required this.strike,
+    required this.expirationDate,
+    required Date asOfDate,
+    required this.underlyingPrice,
+    required num volatility,
+    required this.riskFreeRate,
   }) {
     this.volatility = volatility;
     this.asOfDate = asOfDate;
+    _tExp = _timeToExpiration(asOfDate, expirationDate);
   }
 
   Date get asOfDate => _asOfDate;
@@ -39,8 +40,7 @@ class BlackScholes {
     _tExp = _timeToExpiration(asOfDate, expirationDate);
   }
 
-  num get timeToExpiration =>
-      _tExp ?? _timeToExpiration(asOfDate, expirationDate);
+  num get timeToExpiration => _tExp;
 
   num get volatility => _volatility;
   set volatility(num value) {
@@ -110,7 +110,7 @@ class BlackScholes {
   /// Calculate the gamma of the option (second derivative with respect to
   /// the underlying price.)
   double gamma() {
-    double aux = _volatility * underlyingPrice * sqrt(_tExp);
+    var aux = _volatility * underlyingPrice * sqrt(_tExp);
     return _dNd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) /
         aux;
   }
@@ -118,7 +118,7 @@ class BlackScholes {
   /// Calculate the theta of the option (sensitivity with respect to time.)
   /// for 1 day change in time to expiration
   double theta() {
-    double res;
+    late double res;
     var t1 = -_volatility *
         underlyingPrice *
         _dNd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) /
@@ -132,7 +132,7 @@ class BlackScholes {
                 _nd2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate);
         break;
       case CallPut.put:
-        var t2 = riskFreeRate *
+        num t2 = riskFreeRate *
             strike *
             exp(-riskFreeRate * _tExp) *
             Phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
@@ -154,7 +154,7 @@ class BlackScholes {
   /// Calculate the sensitivity of the option with respect to interest rate
   /// for 1 basis point move in the risk free rate.
   double rho() {
-    /*late*/ double res;
+    late double res;
     switch (type) {
       case CallPut.call:
         res = 0.0001 *
@@ -179,24 +179,21 @@ class BlackScholes {
   num impliedVolatility(num price) {
     var f = (num v) {
       var opt = BlackScholes(
-          type: type, strike: strike, expirationDate: expirationDate)
-        ..volatility = v
-        ..riskFreeRate = riskFreeRate
-        ..underlyingPrice = underlyingPrice
-        ..asOfDate = _asOfDate;
+          type: type, strike: strike, expirationDate: expirationDate,
+          asOfDate: _asOfDate, volatility: v, riskFreeRate: riskFreeRate, underlyingPrice: underlyingPrice);
       return opt.value() - price;
     };
     return bisectionSolver(f, 0.00001, 1000);
   }
 
   BlackScholes copyWith(
-      {CallPut type,
-      num strike,
-      Date expirationDate,
-      Date asOfDate,
-      num underlyingPrice,
-      num volatility,
-      num riskFreeRate}) {
+      {CallPut? type,
+      num? strike,
+      Date? expirationDate,
+      Date? asOfDate,
+      num? underlyingPrice,
+      num? volatility,
+      num? riskFreeRate}) {
     return BlackScholes(
       type: type ?? this.type,
       strike: strike ?? this.strike,

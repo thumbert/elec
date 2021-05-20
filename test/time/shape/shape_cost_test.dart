@@ -12,7 +12,7 @@ void tests() {
   group('Shape cost tests:', () {
     var location = getLocation('America/New_York');
     test('one day', () {
-      var interval = parseTerm('1Jan18', tzLocation: location);
+      var interval = parseTerm('1Jan18', tzLocation: location)!;
       var buckets = [
         IsoNewEngland.bucket7x24,
       ];
@@ -71,7 +71,7 @@ void tests() {
       ]);
       var cost = shapeCost(price, quantity, buckets,
           timeAggregation: TimeAggregation.term);
-      expect(cost[buckets.first].first.value.toStringAsFixed(3), '0.317');
+      expect(cost[buckets.first]!.first.value.toStringAsFixed(3), '0.317');
     });
   });
 }

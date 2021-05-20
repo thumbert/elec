@@ -6,7 +6,7 @@ import 'bucket.dart';
 class HourlyBucketScalars {
   Bucket bucket;
   List<num> values;
-  Map<int,num> _values;
+  late Map<int,num> _values;
 
   /// A list of numbers associated with each hour of a given bucket.
   /// This class is used when dealing with an [HourlySchedule].
@@ -20,6 +20,6 @@ class HourlyBucketScalars {
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
 
-  num operator [](Hour hour) => _values[hour.start.hour];
+  num? operator [](Hour hour) => _values[hour.start.hour];
 }
 

@@ -1,7 +1,7 @@
 # Changelog
 
-## 2.0.0, released 2021-05-17
-- Move to null safety.
+## 2.0.0, released 2021-05-20
+- Move to null safety (first pass).
 
 ## 1.1.0, released 2021-05-16
 - Last release before null safety
