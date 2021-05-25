@@ -8,7 +8,7 @@ import 'commodity_leg.dart';
 abstract class CalculatorBase<Leg extends CommodityLegBase,
     CacheProvider extends CacheProviderBase> {
   /// A collection of caches for different market and curve data.
-  CacheProvider? cacheProvider;
+  late CacheProvider cacheProvider;
 
   late Date _asOfDate;
 
@@ -42,7 +42,7 @@ abstract class CalculatorBase<Leg extends CommodityLegBase,
     }
   }
 
-  late List<Leg> _legs;
+  List<Leg>? _legs;
   List<Leg> get legs => _legs ?? <Leg>[];
   set legs(List<Leg> xs) {
     _legs = <Leg>[];
@@ -50,7 +50,7 @@ abstract class CalculatorBase<Leg extends CommodityLegBase,
       x.term = term;
       x.asOfDate = asOfDate;
       x.buySell = buySell;
-      _legs.add(x);
+      _legs!.add(x);
     }
   }
 

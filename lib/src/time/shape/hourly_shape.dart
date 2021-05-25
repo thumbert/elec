@@ -34,7 +34,7 @@ class HourlyShape extends MarksCurve {
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
       ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
       ..key((IntervalTuple e) => e.interval.start.hour)
-      ..rollup((List xs) => dama.mean(xs.map(((e) => e.value) as num Function(dynamic))));
+      ..rollup((List xs) => dama.mean(xs.map(((e) => e.value as num))));
     var aux = nest.map(ts);
     var avg = flattenMap(
         aux, ['month', 'bucket', 'hourBeginning', 'averageValueForHour'])!;
@@ -44,7 +44,7 @@ class HourlyShape extends MarksCurve {
       ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
       ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
       ..rollup((List xs) {
-        return dama.mean(xs.map(((e) => e.value) as num Function(dynamic)));
+        return dama.mean(xs.map(((e) => e.value as num)));
       });
     var _avgPrice = nestB.map(ts);
     var avgPrice = flattenMap(_avgPrice, ['month', 'bucket', 'averageValue'])!;

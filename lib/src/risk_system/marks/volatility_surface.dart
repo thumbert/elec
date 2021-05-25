@@ -106,7 +106,7 @@ class VolatilitySurface extends MarksCurve {
   /// is above the marked values, return the last marked value.
   ///
   /// Will throw if the bucket or month doesn't exist.
-  num? value(Bucket bucket, Month month, num strikeRatio) {
+  num value(Bucket bucket, Month month, num strikeRatio) {
     if (strikeRatio <= strikeRatios.first) {
       return _data[bucket]![strikeRatios.first]!.observationAt(month).value;
     } else if (strikeRatio >= strikeRatios.last) {

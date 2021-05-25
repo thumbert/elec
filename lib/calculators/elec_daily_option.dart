@@ -19,9 +19,9 @@ import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_l
 import 'package:elec/src/risk_system/pricing/calculators/base/cache_provider.dart';
 import 'package:http/http.dart';
 import 'package:more/cache.dart';
-// import 'package:elec_server/client/marks/curves/curve_id.dart';
-// import 'package:elec_server/client/marks/forward_marks.dart';
+import 'package:elec_server/client/marks/curves/curve_id.dart';
+import 'package:elec_server/client/marks/forward_marks.dart';
 
-// part '../src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
+part '../src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
 part '../src/risk_system/pricing/calculators/elec_option/elec_daily_option/commodity_leg.dart';
-// part '../src/risk_system/pricing/calculators/elec_option/cache_provider.dart';
+part '../src/risk_system/pricing/calculators/elec_option/cache_provider.dart';

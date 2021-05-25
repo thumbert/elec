@@ -14,9 +14,10 @@ dependencies:
   dama:
     git:
       url: git://github.com/thumbert/dama.git
-#  elec_server:
-#      git:
-#        url: git://github.com/thumbert/elec-server.git
+  elec_server:
+      git:
+        url: git://github.com/thumbert/elec-server.git
+        ref: non-null
   intl: ^0.17.0
   mongo_dart: ^0.7.0+1
   quiver: ^3.0.1
@@ -29,7 +30,7 @@ dependencies:
   timezone: ^0.7.0
   tuple: ^2.0.0
   xml: ^5.1.0
-  collection: ^1.15.0-nullsafety.4
+  collection: ^1.15.0
 
 dev_dependencies:
   pedantic: ^1.11.0

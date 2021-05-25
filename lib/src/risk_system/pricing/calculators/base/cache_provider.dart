@@ -6,14 +6,14 @@ import 'package:more/cache.dart';
 
 class CacheProviderBase {
   /// The keys are the curveId, data comes from marks/curve_ids collection
-  Cache<String, Map<String, dynamic>>? curveDetailsCache;
+  late Cache<String, Map<String, dynamic>> curveDetailsCache;
 
   CacheProviderBase();
 
   /// An example of a CacheProvider implementation, that only provides
   /// the curve details and forward marks.
   CacheProviderBase.test(
-      {Client? client, String rootUrl = 'http://localhost:8080/'}) {
+      {Client? client, String rootUrl = 'http://localhost:8080'}) {
     client ??= Client();
     // var curveIdClient = CurveIdClient(client, rootUrl: rootUrl);
 
