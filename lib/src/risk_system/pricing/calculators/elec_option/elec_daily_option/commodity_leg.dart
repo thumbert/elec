@@ -9,13 +9,18 @@ class CommodityLeg extends CommodityLegMonthly {
       required Location tzLocation,
       required this.callPut,
       required this.strike,
-      this.priceAdjustment,
-      this.volatilityAdjustment}) : super(curveId: curveId, bucket: bucket, tzLocation: tzLocation, quantity: quantity, fixPrice: fixPrice) {
+      required this.priceAdjustment,
+      required this.volatilityAdjustment})
+      : super(
+            curveId: curveId,
+            bucket: bucket,
+            tzLocation: tzLocation,
+            quantity: quantity,
+            fixPrice: fixPrice) {
     // this.curveId = curveId;
     // this.bucket = bucket;
     // this.tzLocation = tzLocation;
     // this.quantity = quantity;
-    // this.fixPrice = fixPrice ?? TimeSeries.fill(quantity.intervals, 0);
   }
 
   late String volatilityCurveId;
@@ -26,14 +31,14 @@ class CommodityLeg extends CommodityLegMonthly {
   late TimeSeries<num> strike;
 
   /// The [asOfDate] value of the underlying as a monthly timeseries.
-  TimeSeries<num>? priceAdjustment;
+  late TimeSeries<num> priceAdjustment;
 
   /// The [asOfDate] value of the volatility as a monthly timeseries.
   late TimeSeries<num> volatility;
 
   /// For clarification, values are as treated as numbers, e.g. a 5% adjustment
   /// is entered as 0.05.
-  TimeSeries<num>? volatilityAdjustment;
+  late TimeSeries<num> volatilityAdjustment;
 
   /// The [asOfDate] value of the interest rate as a monthly timeseries.
   late TimeSeries<num> interestRate;
@@ -117,8 +122,8 @@ class CommodityLeg extends CommodityLegMonthly {
         .withTimeZone(tzLocation)
         .splitLeft((dt) => Month.fromTZDateTime(dt));
     for (var i = 0; i < months.length; i++) {
-      var _uPrice = underlyingPrice[i].value + priceAdjustment![i].value;
-      var _volatility = volatility[i].value + volatilityAdjustment![i].value;
+      var _uPrice = underlyingPrice[i].value + priceAdjustment[i].value;
+      var _volatility = volatility[i].value + volatilityAdjustment[i].value;
       var hours = bucket.countHours(months[i]);
       leaves.add(LeafElecOption(
         asOfDate: asOfDate,
@@ -159,27 +164,27 @@ class CommodityLeg extends CommodityLegMonthly {
       out['strike'] = {'value': CommodityLegMonthly.serializeSeries(strike)};
     }
 
-    if (priceAdjustment!.values.toSet().length == 1) {
-      var pAdj = priceAdjustment!.values.first;
+    if (priceAdjustment.values.toSet().length == 1) {
+      var pAdj = priceAdjustment.values.first;
       if (pAdj != 0) {
         out['priceAdjustment'] = {'value': pAdj};
       }
     } else {
       // only serialize if there is a non zero adjustment
       out['priceAdjustment'] = {
-        'value': CommodityLegMonthly.serializeSeries(priceAdjustment!)
+        'value': CommodityLegMonthly.serializeSeries(priceAdjustment)
       };
     }
 
-    if (volatilityAdjustment!.values.toSet().length == 1) {
-      var vAdj = volatilityAdjustment!.values.first;
+    if (volatilityAdjustment.values.toSet().length == 1) {
+      var vAdj = volatilityAdjustment.values.first;
       if (vAdj != 0) {
         out['volatilityAdjustment'] = {'value': vAdj};
       }
     } else {
       // only serialize if there is a non zero adjustment
       out['volatilityAdjustment'] = {
-        'value': CommodityLegMonthly.serializeSeries(priceAdjustment!)
+        'value': CommodityLegMonthly.serializeSeries(priceAdjustment)
       };
     }
 

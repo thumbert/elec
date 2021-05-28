@@ -10,6 +10,7 @@ import 'seasonality.dart';
 class SeasonalAnalysis {
   final TimeSeries<num> xs;
   late Seasonality _seasonality;
+
   /// Get the data grouped by the groups.  For example, for Seasonality.dayOfYear
   /// each entity of the [groups] has as key the day of the year, and as values
   /// a daily TimeSeries for all the years in the input that correspond to this
@@ -56,8 +57,7 @@ class SeasonalAnalysis {
   /// a daily time series of 365/366 values.
   SeasonalAnalysis.dayOfYear(this.xs) {
     _seasonality = Seasonality.dayOfYear;
-    groups =
-        _groupByIndex(xs, (e) => Date.fromTZDateTime(e.start).dayOfYear());
+    groups = _groupByIndex(xs, (e) => Date.fromTZDateTime(e.start).dayOfYear());
     _paths = _toPath(xs, (e) {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
@@ -155,17 +155,17 @@ class SeasonalAnalysis {
 
   /// Calculate the summary statistics by group
   Map<int, Map<String, num>> summaryByGroup() =>
-      {for (var group in groups.keys) group: summary(groups[group]!.values as Iterable<num>)};
+      {for (var group in groups.keys) group: summary(groups[group]!.values)};
 
   /// Calculate the summary statistics by path
   Map<Interval, Map<String, num>> summaryByPath() =>
-      {for (var key in _paths.keys) key: summary(_paths[key]!.values as Iterable<num>)};
+      {for (var key in _paths.keys) key: summary(_paths[key]!.values)};
 
   /// Calculate the quantile by group.
   Map<int, List<QuantilePair>> quantileByGroup(List<num> probabilities) {
     var out = <int, List<QuantilePair>>{}; // group -> probabilities
     for (var group in groups.keys) {
-      var quantile = Quantile(groups[group]!.values.toList() as List<num>);
+      var quantile = Quantile(groups[group]!.values.toList());
       out[group] = [
         for (var p in probabilities) QuantilePair(p, quantile.value(p))
       ];
@@ -180,7 +180,9 @@ Map<Interval, TimeSeries<num>> _toPath(TimeSeries<num> xs,
   var n = xs.length;
   for (var i = 0; i < n; i++) {
     var t2 = f(xs[i]);
-    grp.putIfAbsent(t2.item1, () => TimeSeries<num>()).add(t2.item2 as IntervalTuple<num>);
+    grp
+        .putIfAbsent(t2.item1, () => TimeSeries<num>())
+        .add(t2.item2 as IntervalTuple<num>);
   }
   return grp;
 }
