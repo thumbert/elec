@@ -102,7 +102,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   /// Calculate the delta-gamma report.
   /// Shocks are multipliers to the underlying price, e.g. [-0.1, 0.1] are
   /// -10%, +10% shock in the underlying, respectively.
-  Report deltaGammaReport({required List<num> shocks}) =>
+  Report deltaGammaReport({List<num>? shocks}) =>
       DeltaGammaReportElecDailyOption(this, shocks: shocks);
   Report flatReport() => FlatReportElecDailyOption(this);
   Report monthlyPositionReport() => MonthlyPositionReportElecDailyOption(this);
