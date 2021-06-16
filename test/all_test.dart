@@ -2,6 +2,7 @@ library test_all;
 
 import 'package:timezone/data/latest.dart';
 import 'analysis/filter/filter_test.dart' as filter;
+import 'analysis/format/seasonal_format_test.dart' as seasonal_format;
 import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
 import 'financial/black_scholes/black_scholes_test.dart' as black_scholes;
 import 'physical/gas/time_aggregation_test.dart' as time_aggregation;
@@ -50,6 +51,7 @@ void main() async {
   volatility_surface.tests();
   elec_swap.tests(rootUrl);
   elec_daily_option.tests(rootUrl);
+  seasonal_format.tests();
   shape_cost.tests();
   time_aggregation.tests();
   trade_aggregator.tests();
