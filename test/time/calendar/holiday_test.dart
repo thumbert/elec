@@ -1,5 +1,6 @@
 library test_holiday;
 
+import 'package:elec/src/time/calendar/holidays/juneteenth.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
@@ -46,6 +47,18 @@ void tests() {
           '2017-04-14', GoodFriday().forYear(2017, location: UTC).toString());
       expect(GoodFriday().isDate(Date(2017, 4, 14, location: UTC)), true);
       expect(GoodFriday().isDate(Date(2017, 4, 15, location: UTC)), false);
+    });
+
+    test('Juneteenth', () {
+      expect(Juneteenth().forYear(2020, location: UTC), null);
+      expect(
+          Juneteenth().forYear(2021, location: UTC).toString(), '2021-06-18');
+      expect(
+          Juneteenth().forYear(2022, location: UTC).toString(), '2022-06-20');
+      expect(
+          Juneteenth().forYear(2023, location: UTC).toString(), '2023-06-19');
+      expect(Juneteenth().isDate(Date(2022, 6, 20, location: UTC)), true);
+      expect(Juneteenth().isDate(Date(2020, 6, 19, location: UTC)), false);
     });
 
     test('Labor Day ', () {

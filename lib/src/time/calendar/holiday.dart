@@ -10,6 +10,7 @@ enum HolidayType {
   electionDay,
   goodFriday,
   independenceDay,
+  juneteenth,
   laborDay,
   lincolnBirthday,
   memorialDay,
@@ -24,7 +25,6 @@ enum HolidayType {
 
 abstract class Holiday {
   late HolidayType holidayType;
-  Date forYear(int year, {required Location location});
+  Date? forYear(int year, {required Location location});
   bool isDate(Date date);
 }
-

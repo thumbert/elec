@@ -2,6 +2,7 @@ library time.calendar.calendars.federal_holiday_calendar;
 
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
+import 'package:elec/src/time/calendar/holidays/juneteenth.dart';
 import '../holidays/mlk_birthday.dart';
 import '../holidays/washington_birthday.dart';
 import '../holidays/columbus_day.dart';
@@ -11,8 +12,11 @@ import 'nerc_calendar.dart';
 
 /// Federal holidays calendar (10 holidays).  NERC calendar + another 4 ones.
 /// http://en.wikipedia.org/wiki/Federal_holidays_in_the_United_States
+/// In 2021, Jun 19th was added as a Federal holiday by president Biden.
+///
 class FederalHolidaysCalendar extends Calendar {
   static final _nercCalendar = NercCalendar();
+  static final Holiday _juneteenth = Juneteenth();
   static final Holiday _mlk = MlkBirthday();
   static final Holiday _washingtonBirthday = WashingtonBirthday();
   static final Holiday _columbus = ColumbusDay();
@@ -48,6 +52,12 @@ class FederalHolidaysCalendar extends Calendar {
           _holidayType = HolidayType.washingtonBirthday;
         }
         break;
+      case 6:
+        if (date.year >= 2021 && _juneteenth.isDate(date)) {
+          res = true;
+          _holidayType = HolidayType.juneteenth;
+        }
+        break;
       case 10:
         if (_columbus.isDate(date)) {
           res = true;
@@ -65,5 +75,4 @@ class FederalHolidaysCalendar extends Calendar {
     }
     return res;
   }
-
 }
