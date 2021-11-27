@@ -83,29 +83,49 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     addAll(xs);
   }
 
+  Set<Bucket>? _buckets;
+
+  /// an hourly timeseries cache for the entire price curve
+  TimeSeries<num>? _ts;
+
   @override
   Set<Bucket> get buckets {
-    _buckets ??= values.map((e) => e.keys).expand((e) => e).toSet();
+    _buckets ??= <Bucket>{...expand((e) => e.value.keys)};
     return _buckets!;
   }
 
-  Set<Bucket>? _buckets;
-
-  /// an hourly timeseries cache
-  TimeSeries<num>? _ts ;
-
-  /// Get the entire curve as an hourly timeseries
+  /// Get the curve as an hourly timeseries.
+  /// If [interval] is specified, only return the curve for that interval.
+  /// Since this is an expensive operation, the complete hourly curve can be
+  /// cached by triggering a call with a null [interval].  However, if you
+  /// only want to calculate a two month strip price, it is an overkill to
+  /// calculate the hourly curve for the entire domain which may be 10 years.
+  /// In that case pass in the [interval] you are interested directly.
+  ///
   /// If the forward curve contains only one bucket, say 2x16H, only the hours
-  /// associated with that bucket will be returned in the interval.
-  TimeSeries<num> toHourly() {
-    if (_ts == null) {
+  /// associated with that bucket will be returned in the interval.  Not having
+  /// a complete covering of the interval is DISCOURAGED because the value
+  /// calculation becomes suspect.  What is the value of the Offpeak bucket if
+  /// the curve only has the 2x16H hours defined?  We could assume that
+  /// the 7x8 hours have a value zero but it needs to be specified in the
+  /// constructor.  This has not been assumed, so the Offpeak bucket price
+  /// == 2x16H price in this situation!
+  TimeSeries<num> toHourly({Interval? interval}) {
+    if (_ts != null) {
+      // Since the cache exists, window and exit
+      if (interval == null) {
+        return _ts!;
+      } else {
+        return TimeSeries<num>.fromIterable(_ts!.window(interval));
+      }
+    } else {
       var ts1 = TimeSeries<num>();
-      var buckets = <Bucket>{...expand((e) => e.value.keys)};
       if (buckets == {Bucket.b7x8, Bucket.b2x16H, Bucket.b5x16}) {
         // this is fastest
         buckets = {Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H};
       }
-      for (var x in this) {
+      var aux = (interval == null) ? this : window(interval);
+      for (var x in aux) {
         var hours = x.interval.splitLeft((dt) => Hour.beginning(dt));
         for (var hour in hours) {
           for (var bucket in buckets) {
@@ -116,24 +136,101 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
           }
         }
       }
-      _ts = ts1;
+      if (interval == null) {
+        _ts = ts1; // cache the result
+      }
+      return ts1;
     }
-    return _ts!;
   }
 
   /// Calculate the value for this curve for any term and any bucket.
   ///
+  /// If the forward curve contains only one bucket, say 2x16H, only the hours
+  /// associated with that bucket will be counted in the value calculation.
+  /// Not having a complete bucket covering of the interval is DISCOURAGED
+  /// because the value calculation becomes suspect.  What is the value of the
+  /// Offpeak bucket if the curve only has the 2x16H hours defined?  We could
+  /// assume that the 7x8 hours have a value zero but it's better if this gets
+  /// specified in the constructor.  This assumption has not been made,
+  /// so the Offpeak bucket price == 2x16H price for this curve!
+  ///
   num value(Interval interval, Bucket bucket) {
-    if (!toHourly().domain.containsInterval(interval)) {
+    var _domain = Interval(first.interval.start, last.interval.end);
+    if (!_domain.containsInterval(interval)) {
       throw ArgumentError('Forward curve not defined for the entire $interval');
     }
+
+    /// Take a few shortcuts if possible.  No speed improvements found if
+    /// trying to calculate the ATC bucket or the Offpeak bucket separately.
+    if (buckets.contains(bucket)) {
+      return _calcValue(interval, bucket);
+    } else {
+      /// treat atc and offpeak specially since they are so common
+      final _trio = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
+      if (bucket == Bucket.atc && buckets.containsAll(_trio)) {
+        return _calcValueAtc(interval);
+      }
+      if (bucket == Bucket.offpeak &&
+          buckets.containsAll({Bucket.b2x16H, Bucket.b7x8})) {
+        return _calcValueOffpeak(interval);
+      }
+    }
+
+    /// resort to doing the full blown hourly calculation
     var avg = 0.0;
     var i = 0;
-    var xs = toHourly().window(interval);
+    var xs = toHourly(interval: interval);
     for (var x in xs) {
       if (bucket.containsHour(x.interval as Hour)) {
         avg += x.value;
         i += 1;
+      }
+    }
+    return avg / i;
+  }
+
+  /// Speed up the calculation by avoiding to go to hourly, if the bucket is
+  /// in the curve already and you just aggregate different terms.
+  num _calcValue(Interval interval, Bucket bucket) {
+    var xs = window(interval);
+    var avg = 0.0;
+    var i = 0;
+    for (var x in xs) {
+      var count = bucket.countHours(x.interval);
+      avg += x.value[bucket]! * count;
+      i += count;
+    }
+    return avg / i;
+  }
+
+  /// Speed up the calculation by avoiding to go to hourly, if you just
+  /// aggregate different terms.
+  num _calcValueAtc(Interval interval) {
+    var xs = window(interval);
+    var avg = 0.0;
+    var i = 0;
+    for (var x in xs) {
+      for (var bucket in x.value.keys) {
+        var count = bucket.countHours(x.interval);
+        avg += x.value[bucket]! * count;
+        i += count;
+      }
+    }
+    return avg / i;
+  }
+
+  /// Speed up the calculation by avoiding to go to hourly, if you just
+  /// aggregate different terms.
+  num _calcValueOffpeak(Interval interval) {
+    final _duo = [Bucket.b2x16H, Bucket.b7x8];
+    var xs = window(interval);
+    var avg = 0.0;
+    var i = 0;
+    for (var x in xs) {
+      for (var bucket in _duo) {
+        var count = bucket.countHours(x.interval);
+        avg += x.value[bucket]! * count;
+        i += count;
       }
     }
     return avg / i;

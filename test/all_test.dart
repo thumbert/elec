@@ -43,8 +43,8 @@ void main() async {
   hourly_schedule.tests();
   hourly_shape.tests(rootUrl);
   monthly_bucket_value.tests();
-  calendar.main();
-  holiday.main();
+  calendar.tests();
+  holiday.tests();
   last_trading_day.tests();
   price_curve.tests();
   monthly_curve.tests();

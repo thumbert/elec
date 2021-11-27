@@ -88,16 +88,16 @@ void tests() {
       expect(countByMonth(2015, IsoNewEngland.bucket5x16),
           [336, 320, 352, 352, 320, 352, 368, 336, 336, 352, 320, 352]);
     });
-    
+
     test('custom bucket', () {
-      var b5x16_1318 = CustomBucket.withHours(Bucket.b5x16, 
-          [13, 14, 15, 16, 17, 18]);
+      var b5x16_1318 =
+          CustomBucket.withHours(Bucket.b5x16, [13, 14, 15, 16, 17, 18]);
       var term = Term.parse('21Aug20', location);
-      var hours = term.hours()
-          .where((hour) => b5x16_1318.containsHour(hour))
-          .toList();
+      var hours =
+          term.hours().where((hour) => b5x16_1318.containsHour(hour)).toList();
       expect(hours.length, 6);
-      expect(hours.first, Hour.beginning(TZDateTime(location, 2020, 8, 21, 13)));
+      expect(
+          hours.first, Hour.beginning(TZDateTime(location, 2020, 8, 21, 13)));
     });
   });
 
@@ -196,41 +196,41 @@ void tests() {
           Interval(TZDateTime(location, 2013), TZDateTime(location, 2014));
       var months = year.splitLeft((dt) => Month.fromTZDateTime(dt));
       var b2x16H = IsoNewEngland.bucket2x16H;
-      var count =
-          months.map((month) => b2x16H.countHours(month)).toList();
+      var count = months.map((month) => b2x16H.countHours(month)).toList();
       expect(
           count, [144, 128, 160, 128, 144, 160, 144, 144, 160, 128, 160, 160]);
     });
   });
 }
 
+/// As of 2021-11-28, desktop Intel i7-6700 CPU @ 3.40GHz x 8, Ubuntu 16.04
+/// 100 ms to count the number of onpeak hours in 10 years
+/// - 24 ms is just to construct the hours List, 87648 elements
+/// -  2 ms to iterate over the list
+/// - 75 ms to test if the hour is in onpeak bucket
+///
 void speedTest() {
   var location = getLocation('America/New_York');
   var term = Term.parse('Jan21-Dec30', location);
-  var values = {Bucket.b5x16: 80, Bucket.b7x8: 56, Bucket.b2x16H: 32};
-  var hours = term.hours();
-  var buckets = [Bucket.b5x16, Bucket.b7x8, Bucket.b2x16H];
-  var ts = TimeSeries<num?>();
+  var bucket = Bucket.b5x16;
+  var count = 0;
   var sw = Stopwatch()..start();
+  var hours = term.hours();
   for (var hour in hours) {
-    for (var bucket in buckets) {
-      if (bucket.containsHour(hour)) {
-        ts.add(IntervalTuple(hour, values[bucket]));
-        // ts.add(IntervalTuple(hour, 1));
-        break;
-      }
+    if (bucket.containsHour(hour)) {
+      count++;
     }
   }
   sw.stop();
   print(sw.elapsedMilliseconds);
+  print(count);
 }
-
 
 void main() async {
   initializeTimeZones();
-  tests();
+  // tests();
 
   // aggregateByBucketMonth();
 
-  // speedTest();
+  speedTest();
 }

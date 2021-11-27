@@ -45,37 +45,37 @@ abstract class Bucket {
   static final b7x16 = Bucket7x16();
   static final offpeak = BucketOffpeak();
 
-  static final Map<String,Bucket> buckets = {
-    'ATC' : Bucket.atc,
-    'PEAK' : Bucket.b5x16,
-    'ONPEAK' : Bucket.b5x16,
-    'OFFPEAK' : Bucket.offpeak,
-    '2X16' : Bucket.b2x16,
-    '2X16H' : Bucket.b2x16H,
-    '5X8' : Bucket.b5x8,
-    '5X16' : Bucket.b5x16,
-    '5X16_7' : Bucket.b5x16_7,
-    '5X16_8' : Bucket.b5x16_8,
-    '5X16_9' : Bucket.b5x16_9,
-    '5X16_10' : Bucket.b5x16_10,
-    '5X16_11' : Bucket.b5x16_11,
-    '5X16_12' : Bucket.b5x16_12,
-    '5X16_13' : Bucket.b5x16_13,
-    '5X16_14' : Bucket.b5x16_14,
-    '5X16_15' : Bucket.b5x16_15,
-    '5X16_16' : Bucket.b5x16_16,
-    '5X16_17' : Bucket.b5x16_17,
-    '5X16_18' : Bucket.b5x16_18,
-    '5X16_19' : Bucket.b5x16_19,
-    '5X16_20' : Bucket.b5x16_20,
-    '5X16_21' : Bucket.b5x16_21,
-    '5X16_22' : Bucket.b5x16_22,
-    'WRAP' : Bucket.offpeak,
-    'FLAT' : Bucket.atc,
-    '6X16' : Bucket.b6x16,
-    '7X8' : Bucket.b7x8,
-    '7X16' : Bucket.b7x16,
-    '7X24' : Bucket.atc,
+  static final Map<String, Bucket> buckets = {
+    'ATC': Bucket.atc,
+    'PEAK': Bucket.b5x16,
+    'ONPEAK': Bucket.b5x16,
+    'OFFPEAK': Bucket.offpeak,
+    '2X16': Bucket.b2x16,
+    '2X16H': Bucket.b2x16H,
+    '5X8': Bucket.b5x8,
+    '5X16': Bucket.b5x16,
+    '5X16_7': Bucket.b5x16_7,
+    '5X16_8': Bucket.b5x16_8,
+    '5X16_9': Bucket.b5x16_9,
+    '5X16_10': Bucket.b5x16_10,
+    '5X16_11': Bucket.b5x16_11,
+    '5X16_12': Bucket.b5x16_12,
+    '5X16_13': Bucket.b5x16_13,
+    '5X16_14': Bucket.b5x16_14,
+    '5X16_15': Bucket.b5x16_15,
+    '5X16_16': Bucket.b5x16_16,
+    '5X16_17': Bucket.b5x16_17,
+    '5X16_18': Bucket.b5x16_18,
+    '5X16_19': Bucket.b5x16_19,
+    '5X16_20': Bucket.b5x16_20,
+    '5X16_21': Bucket.b5x16_21,
+    '5X16_22': Bucket.b5x16_22,
+    'WRAP': Bucket.offpeak,
+    'FLAT': Bucket.atc,
+    '6X16': Bucket.b6x16,
+    '7X8': Bucket.b7x8,
+    '7X16': Bucket.b7x16,
+    '7X24': Bucket.atc,
   };
 
   /// Return a bucket from a String, for now, from IsoNewEngland only.
@@ -92,7 +92,6 @@ abstract class Bucket {
 
   /// Count the number of hours in the interval
   int countHours(Interval interval) {
-    //_hoursCache ??= <Interval, int>{};
     if (!_hoursCache.containsKey(interval)) {
       if (!isBeginningOfHour(interval.start) ||
           !isBeginningOfHour(interval.end)) {
@@ -100,7 +99,13 @@ abstract class Bucket {
             'Input interval $interval doesn\'t start/end at hour boundaries');
       }
       var hrs = interval.splitLeft((dt) => Hour.beginning(dt));
-      _hoursCache[interval] = hrs.where((e) => containsHour(e)).length;
+      var count = hrs.where((e) => containsHour(e)).length;
+      // cache only if interval is long enough, don't do it for just a few days
+      if (hrs.length >= 168) {
+        _hoursCache[interval] = count;
+      } else {
+        return count;
+      }
     }
     return _hoursCache[interval]!;
   }
@@ -233,7 +238,9 @@ class Bucket6x16 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.hour >= 7 && hour.start.hour < 23 && hour.currentDate.weekday != 7) return true;
+    if (hour.start.hour >= 7 &&
+        hour.start.hour < 23 &&
+        hour.currentDate.weekday != 7) return true;
     return false;
   }
 
@@ -279,12 +286,13 @@ class Bucket5x16 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    var dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour < 7 || hour.start.hour == 23) {
+      if (hs.hour < 7 || hs.hour == 23) {
         /// not at the right hour of the day
         return false;
       } else {

@@ -42,7 +42,7 @@ void tests() {
     });
 
     test('from the 3 standard buckets', () {
-      expect(curve0.length, 11);
+      expect(curve0.length, 13);
       expect(curve0.first.value.length, 2);
       expect(curve0.toJson(), x0);
     });
@@ -53,25 +53,25 @@ void tests() {
       expect(curve.toJson(), x1);
     });
     test('toMongoDocument', () {
-      var out =
-          curve0.toMongoDocument(Date.utc(2020, 10, 1), 'isone_energy_4000_da_lmp');
+      var out = curve0.toMongoDocument(
+          Date.utc(2020, 10, 1), 'isone_energy_4000_da_lmp');
       expect(out['fromDate'], '2020-10-01');
       expect(out['curveId'], 'isone_energy_4000_da_lmp');
-      expect((out['terms'] as List).length, 11);
-      expect((out['terms'] as List).last, '2020-12');
+      expect((out['terms'] as List).length, 13);
+      expect((out['terms'] as List).last, '2021-02');
       expect((out['buckets'] as Map).keys.toSet(), {'5x16', '2x16H', '7x8'});
     });
     test('filter only the monthly values', () {
       var curve0m =
           PriceCurve.fromIterable(curve0.where((e) => e.interval is Month));
-      expect(curve0m.length, 5);
+      expect(curve0m.length, 7);
     });
     test('first month', () {
       expect(curve0.firstMonth, Month(2020, 8, location: location));
     });
     test('expand to daily', () {
       var curve0P1 = curve0.expandToDaily(Month(2020, 8, location: location));
-      expect(curve0P1.length, 41);
+      expect(curve0P1.length, 43);
       expect(curve0P1.monthlyComponent().first.interval,
           Month(2020, 9, location: location));
       var curve0P2 = curve0.expandToDaily(Month(2020, 9, location: location));
@@ -94,8 +94,8 @@ void tests() {
       var ts = curve0.toHourly();
       expect(
           ts.first.interval, Hour.beginning(TZDateTime(location, 2020, 7, 26)));
-      expect(ts.last.interval, Hour.ending(TZDateTime(location, 2021)));
-      var n = Term.parse('26Jul20-31Dec20', location).hours().length;
+      expect(ts.last.interval, Hour.ending(TZDateTime(location, 2021, 3)));
+      var n = Term.parse('26Jul20-28Feb21', location).hours().length;
       expect(ts.length, n);
     });
     test('calculate value for offpeak bucket (aggregate 2x16H, 7x8)', () {
@@ -107,6 +107,14 @@ void tests() {
       var term = Term.parse('Q4, 2020', location);
       var value = curve0.value(term.interval, Bucket.b5x16);
       expect(value.toStringAsFixed(4), '35.0625');
+    });
+    test('return NaN value if the bucket is not covered', () {
+      var x3 = (xs[3]['observations'] as List).cast<Map<String, dynamic>>();
+      var curve = PriceCurve.fromJson(x3, location);
+      // this curve has only the 7x8 bucket
+      var term = Term.parse('Q4, 2020', location);
+      var value = curve.value(term.interval, Bucket.b2x16H);
+      expect(value.isNaN, true);
     });
     test(
         'calculate value for offpeak bucket, term Q4,20 (aggregate months and buckets)',
@@ -284,8 +292,7 @@ void tests() {
       expect(c3[2].value, {Bucket.b5x16: 62.1});
       expect(c3[3].value, {Bucket.b5x16: 57.2});
     });
-    test('add two price curves, non-matching terms with expansion',
-        () {
+    test('add two price curves, non-matching terms with expansion', () {
       var c1 = PriceCurve.fromIterable([
         IntervalTuple(Date.utc(2020, 1, 29), {Bucket.b5x16: 60}),
         IntervalTuple(Month.utc(2020, 2), {Bucket.b5x16: 57}),
@@ -352,11 +359,32 @@ void tests() {
   });
 }
 
-
-
-
+/// As of 2021-11-28, desktop Intel i7-6700 CPU @ 3.40GHz x 8, Ubuntu 16.04
+/// 100 times, all 3 buckets take 40 ms.
+/// Bucket 5x16 alone takes 26 ms
+/// Bucket atc alone takes 32 ms
+/// Bucket offpeak alone takes 24 ms
+void speedTest() {
+  var location = getLocation('America/New_York');
+  var aux = File('test/risk_system/marks/marks_test.json').readAsStringSync();
+  var xs = json.decode(aux) as List;
+  var x0 = (xs[0]['observations'] as List).cast<Map<String, dynamic>>();
+  var curve0 = PriceCurve.fromJson(x0, location);
+  var term = Term.parse('Q4, 2020', location);
+  late num v1, v2, v3;
+  var sw = Stopwatch()..start();
+  for (var i = 0; i < 100; i++) {
+    v2 = curve0.value(term.interval, Bucket.atc);
+    v1 = curve0.value(term.interval, Bucket.b5x16);
+    v3 = curve0.value(term.interval, Bucket.offpeak);
+  }
+  sw.stop();
+  print(sw.elapsedMilliseconds);
+  print(v3);
+}
 
 void main() async {
   initializeTimeZones();
-  tests();
+  // tests();
+  speedTest();
 }
