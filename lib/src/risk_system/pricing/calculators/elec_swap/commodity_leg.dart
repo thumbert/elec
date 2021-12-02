@@ -163,7 +163,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     var _term = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
       /// TODO: maybe I can do better here and not expand to hourly first
-      var aux = fixPriceSchedule!.toHourly(_term) as TimeSeries<num>;;
+      var aux = fixPriceSchedule!.toHourly(_term) as TimeSeries<num>;
       return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented $timePeriod');

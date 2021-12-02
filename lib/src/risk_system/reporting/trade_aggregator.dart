@@ -19,7 +19,7 @@ class SimpleTradeAggregator {
   // months and flat bucket trades expanded into a peak and offpeak trade)
   List<Map<String, dynamic>> _tradesX = [];
 
-  Map<Tuple2<Bucket, Month>, int> _hours = {};
+  final Map<Tuple2<Bucket, Month>, int> _hours = {};
 
   late Nest _nestMw, _nestMwh, _nestMtm;
 

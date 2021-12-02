@@ -1,7 +1,6 @@
 part of elec.risk_system;
 
-
-class Market {
+class Market implements Comparable<Market> {
   final String name;
   const Market._internal(this.name);
 
@@ -17,5 +16,17 @@ class Market {
   static const rt = Market._internal('RT');
 
   @override
-  String toString()  => name;
+  String toString() => name;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! Market) return false;
+    return name == other.name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  int compareTo(Market other) => name.compareTo(other.name);
 }

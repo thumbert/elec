@@ -17,6 +17,7 @@ import 'time/calendar/holiday_test.dart' as holiday;
 import 'time/calendar/calendar_test.dart' as calendar;
 import 'time/last_trading_day_test.dart' as last_trading_day;
 import 'risk_system/buy_sell_test.dart' as buy_sell;
+import 'risk_system/market_test.dart' as market;
 import 'risk_system/marks/price_curve_test.dart' as price_curve;
 import 'risk_system/marks/monthly_curve_test.dart' as monthly_curve;
 import 'risk_system/marks/volatility_surface_test.dart' as volatility_surface;
@@ -33,6 +34,7 @@ void main() async {
 
   filter.tests();
   buy_sell.tests();
+  market.tests();
   seasonal_analysis.tests();
   solar_elevation.tests();
   black_scholes.tests();

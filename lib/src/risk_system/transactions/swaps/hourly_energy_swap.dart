@@ -31,10 +31,10 @@ class HourlyEnergySwap {
     if (quantity.first.interval != fixedPrice.first.interval) {
       throw ArgumentError('quantity and fixedPrice timeseries are not aligned');
     }
-    if (!(quantity.first.interval is Hour)) {
+    if (quantity.first.interval is! Hour) {
       throw ArgumentError('quantity needs to be an hourly timeseries');
     }
-    if (!(fixedPrice.first.interval is Hour)) {
+    if (fixedPrice.first.interval is! Hour) {
       throw ArgumentError('fixedPrice needs to be an hourly timeseries');
     }
   }

@@ -29,20 +29,22 @@ Map<Bucket, List<IntervalTuple<K>>> splitByBucket<K>(
   var res = Map.fromIterables(
       buckets, List.generate(buckets.length, (i) => <IntervalTuple<K>>[]));
 
-  x.forEach((e) {
-    buckets.forEach((bucket) {
+  for (var e in x) {
+    for (var bucket in buckets) {
       if (bucket.containsHour(Hour.beginning(e.interval.start))) {
         res[bucket]!.add(e);
       }
-    });
-  });
+    }
+  }
 
   /// remove empty buckets, if any
   var emptyBuckets = <Bucket>[];
   res.forEach((k, List v) {
     if (v.isEmpty) emptyBuckets.add(k);
   });
-  emptyBuckets.forEach((bucket) => res.remove(bucket));
+  for (var bucket in emptyBuckets) {
+    res.remove(bucket);
+  }
 
   return res;
 }

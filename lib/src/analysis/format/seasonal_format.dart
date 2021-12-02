@@ -14,9 +14,9 @@ List<Map<String, num>> formatYearMonth(TimeSeries<num> x) {
   var nest = Nest()..key((e) => e['interval'].start.year);
   nest.rollup((List xs) {
     var out = <String?, num?>{};
-    xs.forEach((e) {
+    for (var e in xs) {
       out[_months[e['interval'].start.month]] = e['value'];
-    });
+    }
     return out;
   });
   var xs = x.map((e) => {'interval': e.interval, 'value': e.value}).toList();
@@ -35,9 +35,9 @@ List<Map<String, dynamic>> formatMonthYear(TimeSeries<num> x) {
   var nest = Nest()..key((e) => _months[e['interval'].start.month]);
   nest.rollup((List xs) {
     var out = <String, num?>{};
-    xs.forEach((e) {
+    for (var e in xs) {
       out[e['interval'].start.year.toString()] = e['value'];
-    });
+    }
     return out;
   });
   var xs = x.map((e) => {'interval': e.interval, 'value': e.value}).toList();

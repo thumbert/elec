@@ -1,6 +1,6 @@
 part of elec.risk_system;
 
-class BuySell {
+class BuySell implements Comparable<BuySell> {
   final int sign;
   const BuySell._internal(this.sign);
 
@@ -33,4 +33,7 @@ class BuySell {
 
   @override
   int get hashCode => sign;
+
+  @override
+  int compareTo(BuySell other) => sign.compareTo(other.sign);
 }

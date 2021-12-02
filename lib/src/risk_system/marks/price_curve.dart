@@ -69,7 +69,6 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
           value[buckets[bucket]!] = v;
         }
       }
-      ;
       Interval term;
       if (terms[i].length == 7) {
         term = Month.parse(terms[i], location: location);

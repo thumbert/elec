@@ -15,10 +15,10 @@ class ApiTemperatureNoaa {
   late Db db;
   late DbCollection coll;
 
-  ApiTemperatureNoaa() {}
+  ApiTemperatureNoaa();
 
   Future init() async {
-    db = new Db("mongodb://localhost:27017/weather");
+    db = Db("mongodb://localhost:27017/weather");
     await db.open();
     coll = db.collection('daily');
   }

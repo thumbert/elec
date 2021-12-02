@@ -164,7 +164,6 @@ class MonthlyCurve {
         year = year1;
         calYear = Interval(
             TZDateTime(location, year), TZDateTime(location, year + 1));
-        ;
       }
       var hrs1 = bucket.countHours(timeseries[i].interval);
       value = (hours * value + hrs1 * timeseries[i].value) / (hours + hrs1);

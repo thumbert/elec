@@ -10,7 +10,7 @@ import 'package:elec/elec.dart';
 List<Map> getNoaaCsvData() {
   Map env = Platform.environment;
   File file =
-      new File(env['HOME'] + '/Downloads/Archive/temperature/noaa/926924.csv');
+      File(env['HOME'] + '/Downloads/Archive/temperature/noaa/926924.csv');
 
   List<Map> res = [];
   List<String> keys = [
@@ -27,7 +27,7 @@ List<Map> getNoaaCsvData() {
   var aux =
       const CsvToListConverter(eol: '\n').convert(file.readAsStringSync());
   aux.skip(1).forEach((e) {
-    res.add(new Map.fromIterables(
+    res.add(Map.fromIterables(
         keys, [e[0], e[1], e[2], e[3], e[4], e[5], e[11], e[16]]));
   });
 
@@ -39,7 +39,7 @@ List<Map> getNoaaCsvData() {
 /// {station: GHCND:USW00014739, station name: BOSTON MA US, elevation: 6.1, latitude: 42.36667, longitude: -71.03333, date: 1980-01-01 00:00:00.000Z, tmax: 38, tmin: 26}
 ///
 insertTemperatureDataMongo(List<Map> data) async {
-  Db db = new Db("mongodb://localhost:27017/weather");
+  Db db = Db("mongodb://localhost:27017/weather");
   await db.open();
   await db.ensureIndex('daily', keys: {
     'station': 1,
@@ -56,7 +56,7 @@ DateTime _parseDate(num yyyymmdd) {
   int year = (yyyymmdd / 10000).truncate();
   int month = ((yyyymmdd - 10000 * year) / 100).truncate();
   int day = yyyymmdd - 10000 * year - 100 * month as int;
-  return new DateTime.utc(year, month, day);
+  return DateTime.utc(year, month, day);
 }
 
 /// Test the contents of the database.

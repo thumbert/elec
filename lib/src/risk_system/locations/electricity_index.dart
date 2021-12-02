@@ -10,6 +10,7 @@ class ElectricityIndex extends Location {
   int ptid;
   Market market;
   LmpComponent lmpComponent;
+  @override
   final commodity = Commodity.electricity;
 
   ElectricityIndex(this.iso, this.ptid, this.market, this.lmpComponent);

@@ -17,7 +17,7 @@ class Path {
   Path();
 
   /// An FTR path
-  Path.from(this.source, this.sink, this.bucket, {this.quantity: 1}) {
+  Path.from(this.source, this.sink, this.bucket, {this.quantity = 1}) {
     //TODO:  check that the ISO is the same?
   }
 

@@ -6,7 +6,7 @@ class TradeStatus {
   final String name;
   const TradeStatus._internal(this.name);
 
-  static var _allowed = Set<String>()
+  static final _allowed = <String>{}
     ..addAll([
       'live',
       'closed',
@@ -14,8 +14,9 @@ class TradeStatus {
 
   factory TradeStatus.parse(String x) {
     var y = x.toLowerCase();
-    if (!_allowed.contains(y))
+    if (!_allowed.contains(y)) {
       throw ArgumentError('Invalid trade status.');
+    }
     late TradeStatus out;
     switch (y) {
       case 'live': out = live; break;
@@ -24,8 +25,9 @@ class TradeStatus {
     return out;
   }
 
-  static const live = const TradeStatus._internal('live');
-  static const closed = const TradeStatus._internal('closed');
+  static const live = TradeStatus._internal('live');
+  static const closed = TradeStatus._internal('closed');
 
+  @override
   String toString()  => name;
 }
