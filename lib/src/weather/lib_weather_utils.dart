@@ -3,6 +3,10 @@ library weather.lib_weather_utils;
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
+// List<Map<String,dynamic>> historicalDealValuation(Map<String,dynamic> xs, {int n = 30}) {
+//
+// }
+
 /// Make historical terms for different weather instruments.
 /// To make the last complete 30 past Aug months, use startMonth = endMonth = 8.
 /// To make the last complete 30 past Dec-Feb term, use startMonth = 12,

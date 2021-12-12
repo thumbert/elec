@@ -61,6 +61,8 @@ abstract class WeatherInstrument extends Object with CappedValue {
     'HDD put',
   };
 
+  /// Parse a deal from a [Map].
+  ///
   static WeatherInstrument fromJson(Map<String, dynamic> x) {
     String instrument = x['instrumentType'];
     if (instrument == 'CDD swap' || instrument == 'HDD swap') {

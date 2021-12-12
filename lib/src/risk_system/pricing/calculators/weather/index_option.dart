@@ -28,7 +28,7 @@ class CddOption extends WeatherInstrument with IndexOption {
     super.callPut = callPut;
     super.airportCode = airportCode;
     super.premium = premium;
-    name = '$term $strike ${cddHdd.toString()} ${callPut.toString()} option';
+    name = '$term $strike CDD ${callPut.toString()} option';
   }
 }
 
@@ -51,7 +51,7 @@ class HddOption extends WeatherInstrument with IndexOption {
     super.callPut = callPut;
     super.airportCode = airportCode;
     super.premium = premium;
-    name = '$term $strike ${cddHdd.toString()} ${callPut.toString()} option';
+    name = '$term $strike HDD ${callPut.toString()} option';
   }
 }
 

@@ -13,16 +13,14 @@ class CddSwap extends WeatherInstrument with IndexSwap {
       required Interval term,
       required num quantity,
       required TimeSeries<num> strike,
-      num maxPayoff = double.infinity,
-      String? airportCode}) {
+      num maxPayoff = double.infinity}) {
     super.buySell = buySell;
+    super.cddHdd = CddHdd.cdd;
     super.term = term;
     super.quantity = quantity;
     super.strike = strike;
     super.maxPayoff = maxPayoff;
-    super.airportCode = airportCode;
-    super.cddHdd = CddHdd.cdd;
-    name = '$term $strike ${cddHdd.toString()} swap';
+    name = '$term $strike CDD swap';
   }
 }
 
@@ -32,16 +30,14 @@ class HddSwap extends WeatherInstrument with IndexSwap {
       required Interval term,
       required num quantity,
       required TimeSeries<num> strike,
-      num maxPayoff = double.infinity,
-      String? airportCode}) {
+      num maxPayoff = double.infinity}) {
     super.buySell = buySell;
+    super.cddHdd = CddHdd.hdd;
     super.term = term;
     super.quantity = quantity;
     super.strike = strike;
     super.maxPayoff = maxPayoff;
-    super.airportCode = airportCode;
-    super.cddHdd = CddHdd.hdd;
-    name = '$term $strike ${cddHdd.toString()} swap';
+    name = '$term $strike HDD swap';
   }
 }
 
