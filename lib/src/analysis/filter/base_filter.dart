@@ -21,10 +21,9 @@ class DateFilter extends BaseFilter {
   bool contains(Date date) => _filters.every((filter) => filter.contains(date));
 }
 
-
-
 class MonthOfYearFilter extends BaseFilter {
-  Set<Month> months;
+  Set<int> months;
+
   /// Keep only days that have month of year in the Set [months].
   MonthOfYearFilter(this.months);
   @override

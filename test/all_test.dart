@@ -25,7 +25,11 @@ import 'risk_system/pricing/calculators/elec_swap/elec_swap_test.dart'
     as elec_swap;
 import 'risk_system/pricing/calculators/elec_option/elec_option_daily_test.dart'
     as elec_daily_option;
+import 'risk_system/pricing/calculators/weather/all_weather_test.dart'
+    as all_weather;
+
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
+import 'weather/leap_year_policy_test.dart' as leap_year_policy;
 
 void main() async {
   initializeTimeZones();
@@ -53,8 +57,10 @@ void main() async {
   volatility_surface.tests();
   elec_swap.tests(rootUrl);
   elec_daily_option.tests(rootUrl);
+  all_weather.tests(rootUrl);
   seasonal_format.tests();
   shape_cost.tests();
   time_aggregation.tests();
   trade_aggregator.tests();
+  leap_year_policy.tests();
 }
