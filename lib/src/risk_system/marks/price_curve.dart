@@ -153,6 +153,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// specified in the constructor.  This assumption has not been made,
   /// so the Offpeak bucket price == 2x16H price for this curve!
   ///
+  /// See also the method [points] which returns the individual points for
+  /// a given bucket before [interval] aggregation.
   num value(Interval interval, Bucket bucket) {
     var _domain = Interval(first.interval.start, last.interval.end);
     if (!_domain.containsInterval(interval)) {
@@ -164,7 +166,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     if (buckets.contains(bucket)) {
       return _calcValue(interval, bucket);
     } else {
-      /// treat atc and offpeak specially since they are so common
+      /// treat atc and offpeak separately since they are so common
       final _trio = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
       if (bucket == Bucket.atc && buckets.containsAll(_trio)) {
         return _calcValueAtc(interval);
@@ -186,6 +188,29 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       }
     }
     return avg / i;
+  }
+
+  /// Calculate a different bucket from this [PriceCurve].
+  /// Return a timeseries for the [interval] for this [bucket].
+  ///
+  TimeSeries<num> points(Bucket bucket, {Interval? interval}) {
+    var _domain = Interval(first.interval.start, last.interval.end);
+    interval ??= _domain;
+    if (!_domain.containsInterval(interval)) {
+      throw ArgumentError('Forward curve not defined for the entire $interval');
+    }
+
+    var out = TimeSeries<num>();
+    var xs = window(interval);
+    for (var x in xs) {
+      if (buckets.contains(bucket)) {
+        out.add(IntervalTuple(x.interval, x.value[bucket]!));
+      } else {
+        out.add(IntervalTuple(x.interval, value(x.interval, bucket)));
+      }
+    }
+
+    return out;
   }
 
   /// Speed up the calculation by avoiding to go to hourly, if the bucket is

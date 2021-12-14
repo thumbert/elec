@@ -123,6 +123,13 @@ void tests() {
       var value = curve0.value(term.interval, Bucket.offpeak);
       expect(value.toStringAsFixed(4), '28.1768');
     });
+    test('calculate points for offpeak bucket, term Q4,20 (aggregate buckets)',
+        () {
+      var term = Term.parse('Q4, 2020', location);
+      var ts = curve0.points(Bucket.offpeak, interval: term.interval);
+      expect(ts.length, 3);
+      expect(ts.values.first.toStringAsFixed(4), '18.7041');
+    });
     test(
         'calculate value for atc bucket, term 26Ju20-31Jul20 (aggregate months and buckets)',
         () {
@@ -130,6 +137,7 @@ void tests() {
       var value = curve0.value(term.interval, Bucket.atc);
       expect(value.toStringAsFixed(4), '24.8889');
     });
+
     test('extend periodically by year', () {
       var x2 = (xs[2]['observations'] as List).cast<Map<String, dynamic>>();
       var curve = PriceCurve.fromJson(x2, location);
@@ -385,6 +393,6 @@ void speedTest() {
 
 void main() async {
   initializeTimeZones();
-  // tests();
-  speedTest();
+  tests();
+  // speedTest();
 }

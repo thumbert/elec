@@ -8,7 +8,7 @@ abstract class Bucket {
 
   /// The permissible hour beginnings for this bucket.  Used by hourly bucket
   /// weights.  Should be a sorted list.
-  late List<int> hourBeginning;
+  late final List<int> hourBeginning;
 
   ///Is this hour in the bucket?
   bool containsHour(Hour hour);
@@ -110,11 +110,11 @@ abstract class Bucket {
     return _hoursCache[interval]!;
   }
 
-  @override
-  bool operator ==(Object other) {
-    // TODO: implement ==
-    return super == other;
-  }
+  // @override
+  // bool operator ==(Object other) {
+  //   // TODO: implement ==
+  //   return super == other;
+  // }
 }
 
 class CustomBucket extends Bucket {
@@ -164,7 +164,6 @@ class Bucket7x24 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket7x8 extends Bucket {
@@ -191,7 +190,6 @@ class Bucket7x8 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket2x8 extends Bucket {
@@ -220,7 +218,6 @@ class Bucket2x8 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x8 extends Bucket {
@@ -249,7 +246,6 @@ class Bucket5x8 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket6x16 extends Bucket {
@@ -279,7 +275,6 @@ class Bucket6x16 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket7x16 extends Bucket {
@@ -307,18 +302,16 @@ class Bucket7x16 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16 extends Bucket {
   @override
   final String name = '5x16';
   final calendar = NercCalendar();
-  @override
-  final List<int> hourBeginning =
-      List.generate(16, (i) => i + 7, growable: false);
 
-  Bucket5x16();
+  Bucket5x16() {
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -350,7 +343,6 @@ class Bucket5x16 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_7 extends Bucket {
@@ -386,7 +378,6 @@ class Bucket5x16_7 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_8 extends Bucket {
@@ -422,7 +413,6 @@ class Bucket5x16_8 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_9 extends Bucket {
@@ -459,7 +449,6 @@ class Bucket5x16_9 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_10 extends Bucket {
@@ -496,7 +485,6 @@ class Bucket5x16_10 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_11 extends Bucket {
@@ -533,7 +521,6 @@ class Bucket5x16_11 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_12 extends Bucket {
@@ -570,7 +557,6 @@ class Bucket5x16_12 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_13 extends Bucket {
@@ -607,7 +593,6 @@ class Bucket5x16_13 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_14 extends Bucket {
@@ -644,7 +629,6 @@ class Bucket5x16_14 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_15 extends Bucket {
@@ -681,7 +665,6 @@ class Bucket5x16_15 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_16 extends Bucket {
@@ -718,7 +701,6 @@ class Bucket5x16_16 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_17 extends Bucket {
@@ -755,7 +737,6 @@ class Bucket5x16_17 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_18 extends Bucket {
@@ -792,7 +773,6 @@ class Bucket5x16_18 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_19 extends Bucket {
@@ -829,7 +809,6 @@ class Bucket5x16_19 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_20 extends Bucket {
@@ -866,7 +845,6 @@ class Bucket5x16_20 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_21 extends Bucket {
@@ -903,7 +881,6 @@ class Bucket5x16_21 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket5x16_22 extends Bucket {
@@ -940,7 +917,6 @@ class Bucket5x16_22 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket2x16H extends Bucket {
@@ -977,7 +953,6 @@ class Bucket2x16H extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class Bucket2x16 extends Bucket {
@@ -1010,7 +985,6 @@ class Bucket2x16 extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }
 
 class BucketOffpeak extends Bucket {
@@ -1043,5 +1017,4 @@ class BucketOffpeak extends Bucket {
   @override
   // TODO: implement hashCode
   int get hashCode => super.hashCode;
-
 }

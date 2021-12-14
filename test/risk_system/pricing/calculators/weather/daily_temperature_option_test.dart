@@ -3,7 +3,6 @@ library test.risk_system.pricing.calculators.weather.daily_temperature_option_te
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/daily_temperature_option.dart';
-import 'package:elec/src/risk_system/pricing/calculators/weather/index_option.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timeseries/timeseries.dart';
