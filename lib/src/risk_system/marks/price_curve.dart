@@ -257,8 +257,10 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     for (var x in xs) {
       for (var bucket in _duo) {
         var count = bucket.countHours(x.interval);
-        avg += x.value[bucket]! * count;
-        i += count;
+        if (count != 0) {
+          avg += x.value[bucket]! * count;
+          i += count;
+        }
       }
     }
     return avg / i;
