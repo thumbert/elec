@@ -4,7 +4,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/iso/location.dart';
 
-
 abstract class Iso {
   String get name;
   Set<String> get serviceTypes;
@@ -12,32 +11,33 @@ abstract class Iso {
   late tz.Location preferredTimeZoneLocation;
 
   static final Iso newEngland = IsoNewEngland();
+  static final Iso newYork = NewYorkIso();
 
   factory Iso.parse(String x) {
     if (x.toLowerCase() == 'isone') {
-      return IsoNewEngland();
+      return newEngland;
+    } else if (x.toLowerCase() == 'nyiso') {
+      return newYork;
     } else {
       throw ArgumentError('Iso $x not supported yet');
     }
   }
 }
 
-
-
 class IsoNewEngland implements Iso {
   @override
   final String name = 'ISONE';
   static tz.Location location = tz.getLocation('America/New_York');
-  static final Bucket bucket5x8     = Bucket.b5x8;
-  static final Bucket bucket5x16    = Bucket.b5x16;
-  static final Bucket bucket7x16    = Bucket.b7x16;
-  static final Bucket bucket2x8     = Bucket.b2x8;
-  static final Bucket bucket2x16H   = Bucket.b2x16H;
-  static final Bucket bucket2x16    = Bucket.b2x16;
-  static final Bucket bucket7x8     = Bucket.b7x8;
-  static final Bucket bucket7x24    = Bucket.atc;
+  static final Bucket bucket5x8 = Bucket.b5x8;
+  static final Bucket bucket5x16 = Bucket.b5x16;
+  static final Bucket bucket7x16 = Bucket.b7x16;
+  static final Bucket bucket2x8 = Bucket.b2x8;
+  static final Bucket bucket2x16H = Bucket.b2x16H;
+  static final Bucket bucket2x16 = Bucket.b2x16;
+  static final Bucket bucket7x8 = Bucket.b7x8;
+  static final Bucket bucket7x24 = Bucket.atc;
   static final Bucket bucketOffpeak = Bucket.offpeak;
-  static final Bucket bucketPeak    = bucket5x16;
+  static final Bucket bucketPeak = bucket5x16;
 
   /// Allowed service types in this ISO
   @override
@@ -54,15 +54,36 @@ class IsoNewEngland implements Iso {
 
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
-
-
-
 }
 
+class NewYorkIso implements Iso {
+  @override
+  final String name = 'NYISO';
+  static tz.Location location = tz.getLocation('America/New_York');
+  static final Bucket bucket5x8 = Bucket.b5x8;
+  static final Bucket bucket5x16 = Bucket.b5x16;
+  static final Bucket bucket7x16 = Bucket.b7x16;
+  static final Bucket bucket2x8 = Bucket.b2x8;
+  static final Bucket bucket2x16H = Bucket.b2x16H;
+  static final Bucket bucket2x16 = Bucket.b2x16;
+  static final Bucket bucket7x8 = Bucket.b7x8;
+  static final Bucket bucket7x24 = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeak;
+  static final Bucket bucketPeak = bucket5x16;
 
+  /// Allowed service types in this ISO
+  @override
+  final serviceTypes = <String>{
+    'Energy',
+    // Maybe others, eh?
+  };
+
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+}
 
 //class Caiso extends Iso {
-  //static final Location location = getLocation('America/Los_Angeles');
+//static final Location location = getLocation('America/Los_Angeles');
 //}
 
 //class Ercot extends Iso {
