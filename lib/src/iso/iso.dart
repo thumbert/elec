@@ -10,14 +10,21 @@ abstract class Iso {
 
   late tz.Location preferredTimeZoneLocation;
 
+  static final Iso ieso = Ieso();
   static final Iso newEngland = IsoNewEngland();
   static final Iso newYork = NewYorkIso();
+  static final Iso pjm = Pjm();
+
+  static final _map = <String, Iso>{
+    'ieso': ieso,
+    'isone': newEngland,
+    'nyiso': newYork,
+    'pjm': pjm,
+  };
 
   factory Iso.parse(String x) {
-    if (x.toLowerCase() == 'isone') {
-      return newEngland;
-    } else if (x.toLowerCase() == 'nyiso') {
-      return newYork;
+    if (_map.containsKey(x.toLowerCase())) {
+      return _map[x.toLowerCase()]!;
     } else {
       throw ArgumentError('Iso $x not supported yet');
     }
@@ -59,6 +66,58 @@ class IsoNewEngland implements Iso {
 class NewYorkIso implements Iso {
   @override
   final String name = 'NYISO';
+  static tz.Location location = tz.getLocation('America/New_York');
+  static final Bucket bucket5x8 = Bucket.b5x8;
+  static final Bucket bucket5x16 = Bucket.b5x16;
+  static final Bucket bucket7x16 = Bucket.b7x16;
+  static final Bucket bucket2x8 = Bucket.b2x8;
+  static final Bucket bucket2x16H = Bucket.b2x16H;
+  static final Bucket bucket2x16 = Bucket.b2x16;
+  static final Bucket bucket7x8 = Bucket.b7x8;
+  static final Bucket bucket7x24 = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeak;
+  static final Bucket bucketPeak = bucket5x16;
+
+  /// Allowed service types in this ISO
+  @override
+  final serviceTypes = <String>{
+    'Energy',
+    // Maybe others, eh?
+  };
+
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+}
+
+class Pjm implements Iso {
+  @override
+  final String name = 'PJM';
+  static tz.Location location = tz.getLocation('America/New_York');
+  static final Bucket bucket5x8 = Bucket.b5x8;
+  static final Bucket bucket5x16 = Bucket.b5x16;
+  static final Bucket bucket7x16 = Bucket.b7x16;
+  static final Bucket bucket2x8 = Bucket.b2x8;
+  static final Bucket bucket2x16H = Bucket.b2x16H;
+  static final Bucket bucket2x16 = Bucket.b2x16;
+  static final Bucket bucket7x8 = Bucket.b7x8;
+  static final Bucket bucket7x24 = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeak;
+  static final Bucket bucketPeak = bucket5x16;
+
+  /// Allowed service types in this ISO
+  @override
+  final serviceTypes = <String>{
+    'Energy',
+    // Maybe others, eh?
+  };
+
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+}
+
+class Ieso implements Iso {
+  @override
+  final String name = 'IESO';
   static tz.Location location = tz.getLocation('America/New_York');
   static final Bucket bucket5x8 = Bucket.b5x8;
   static final Bucket bucket5x16 = Bucket.b5x16;
