@@ -14,6 +14,50 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     addAll(xs);
   }
 
+  /// Construct a price curve if you have the data from different buckets.
+  PriceCurve.fromBuckets(Map<Bucket, TimeSeries<num>> xs) {
+    _buckets = xs.keys.toSet();
+    // put the first bucket
+    addAll(xs[_buckets!.first]!.map((e) =>
+        IntervalTuple(e.interval, <Bucket, num>{_buckets!.first: e.value})));
+
+    for (var bucket in _buckets!.skip(1)) {
+      var out = merge(xs[bucket]!, joinType: JoinType.Outer, f: (x, dynamic y) {
+        if (x == null) {
+          return <Bucket, num>{bucket: y};
+        } else if (y == null) {
+          return x;
+        } else {
+          x[bucket] = y;
+          return x;
+        }
+      });
+      clear();
+      addAll(out);
+    }
+  }
+
+  // factory PriceCurve.fromBuckets(Map<Bucket, TimeSeries<num>> xs) {
+  //   _buckets = xs.keys.toSet();
+  //   // put the first bucket
+  //   addAll(xs[_buckets!.first]!.map((e) =>
+  //       IntervalTuple(e.interval, <Bucket, num>{_buckets!.first: e.value})));
+  //
+  //   for (var bucket in _buckets!.skip(1)) {
+  //     merge(xs[bucket]!, joinType: JoinType.Outer, f: (x, dynamic y) {
+  //       if (x == null) {
+  //         return <Bucket, num>{bucket: y};
+  //       } else if (y == null) {
+  //         return x;
+  //       } else {
+  //         x[bucket] = y;
+  //         return x;
+  //       }
+  //     });
+  //   }
+  //
+  // }
+
   /// Construct a forward curve given an input in this form.  The buckets
   /// can be different, but the covering needs to be complete (no gaps.)
   ///   [

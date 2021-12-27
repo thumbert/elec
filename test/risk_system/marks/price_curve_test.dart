@@ -24,6 +24,39 @@ void tests() {
     // a gas curve, 7x24 bucket
     var x1 = (xs[1]['observations'] as List).cast<Map<String, dynamic>>();
 
+    test('create a PriceCurve fromBuckets', () {
+      var xs = {
+        Bucket.b2x16H: TimeSeries<num>.fromIterable([
+          IntervalTuple(Date.utc(2022, 1, 1), 60),
+          IntervalTuple(Date.utc(2022, 1, 2), 61),
+          IntervalTuple(Date.utc(2022, 1, 7), 67),
+          IntervalTuple(Date.utc(2022, 1, 8), 68),
+        ]),
+        Bucket.b7x8: TimeSeries<num>.fromIterable([
+          IntervalTuple(Date.utc(2022, 1, 1), 41),
+          IntervalTuple(Date.utc(2022, 1, 2), 42),
+          IntervalTuple(Date.utc(2022, 1, 3), 43),
+          IntervalTuple(Date.utc(2022, 1, 4), 44),
+          IntervalTuple(Date.utc(2022, 1, 5), 45),
+          IntervalTuple(Date.utc(2022, 1, 6), 46),
+          IntervalTuple(Date.utc(2022, 1, 7), 47),
+          IntervalTuple(Date.utc(2022, 1, 8), 48),
+        ]),
+        Bucket.b5x16: TimeSeries<num>.fromIterable([
+          IntervalTuple(Date.utc(2022, 1, 3), 83),
+          IntervalTuple(Date.utc(2022, 1, 4), 84),
+          IntervalTuple(Date.utc(2022, 1, 5), 85),
+          IntervalTuple(Date.utc(2022, 1, 6), 86),
+        ]),
+      };
+      var pc = PriceCurve.fromBuckets(xs);
+      expect(pc.length, 8);
+      expect(pc.first.interval, Date.utc(2022, 1, 1));
+      expect(pc.first.value, {Bucket.b2x16H: 60, Bucket.b7x8: 41});
+      expect(pc[2].interval, Date.utc(2022, 1, 3));
+      expect(pc[2].value, {Bucket.b5x16: 83, Bucket.b7x8: 43});
+    });
+
     test('fromMongoDocument', () {
       var document = {
         'fromDate': '2020-08-17',
