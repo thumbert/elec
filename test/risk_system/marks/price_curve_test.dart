@@ -156,8 +156,7 @@ void tests() {
       var value = curve0.value(term.interval, Bucket.offpeak);
       expect(value.toStringAsFixed(4), '28.1768');
     });
-    test('calculate points for offpeak bucket, term Q4,20 (aggregate buckets)',
-        () {
+    test('calculate points for offpeak bucket (aggregate buckets)', () {
       var term = Term.parse('Q4, 2020', location);
       var ts = curve0.points(Bucket.offpeak, interval: term.interval);
       expect(ts.length, 3);

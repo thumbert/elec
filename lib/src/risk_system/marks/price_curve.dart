@@ -37,27 +37,6 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     }
   }
 
-  // factory PriceCurve.fromBuckets(Map<Bucket, TimeSeries<num>> xs) {
-  //   _buckets = xs.keys.toSet();
-  //   // put the first bucket
-  //   addAll(xs[_buckets!.first]!.map((e) =>
-  //       IntervalTuple(e.interval, <Bucket, num>{_buckets!.first: e.value})));
-  //
-  //   for (var bucket in _buckets!.skip(1)) {
-  //     merge(xs[bucket]!, joinType: JoinType.Outer, f: (x, dynamic y) {
-  //       if (x == null) {
-  //         return <Bucket, num>{bucket: y};
-  //       } else if (y == null) {
-  //         return x;
-  //       } else {
-  //         x[bucket] = y;
-  //         return x;
-  //       }
-  //     });
-  //   }
-  //
-  // }
-
   /// Construct a forward curve given an input in this form.  The buckets
   /// can be different, but the covering needs to be complete (no gaps.)
   ///   [
@@ -246,12 +225,15 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
 
     var out = TimeSeries<num>();
     var xs = window(interval);
-    for (var x in xs) {
-      if (buckets.contains(bucket)) {
-        out.add(IntervalTuple(x.interval, x.value[bucket]!));
-      } else {
-        out.add(IntervalTuple(x.interval, value(x.interval, bucket)));
-      }
+    if (buckets.contains(bucket)) {
+      out.addAll(xs
+          // for daily marks, not all the buckets will be in this interval
+          .where((e) => e.value.containsKey(bucket))
+          .map((e) => IntervalTuple(e.interval, e.value[bucket]!)));
+    } else {
+      // need to calculate by hand
+      out.addAll(
+          xs.map((e) => IntervalTuple(e.interval, value(e.interval, bucket))));
     }
 
     return out;
