@@ -5,13 +5,13 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'location.dart';
 
-class ElectricityIndex extends Location {
+class ElectricityIndex extends Object with Location {
   Iso? iso;
   int ptid;
   Market market;
   LmpComponent lmpComponent;
-  @override
   final commodity = Commodity.electricity;
+  late tz.Location tzLocation;
 
   ElectricityIndex(this.iso, this.ptid, this.market, this.lmpComponent);
 
