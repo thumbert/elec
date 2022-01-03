@@ -23,7 +23,7 @@ abstract class ElectricityLocation extends Object with Location {
   final _futCurveCache = <Date, PriceCurve>{};
 
   @override
-  String toString() => '$name, ptid: $ptid';
+  String toString() => '$name, ptid: $ptid, market: $market';
 
   /// Historical daily price by bucket
   Future<TimeSeries<num>> getHistoricalDailyBucketPrice(

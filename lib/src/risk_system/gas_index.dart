@@ -1,10 +1,10 @@
 part of elec.risk_system;
 
-class GasProduct {
+class GasIndex {
   final String _name;
-  const GasProduct._internal(this._name);
+  const GasIndex._internal(this._name);
 
-  static final _allowed = <String, GasProduct>{
+  static final _allowed = <String, GasIndex>{
     'iferc': iferc,
     'if': iferc,
     'gasdaily': gasDaily,
@@ -15,7 +15,7 @@ class GasProduct {
     'phys': physical,
   };
 
-  factory GasProduct.parse(String x) {
+  factory GasIndex.parse(String x) {
     var y = x.toLowerCase();
     if (!_allowed.keys.contains(y)) {
       throw ArgumentError('Can\'t parse $x for a GasProduct.');
@@ -23,9 +23,9 @@ class GasProduct {
     return _allowed[y]!;
   }
 
-  static const iferc = GasProduct._internal('IFerc');
-  static const gasDaily = GasProduct._internal('GasDaily');
-  static const physical = GasProduct._internal('Physical');
+  static const iferc = GasIndex._internal('IFerc');
+  static const gasDaily = GasIndex._internal('GasDaily');
+  static const physical = GasIndex._internal('Physical');
 
   @override
   String toString() => _name;
