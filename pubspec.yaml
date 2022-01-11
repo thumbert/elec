@@ -1,6 +1,7 @@
 name: elec
 description: A collection of elec functionality
 version: 2.0.1
+publish_to: none
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -8,23 +9,18 @@ environment:
 dependencies:
   csv: ^5.0.0
   date:
-    git:
-      url: git://github.com/thumbert/date.git
+    git: https://github.com/thumbert/date.git
   dama:
-    git:
-      url: git://github.com/thumbert/dama.git
+    git: https://github.com/thumbert/dama.git
   elec_server:
-      git:
-        url: git://github.com/thumbert/elec-server.git
+      git: https://github.com/thumbert/elec-server.git
   intl: ^0.17.0
   mongo_dart: ^0.7.0+1
   quiver: ^3.0.1
   table:
-    git:
-      url: git://github.com/thumbert/table.git
+    git: https://github.com/thumbert/table.git
   timeseries:
-    git:
-      url: git://github.com/thumbert/timeseries.git
+    git: https://github.com/thumbert/timeseries.git
   timezone: ^0.7.0
   tuple: ^2.0.0
   xml: ^5.1.0
