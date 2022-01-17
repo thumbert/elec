@@ -23,6 +23,7 @@ part 'src/risk_system/energy_unit.dart';
 part 'src/risk_system/gas_index.dart';
 part 'src/risk_system/lmp_component.dart';
 part 'src/risk_system/market.dart';
+part 'src/risk_system/node_type.dart';
 part 'src/risk_system/quantity.dart';
 part 'src/risk_system/time_aggregation.dart';
 part 'src/risk_system/trade.dart';
