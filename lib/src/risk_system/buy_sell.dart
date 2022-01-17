@@ -27,8 +27,7 @@ class BuySell implements Comparable<BuySell> {
   @override
   bool operator ==(dynamic other) {
     if (other is! BuySell) return false;
-    var bs = other;
-    return bs.sign == sign;
+    return other.sign == sign;
   }
 
   @override
