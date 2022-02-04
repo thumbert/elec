@@ -5,9 +5,7 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/iso/location.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
-import 'auction.dart';
-
-
+import 'ftr_auction.dart';
 
 class Path {
   Location? source, sink;
@@ -47,8 +45,6 @@ class Path {
 //    return res;
 //  }
 
-
-
 }
 
 class Bid extends Path {
@@ -62,7 +58,6 @@ class Bid extends Path {
     bucket = path.bucket;
     quantity = path.quantity;
   }
-
 }
 
 class Award extends Path {
@@ -70,13 +65,10 @@ class Award extends Path {
   FtrAuction? auction;
 
   Award();
-  Award.from(this.auction, this.clearingPrice, Path path){
+  Award.from(this.auction, this.clearingPrice, Path path) {
     source = path.source;
     sink = path.sink;
     bucket = path.bucket;
     quantity = path.quantity;
   }
-
 }
-
-
