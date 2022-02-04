@@ -7,6 +7,7 @@ import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
 import 'financial/black_scholes/black_scholes_test.dart' as black_scholes;
 import 'physical/gas/time_aggregation_test.dart' as time_aggregation;
 import 'physical/gen/solar/lib_solar_elevation_test.dart' as solar_elevation;
+import 'physical/ftr/ftr_auction_test.dart' as ftr_auction;
 import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
 import 'time/hourly_shape_test.dart' as hourly_shape;
@@ -41,6 +42,7 @@ void main() async {
   market.tests();
   seasonal_analysis.tests();
   solar_elevation.tests();
+  ftr_auction.tests();
   black_scholes.tests();
   bucket.tests();
   bucket.aggregateByBucketMonth();

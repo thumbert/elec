@@ -33,17 +33,15 @@ class FtrAuction implements Comparable<FtrAuction> {
     this.round,
     this.boppMonth,
     this.season,
-  });
+  }) {
+    /// do some validation here
+    if (iso == Iso.newYork) {
+      _validateNyiso();
+    }
+  }
 
   /// Construct an Auction from an auction name.
-  FtrAuction.parse(this.name, {Iso? iso}) {
-    name = name.toUpperCase();
-    if (iso == null) {
-      this.iso = Iso.newEngland;
-    } else {
-      this.iso = iso;
-    }
-
+  FtrAuction.parse(this.name, {required this.iso}) {
     if (iso == Iso.newEngland) {
       _parseIsone(name);
     } else if (iso == Iso.newYork) {
@@ -101,104 +99,68 @@ class FtrAuction implements Comparable<FtrAuction> {
 
   /// Valid auction names are:
   /// 'G22', 'H22-boppG22', 'J22-boppG22',
-  /// 'X21-6M-R4', 'X21-6M-R5', ...
-  /// 'X21-1Y-R1', 'X21-1Y-R2', ...
-  /// 'K21-2Y-R1', ...
+  /// 'X21-6M-R4Autumn21', 'X21-6M-R5Autumn21', ...
+  /// 'X21-1Y-R1Autumn21', 'X21-1Y-R2Autumn21', ...
+  /// 'K21-2Y-R1Spring21', ...
   void _parseNyiso(String name) {
     if (name.length == 3) {
       /// it's a monthly auction
+      ///
       var month = parseMonth(name, location: location);
       interval = month.toInterval();
       start = month.startDate;
       monthCount = 1;
     } else if (name.contains('-bopp')) {
       /// it's a bopp auction
+      ///
       var month = parseMYY(name.substring(0, 3), location: location);
       interval = month.toInterval();
       start = month.startDate;
       boppMonth = parseMYY(name.substring(8), location: location);
       monthCount = 1;
-    } else if (name.contains('-1Y-')) {
-      /// it's an annual auction
-      var monthStart = parseMYY(name.substring(0, 3), location: location);
-      var monthEnd = monthStart.add(12);
-      interval = Interval(monthStart.start, monthEnd.end);
-      start = Date(interval.start.year, interval.start.month, 1,
-          location: location);
-      round = int.parse(name.substring(8, 9));
-      monthCount = 12;
-      season = name.substring(9);
-    } else if (name.contains('-6M-')) {
-      var monthStart = parseMYY(name.substring(0, 3), location: location);
-      var monthEnd = monthStart.add(6);
-      interval = Interval(monthStart.start, monthEnd.end);
-      start = Date(interval.start.year, interval.start.month, 1,
-          location: location);
-      round = int.parse(name.substring(8, 9));
-      monthCount = 6;
-      season = name.substring(9);
-    } else if (name.contains('-2Y-')) {
-      var monthStart = parseMYY(name.substring(0, 3), location: location);
-      var monthEnd = monthStart.add(24);
-      interval = Interval(monthStart.start, monthEnd.end);
-      start = Date(interval.start.year, interval.start.month, 1,
-          location: location);
-      round = int.parse(name.substring(8, 9));
-      monthCount = 24;
-      season = name.substring(9);
-      if (!season!.startsWith('Spring')) {
-        throw ArgumentError('The only 2Y auction is in the Spring!');
-      }
     } else {
-      throw StateError('Don\'t know how to parse $name');
+      /// is a 6M, 1Y or 2Y auction
+      ///
+      var tokens = name.split('-');
+      if (tokens.length != 3) {
+        throw ArgumentError('Wrong auction name $name');
+      }
+      var monthStart = parseMYY(name.substring(0, 3), location: location);
+      round = int.parse(tokens[2].substring(1, 2));
+      season = tokens[2].substring(2);
+      if (season!.startsWith(RegExp(r'Spring|Autumn'))){
+        throw ArgumentError('Wrong season name in $name.  Only Spring and Autumn allowed');
+      }
+      if (name.contains('-1Y-')) {
+        /// it's an annual auction
+        monthCount = 12;
+        if (!(monthStart.month == 11 && season == 'Autumn') ||
+            (monthStart.month == 11 && season == 'Spring')) {
+          throw ArgumentError('Wrong auction name $name');
+        }
+      } else if (name.contains('-6M-')) {
+        monthCount = 6;
+      } else if (name.contains('-2Y-')) {
+        monthCount = 24;
+        if (!season!.startsWith('Spring')) {
+          throw ArgumentError('The only 2Y auction is in the Spring!');
+        }
+      } else {
+        throw StateError('Don\'t know how to parse $name');
+      }
+      var monthEnd = monthStart.add(monthCount);
+      interval = Interval(monthStart.start, monthEnd.end);
+      start = Date(interval.start.year, interval.start.month, 1,
+          location: location);
     }
   }
 
-  // /// Construct a monthly auction
-  // FtrAuction.monthly(Month month) {
-  //   interval = Month(month.year, month.month, location: location);
-  //   start = Date(month.year, month.month, 1, location: location);
-  //   monthCount = 1;
-  //   name = formatMYY(month);
-  // }
-  //
-  // /// Construct an annual auction
-  // FtrAuction.annual(int year, this.round) {
-  //   interval =
-  //       Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
-  //   start = Date(year, 1, 1, location: location);
-  //   monthCount = 12;
-  //   if (year > 2012) {
-  //     if (round != 1 && round != 2) {
-  //       throw ArgumentError('Only round 1 or 2 are allowed.');
-  //     }
-  //     name = 'F${year - 2000}-1Y-R${round.toString()}';
-  //   } else {
-  //     name = 'F${year - 2000}-1Y';
-  //     round = 0;
-  //   }
-  // }
+  /// Do some validation
+  void _validateNyiso() {
+    if (monthCount == 12) {
 
-  // /// Get all the FTR auctions that start after a given date but before "today".
-  // /// This means that in Dec18, you won't get F19 auction because delivery
-  // /// period hasn't started yet.
-  // static List<FtrAuction> auctionsWithSettle(Date fromDate) {
-  //   var year = fromDate.year;
-  //   var today = Date.today(location: fromDate.location);
-  //   var res = <FtrAuction>[];
-  //   for (var i = year; i <= today.year; i++) {
-  //     res.add(FtrAuction.annual(i, 1));
-  //     res.add(FtrAuction.annual(i, 2));
-  //     for (var m = 1; m <= 12; m++) {
-  //       var auction =
-  //           FtrAuction.monthly(Month(i, m, location: fromDate.location));
-  //       if (auction.start.isAfter(fromDate) && auction.start.isBefore(today)) {
-  //         res.add(auction);
-  //       }
-  //     }
-  //   }
-  //   return res;
-  // }
+    }
+  }
 
   /// the last day of the auction period
   Date get end => Date.fromTZDateTime(interval.end).previous;
@@ -255,7 +217,12 @@ class AnnualFtrAuction extends FtrAuction {
     required Iso iso,
     required Month startMonth,
     int? round,
-  }) : super(iso: iso, startMonth: startMonth, monthCount: 12, round: round);
+  }) : super(iso: iso, startMonth: startMonth, monthCount: 12, round: round) {
+    // set the season
+    if (startMonth.month == 11) {
+      season = 'Autumn';
+    }
+  }
 }
 
 /// For Nyiso
@@ -285,3 +252,50 @@ class MonthlyBoppFtrAuction extends FtrAuction {
             monthCount: 1,
             boppMonth: boppMonth);
 }
+
+
+// /// Construct a monthly auction
+// FtrAuction.monthly(Month month) {
+//   interval = Month(month.year, month.month, location: location);
+//   start = Date(month.year, month.month, 1, location: location);
+//   monthCount = 1;
+//   name = formatMYY(month);
+// }
+//
+// /// Construct an annual auction
+// FtrAuction.annual(int year, this.round) {
+//   interval =
+//       Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
+//   start = Date(year, 1, 1, location: location);
+//   monthCount = 12;
+//   if (year > 2012) {
+//     if (round != 1 && round != 2) {
+//       throw ArgumentError('Only round 1 or 2 are allowed.');
+//     }
+//     name = 'F${year - 2000}-1Y-R${round.toString()}';
+//   } else {
+//     name = 'F${year - 2000}-1Y';
+//     round = 0;
+//   }
+// }
+
+// /// Get all the FTR auctions that start after a given date but before "today".
+// /// This means that in Dec18, you won't get F19 auction because delivery
+// /// period hasn't started yet.
+// static List<FtrAuction> auctionsWithSettle(Date fromDate) {
+//   var year = fromDate.year;
+//   var today = Date.today(location: fromDate.location);
+//   var res = <FtrAuction>[];
+//   for (var i = year; i <= today.year; i++) {
+//     res.add(FtrAuction.annual(i, 1));
+//     res.add(FtrAuction.annual(i, 2));
+//     for (var m = 1; m <= 12; m++) {
+//       var auction =
+//           FtrAuction.monthly(Month(i, m, location: fromDate.location));
+//       if (auction.start.isAfter(fromDate) && auction.start.isBefore(today)) {
+//         res.add(auction);
+//       }
+//     }
+//   }
+//   return res;
+// }

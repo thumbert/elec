@@ -1,27 +1,30 @@
 library test.physical.ftr.ftr_auction_test;
 
 import 'package:date/date.dart';
+import 'package:elec/elec.dart';
 import 'package:elec/src/physical/ftr/ftr_auction.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
+import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 
 void tests() {
   group('FTR Auction tests:', () {
+    final location = getLocation('America/New_York');
     test('parse NYISO TCC auction names', () {
       var auctionNames = [
         'G22',
         'H22-boppG22',
         'J22-boppG22',
-        'X21-1Y-R1Fall21',
-        'X21-1Y-R2Fall21',
-        'X21-1Y-R3Fall21',
-        'X21-6M-R4Fall21',
-        'X21-6M-R5Fall21',
-        'X21-6M-R6Fall21',
-        'X21-6M-R7Fall21',
-        'X21-6M-R8Fall21',
-        'K21-1Y-R8Fall20',
+        'X21-1Y-R1Autumn21',
+        'X21-1Y-R2Autumn21',
+        'X21-1Y-R3Autumn21',
+        'X21-6M-R4Autumn21',
+        'X21-6M-R5Autumn21',
+        'X21-6M-R6Autumn21',
+        'X21-6M-R7Autumn21',
+        'X21-6M-R8Autumn21',
+        'K21-1Y-R8Autumn20',
         'K21-2Y-R1Spring21',
         'K21-1Y-R2Spring21',
         'K21-1Y-R3Spring21',
@@ -31,10 +34,24 @@ void tests() {
         'K21-6M-R7Spring21',
         'K21-6M-R8Spring21',
       ];
+      for (var name in auctionNames) {
+        var auction = FtrAuction.parse(name, iso: Iso.newYork);
+        expect(auction.name, name);
+      }
     });
+    test('equality annual auctions', () {
+      var a1 = FtrAuction.parse('X21-1Y-R1Autumn21', iso: Iso.newYork);
+      var a2 = AnnualFtrAuction(
+          iso: Iso.newYork,
+          startMonth: Month(2021, 11, location: location),
+          round: 1);
+      expect(a1, a2);
+    });
+    test('compare auctions', () {});
   });
 }
 
-void main() {
+void main() async {
+  initializeTimeZones();
   tests();
 }
