@@ -5,47 +5,24 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 
 /// A class representing an FTR/TCC Auction
-class FtrAuction implements Comparable<FtrAuction> {
-  late Interval interval;
-  late Date start;
-
+mixin FtrAuction implements Comparable<FtrAuction> {
   late Iso iso;
+  late Date start;
 
   /// number of months for this auction
   late int monthCount;
-  int? round;
-
-  /// for bopp auctions, the month when the auction is held (not the
-  /// delivery month).  E.g. for 'J22-boppF22', it is F22.
-  Month? boppMonth;
-
-  /// NYISO TCC 6M, 1Y, 2Y auctions have a season,
-  /// for example Autumn21, Spring20.  Otherwise, it's null
-  String? season;
-
   Location location = getLocation('America/New_York');
+
+  late Interval interval;
   late String name;
 
-  FtrAuction({
-    required this.iso,
-    required Month startMonth,
-    this.monthCount = 1,
-    this.round,
-    this.boppMonth,
-    this.season,
-  }) {
-    /// do some validation here
-    if (iso == Iso.newYork) {
-      _validateNyiso();
-    }
-  }
-
   /// Construct an Auction from an auction name.
-  FtrAuction.parse(this.name, {required this.iso}) {
+  ///
+  static FtrAuction parse(String name, {required Iso iso}) {
     if (iso == Iso.newEngland) {
-      _parseIsone(name);
+      return _parseIsone(name);
     } else if (iso == Iso.newYork) {
-      _parseNyiso(name);
+      return _parseNyiso(name);
     } else {
       throw ArgumentError('Iso $iso not supported');
     }
@@ -55,46 +32,29 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// 'F18-1Y-R1', 'F18-1Y-R2', etc. for annual auctions,
   /// 'G18', etc. for monthly auctions.
   /// Rounds were added to the annual auctions starting in 2013.
-  void _parseIsone(String name) {
-    round = 0;
+  static FtrAuction _parseIsone(String name) {
+    var month =
+        parseMYY(name, location: Iso.newEngland.preferredTimeZoneLocation);
     if (name.length == 3) {
       /// it's a monthly auction
-      var month = parseMonth(name, location: location);
-      interval = month.toInterval();
-      start = month.startDate;
-      monthCount = 1;
-    } else if (name.contains('-')) {
+      ///
+      return MonthlyFtrAuction(iso: Iso.newEngland, startMonth: month);
+    } else if (name.contains('-bopp')) {
+      /// it's a monthly bopp auction
+      ///
+      var boppMonth = parseMYY(name.substring(8),
+          location: Iso.newYork.preferredTimeZoneLocation);
+      return MonthlyBoppFtrAuction(
+          iso: Iso.newEngland, startMonth: month, boppMonth: boppMonth);
+    } else if (name.contains('-1Y-')) {
       /// it's an annual auction
-      var year = 2000 + int.parse(name.substring(1, 3));
-      interval =
-          Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
-      start = Date(interval.start.year, interval.start.month, 1,
-          location: location);
-      if (year > 2012) {
-        round = int.parse(name.substring(8));
-      }
-      monthCount = 12;
+      ///
+      var round = int.parse(name.substring(8)); // only from 2013
+      return AnnualFtrAuction(
+          iso: Iso.newEngland, startMonth: month, round: round);
+    } else {
+      throw StateError('Don\'t know how to parse $name for IsoNewEngland');
     }
-    // if (name.length == 3) {
-    //   /// it's a monthly auction
-    //   var month = parseMonth(name, location: location);
-    //   return MonthlyFtrAuction(month);
-    // } else if (name.contains('-1Y-')) {
-    //   /// it's an annual auction
-    //   var year = 2000 + int.parse(name.substring(1, 3));
-    //   var round = 0;
-    //   if (year > 2012) round = int.parse(name.substring(8));
-    //   return FtrAuction.annual(year, round);
-    // } else if (name.contains('-bopp')) {
-    //   /// it's a bopp auction
-    //   var month = parseMonth(name.substring(0, 3), location: location);
-    //   var name2 = name.substring(8);
-    //   var boppMonth = parseMonth(name2, location: location);
-    //   if (!boppMonth.isBefore(month)) {
-    //     throw ArgumentError('Bopp month must be before auction month: $name');
-    //   }
-    //   return MonthlyBoppFtrAuction(month, boppMonth);
-    // }
   }
 
   /// Valid auction names are:
@@ -102,22 +62,20 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// 'X21-6M-R4Autumn21', 'X21-6M-R5Autumn21', ...
   /// 'X21-1Y-R1Autumn21', 'X21-1Y-R2Autumn21', ...
   /// 'K21-2Y-R1Spring21', ...
-  void _parseNyiso(String name) {
+  static FtrAuction _parseNyiso(String name) {
+    var month = parseMYY(name.substring(0, 3),
+        location: Iso.newYork.preferredTimeZoneLocation);
     if (name.length == 3) {
       /// it's a monthly auction
       ///
-      var month = parseMonth(name, location: location);
-      interval = month.toInterval();
-      start = month.startDate;
-      monthCount = 1;
+      return MonthlyFtrAuction(iso: Iso.newYork, startMonth: month);
     } else if (name.contains('-bopp')) {
       /// it's a bopp auction
       ///
-      var month = parseMYY(name.substring(0, 3), location: location);
-      interval = month.toInterval();
-      start = month.startDate;
-      boppMonth = parseMYY(name.substring(8), location: location);
-      monthCount = 1;
+      var boppMonth = parseMYY(name.substring(8),
+          location: Iso.newYork.preferredTimeZoneLocation);
+      return MonthlyBoppFtrAuction(
+          iso: Iso.newYork, startMonth: month, boppMonth: boppMonth);
     } else {
       /// is a 6M, 1Y or 2Y auction
       ///
@@ -125,40 +83,24 @@ class FtrAuction implements Comparable<FtrAuction> {
       if (tokens.length != 3) {
         throw ArgumentError('Wrong auction name $name');
       }
-      var monthStart = parseMYY(name.substring(0, 3), location: location);
-      round = int.parse(tokens[2].substring(1, 2));
-      season = tokens[2].substring(2);
-      if (season!.startsWith(RegExp(r'Spring|Autumn'))){
-        throw ArgumentError('Wrong season name in $name.  Only Spring and Autumn allowed');
-      }
+      var round = int.parse(tokens[2].substring(1, 2));
       if (name.contains('-1Y-')) {
         /// it's an annual auction
-        monthCount = 12;
-        if (!(monthStart.month == 11 && season == 'Autumn') ||
-            (monthStart.month == 11 && season == 'Spring')) {
-          throw ArgumentError('Wrong auction name $name');
-        }
+        ///
+        return AnnualFtrAuction(
+            iso: Iso.newYork, startMonth: month, round: round);
       } else if (name.contains('-6M-')) {
-        monthCount = 6;
+        /// it's a six month auction
+        ///
+        return SixMonthFtrAuction(
+            iso: Iso.newYork, startMonth: month, round: round);
       } else if (name.contains('-2Y-')) {
-        monthCount = 24;
-        if (!season!.startsWith('Spring')) {
-          throw ArgumentError('The only 2Y auction is in the Spring!');
-        }
+        /// it's a 2 year auction
+        ///
+        return TwoYearFtrAuction(iso: Iso.newYork, startMonth: month);
       } else {
-        throw StateError('Don\'t know how to parse $name');
+        throw StateError('Don\'t know how to parse $name for Nyiso');
       }
-      var monthEnd = monthStart.add(monthCount);
-      interval = Interval(monthStart.start, monthEnd.end);
-      start = Date(interval.start.year, interval.start.month, 1,
-          location: location);
-    }
-  }
-
-  /// Do some validation
-  void _validateNyiso() {
-    if (monthCount == 12) {
-
     }
   }
 
@@ -170,11 +112,22 @@ class FtrAuction implements Comparable<FtrAuction> {
   /// monthlies by start date.
   @override
   int compareTo(FtrAuction other) {
-    var aux = -monthCount.compareTo(other.monthCount);
-    if (aux == 0 && round != null && other.round != null) {
-      aux = round!.compareTo(other.round!);
+    // compare start dates
+    var aux = start.compareTo(other.start);
+    // first compare auction length
+    if (aux == 0) {
+      aux = -monthCount.compareTo(other.monthCount);
     }
-    if (aux == 0) aux = start.compareTo(other.start);
+    // for the same auction length, compare rounds for multi month auctions
+    if (aux == 0) {
+      if (monthCount > 1) {
+        late int round;
+        late int otherRound;
+        round = (this as AuctionWithRound).round;
+        otherRound = (other as AuctionWithRound).round;
+        aux = round.compareTo(otherRound);
+      }
+    }
     return aux;
   }
 
@@ -203,56 +156,122 @@ class FtrAuction implements Comparable<FtrAuction> {
   }
 }
 
-/// For Nyiso
-class TwoYearFtrAuction extends FtrAuction {
+mixin AuctionWithRound {
+  late int round;
+}
+
+class TwoYearFtrAuction extends Object with FtrAuction, AuctionWithRound {
+  late String _season;
+
   TwoYearFtrAuction({
     required Iso iso,
     required Month startMonth,
-    int? round,
-  }) : super(iso: iso, startMonth: startMonth, monthCount: 24, round: round);
+    round = 1,
+  }) {
+    start = startMonth.startDate;
+    monthCount = 24;
+    interval = Interval(start.start, startMonth.add(monthCount).end);
+    if (startMonth.month != 5) {
+      throw ArgumentError('Two year TCC auctions only start in May.');
+    }
+    var yy = startMonth.year - 2000;
+    _season = 'Spring$yy';
+    name = formatMYY(startMonth) + '-2Y-R$round' + _season;
+  }
+
+  String get season => _season;
 }
 
-class AnnualFtrAuction extends FtrAuction {
+class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
+  late String _season;
+
   AnnualFtrAuction({
     required Iso iso,
     required Month startMonth,
-    int? round,
-  }) : super(iso: iso, startMonth: startMonth, monthCount: 12, round: round) {
+    required int round,
+  }) {
+    start = startMonth.startDate;
+    monthCount = 12;
+    interval = Interval(start.start, startMonth.add(monthCount).end);
+    this.round = round;
+    if (startMonth.month != 5 && startMonth.month != 11) {
+      throw ArgumentError('Annual TCC auctions start in May or Nov only.');
+    }
+    var yy = startMonth.year - 2000;
     // set the season
     if (startMonth.month == 11) {
-      season = 'Autumn';
+      _season = 'Autumn$yy';
+    } else {
+      if (round == 8) {
+        _season = 'Autumn${yy - 1}'; // for example K21-1Y-R8Autumn20
+      } else {
+        _season = 'Spring$yy';
+      }
     }
+    name = formatMYY(startMonth) + '-1Y-R$round' + _season;
   }
+
+  String get season => _season;
 }
 
-/// For Nyiso
-class SixMonthFtrAuction extends FtrAuction {
+class SixMonthFtrAuction extends Object with FtrAuction, AuctionWithRound {
+  late String _season;
+
   SixMonthFtrAuction({
     required Iso iso,
     required Month startMonth,
     required int round,
-  }) : super(iso: iso, startMonth: startMonth, monthCount: 6, round: round);
+  }) {
+    start = startMonth.startDate;
+    monthCount = 6;
+    interval = Interval(start.start, startMonth.add(monthCount).end);
+    this.round = round;
+    if (startMonth.month != 5 && startMonth.month != 11) {
+      throw ArgumentError('Six month TCC auctions start in May or Nov only.');
+    }
+    var yy = startMonth.year - 2000;
+    // set the season
+    if (startMonth.month == 11) {
+      _season = 'Autumn$yy';
+    } else {
+      _season = 'Spring$yy';
+    }
+    name = formatMYY(startMonth) + '-6M-R$round' + _season;
+    // Only in Autumn you have 6M-R4AutumnYY, in the Spring 6M-R5SpringYY
+    if (round < 4 || (round == 4 && !_season.startsWith('Autumn'))) {
+      throw StateError('Invalid round $round for auction $name');
+    }
+  }
+
+  String get season => _season;
 }
 
-class MonthlyFtrAuction extends FtrAuction {
+class MonthlyFtrAuction extends Object with FtrAuction {
   MonthlyFtrAuction({
     required Iso iso,
     required Month startMonth,
-  }) : super(iso: iso, startMonth: startMonth, monthCount: 1);
+  }) {
+    start = startMonth.startDate;
+    monthCount = 1;
+    interval = Interval(start.start, startMonth.add(monthCount).end);
+    name = formatMYY(startMonth);
+  }
 }
 
-class MonthlyBoppFtrAuction extends FtrAuction {
+class MonthlyBoppFtrAuction extends Object with FtrAuction {
+  final Month boppMonth;
+
   MonthlyBoppFtrAuction({
     required Iso iso,
     required Month startMonth,
-    required Month boppMonth,
-  }) : super(
-            iso: iso,
-            startMonth: startMonth,
-            monthCount: 1,
-            boppMonth: boppMonth);
+    required this.boppMonth,
+  }) {
+    start = startMonth.startDate;
+    monthCount = 1;
+    interval = Interval(start.start, startMonth.add(monthCount).end);
+    name = formatMYY(startMonth) + '-bopp' + formatMYY(boppMonth);
+  }
 }
-
 
 // /// Construct a monthly auction
 // FtrAuction.monthly(Month month) {
