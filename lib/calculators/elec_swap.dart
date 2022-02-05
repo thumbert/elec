@@ -1,6 +1,6 @@
 library elec.calculators.elec_swap;
 
-import 'package:elec_server/client/isoexpress/dalmp.dart';
+import 'package:elec_server/client/dalmp.dart';
 import 'package:elec_server/client/marks/curves/curve_id.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 import 'package:http/http.dart';

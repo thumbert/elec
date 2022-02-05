@@ -5,18 +5,17 @@ import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
-import 'package:elec_server/client/isoexpress/dalmp.dart';
+import 'package:elec_server/client/dalmp.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 
 void tests(String rootUrl) async {
-  var client = DaLmp(Client(), rootUrl: rootUrl);
+  var client = DaLmp(Client(), rootUrl: rootUrl, iso: Iso.newEngland);
   var buckets = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
   var location = getLocation('America/New_York');
   late TimeSeries<num> ts;
