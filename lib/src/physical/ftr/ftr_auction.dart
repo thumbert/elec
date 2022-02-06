@@ -134,17 +134,6 @@ mixin FtrAuction implements Comparable<FtrAuction> {
   @override
   String toString() => name;
 
-  /// Get the number of hours in this bucket; e.g. how many peak hours are
-  /// in this auction term?
-  int hours(Bucket bucket) {
-//    if (_hours.containsKey(  Tuple2(this, bucket)))
-//      return _hours[  Tuple2(this, bucket)];
-//    var hrs = interval.splitLeft((dt) =>   Hour.beginning(dt));
-//    int count = hrs.where((hour) => bucket.containsHour(hour)).length;
-//    _hours[  Tuple2(this, bucket)] = count;
-    return 0;
-  }
-
   @override
   int get hashCode => name.hashCode;
 

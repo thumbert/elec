@@ -51,13 +51,19 @@ Future<void> tests(String rootUrl) async {
     });
     test('get clearing prices for the path', () async {
       var cp = await path.getClearingPrices();
-      expect(cp['Z21'], 7.768346774193549);
+      expect(cp[FtrAuction.parse('F21', iso: Iso.newYork)], 7.768346774193549);
     });
     test('get cp vs. sp table', () async {
-      var cp = await path.getClearingPrices();
-      expect(cp['Z21'], 7.768346774193549);
+      var data = await path.makeTableCpSp(
+          fromDate: Date(2020, 1, 1, location: NewYorkIso.location));
+      var f21 = data.firstWhere(
+          (e) => e['auction'] == FtrAuction.parse('F21', iso: Iso.newYork));
+      expect(f21, {
+        'auction': FtrAuction.parse('F21', iso: Iso.newYork),
+        'clearingPrice': 7.768346774193549,
+        'settlePrice': 8.631370967741935,
+      });
     });
-
   });
 }
 

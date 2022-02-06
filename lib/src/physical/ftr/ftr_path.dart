@@ -84,24 +84,24 @@ class FtrPath {
   });
 
   /// Get all auction clearing prices from the database
-  Future<Map<AuctionName, num>> getClearingPrices(
-      {Set<FtrAuction>? auctions}) async {
+  Future<Map<FtrAuction, num>> getClearingPrices(
+      {List<FtrAuction>? auctions}) async {
     var cpSource = await clearingPriceCache.get(Tuple2(iso, sourcePtid));
     var cpSink = await clearingPriceCache.get(Tuple2(iso, sinkPtid));
 
     auctions ??= cpSource[bucket]!
         .keys
         .map((e) => FtrAuction.parse(e, iso: iso))
-        .toSet();
+        .toList();
 
-    var out = <AuctionName, num>{};
+    var out = <FtrAuction, num>{};
     for (var auction in auctions) {
       var auctionName = auction.name;
       var _cpSink = cpSink[bucket]![auctionName];
       var _cpSource = cpSource[bucket]![auctionName];
       if (_cpSource != null && _cpSink != null) {
         // only if both nodes exist
-        out[auctionName] = _cpSink - _cpSource;
+        out[auction] = _cpSink - _cpSource;
       }
     }
 
@@ -140,6 +140,35 @@ class FtrPath {
   Future<num> getSettlePriceForAuction(FtrAuction auction) async {
     var aux =
         await getDailySettlePrices(term: Term.fromInterval(auction.interval));
+    if (aux.isEmpty) return double.nan;
     return mean(aux.map((e) => e.value));
+  }
+
+  /// Make the table comparing the clearing prices vs. settlement prices for
+  /// all the auctions that are in the database after [fromDate].
+  /// ```
+  /// {
+  ///   'auction': FtrAuction,
+  ///   'clearingPrice': ...,
+  ///   'settlePrice': ...,
+  /// }
+  /// ```
+  Future<List<Map<String, dynamic>>> makeTableCpSp(
+      {required Date fromDate}) async {
+    var auctions =
+        await _ftrClearingPricesClient.getAuctions(startDate: fromDate);
+
+    var out = <Map<String, dynamic>>[];
+    var clearingPrices = await getClearingPrices(auctions: auctions);
+    for (var auction in clearingPrices.keys) {
+      var sp = await getSettlePriceForAuction(auction);
+      out.add({
+        'auction': auction,
+        'clearingPrice': clearingPrices[auction],
+        'settlePrice': sp,
+      });
+    }
+
+    return out;
   }
 }
