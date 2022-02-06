@@ -38,6 +38,30 @@ void tests() {
         expect(auction.name, name);
       }
     });
+    test('monthly auction Z21', () {
+      var auction = FtrAuction.parse('Z21', iso: Iso.newYork);
+      expect(auction.monthCount, 1);
+      expect(auction.start, Date(2021, 12, 1, location: location));
+      expect(auction.end, Date(2021, 12, 31, location: location));
+    });
+    test('6 months auction K21-6M-R4Spring21', () {
+      var auction = FtrAuction.parse('K21-6M-R5Spring21', iso: Iso.newYork);
+      expect(auction.monthCount, 6);
+      expect(auction.start, Date(2021, 5, 1, location: location));
+      expect(auction.end, Date(2021, 10, 31, location: location));
+    });
+    test('1Y auction K21-6M-R4Spring21', () {
+      var auction = FtrAuction.parse('K21-1Y-R4Spring21', iso: Iso.newYork);
+      expect(auction.monthCount, 12);
+      expect(auction.start, Date(2021, 5, 1, location: location));
+      expect(auction.end, Date(2022, 4, 30, location: location));
+    });
+    test('2Y auction K21-2Y-R1Spring21', () {
+      var auction = FtrAuction.parse('K21-2Y-R1Spring21', iso: Iso.newYork);
+      expect(auction.monthCount, 24);
+      expect(auction.start, Date(2021, 5, 1, location: location));
+      expect(auction.end, Date(2023, 4, 30, location: location));
+    });
     test('equality annual auctions', () {
       var a1 = FtrAuction.parse('X21-1Y-R1Autumn21', iso: Iso.newYork);
       var a2 = AnnualFtrAuction(

@@ -170,7 +170,7 @@ class TwoYearFtrAuction extends Object with FtrAuction, AuctionWithRound {
   }) {
     start = startMonth.startDate;
     monthCount = 24;
-    interval = Interval(start.start, startMonth.add(monthCount).end);
+    interval = Interval(start.start, startMonth.add(monthCount).start);
     if (startMonth.month != 5) {
       throw ArgumentError('Two year TCC auctions only start in May.');
     }
@@ -192,7 +192,7 @@ class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
   }) {
     start = startMonth.startDate;
     monthCount = 12;
-    interval = Interval(start.start, startMonth.add(monthCount).end);
+    interval = Interval(start.start, startMonth.add(monthCount).start);
     this.round = round;
     if (startMonth.month != 5 && startMonth.month != 11) {
       throw ArgumentError('Annual TCC auctions start in May or Nov only.');
@@ -224,7 +224,7 @@ class SixMonthFtrAuction extends Object with FtrAuction, AuctionWithRound {
   }) {
     start = startMonth.startDate;
     monthCount = 6;
-    interval = Interval(start.start, startMonth.add(monthCount).end);
+    interval = Interval(start.start, startMonth.add(monthCount).start);
     this.round = round;
     if (startMonth.month != 5 && startMonth.month != 11) {
       throw ArgumentError('Six month TCC auctions start in May or Nov only.');
@@ -253,7 +253,7 @@ class MonthlyFtrAuction extends Object with FtrAuction {
   }) {
     start = startMonth.startDate;
     monthCount = 1;
-    interval = Interval(start.start, startMonth.add(monthCount).end);
+    interval = Interval(start.start, startMonth.end);
     name = formatMYY(startMonth);
   }
 }
@@ -268,7 +268,7 @@ class MonthlyBoppFtrAuction extends Object with FtrAuction {
   }) {
     start = startMonth.startDate;
     monthCount = 1;
-    interval = Interval(start.start, startMonth.add(monthCount).end);
+    interval = Interval(start.start, startMonth.end);
     name = formatMYY(startMonth) + '-bopp' + formatMYY(boppMonth);
   }
 }
