@@ -64,6 +64,15 @@ Future<void> tests(String rootUrl) async {
         'settlePrice': 8.631370967741935,
       });
     });
+    test('toString() for the path', () {
+      expect(path.toString(), 'NYISO 61752 -> 61758');
+      var path1 = FtrPath(
+          sourcePtid: 4000,
+          sinkPtid: 4008,
+          bucket: Bucket.b5x16,
+          iso: Iso.newEngland);
+      expect(path1.toString(), 'ISONE 4000 -> 4008 5x16');
+    });
   });
 }
 

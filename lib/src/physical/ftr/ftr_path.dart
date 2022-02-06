@@ -171,4 +171,17 @@ class FtrPath {
 
     return out;
   }
+
+  @override
+  String toString() {
+    var base = '${iso.name} $sourcePtid -> $sinkPtid';
+    if (mw != 1) {
+      base += ' ${mw}MW';
+    }
+    if (iso.name == 'NYISO') {
+      return base;
+    } else {
+      return '$base $bucket';
+    }
+  }
 }
