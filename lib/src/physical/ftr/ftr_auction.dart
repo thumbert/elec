@@ -179,6 +179,7 @@ class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
     required Month startMonth,
     required int round,
   }) {
+    // TODO: only for Nyiso for now, need to extend to other Iso
     start = startMonth.startDate;
     monthCount = 12;
     interval = Interval(start.start, startMonth.add(monthCount).start);
@@ -211,6 +212,7 @@ class SixMonthFtrAuction extends Object with FtrAuction, AuctionWithRound {
     required Month startMonth,
     required int round,
   }) {
+    // TODO: only for Nyiso for now, need to extend to other Iso
     start = startMonth.startDate;
     monthCount = 6;
     interval = Interval(start.start, startMonth.add(monthCount).start);

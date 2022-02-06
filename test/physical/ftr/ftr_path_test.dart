@@ -52,10 +52,12 @@ Future<void> tests(String rootUrl) async {
     test('get clearing prices for the path', () async {
       var cp = await path.getClearingPrices();
       expect(cp[FtrAuction.parse('F21', iso: Iso.newYork)], 7.768346774193549);
+      expect(cp[FtrAuction.parse('X21-1Y-R1Autumn21', iso: Iso.newYork)],
+          11.499999999999998);
     });
     test('get cp vs. sp table', () async {
       var data = await path.makeTableCpSp(
-          fromDate: Date(2020, 1, 1, location: NewYorkIso.location));
+          fromDate: Date(2020, 12, 14, location: NewYorkIso.location));
       var f21 = data.firstWhere(
           (e) => e['auction'] == FtrAuction.parse('F21', iso: Iso.newYork));
       expect(f21, {
