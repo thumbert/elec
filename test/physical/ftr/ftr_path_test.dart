@@ -1,6 +1,9 @@
 library path_test;
 
+import 'package:collection/collection.dart';
+import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
+import 'package:elec_server/client/binding_constraints.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
@@ -74,6 +77,20 @@ Future<void> tests(String rootUrl) async {
           bucket: Bucket.b5x16,
           iso: Iso.newEngland);
       expect(path1.toString(), 'ISONE 4000 -> 4008 5x16');
+    });
+    test('get relevant constraints', () async {
+      var path = FtrPath(
+          sourcePtid: 23598,
+          sinkPtid: 61754,
+          bucket: Bucket.b5x16,
+          iso: Iso.newYork);
+      var term = Term.parse('1Jan19-31Dec19', location);
+      var client =
+          BindingConstraints(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+
+      var bc = await client.getDaBindingConstraints(term.interval);
+      var sp = await path.getHourlySettlePrices();
+      var relevantConstraints = path.getRelevantConstraints(bindingConstraints: bc);
     });
   });
 }

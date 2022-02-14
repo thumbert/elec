@@ -55,6 +55,7 @@ class FtrPath {
   static late DaLmp _daLmpClient;
   static late FtrClearingPrices _ftrClearingPricesClient;
 
+  /// a daily settle price cache
   static final settlePriceCache =
       Cache.lru(loader: (Tuple3<Iso, Bucket, int> tuple3) {
     return _daLmpClient.getDailyLmpBucket(
@@ -65,14 +66,19 @@ class FtrPath {
         _term!.endDate);
   });
 
+  /// an hourly settle price cache
+  static final hourlySettlePriceCache =
+      Cache.lru(loader: (Tuple2<Iso, int> tuple2) {
+    return _daLmpClient.getHourlyLmp(tuple2.item2, LmpComponent.congestion,
+        _term!.startDate, _term!.endDate);
+    ;
+  });
+
   /// A clearing price cache
   static final clearingPriceCache =
       Cache.lru(loader: (Tuple2<Iso, int> tuple2) async {
     var xs =
         await _ftrClearingPricesClient.getClearingPricesForPtid(tuple2.item2);
-    // if (xs.isEmpty) {
-    //   return <Bucket, Map<String, num>>{};
-    // }
     var groups = groupBy(xs, (Map x) => x['bucket'] as String);
     return groups.map((key, values) {
       var out = {
@@ -136,6 +142,28 @@ class FtrPath {
     }
   }
 
+  /// Get the hourly settle prices for this path.
+  /// If you don't specify the [term], return values from cache
+  /// (the last 5 years by default.)
+  Future<TimeSeries<num>> getHourlySettlePrices({Term? term}) async {
+    var sourcePrices =
+        await hourlySettlePriceCache.get(Tuple2(iso, sourcePtid));
+    var sinkPrices = await hourlySettlePriceCache.get(Tuple2(iso, sinkPtid));
+    late TimeSeries<num> spread;
+    if (iso == Iso.newYork) {
+      spread = sourcePrices - sinkPrices;
+    } else {
+      spread = sinkPrices - sourcePrices;
+    }
+
+    if (term == null) {
+      // return everything you have in cache
+      return spread;
+    } else {
+      return TimeSeries.fromIterable(spread.window(term.interval));
+    }
+  }
+
   /// Get the settle price for an auction
   Future<num> getSettlePriceForAuction(FtrAuction auction) async {
     var aux =
@@ -170,6 +198,36 @@ class FtrPath {
     }
 
     return out;
+  }
+
+  /// Get the (relevant) constraints that influence this path.
+  /// [bindingConstraints] are the historical hourly binding constraints
+  /// in the pool for this term.  Only some of these constraints have direct
+  /// influence on the path.
+  ///
+  Future<List<String>> getRelevantConstraints(Term term, 
+      {required Map<String, TimeSeries<num>> bindingConstraints}) async {
+    var relevantConstraints = <String>[];
+
+    var hourlySettlePrice = await getHourlySettlePrices();
+    var _nonZeroSettlePrice =
+        TimeSeries.fromIterable(hourlySettlePrice
+            .window(term.interval)
+            .where((e) => e.value != 0)
+            .where((e) => bucket.containsHour(e.interval as Hour)));
+    for (var constraint in bindingConstraints.keys) {
+      var bc = bindingConstraints[constraint]!.window(term.interval);
+      if (bc.isNotEmpty) {
+        var join = _nonZeroSettlePrice.merge(TimeSeries.fromIterable(bc),
+            f: (x, y) => 1, joinType: JoinType.Inner);
+        if (join.length == bc.length) {
+          /// this guarantees that on all the hours the constraint bind, the
+          /// spread was non-zero.
+          relevantConstraints.add(constraint);
+        }
+      }
+    }
+    return relevantConstraints;
   }
 
   @override
