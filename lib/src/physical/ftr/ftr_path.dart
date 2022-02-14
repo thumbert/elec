@@ -205,16 +205,15 @@ class FtrPath {
   /// in the pool for this term.  Only some of these constraints have direct
   /// influence on the path.
   ///
-  Future<List<String>> getRelevantConstraints(Term term, 
+  Future<List<Map<String, dynamic>>> getRelevantConstraints(Term term,
       {required Map<String, TimeSeries<num>> bindingConstraints}) async {
-    var relevantConstraints = <String>[];
+    var relevantConstraints = <Map<String, dynamic>>[];
 
     var hourlySettlePrice = await getHourlySettlePrices();
-    var _nonZeroSettlePrice =
-        TimeSeries.fromIterable(hourlySettlePrice
-            .window(term.interval)
-            .where((e) => e.value != 0)
-            .where((e) => bucket.containsHour(e.interval as Hour)));
+    var _nonZeroSettlePrice = TimeSeries.fromIterable(hourlySettlePrice
+        .window(term.interval)
+        .where((e) => e.value != 0)
+        .where((e) => bucket.containsHour(e.interval as Hour)));
     for (var constraint in bindingConstraints.keys) {
       var bc = bindingConstraints[constraint]!.window(term.interval);
       if (bc.isNotEmpty) {
@@ -223,7 +222,10 @@ class FtrPath {
         if (join.length == bc.length) {
           /// this guarantees that on all the hours the constraint bind, the
           /// spread was non-zero.
-          relevantConstraints.add(constraint);
+          relevantConstraints.add({
+            'constraintName': constraint,
+            'cost': sum(bc.map((e) => e.value)),
+          });
         }
       }
     }

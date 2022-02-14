@@ -25,10 +25,10 @@ void tests() {
       'K21-1Y-R8Autumn20',
       'K21-2Y-R1Spring21',
       'K21-1Y-R2Spring21',
-      'K21-1Y-R3Spring21',
-      'K21-1Y-R4Spring21',
       'K21-6M-R5Spring21',
       'K21-6M-R6Spring21',
+      'K21-1Y-R4Spring21',
+      'K21-1Y-R3Spring21',
       'K21-6M-R7Spring21',
       'K21-6M-R8Spring21',
     ];
@@ -44,11 +44,12 @@ void tests() {
       expect(auction.start, Date(2021, 12, 1, location: location));
       expect(auction.end, Date(2021, 12, 31, location: location));
     });
-    test('6 months auction K21-6M-R4Spring21', () {
+    test('6 months auction K21-6M-R5Spring21', () {
       var auction = FtrAuction.parse('K21-6M-R5Spring21', iso: Iso.newYork);
       expect(auction.monthCount, 6);
       expect(auction.start, Date(2021, 5, 1, location: location));
       expect(auction.end, Date(2021, 10, 31, location: location));
+      expect(auction is SixMonthFtrAuction, true);
     });
     test('1Y auction K21-6M-R4Spring21', () {
       var auction = FtrAuction.parse('K21-1Y-R4Spring21', iso: Iso.newYork);

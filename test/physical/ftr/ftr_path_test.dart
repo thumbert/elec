@@ -1,6 +1,5 @@
 library path_test;
 
-import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:elec_server/client/binding_constraints.dart';
@@ -80,8 +79,8 @@ Future<void> tests(String rootUrl) async {
     });
     test('get relevant constraints', () async {
       var path = FtrPath(
-          sourcePtid: 23598,
-          sinkPtid: 61754,
+          sourcePtid: 23598, // Fitz
+          sinkPtid: 61754, // C
           bucket: Bucket.b5x16,
           iso: Iso.newYork);
       var term = Term.parse('1Jan19-31Dec19', location);
@@ -89,8 +88,10 @@ Future<void> tests(String rootUrl) async {
           BindingConstraints(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
 
       var bc = await client.getDaBindingConstraints(term.interval);
-      var sp = await path.getHourlySettlePrices();
-      var relevantConstraints = path.getRelevantConstraints(bindingConstraints: bc);
+      var relevantConstraints =
+          await path.getRelevantConstraints(term, bindingConstraints: bc);
+      print(relevantConstraints);
+      expect(relevantConstraints.length, 11);
     });
   });
 }
