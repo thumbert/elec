@@ -200,12 +200,19 @@ class FtrPath {
     return out;
   }
 
-  /// Get the (relevant) constraints that influence this path.
+  /// Show the (relevant) constraints that influence this path for this [term].
   /// [bindingConstraints] are the historical hourly binding constraints
-  /// in the pool for this term.  Only some of these constraints have direct
-  /// influence on the path.
+  /// in the pool for this term or a longer term.  Only some of these
+  /// constraints have direct influence on the path.
   ///
-  Future<List<Map<String, dynamic>>> getRelevantConstraints(Term term,
+  /// Return a list of elements
+  /// ```
+  /// {
+  ///   'constraintName': 'CENTRAL EAST - VC',
+  ///   'cost': 16.78,
+  /// }
+  /// ```
+  Future<List<Map<String, dynamic>>> showRelevantConstraints(Term term,
       {required Map<String, TimeSeries<num>> bindingConstraints}) async {
     var relevantConstraints = <Map<String, dynamic>>[];
 

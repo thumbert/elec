@@ -89,7 +89,7 @@ Future<void> tests(String rootUrl) async {
 
       var bc = await client.getDaBindingConstraints(term.interval);
       var relevantConstraints =
-          await path.getRelevantConstraints(term, bindingConstraints: bc);
+          await path.showRelevantConstraints(term, bindingConstraints: bc);
       print(relevantConstraints);
       expect(relevantConstraints.length, 11);
     });

@@ -9,7 +9,7 @@ import 'package:elec/src/analysis/format/seasonal_format.dart' as seasonal;
 void tests() {
   group('Timeseries seasonal format:', () {
     test('year/month', () {
-      var months = Month.utc(2015, 12).nextN(28);
+      var months = Month.utc(2015, 7).nextN(28);
       var ts = TimeSeries.from(months, List.filled(months.length, 1));
       var out = seasonal.formatYearMonth(ts);
       expect(out.length, 3);
