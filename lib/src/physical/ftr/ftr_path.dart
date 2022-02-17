@@ -212,7 +212,7 @@ class FtrPath {
   ///   'cost': 16.78,
   /// }
   /// ```
-  Future<List<Map<String, dynamic>>> showRelevantConstraints(Term term,
+  Future<List<Map<String, dynamic>>> calculateRelevantConstraints(Term term,
       {required Map<String, TimeSeries<num>> bindingConstraints}) async {
     var relevantConstraints = <Map<String, dynamic>>[];
 
