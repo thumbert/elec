@@ -68,6 +68,17 @@ Future<void> tests(String rootUrl) async {
         'settlePrice': 8.631370967741935,
       });
     });
+    test('get cp vs. sp table for a path that doesn\'t exist', () async {
+      var path = FtrPath(
+          sourcePtid: 23518,
+          sinkPtid: 61762,
+          bucket: Bucket.atc,
+          iso: Iso.newYork,
+          rootUrl: rootUrl);
+      var data = await path.makeTableCpSp(
+          fromDate: Date(2020, 12, 14, location: NewYorkIso.location));
+      expect(data.isEmpty, true);
+    });
     test('toString() for the path', () {
       expect(path.toString(), 'NYISO 61752 -> 61758');
       var path1 = FtrPath(

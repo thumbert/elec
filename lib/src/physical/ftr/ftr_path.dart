@@ -89,18 +89,25 @@ class FtrPath {
     });
   });
 
-  /// Get all auction clearing prices from the database
+  /// Get all auction clearing prices from the database.
+  /// Return an empty Map if one of the nodes is not allowed in the
+  /// FTR/TCC auction or if there are no auctions this path cleared.
   Future<Map<FtrAuction, num>> getClearingPrices(
       {List<FtrAuction>? auctions}) async {
     var cpSource = await clearingPriceCache.get(Tuple2(iso, sourcePtid));
     var cpSink = await clearingPriceCache.get(Tuple2(iso, sinkPtid));
+
+    var out = <FtrAuction, num>{};
+    if (cpSource.isEmpty || cpSink.isEmpty) {
+      /// at least one of the nodes has not cleared anything, ever
+      return out;
+    }
 
     auctions ??= cpSource[bucket]!
         .keys
         .map((e) => FtrAuction.parse(e, iso: iso))
         .toList();
 
-    var out = <FtrAuction, num>{};
     for (var auction in auctions) {
       var auctionName = auction.name;
       var _cpSink = cpSink[bucket]![auctionName];

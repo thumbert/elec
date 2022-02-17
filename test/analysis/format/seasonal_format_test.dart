@@ -13,7 +13,7 @@ void tests() {
       var ts = TimeSeries.from(months, List.filled(months.length, 1));
       var out = seasonal.formatYearMonth(ts);
       expect(out.length, 3);
-      expect(out.first.length, 13);
+      expect(out.first.length, 6);
     });
     test('month/year', () {
       var months = Month.utc(2016, 3).nextN(28);
