@@ -216,34 +216,60 @@ class FtrPath {
   /// ```
   /// {
   ///   'constraintName': 'CENTRAL EAST - VC',
-  ///   'cost': 16.78,
+  ///   'hours': 131,
+  ///   'Mean Spread': 8.55,
+  ///   'Cumulative Spread': 166.78,
   /// }
   /// ```
-  Future<List<Map<String, dynamic>>> calculateRelevantConstraints(Term term,
-      {required Map<String, TimeSeries<num>> bindingConstraints}) async {
-    var relevantConstraints = <Map<String, dynamic>>[];
+  Future<List<Map<String, dynamic>>> bindingConstraintEffect(Term term,
+      {required Map<String, TimeSeries<num>> bindingConstraints,
+      num meanSpreadThreshold = 1.0}) async {
+    var out = <Map<String, dynamic>>[];
 
     var hourlySettlePrice = await getHourlySettlePrices();
-    var _nonZeroSettlePrice = TimeSeries.fromIterable(hourlySettlePrice
+    var _settlePrice = TimeSeries.fromIterable(hourlySettlePrice
         .window(term.interval)
-        .where((e) => e.value != 0)
+        // .where((e) => e.value != 0)
         .where((e) => bucket.containsHour(e.interval as Hour)));
     for (var constraint in bindingConstraints.keys) {
       var bc = bindingConstraints[constraint]!.window(term.interval);
       if (bc.isNotEmpty) {
-        var join = _nonZeroSettlePrice.merge(TimeSeries.fromIterable(bc),
-            f: (x, y) => 1, joinType: JoinType.Inner);
-        if (join.length == bc.length) {
-          /// this guarantees that on all the hours the constraint bind, the
-          /// spread was non-zero.
-          relevantConstraints.add({
-            'constraintName': constraint,
-            'cost': sum(bc.map((e) => e.value)),
+        var join = _settlePrice.merge(TimeSeries.fromIterable(bc),
+            f: (x, y) => [x, y], joinType: JoinType.Inner);
+        // if (iso == Iso.newYork) {
+        //   /// For NYISO, have a more restrictive check as there is
+        //   /// persistent congestion on most hours.
+        //   /// check that on all the hours the constraint bind, the
+        //   /// spread was non-zero.
+        //   if (join.length == bc.length) {
+        //     var effect = mean(join.map(((e) => e.value[0] as num)));
+        //     out.add({
+        //       'constraintName': constraint,
+        //       'hours': join.length,
+        //       'Mean Spread': effect,
+        //       'Cumulative Spread': effect * join.length,
+        //     });
+        //   }
+        // } else {
+        /// need to eliminate the false positives, when the constraint binds
+        /// but the spread == 0
+        var lr = join.partition((e) => e.value![0] == 0);
+        if (lr.item1.isNotEmpty) continue;
+        if (lr.item2.isNotEmpty) {
+          var effect = mean(lr.item2.map(((e) => e.value[0] as num)));
+          out.add({
+            'name': constraint,
+            'hours': lr.item2.length,
+            'Mean Spread': effect,
+            'Cumulative Spread': effect * lr.item2.length,
           });
         }
       }
+      // }
     }
-    return relevantConstraints;
+    return out
+        .where((e) => (e['Mean Spread'] as num).abs() >= meanSpreadThreshold)
+        .toList();
   }
 
   @override

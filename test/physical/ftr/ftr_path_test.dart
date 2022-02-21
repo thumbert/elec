@@ -88,7 +88,30 @@ Future<void> tests(String rootUrl) async {
           iso: Iso.newEngland);
       expect(path1.toString(), 'ISONE 4000 -> 4008 5x16');
     });
-    test('get relevant constraints', () async {
+    test('get relevant constraints ISONE', () async {
+      var path = FtrPath(
+          sourcePtid: 4000,
+          sinkPtid: 4006,
+          bucket: Bucket.b5x16,
+          iso: Iso.newEngland);
+      var term = Term.parse('1Aug21-31Dec21', location);
+      var client = BindingConstraints(http.Client(),
+          iso: Iso.newEngland, rootUrl: rootUrl);
+
+      var bc = await client.getDaBindingConstraints(term.interval);
+      var effects =
+          await path.bindingConstraintEffect(term, bindingConstraints: bc);
+      effects.sort(
+          (a, b) => -a['Cumulative Spread'].compareTo(b['Cumulative Spread']));
+      expect(effects.first.keys.toSet(), {
+        'name',
+        'hours',
+        'Mean Spread',
+        'Cumulative Spread',
+      });
+      expect(effects.length, 8);
+    });
+    test('get relevant constraints NYISO', () async {
       var path = FtrPath(
           sourcePtid: 23598, // Fitz
           sinkPtid: 61754, // C
@@ -99,10 +122,12 @@ Future<void> tests(String rootUrl) async {
           BindingConstraints(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
 
       var bc = await client.getDaBindingConstraints(term.interval);
-      var relevantConstraints =
-          await path.calculateRelevantConstraints(term, bindingConstraints: bc);
-      print(relevantConstraints);
-      expect(relevantConstraints.length, 11);
+      var effects =
+          await path.bindingConstraintEffect(term, bindingConstraints: bc);
+      // print(relevantConstraints);
+      effects.sort(
+          (a, b) => -a['Cumulative Spread'].compareTo(b['Cumulative Spread']));
+      expect(effects.length, 16);
     });
   });
 }
