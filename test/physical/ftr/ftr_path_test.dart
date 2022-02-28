@@ -145,7 +145,7 @@ Future<void> tests(String rootUrl) async {
       // print(relevantConstraints);
       effects.sort((a, b) => -(a['Cumulative Spread'].abs())
           .compareTo(b['Cumulative Spread'].abs()));
-      expect(effects.length, 63);
+      expect(effects.length, 65);
       expect(effects.first['name'], 'CENTRAL EAST - VC');
     });
   });
