@@ -229,47 +229,32 @@ class FtrPath {
     var hourlySettlePrice = await getHourlySettlePrices();
     var _settlePrice = TimeSeries.fromIterable(hourlySettlePrice
         .window(term.interval)
-        // .where((e) => e.value != 0)
         .where((e) => bucket.containsHour(e.interval as Hour)));
     for (var constraint in bindingConstraints.keys) {
       var bc = bindingConstraints[constraint]!.window(term.interval);
       if (bc.isNotEmpty) {
         var join = _settlePrice.merge(TimeSeries.fromIterable(bc),
             f: (x, y) => [x, y], joinType: JoinType.Inner);
-        // if (iso == Iso.newYork) {
-        //   /// For NYISO, have a more restrictive check as there is
-        //   /// persistent congestion on most hours.
-        //   /// check that on all the hours the constraint bind, the
-        //   /// spread was non-zero.
-        //   if (join.length == bc.length) {
-        //     var effect = mean(join.map(((e) => e.value[0] as num)));
-        //     out.add({
-        //       'constraintName': constraint,
-        //       'hours': join.length,
-        //       'Mean Spread': effect,
-        //       'Cumulative Spread': effect * join.length,
-        //     });
-        //   }
-        // } else {
+
         /// need to eliminate the false positives, when the constraint binds
-        /// but the spread == 0
+        /// but the spread == 0.  Make an exception in case by pure chance, the
+        /// spread is zero when the constraint binds in very few hours^*.
         var lr = join.partition((e) => e.value![0] == 0);
-        if (lr.item1.isNotEmpty) continue;
         if (lr.item2.isNotEmpty) {
           var effect = mean(lr.item2.map(((e) => e.value[0] as num)));
-          out.add({
-            'name': constraint,
-            'hours': lr.item2.length,
-            'Mean Spread': effect,
-            'Cumulative Spread': effect * lr.item2.length,
-          });
+          if (effect.abs() >= meanSpreadThreshold &&
+              lr.item1.length / lr.item2.length < 0.005) {
+            out.add({
+              'name': constraint,
+              'hours': lr.item2.length,
+              'Mean Spread': effect,
+              'Cumulative Spread': effect * lr.item2.length,
+            });
+          }
         }
       }
-      // }
     }
-    return out
-        .where((e) => (e['Mean Spread'] as num).abs() >= meanSpreadThreshold)
-        .toList();
+    return out;
   }
 
   @override
@@ -285,3 +270,19 @@ class FtrPath {
     }
   }
 }
+
+// if (iso == Iso.newYork) {
+//   /// For NYISO, have a more restrictive check as there is
+//   /// persistent congestion on most hours.
+//   /// check that on all the hours the constraint bind, the
+//   /// spread was non-zero.
+//   if (join.length == bc.length) {
+//     var effect = mean(join.map(((e) => e.value[0] as num)));
+//     out.add({
+//       'constraintName': constraint,
+//       'hours': join.length,
+//       'Mean Spread': effect,
+//       'Cumulative Spread': effect * join.length,
+//     });
+//   }
+// } else {

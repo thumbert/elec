@@ -127,7 +127,26 @@ Future<void> tests(String rootUrl) async {
       // print(relevantConstraints);
       effects.sort(
           (a, b) => -a['Cumulative Spread'].compareTo(b['Cumulative Spread']));
-      expect(effects.length, 16);
+      expect(effects.length, 18);
+    });
+    test('get relevant constraints NYISO, short term', () async {
+      var path = FtrPath(
+          sourcePtid: 61752, // A
+          sinkPtid: 61758, // G
+          bucket: Bucket.atc,
+          iso: Iso.newYork);
+      var term = Term.parse('1Nov20-27Feb22', location);
+      var client =
+          BindingConstraints(http.Client(), iso: Iso.newYork, rootUrl: rootUrl);
+
+      var bc = await client.getDaBindingConstraints(term.interval);
+      var effects =
+          await path.bindingConstraintEffect(term, bindingConstraints: bc);
+      // print(relevantConstraints);
+      effects.sort((a, b) => -(a['Cumulative Spread'].abs())
+          .compareTo(b['Cumulative Spread'].abs()));
+      expect(effects.length, 63);
+      expect(effects.first['name'], 'CENTRAL EAST - VC');
     });
   });
 }
