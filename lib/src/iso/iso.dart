@@ -46,6 +46,18 @@ class IsoNewEngland implements Iso {
   static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak = bucket5x16;
 
+  /// A convenient location, should be used.
+  static const loadZones = <String, int>{
+    'Maine': 4001,
+    'NH': 4002,
+    'VT': 4003,
+    'CT': 4004,
+    'RI': 4005,
+    'SEMA': 4006,
+    'WCMA': 4007,
+    'NEMA': 4008,
+  };
+
   /// Allowed service types in this ISO
   @override
   final serviceTypes = <String>{
@@ -77,6 +89,20 @@ class NewYorkIso implements Iso {
   static final Bucket bucket7x24 = Bucket.atc;
   static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak = bucket5x16;
+
+  static const loadZones = <String, int>{
+    'Zone A': 61752,
+    'Zone B': 61753,
+    'Zone C': 61754,
+    'Zone D': 61755,
+    'Zone E': 61756,
+    'Zone F': 61757,
+    'Zone G': 61758,
+    'Zone H': 61759,
+    'Zone I': 61760,
+    'Zone J': 61761,
+    'Zone K': 61762,
+  };
 
   /// Allowed service types in this ISO
   @override
