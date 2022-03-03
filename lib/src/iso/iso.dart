@@ -29,6 +29,9 @@ abstract class Iso {
       throw ArgumentError('Iso $x not supported yet');
     }
   }
+
+  /// A map from loadZone name to ptid
+  static const loadZones = <String, int>{};
 }
 
 class IsoNewEngland implements Iso {
