@@ -7,6 +7,7 @@ import 'package:elec/src/iso/location.dart';
 abstract class Iso {
   String get name;
   Set<String> get serviceTypes;
+  Map<String, int> get loadZones;
 
   late tz.Location preferredTimeZoneLocation;
 
@@ -29,9 +30,6 @@ abstract class Iso {
       throw ArgumentError('Iso $x not supported yet');
     }
   }
-
-  /// A map from loadZone name to ptid
-  static const loadZones = <String, int>{};
 }
 
 class IsoNewEngland implements Iso {
@@ -50,7 +48,8 @@ class IsoNewEngland implements Iso {
   static final Bucket bucketPeak = bucket5x16;
 
   /// A convenient location, should be used.
-  static const loadZones = <String, int>{
+  @override
+  final loadZones = <String, int>{
     'Maine': 4001,
     'NH': 4002,
     'VT': 4003,
@@ -93,7 +92,8 @@ class NewYorkIso implements Iso {
   static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak = bucket5x16;
 
-  static const loadZones = <String, int>{
+  @override
+  final loadZones = <String, int>{
     'Zone A': 61752,
     'Zone B': 61753,
     'Zone C': 61754,
@@ -142,6 +142,10 @@ class Pjm implements Iso {
 
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+
+  @override
+  // TODO: implement loadZones
+  Map<String, int> get loadZones => throw UnimplementedError();
 }
 
 class Ieso implements Iso {
@@ -168,6 +172,10 @@ class Ieso implements Iso {
 
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+
+  @override
+  // TODO: implement loadZones
+  Map<String, int> get loadZones => throw UnimplementedError();
 }
 
 //class Caiso extends Iso {
