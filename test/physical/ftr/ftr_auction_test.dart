@@ -99,6 +99,44 @@ void tests() {
         'J22-boppG22',
       ]);
     });
+    test('compare bopp auctions', () {
+      var xs = [
+        'J22-boppF22',
+        'J22-boppX21',
+        'J22-boppH22',
+        'J22-boppG22',
+        'H22-boppZ21',
+        'J22-boppZ21',
+      ].map((e) => FtrAuction.parse(e, iso: Iso.newYork)).toList();
+      xs.sort();
+      expect(xs.map((e) => e.name).toList(), [
+        'H22-boppZ21',
+        'J22-boppX21',
+        'J22-boppZ21',
+        'J22-boppF22',
+        'J22-boppG22',
+        'J22-boppH22',
+      ]);
+    });
+    test('compare monthly and bopp auctions', () {
+      var xs = [
+        'F22',
+        'J22-boppH22',
+        'J22',
+        'X21',
+        'H22-boppZ21',
+        'J22-boppZ21',
+      ].map((e) => FtrAuction.parse(e, iso: Iso.newYork)).toList();
+      xs.sort();
+      expect(xs.map((e) => e.name).toList(), [
+        'X21',
+        'F22',
+        'H22-boppZ21',
+        'J22-boppZ21',
+        'J22-boppH22',
+        'J22',
+      ]);
+    });
   });
 }
 

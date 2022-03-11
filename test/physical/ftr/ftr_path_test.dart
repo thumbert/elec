@@ -109,7 +109,7 @@ Future<void> tests(String rootUrl) async {
         'Mean Spread',
         'Cumulative Spread',
       });
-      expect(effects.length, 8);
+      expect(effects.length, 10);
     });
     test('get relevant constraints NYISO', () async {
       var path = FtrPath(

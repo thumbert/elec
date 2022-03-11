@@ -109,7 +109,7 @@ mixin FtrAuction implements Comparable<FtrAuction> {
 
   /// A compare functions for sorting FTR Auctions.
   /// First you sort the annual auctions, then you sort by rounds, then the
-  /// monthlies by start date.
+  /// monthlies by start date.  MonthlyBopp come before Monthly auctions.
   @override
   int compareTo(FtrAuction other) {
     // compare start dates
@@ -118,7 +118,8 @@ mixin FtrAuction implements Comparable<FtrAuction> {
     if (aux == 0) {
       aux = -monthCount.compareTo(other.monthCount);
     }
-    // for the same auction length, compare rounds for multi month auctions
+    // for the same start date and auction length,
+    // compare rounds for multi month auctions
     if (aux == 0) {
       if (monthCount > 1) {
         late int round;
@@ -126,6 +127,23 @@ mixin FtrAuction implements Comparable<FtrAuction> {
         round = (this as AuctionWithRound).round;
         otherRound = (other as AuctionWithRound).round;
         aux = round.compareTo(otherRound);
+      } else {
+        // month count == 1, so it's a monthly or MonthlyBopp auctions
+        // with same start date. Monthly bopp gets ordered by boppMonth,
+        // monthly comes after monthlyBopp
+        if (this is MonthlyBoppFtrAuction) {
+          var a1 = this as MonthlyBoppFtrAuction;
+          if (other is MonthlyBoppFtrAuction) {
+            aux = a1.boppMonth.compareTo(other.boppMonth);
+          } else {
+            // other is a Monthly auction
+            aux = -1;
+          }
+        } else {
+          // this is a MonthlyAuction, and other is a MonthlyBoppAuction with
+          // same start
+          aux = 1;
+        }
       }
     }
     return aux;
@@ -263,49 +281,3 @@ class MonthlyBoppFtrAuction extends Object with FtrAuction {
     name = formatMYY(startMonth) + '-bopp' + formatMYY(boppMonth);
   }
 }
-
-// /// Construct a monthly auction
-// FtrAuction.monthly(Month month) {
-//   interval = Month(month.year, month.month, location: location);
-//   start = Date(month.year, month.month, 1, location: location);
-//   monthCount = 1;
-//   name = formatMYY(month);
-// }
-//
-// /// Construct an annual auction
-// FtrAuction.annual(int year, this.round) {
-//   interval =
-//       Interval(TZDateTime(location, year), TZDateTime(location, year + 1));
-//   start = Date(year, 1, 1, location: location);
-//   monthCount = 12;
-//   if (year > 2012) {
-//     if (round != 1 && round != 2) {
-//       throw ArgumentError('Only round 1 or 2 are allowed.');
-//     }
-//     name = 'F${year - 2000}-1Y-R${round.toString()}';
-//   } else {
-//     name = 'F${year - 2000}-1Y';
-//     round = 0;
-//   }
-// }
-
-// /// Get all the FTR auctions that start after a given date but before "today".
-// /// This means that in Dec18, you won't get F19 auction because delivery
-// /// period hasn't started yet.
-// static List<FtrAuction> auctionsWithSettle(Date fromDate) {
-//   var year = fromDate.year;
-//   var today = Date.today(location: fromDate.location);
-//   var res = <FtrAuction>[];
-//   for (var i = year; i <= today.year; i++) {
-//     res.add(FtrAuction.annual(i, 1));
-//     res.add(FtrAuction.annual(i, 2));
-//     for (var m = 1; m <= 12; m++) {
-//       var auction =
-//           FtrAuction.monthly(Month(i, m, location: fromDate.location));
-//       if (auction.start.isAfter(fromDate) && auction.start.isBefore(today)) {
-//         res.add(auction);
-//       }
-//     }
-//   }
-//   return res;
-// }
