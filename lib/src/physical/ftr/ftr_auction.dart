@@ -46,10 +46,12 @@ mixin FtrAuction implements Comparable<FtrAuction> {
           location: Iso.newYork.preferredTimeZoneLocation);
       return MonthlyBoppFtrAuction(
           iso: Iso.newEngland, startMonth: month, boppMonth: boppMonth);
-    } else if (name.contains('-1Y-')) {
+    } else if (name.contains(RegExp('-1Y-?'))) {
       /// it's an annual auction
-      ///
-      var round = int.parse(name.substring(8)); // only from 2013
+      int round = 0;
+      if (month.year >= 2013) {
+        round = int.parse(name.substring(8)); // only from 2013
+      }
       return AnnualFtrAuction(
           iso: Iso.newEngland, startMonth: month, round: round);
     } else {
@@ -201,6 +203,7 @@ class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
     monthCount = 12;
     interval = Interval(start.start, startMonth.add(monthCount).start);
     this.round = round;
+
     if (iso == Iso.newYork) {
       if (startMonth.month != 5 && startMonth.month != 11) {
         throw ArgumentError('Annual TCC auctions start in May or Nov only.');
@@ -216,12 +219,20 @@ class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
           _season = 'Spring$yy';
         }
       }
+      name = formatMYY(startMonth) + '-1Y-R$round' + _season;
+      //
+      //
     } else if (iso == Iso.newEngland) {
+      if (round == 0) {
+        name = formatMYY(startMonth) + '-1Y';
+      } else {
+        name = formatMYY(startMonth) + '-1Y-R$round';
+      }
+      //
+      //
     } else {
       throw ArgumentError('Iso $iso not yet supported.');
     }
-
-    name = formatMYY(startMonth) + '-1Y-R$round' + _season;
   }
 
   /// Empty for ISONE.

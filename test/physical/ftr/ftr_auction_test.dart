@@ -40,6 +40,7 @@ void tests() {
     });
     test('parse ISONE FTR auction names', () {
       var auctionNames = [
+        'F06-1Y',
         'F20-1Y-R2',
         'G22',
         'J22-boppF22',
