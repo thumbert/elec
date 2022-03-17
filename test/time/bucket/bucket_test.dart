@@ -1,6 +1,7 @@
 library test_bucket;
 
 import 'dart:math' show pow;
+import 'package:table/table_base.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
 import 'package:test/test.dart';
@@ -226,11 +227,39 @@ void speedTest() {
   print(count);
 }
 
+void calculateBucketHoursByMonth() {
+  var buckets = [
+    Bucket.b5x16,
+    Bucket.b2x16H,
+    Bucket.b7x8,
+  ];
+
+  var startMonth =
+      Month(2023, 1, location: Iso.newEngland.preferredTimeZoneLocation);
+  var endMonth =
+      Month(2036, 12, location: Iso.newEngland.preferredTimeZoneLocation);
+  var months = startMonth.upTo(endMonth);
+
+  var out = <Map<String, dynamic>>[];
+  for (var bucket in buckets) {
+    for (var month in months) {
+      out.add({
+        'month': month.toIso8601String(),
+        'bucket': bucket.name,
+        'hours': bucket.countHours(month),
+      });
+    }
+  }
+  var aux = reshape(out, ['month'], ['bucket'], 'hours');
+  print(Table.from(aux));
+}
+
 void main() async {
   initializeTimeZones();
   // tests();
 
   // aggregateByBucketMonth();
 
-  speedTest();
+  // speedTest();
+  calculateBucketHoursByMonth();
 }

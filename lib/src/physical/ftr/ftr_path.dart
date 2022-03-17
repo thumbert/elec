@@ -75,6 +75,7 @@ class FtrPath {
   });
 
   /// A clearing price cache
+  /// (Iso, ptid) -> {Bucket: {AuctionName: num}}
   static final clearingPriceCache =
       Cache.lru(loader: (Tuple2<Iso, int> tuple2) async {
     var xs =
@@ -270,19 +271,3 @@ class FtrPath {
     }
   }
 }
-
-// if (iso == Iso.newYork) {
-//   /// For NYISO, have a more restrictive check as there is
-//   /// persistent congestion on most hours.
-//   /// check that on all the hours the constraint bind, the
-//   /// spread was non-zero.
-//   if (join.length == bc.length) {
-//     var effect = mean(join.map(((e) => e.value[0] as num)));
-//     out.add({
-//       'constraintName': constraint,
-//       'hours': join.length,
-//       'Mean Spread': effect,
-//       'Cumulative Spread': effect * join.length,
-//     });
-//   }
-// } else {

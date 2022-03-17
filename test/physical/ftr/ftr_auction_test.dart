@@ -38,6 +38,17 @@ void tests() {
         expect(auction.name, name);
       }
     });
+    test('parse ISONE FTR auction names', () {
+      var auctionNames = [
+        'F20-1Y-R2',
+        'G22',
+        'J22-boppF22',
+      ];
+      for (var name in auctionNames) {
+        var auction = FtrAuction.parse(name, iso: Iso.newEngland);
+        expect(auction.name, name);
+      }
+    });
     test('monthly auction Z21', () {
       var auction = FtrAuction.parse('Z21', iso: Iso.newYork);
       expect(auction.monthCount, 1);

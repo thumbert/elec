@@ -33,8 +33,8 @@ mixin FtrAuction implements Comparable<FtrAuction> {
   /// 'G18', etc. for monthly auctions.
   /// Rounds were added to the annual auctions starting in 2013.
   static FtrAuction _parseIsone(String name) {
-    var month =
-        parseMYY(name, location: Iso.newEngland.preferredTimeZoneLocation);
+    var month = parseMYY(name.substring(0, 3),
+        location: Iso.newEngland.preferredTimeZoneLocation);
     if (name.length == 3) {
       /// it's a monthly auction
       ///
@@ -190,35 +190,41 @@ class TwoYearFtrAuction extends Object with FtrAuction, AuctionWithRound {
 }
 
 class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
-  late String _season;
+  String _season = '';
 
   AnnualFtrAuction({
     required Iso iso,
     required Month startMonth,
     required int round,
   }) {
-    // TODO: only for Nyiso for now, need to extend to other Iso
     start = startMonth.startDate;
     monthCount = 12;
     interval = Interval(start.start, startMonth.add(monthCount).start);
     this.round = round;
-    if (startMonth.month != 5 && startMonth.month != 11) {
-      throw ArgumentError('Annual TCC auctions start in May or Nov only.');
-    }
-    var yy = startMonth.year - 2000;
-    // set the season
-    if (startMonth.month == 11) {
-      _season = 'Autumn$yy';
-    } else {
-      if (round == 8) {
-        _season = 'Autumn${yy - 1}'; // for example K21-1Y-R8Autumn20
-      } else {
-        _season = 'Spring$yy';
+    if (iso == Iso.newYork) {
+      if (startMonth.month != 5 && startMonth.month != 11) {
+        throw ArgumentError('Annual TCC auctions start in May or Nov only.');
       }
+      var yy = startMonth.year - 2000;
+      // set the season
+      if (startMonth.month == 11) {
+        _season = 'Autumn$yy';
+      } else {
+        if (round == 8) {
+          _season = 'Autumn${yy - 1}'; // for example K21-1Y-R8Autumn20
+        } else {
+          _season = 'Spring$yy';
+        }
+      }
+    } else if (iso == Iso.newEngland) {
+    } else {
+      throw ArgumentError('Iso $iso not yet supported.');
     }
+
     name = formatMYY(startMonth) + '-1Y-R$round' + _season;
   }
 
+  /// Empty for ISONE.
   String get season => _season;
 }
 
