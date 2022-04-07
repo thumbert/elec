@@ -1,5 +1,6 @@
 library elec.iso;
 
+import 'package:elec/src/iso/load_zone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/time/bucket/bucket.dart';
 import 'package:elec/src/iso/location.dart';
@@ -116,6 +117,18 @@ class NewYorkIso implements Iso {
 
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+
+  final zoneA = LoadZone('WEST', 61752);
+  final zoneB = LoadZone('GENESE', 61753);
+  final zoneC = LoadZone('CENTRL', 61754);
+  final zoneD = LoadZone('NORTH', 61755);
+  final zoneE = LoadZone('MHK VL', 61756);
+  final zoneF = LoadZone('CAPITL', 61757);
+  final zoneG = LoadZone('HUD VL', 61758);
+  final zoneH = LoadZone('MILLWD', 61759);
+  final zoneI = LoadZone('DUNWOD', 61760);
+  final zoneJ = LoadZone('N.Y.C.', 61761);
+  final zoneK = LoadZone('LONGIL', 61762);
 }
 
 class Pjm implements Iso {
