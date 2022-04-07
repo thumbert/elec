@@ -118,17 +118,18 @@ class NewYorkIso implements Iso {
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
 
-  final zoneA = LoadZone('WEST', 61752);
-  final zoneB = LoadZone('GENESE', 61753);
-  final zoneC = LoadZone('CENTRL', 61754);
-  final zoneD = LoadZone('NORTH', 61755);
-  final zoneE = LoadZone('MHK VL', 61756);
-  final zoneF = LoadZone('CAPITL', 61757);
-  final zoneG = LoadZone('HUD VL', 61758);
-  final zoneH = LoadZone('MILLWD', 61759);
-  final zoneI = LoadZone('DUNWOD', 61760);
-  final zoneJ = LoadZone('N.Y.C.', 61761);
-  final zoneK = LoadZone('LONGIL', 61762);
+  /// the load zones
+  static final zoneA = LoadZone('WEST', 61752);
+  static final zoneB = LoadZone('GENESE', 61753);
+  static final zoneC = LoadZone('CENTRL', 61754);
+  static final zoneD = LoadZone('NORTH', 61755);
+  static final zoneE = LoadZone('MHK VL', 61756);
+  static final zoneF = LoadZone('CAPITL', 61757);
+  static final zoneG = LoadZone('HUD VL', 61758);
+  static final zoneH = LoadZone('MILLWD', 61759);
+  static final zoneI = LoadZone('DUNWOD', 61760);
+  static final zoneJ = LoadZone('N.Y.C.', 61761);
+  static final zoneK = LoadZone('LONGIL', 61762);
 }
 
 class Pjm implements Iso {
