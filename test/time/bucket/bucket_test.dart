@@ -91,8 +91,7 @@ void tests() {
     });
 
     test('custom bucket', () {
-      var b5x16_1318 =
-          CustomBucket.withHours(Bucket.b5x16, [13, 14, 15, 16, 17, 18]);
+      var b5x16_1318 = CustomBucket(Bucket.b5x16, [13, 14, 15, 16, 17, 18]);
       var term = Term.parse('21Aug20', location);
       var hours =
           term.hours().where((hour) => b5x16_1318.containsHour(hour)).toList();

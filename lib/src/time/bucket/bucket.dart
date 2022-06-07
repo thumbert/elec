@@ -4,7 +4,7 @@ import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 
 abstract class Bucket {
-  String get name;
+  late final String name;
 
   /// The permissible hour beginnings for this bucket.  Used by hourly bucket
   /// weights.  Should be a sorted list.
@@ -43,11 +43,13 @@ abstract class Bucket {
   static final b6x16 = Bucket6x16();
   static final b7x8 = Bucket7x8();
   static final b7x16 = Bucket7x16();
+  static final caisoPeak = BucketCaisoPeak();
   static final offpeak = BucketOffpeak();
 
   static final Map<String, Bucket> buckets = {
     'ATC': Bucket.atc,
     'PEAK': Bucket.b5x16,
+    'CAISO PEAK': Bucket.caisoPeak,
     'ONPEAK': Bucket.b5x16,
     'OFFPEAK': Bucket.offpeak,
     '2X16': Bucket.b2x16,
@@ -110,19 +112,15 @@ abstract class Bucket {
     return _hoursCache[interval]!;
   }
 
-  // @override
-  // bool operator ==(Object other) {
-  //   // TODO: implement ==
-  //   return super == other;
-  // }
+  @override
+  bool operator ==(Object other) {
+    if (other is! Bucket) return false;
+    return name == other.name;
+  }
 }
 
 class CustomBucket extends Bucket {
-  @override
-  late String name;
   final Bucket bucket;
-  @override
-  final List<int> hourBeginning;
 
   late Set<int> _hours;
 
@@ -130,7 +128,8 @@ class CustomBucket extends Bucket {
   /// filter, that is, retain only a list of hours.
   /// For example, to select the hours 12 to 18
   /// for all peak days of the year.
-  CustomBucket.withHours(this.bucket, this.hourBeginning) {
+  CustomBucket(this.bucket, List<int> hourBeginning) {
+    this.hourBeginning = hourBeginning;
     hourBeginning.sort();
     if (hourBeginning.first < 0 || hourBeginning.last > 23) {
       throw ArgumentError('Invalid hourBeginning $hourBeginning');
@@ -145,61 +144,33 @@ class CustomBucket extends Bucket {
 }
 
 class Bucket7x24 extends Bucket {
-  @override
-  final String name = '7x24';
-  @override
-  final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
-
-  Bucket7x24();
-
+  Bucket7x24() {
+    name = '7x24';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
   @override
   bool containsHour(Hour hour) => true;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket7x24) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket7x8 extends Bucket {
-  @override
-  final String name = '7x8';
-  @override
-  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
-
   /// Overnight hours for all days of the year
-  Bucket7x8();
-
+  Bucket7x8() {
+    name = '7x8';
+    hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
+  }
   @override
   bool containsHour(Hour hour) {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket7x8) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket2x8 extends Bucket {
-  @override
-  final String name = '2x8';
-  @override
-  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
-
   /// Overnight hours for weekend only (no weekday holidays)
-  Bucket2x8();
+  Bucket2x8() {
+    name = '2x8';
+    hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -208,26 +179,14 @@ class Bucket2x8 extends Bucket {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket2x8) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket5x8 extends Bucket {
-  @override
-  final String name = '5x8';
-  @override
-  final List<int> hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
-
   /// Overnight hours for weekday only (with weekday holidays)
-  Bucket5x8();
+  Bucket5x8() {
+    name = '5x8';
+    hourBeginning = [0, 1, 2, 3, 4, 5, 6, 23];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -236,27 +195,14 @@ class Bucket5x8 extends Bucket {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket2x8) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket6x16 extends Bucket {
-  @override
-  final String name = '6x16';
-  @override
-  final List<int> hourBeginning =
-      List.generate(16, (i) => i + 7, growable: false);
-
   /// Peak hours for Mon-Sat.
-  Bucket6x16();
+  Bucket6x16() {
+    name = '6x16';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -265,51 +211,27 @@ class Bucket6x16 extends Bucket {
         hour.currentDate.weekday != 7) return true;
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket6x16) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket7x16 extends Bucket {
-  @override
-  final String name = '7x16';
-  @override
-  final List<int> hourBeginning =
-      List.generate(16, (i) => i + 7, growable: false);
-
   /// Peak hours for all days of the week.
-  Bucket7x16();
+  Bucket7x16() {
+    name = '7x16';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
     if (hour.start.hour >= 7 && hour.start.hour < 23) return true;
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket7x16) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket5x16 extends Bucket {
-  @override
-  final String name = '5x16';
   final calendar = NercCalendar();
 
   Bucket5x16() {
+    name = '5x16';
     hourBeginning = List.generate(16, (i) => i + 7, growable: false);
   }
 
@@ -333,26 +255,45 @@ class Bucket5x16 extends Bucket {
       }
     }
   }
+}
 
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16) return false;
-    return true;
+class BucketCaisoPeak extends Bucket {
+  final calendar = NercCalendar();
+
+  BucketCaisoPeak() {
+    name = 'Caiso Peak';
+    hourBeginning = List.generate(17, (i) => i + 6, growable: false);
   }
 
   @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
+  bool containsHour(Hour hour) {
+    final hs = hour.start;
+    var dayOfWeek = hs.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      /// not the right day of the week
+      return false;
+    } else {
+      if (hs.hour < 6 || hs.hour == 23) {
+        /// not at the right hour of the day
+        return false;
+      } else {
+        if (calendar.isHoliday(hour.currentDate)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
 }
 
+// ignore: camel_case_types
 class Bucket5x16_7 extends Bucket {
-  @override
-  final String name = '5x16_7';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[7];
-
-  Bucket5x16_7();
+  Bucket5x16_7() {
+    name = '5x16_7';
+    hourBeginning = <int>[7];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -368,26 +309,16 @@ class Bucket5x16_7 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_7) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_8 extends Bucket {
-  @override
-  final String name = '5x16_8';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[8];
 
-  Bucket5x16_8();
+  Bucket5x16_8() {
+    name = '5x16_8';
+    hourBeginning = <int>[8];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -403,27 +334,17 @@ class Bucket5x16_8 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_8) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_9 extends Bucket {
-  @override
-  final String name = '5x16_9';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[9];
 
   /// The 5x16 hour beginning 9 bucket
-  Bucket5x16_9();
+  Bucket5x16_9() {
+    name = '5x16_9';
+    hourBeginning = <int>[9];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -439,27 +360,17 @@ class Bucket5x16_9 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_9) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_10 extends Bucket {
-  @override
-  final String name = '5x16_10';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[10];
 
   /// The 5x16 hour beginning 10 bucket
-  Bucket5x16_10();
+  Bucket5x16_10() {
+    name = '5x16_10';
+    hourBeginning = <int>[10];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -475,27 +386,17 @@ class Bucket5x16_10 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_10) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_11 extends Bucket {
-  @override
-  final String name = '5x16_11';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[11];
 
   /// The 5x16 hour beginning 11 bucket
-  Bucket5x16_11();
+  Bucket5x16_11() {
+    name = '5x16_11';
+    hourBeginning = <int>[11];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -511,27 +412,17 @@ class Bucket5x16_11 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_11) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_12 extends Bucket {
-  @override
-  final String name = '5x16_12';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[12];
 
   /// The 5x16 hour beginning 12 bucket
-  Bucket5x16_12();
+  Bucket5x16_12() {
+    name = '5x16_12';
+    hourBeginning = <int>[12];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -547,27 +438,17 @@ class Bucket5x16_12 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_12) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_13 extends Bucket {
-  @override
-  final String name = '5x16_13';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[13];
 
   /// The 5x16 hour beginning 13 bucket
-  Bucket5x16_13();
+  Bucket5x16_13() {
+    name = '5x16_13';
+    hourBeginning = <int>[13];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -583,27 +464,17 @@ class Bucket5x16_13 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_13) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_14 extends Bucket {
-  @override
-  final String name = '5x16_14';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[14];
 
   /// The 5x16 hour beginning 14 bucket
-  Bucket5x16_14();
+  Bucket5x16_14() {
+    name = '5x16_14';
+    hourBeginning = <int>[14];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -619,27 +490,17 @@ class Bucket5x16_14 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_14) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_15 extends Bucket {
-  @override
-  final String name = '5x16_15';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[15];
 
   /// The 5x16 hour beginning 15 bucket
-  Bucket5x16_15();
+  Bucket5x16_15() {
+    name = '5x16_15';
+    hourBeginning = <int>[15];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -655,27 +516,17 @@ class Bucket5x16_15 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_15) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_16 extends Bucket {
-  @override
-  final String name = '5x16_16';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[16];
 
   /// The 5x16 hour beginning 16 bucket
-  Bucket5x16_16();
+  Bucket5x16_16() {
+    name = '5x16_16';
+    hourBeginning = <int>[16];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -691,27 +542,17 @@ class Bucket5x16_16 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_16) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_17 extends Bucket {
-  @override
-  final String name = '5x16_17';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[17];
 
   /// The 5x16 hour beginning 17 bucket
-  Bucket5x16_17();
+  Bucket5x16_17() {
+    name = '5x16_17';
+    hourBeginning = <int>[17];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -727,27 +568,17 @@ class Bucket5x16_17 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_17) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_18 extends Bucket {
-  @override
-  final String name = '5x16_18';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[18];
 
   /// The 5x16 hour beginning 18 bucket
-  Bucket5x16_18();
+  Bucket5x16_18() {
+    name = '5x16_18';
+    hourBeginning = <int>[18];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -763,27 +594,17 @@ class Bucket5x16_18 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_18) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_19 extends Bucket {
-  @override
-  final String name = '5x16_19';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[19];
 
   /// The 5x16 hour beginning 19 bucket
-  Bucket5x16_19();
+  Bucket5x16_19() {
+    name = '5x16_19';
+    hourBeginning = <int>[19];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -799,27 +620,17 @@ class Bucket5x16_19 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_19) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_20 extends Bucket {
-  @override
-  final String name = '5x16_20';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[20];
 
   /// The 5x16 hour beginning 20 bucket
-  Bucket5x16_20();
+  Bucket5x16_20() {
+    name = '5x16_20';
+    hourBeginning = <int>[20];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -835,27 +646,17 @@ class Bucket5x16_20 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_20) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_21 extends Bucket {
-  @override
-  final String name = '5x16_21';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[21];
 
   /// The 5x16 hour beginning 21 bucket
-  Bucket5x16_21();
+  Bucket5x16_21() {
+    name = '5x16_21';
+    hourBeginning = <int>[21];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -871,27 +672,17 @@ class Bucket5x16_21 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_21) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
+// ignore: camel_case_types
 class Bucket5x16_22 extends Bucket {
-  @override
-  final String name = '5x16_22';
   final calendar = NercCalendar();
-  @override
-  final hourBeginning = <int>[22];
 
   /// The 5x16 hour beginning 22 bucket
-  Bucket5x16_22();
+  Bucket5x16_22() {
+    name = '5x16_22';
+    hourBeginning = <int>[22];
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -907,27 +698,15 @@ class Bucket5x16_22 extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket5x16_22) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket2x16H extends Bucket {
-  @override
-  final String name = '2x16H';
   final calendar = NercCalendar();
-  @override
-  final List<int> hourBeginning =
-      List.generate(16, (i) => i + 7, growable: false);
 
-  Bucket2x16H();
+  Bucket2x16H() {
+    name = '2x16H';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -943,27 +722,14 @@ class Bucket2x16H extends Bucket {
       }
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket2x16H) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class Bucket2x16 extends Bucket {
-  @override
-  final String name = '2x16';
-  @override
-  final List<int> hourBeginning =
-      List.generate(16, (i) => i + 7, growable: false);
-
   /// Peak hours, weekends only (no weekday holidays included)
-  Bucket2x16();
+  Bucket2x16() {
+    name = '2x16';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -975,26 +741,15 @@ class Bucket2x16 extends Bucket {
       return false;
     }
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Bucket2x16) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
 
 class BucketOffpeak extends Bucket {
-  @override
-  final String name = 'Offpeak';
   final calendar = NercCalendar();
-  @override
-  final List<int> hourBeginning = List.generate(24, (i) => i, growable: false);
 
-  BucketOffpeak();
+  BucketOffpeak() {
+    name = 'Offpeak';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
 
   @override
   bool containsHour(Hour hour) {
@@ -1007,14 +762,4 @@ class BucketOffpeak extends Bucket {
     }
     return false;
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! BucketOffpeak) return false;
-    return true;
-  }
-
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 }
