@@ -36,7 +36,7 @@ Map<String, dynamic> _calc0() => <String, dynamic>{
 /// fixPrice is specified
 Map<String, dynamic> _calc1() => <String, dynamic>{
       'calculatorType': 'elec_swap',
-      'term': 'Jan21-Mar21',
+      'term': 'Q1, 21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
       'comments': 'a simple calculator for winter times',
@@ -59,7 +59,7 @@ Map<String, dynamic> _calc1() => <String, dynamic>{
 /// Monthly quantities and prices, ISONE
 Map<String, dynamic> _calc2() => <String, dynamic>{
       'calculatorType': 'elec_swap',
-      'term': 'Jan21-Mar21',
+      'term': 'Q1, 21',
       'asOfDate': '2020-05-29',
       'buy/sell': 'Buy',
       'comments': 'a simple calculator for winter times',

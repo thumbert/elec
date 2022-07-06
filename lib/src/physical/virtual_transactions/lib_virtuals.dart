@@ -60,7 +60,7 @@ String toXml(List<Virtual> virtuals, {String subaccountName = 'VIRT'}) {
       });
     });
   });
-  var out = builder.build();
+  var out = builder.buildDocument();
   return out.toXmlString(pretty: true);
 }
 
