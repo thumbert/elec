@@ -21,9 +21,9 @@ dependencies:
     git: https://github.com/thumbert/table.git
   timeseries:
     git: https://github.com/thumbert/timeseries.git
-  timezone: ^0.7.0
+  timezone: ^0.8.0
   tuple: ^2.0.0
-  xml: ^5.1.0
+  xml: ^6.1.0
   collection: ^1.15.0
 
 dev_dependencies:
