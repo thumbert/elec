@@ -9,6 +9,7 @@ class LmpComponent {
   static const lmp = LmpComponent._internal('lmp');
   static const congestion = LmpComponent._internal('congestion');
   static const loss = LmpComponent._internal('loss');
+  static const lossPercent = LmpComponent._internal('loss%');
 
   factory LmpComponent.parse(String x) {
     var y = x.toLowerCase();
@@ -20,6 +21,8 @@ class LmpComponent {
       return congestion;
     } else if (y == 'loss') {
       return loss;
+    } else if (y == 'loss%') {
+      return lossPercent;
     } else {
       throw ArgumentError('Can\'t parse $x as an LMP component.');
     }
