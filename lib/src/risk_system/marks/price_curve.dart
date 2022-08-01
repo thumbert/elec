@@ -177,10 +177,13 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// so the Offpeak bucket price == 2x16H price for this curve!
   ///
   /// See also the method [points] which returns the individual points for
-  /// a given bucket before [interval] aggregation.
+  /// a given bucket **before** [interval] aggregation.
   num value(Interval interval, Bucket bucket) {
-    var _domain = Interval(first.interval.start, last.interval.end);
-    if (!_domain.containsInterval(interval)) {
+    var domain = Interval(first.interval.start, last.interval.end);
+    if (interval.start.location != first.interval.start.location) {
+      throw StateError('Timezone location of the PriceCurve does not match the interval timezone location used for the value calculation');
+    }
+    if (!domain.containsInterval(interval)) {
       throw ArgumentError('Forward curve not defined for the entire $interval');
     }
 
@@ -190,8 +193,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       return _calcValue(interval, bucket);
     } else {
       /// treat atc and offpeak separately since they are so common
-      final _trio = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
-      if (bucket == Bucket.atc && buckets.containsAll(_trio)) {
+      final trio = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
+      if (bucket == Bucket.atc && buckets.containsAll(trio)) {
         return _calcValueAtc(interval);
       }
       if (bucket == Bucket.offpeak &&
