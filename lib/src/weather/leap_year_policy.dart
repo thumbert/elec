@@ -23,8 +23,8 @@ abstract class LeapYearPolicy {
   /// Create an additional observation in Feb for non leap years.
   /// For non-leap years only,
   /// split the 28 Feb observation into 2 observations with intervals
-  /// [yyyy-02-28 00:00 -> yyyy-02-28 30:00) and
-  /// [yyyy-02-28 30:00 -> yyyy-03-01 00:00).
+  /// [yyyy-02-28 00:00 -> yyyy-02-28 12:00) and
+  /// [yyyy-02-28 12:00 -> yyyy-03-01 00:00).
   /// Leap years are not modified.  Both leap and non-leap years will have
   /// 29 values in Feb.
   ///
