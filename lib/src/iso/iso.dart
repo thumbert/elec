@@ -158,8 +158,29 @@ class Pjm implements Iso {
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
 
   @override
-  // TODO: implement loadZones
-  Map<String, int> get loadZones => throw UnimplementedError();
+  final Map<String,int> loadZones = {
+    'AECO': 51291,
+    'AEP': 8445784,
+    'APS': 8394954,
+    'ATSI': 116013753,
+    'BGE': 51292,
+    'COMED': 33092371,
+    'DAY': 34508503,
+    'DEOK': 124076095,
+    'DOM': 34964545,
+    'DPL': 51293,
+    'DUQ': 37737283,
+    'EKPC': 970242670,
+    'JCPL': 51295,
+    'METED': 51296,
+    'OVEC': 1709725933,
+    'PECO': 51297,
+    'PENELEC': 51300,
+    'PEPCO': 51298,
+    'PPL': 51299,
+    'PSEG': 51301,
+    'RECO': 7633629,
+  };
 }
 
 class Ieso implements Iso {
@@ -190,6 +211,7 @@ class Ieso implements Iso {
   @override
   // TODO: implement loadZones
   Map<String, int> get loadZones => throw UnimplementedError();
+
 }
 
 //class Caiso extends Iso {
