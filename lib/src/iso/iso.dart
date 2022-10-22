@@ -108,6 +108,20 @@ class NewYorkIso implements Iso {
     'Zone K': 61762,
   };
 
+  final loadZoneNameToPtid = <String, int>{
+    'WEST': 61752,
+    'CAPITL': 61757,
+    'CENTRL': 61754,
+    'DUNWOD': 61760,
+    'GENESE': 61753,
+    'HUD VL': 61758,
+    'LONGIL': 61762,
+    'MHK VL': 61756,
+    'MILLWD': 61759,
+    'N.Y.C.': 61761,
+    'NORTH': 61755,
+  };
+
   /// Allowed service types in this ISO
   @override
   final serviceTypes = <String>{
@@ -158,7 +172,7 @@ class Pjm implements Iso {
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
 
   @override
-  final Map<String,int> loadZones = {
+  final Map<String, int> loadZones = {
     'AECO': 51291,
     'AEP': 8445784,
     'APS': 8394954,
@@ -211,7 +225,6 @@ class Ieso implements Iso {
   @override
   // TODO: implement loadZones
   Map<String, int> get loadZones => throw UnimplementedError();
-
 }
 
 //class Caiso extends Iso {
