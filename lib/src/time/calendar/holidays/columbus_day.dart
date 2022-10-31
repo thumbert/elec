@@ -1,7 +1,7 @@
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import '../holiday.dart';
-import '../_holiday_utils.dart';
+import '../holiday_utils.dart';
 
 /// Columbus Day.  It's a federal holiday.
 /// Is celebrated on the 2rd Monday in October (since 1971).

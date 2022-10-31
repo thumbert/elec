@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 2022-10-31
+- Add a name to the holiday type enum
+- Bump SDK requirement to 2.17
+
 ## 2.0.1, released 2021-11-27
 - Performance improvements when calculating if a date is a holiday.  This had
   cascading beneficial effects in a lot of bucket operations. 

@@ -5,7 +5,7 @@ import '../holidays/patriots_day.dart';
 import 'federal_holidays_calendar.dart';
 
 
-/// Massachussetts has Patriots' Day in addition to the
+/// Massachusetts has Patriots' Day in addition to the
 /// 10 Federal holidays.
 class MaStateHolidayCalendar extends Calendar {
   static final _federalCalendar = FederalHolidaysCalendar();

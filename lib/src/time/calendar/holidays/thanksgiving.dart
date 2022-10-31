@@ -1,7 +1,7 @@
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import '../holiday.dart';
-import '../_holiday_utils.dart';
+import '../holiday_utils.dart';
 
 /// Thanksgiving is a Federal holiday (and a NERC holiday).
 /// Falls on the 4th Thursday in Nov.

@@ -1,7 +1,7 @@
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import '../holiday.dart';
-import '../_holiday_utils.dart';
+import '../holiday_utils.dart';
 
 /// Day after Thanksgiving is a state holiday in NH.
 class DayAfterThanksgiving implements Holiday {
