@@ -161,11 +161,70 @@ void tests() {
     });
   });
 
-  // group('Test ERCOT buckets', (){
-  //   test('Onpeak', () {
-  //
-  //   });
-  // });
+  group('Test ERCOT buckets', () {
+    var months = Month(2024, 1, location: Ercot.location)
+        .upTo(Month(2024, 12, location: Ercot.location));
+    test('Onpeak', () {
+      var bucket = Ercot.bucketPeak;
+      var hours = [
+        352,
+        336,
+        336,
+        352,
+        352,
+        320,
+        352,
+        352,
+        320,
+        368,
+        320,
+        336,
+      ];
+      for (var i = 0; i < hours.length; ++i) {
+        expect(bucket.countHours(months[i]), hours[i]);
+      }
+    });
+    test('7x8', () {
+      var bucket = Ercot.bucket7x8;
+      var hours = [
+        248,
+        232,
+        247,
+        240,
+        248,
+        240,
+        248,
+        248,
+        240,
+        248,
+        241,
+        248,
+      ];
+      for (var i = 0; i < hours.length; ++i) {
+        expect(bucket.countHours(months[i]), hours[i]);
+      }
+    });
+    test('2x16H', () {
+      var bucket = Ercot.bucket2x16H;
+      var hours = [
+        144,
+        128,
+        160,
+        128,
+        144,
+        160,
+        144,
+        144,
+        160,
+        128,
+        160,
+        160,
+      ];
+      for (var i = 0; i < hours.length; ++i) {
+        expect(bucket.countHours(months[i]), hours[i]);
+      }
+    });
+  });
 
   group('Test Bucket.parse()', () {
     test('5x16, Peak', () {
@@ -261,10 +320,10 @@ void calculateBucketHoursByMonth() {
 
 void main() async {
   initializeTimeZones();
-  // tests();
+  tests();
 
   // aggregateByBucketMonth();
 
   // speedTest();
-  calculateBucketHoursByMonth();
+  // calculateBucketHoursByMonth();
 }

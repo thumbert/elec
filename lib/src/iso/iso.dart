@@ -235,6 +235,8 @@ class Ieso implements Iso {
 //}
 
 class Ercot implements Iso {
+  static final location = tz.getLocation('America/Chicago');
+
   @override
   final String name = 'ERCOT';
   @override
