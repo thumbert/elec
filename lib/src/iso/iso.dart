@@ -249,8 +249,28 @@ class Ercot implements Iso {
   static final Bucket bucketPeak = bucket5x16;
 
   @override
-  // TODO: implement loadZones
-  Map<String, int> get loadZones => throw UnimplementedError();
+  /// I made up some ptids because Ercot doesn't have them as of 11/11/2022
+  Map<String, int> get loadZones => {
+    'LZ AEN': 1000,
+    'LZ CPS': 1001,
+    'LZ HOUSTON': 1002,
+    'LZ LCRA': 1003,
+    'LZ NORTH': 1004,
+    'LZ RAYBN': 1005,
+    'LZ SOUTH': 1006,
+    'LZ WEST': 1007,
+
+  };
+
+  static const List<String> hubNames = [
+    'HB_BUSAVG',
+    'HB_HOUSTON',
+    'HB_HUBAVG',
+    'HB_NORTH',
+    'HB_PAN',
+    'HB_SOUTH',
+    'HB_WEST',
+  ];
 
 
   @override
