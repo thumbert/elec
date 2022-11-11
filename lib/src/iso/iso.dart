@@ -12,12 +12,15 @@ abstract class Iso {
 
   late tz.Location preferredTimeZoneLocation;
 
+
+  static final Iso ercot = Ercot();
   static final Iso ieso = Ieso();
   static final Iso newEngland = IsoNewEngland();
   static final Iso newYork = NewYorkIso();
   static final Iso pjm = Pjm();
 
   static final _map = <String, Iso>{
+    'ercot': ercot,
     'ieso': ieso,
     'isone': newEngland,
     'nyiso': newYork,
@@ -231,6 +234,26 @@ class Ieso implements Iso {
 //static final Location location = getLocation('America/Los_Angeles');
 //}
 
-//class Ercot extends Iso {
-//  //static final Location location = getLocation('America/Chicago');
-//}
+class Ercot implements Iso {
+  @override
+  final String name = 'ERCOT';
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/Chicago');
+
+  static final Bucket bucket5x16 = Bucket.peakErcot;
+  static final Bucket bucket7x16 = Bucket.b7x16Ercot;
+  static final Bucket bucket2x16H = Bucket.b2x16HErcot;
+  static final Bucket bucket7x8 = Bucket.b7x8Ercot;
+  static final Bucket bucket7x24 = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeakErcot;
+  static final Bucket bucketPeak = bucket5x16;
+
+  @override
+  // TODO: implement loadZones
+  Map<String, int> get loadZones => throw UnimplementedError();
+
+
+  @override
+  // TODO: implement serviceTypes
+  Set<String> get serviceTypes => throw UnimplementedError();
+}

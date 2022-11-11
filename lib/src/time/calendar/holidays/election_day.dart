@@ -12,7 +12,11 @@ class ElectionDay implements Holiday {
 
   @override
   Date forYear(int year, {required Location location}) {
-    return makeHoliday(year, 11, 1, DateTime.tuesday, location: location);
+    var candidate = makeHoliday(year, 11, 1, DateTime.tuesday, location: location);
+    if (candidate.day == 1) {
+      candidate = candidate.add(7);
+    }
+    return candidate;
   }
 
   @override

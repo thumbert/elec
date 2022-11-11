@@ -97,6 +97,8 @@ void tests() {
       expect(calendar.isHoliday(Date.utc(2018, 8, 13)), true);
       expect(calendar.getHolidayType(Date.utc(2018, 8, 13)),
           HolidayType.victoryDay);
+      expect(calendar.isHoliday(Date.utc(2022, 11, 8)), true); // mid-term
+      expect(calendar.isHoliday(Date.utc(2020, 11, 3)), true); // presidential
     });
   });
 }
