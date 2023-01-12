@@ -51,5 +51,7 @@ void tests() {
 }
 
 void main() {
-  tests();
+  // tests();
+  print(lastBusinessDayPrior(Month.utc(2023, 1)));
+  // print('here');
 }

@@ -32,6 +32,7 @@ import 'risk_system/pricing/calculators/weather/all_weather_test.dart'
 
 import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 import 'weather/leap_year_policy_test.dart' as leap_year_policy;
+import 'weather/lib_weather_utils.dart' as weather_utils;
 
 void main() async {
   initializeTimeZones();
@@ -67,4 +68,5 @@ void main() async {
   time_aggregation.tests();
   trade_aggregator.tests();
   leap_year_policy.tests();
+  weather_utils.tests();
 }

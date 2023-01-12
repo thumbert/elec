@@ -3,6 +3,9 @@
 ## TODO
 -
 
+## Release 2023-01-12
+- Really minor cleanups
+
 ## Release 2022-11-11
 - Fixed a bug in ElectionDay calendar, was incorrectly calculating a date on 1-Nov 
 which is not allowed

@@ -15,7 +15,12 @@ class IndependenceDay implements Holiday {
     /// If it falls on Sun, celebrate it on Monday
     if (candidate.weekday == 7) candidate = candidate.add(1);
 
-    /// TODO: What happens if it falls on a Sat??
+    /// What happens if it falls on a Sat??  Apparently nothing
+    /// In 2020, 4th Jul fell on Sat, was publicly celebrated on the 3rd
+    /// but NERC kept it on the 4th and didn't move it to the 3rd.  Not
+    /// sure this will always be the case.
+    /// Keep an eye on this.  Will happen again in 2026!
+    ///
 
     return candidate;
   }

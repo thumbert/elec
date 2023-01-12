@@ -209,8 +209,8 @@ void tests(String rootUrl) async {
       var out = c0.showDetails();
       expect(out, r'''
  term                   curveId  bucket  type  strike  quantity  fwdPrice  implVol  optionPrice  delta     value
-Jan21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $60.7000   117.95     $10.2332   0.42  $163,731
-Feb21  isone_energy_4000_da_lmp    5x16  Call     100    16,000  $57.2000   119.97     $10.5785   0.43  $169,256''');
+Jan21  isone_energy_4000_da_lmp    5x16  Call   100.0    16,000  $60.7000   117.95     $10.2332   0.42  $163,731
+Feb21  isone_energy_4000_da_lmp    5x16  Call   100.0    16,000  $57.2000   119.97     $10.5785   0.43  $169,256''');
     });
     test('flat report', () async {
       await c1.build();

@@ -109,6 +109,7 @@ void tests() {
 ///  - 32 ms with LRU Map caching
 ///  - 32 ms with a regular Map
 ///  -  4 ms just iterating
+/// FWIW: A Rust implementation takes 0.7 ms (no caching).
 void speedTest() {
   var location = getLocation('America/New_York');
   var term = Term.parse('Jan21-Dec30', location);
@@ -116,7 +117,7 @@ void speedTest() {
   var count = 0;
   var days = term.days();
   var sw = Stopwatch()..start();
-  for (var i = 0; i < 24; i++) {
+  for (var i = 0; i < 25; i++) {
     for (var date in days) {
       if (calendar.isHoliday(date)) {
         count++;
@@ -124,8 +125,8 @@ void speedTest() {
     }
   }
   sw.stop();
-  print(sw.elapsedMilliseconds);
-  print(count);
+  print('Time spent: ${sw.elapsedMilliseconds} millis');
+  print('Count of holidays: $count');
 }
 
 void main() {

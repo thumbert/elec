@@ -99,6 +99,8 @@ void tests() {
       expect(
           '2014-05-26', MemorialDay().forYear(2014, location: UTC).toString());
       expect(MemorialDay().isDate(Date(2012, 5, 28, location: UTC)), true);
+      expect(MemorialDay().isDate(Date(2022, 5, 30, location: UTC)), true);
+      expect(MemorialDay().isDate(Date(2023, 5, 29, location: UTC)), true);
     });
 
     test('Thanksgiving ', () {
