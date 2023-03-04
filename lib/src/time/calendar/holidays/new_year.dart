@@ -2,11 +2,12 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import '../holiday.dart';
 
-/// New Year eve is a federal holiday.  If it falls on a Sun, it gets observed
-/// on the following Monday.
-class NewYear implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.newYear;
+class NewYear extends Holiday {
+  /// New Year eve is a federal holiday.  If it falls on a Sun, it gets observed
+  /// on the following Monday.
+  NewYear() {
+    holidayType = HolidayType.newYear;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

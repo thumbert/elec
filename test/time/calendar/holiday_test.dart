@@ -19,6 +19,11 @@ import 'package:timezone/timezone.dart';
 
 void tests() {
   group('Test Holidays: ', () {
+    test('parse', () {
+      expect(Holiday.parse('New Year'), Holiday.newYear);
+      expect(Holiday.parse('Christmas'), Holiday.christmas);
+    });
+
     test('Columbus day ', () {
       expect(
           '2017-10-09', ColumbusDay().forYear(2017, location: UTC).toString());

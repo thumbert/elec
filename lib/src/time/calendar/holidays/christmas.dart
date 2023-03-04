@@ -4,9 +4,10 @@ import '../holiday.dart';
 
 /// Christmas eve is a federal holiday.  If it falls on a Sun, it gets observed
 /// on the following Monday.
-class Christmas implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.christmas;
+class Christmas extends Holiday {
+  Christmas() {
+    holidayType = HolidayType.christmas;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

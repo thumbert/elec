@@ -5,9 +5,11 @@ import '../holiday_utils.dart';
 
 /// Columbus Day.  It's a federal holiday.
 /// Is celebrated on the 2rd Monday in October (since 1971).
-class ColumbusDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.columbusDay;
+class ColumbusDay extends Holiday {
+
+  ColumbusDay() {
+    holidayType = HolidayType.columbusDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

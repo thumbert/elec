@@ -2,11 +2,12 @@ import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 import '../holiday.dart';
 
-/// Independence day is a federal holiday.  If it falls on a Sun, it gets observed
-/// on the following Monday.
-class IndependenceDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.independenceDay;
+class IndependenceDay extends Holiday {
+  /// Independence day is a federal holiday.  If it falls on a Sun, it gets observed
+  /// on the following Monday.
+  IndependenceDay() {
+    holidayType = HolidayType.independenceDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

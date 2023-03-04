@@ -3,11 +3,12 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 import '../holiday_utils.dart';
 
-/// Washington's Birthday (Presidents' Day).  It's a federal holiday.
-/// Is celebrated on the 3rd Monday in February.
-class WashingtonBirthday implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.washingtonBirthday;
+class WashingtonBirthday extends Holiday {
+  /// Washington's Birthday (Presidents' Day).  It's a federal holiday.
+  /// Is celebrated on the 3rd Monday in February.
+  WashingtonBirthday() {
+    holidayType = HolidayType.washingtonBirthday;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

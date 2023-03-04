@@ -2,10 +2,11 @@ import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import '../holiday.dart';
 
-/// Veterans Day is a Federal holiday.
-class VeteransDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.veteransDay;
+class VeteransDay extends Holiday {
+  /// Veterans Day is a Federal holiday.
+  VeteransDay() {
+    holidayType = HolidayType.veteransDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

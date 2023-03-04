@@ -91,7 +91,7 @@ abstract class Bucket {
     '7X24': Bucket.atc,
   };
 
-  /// Return a bucket from a String, for now, from IsoNewEngland only.
+  /// Return a bucket from a String.  Throw if it fails.
   static Bucket parse(String bucket) {
     var out = buckets[bucket.toUpperCase()];
     if (out == null) {

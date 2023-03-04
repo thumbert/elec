@@ -4,9 +4,10 @@ import '../holiday.dart';
 
 /// Memorial Day is a Federal holiday (and a NERC holiday).
 /// Falls on the last Monday in May.
-class MemorialDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.memorialDay;
+class MemorialDay extends Holiday {
+  MemorialDay() {
+    holidayType = HolidayType.memorialDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

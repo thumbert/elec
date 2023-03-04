@@ -5,6 +5,7 @@
 
 ## Release 2023-03-04
 - Export functionality in the `time.dart` library
+- Add a static Holiday parse() method to help with deserialization.  Add static holidays.
 
 ## Release 2023-01-12
 - Really minor cleanups

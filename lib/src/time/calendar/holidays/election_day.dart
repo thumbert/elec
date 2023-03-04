@@ -6,9 +6,10 @@ import '../holiday_utils.dart';
 /// Election Day. See https://en.wikipedia.org/wiki/Election_Day_(United_States)
 /// Set on 1st Tuesday after November 1st.  It is a state holiday in RI (on
 /// even years only!).
-class ElectionDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.electionDay;
+class ElectionDay extends Holiday {
+  ElectionDay() {
+    holidayType = HolidayType.electionDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

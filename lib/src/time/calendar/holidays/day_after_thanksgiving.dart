@@ -3,10 +3,11 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 import '../holiday_utils.dart';
 
-/// Day after Thanksgiving is a state holiday in NH.
-class DayAfterThanksgiving implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.dayAfterThanksgiving;
+class DayAfterThanksgiving extends Holiday {
+  /// Day after Thanksgiving is a state holiday in NH.
+  DayAfterThanksgiving() {
+    holidayType = HolidayType.dayAfterThanksgiving;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

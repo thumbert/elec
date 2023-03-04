@@ -3,10 +3,11 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 import '../holiday_utils.dart';
 
-/// Labor Day is a Federal holiday (and a NERC holiday).
-class LaborDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.laborDay;
+class LaborDay extends Holiday {
+  /// Labor Day is a Federal holiday (and a NERC holiday).
+  LaborDay() {
+    holidayType = HolidayType.laborDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

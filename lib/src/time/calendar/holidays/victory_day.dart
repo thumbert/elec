@@ -3,11 +3,12 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 import '../holiday_utils.dart';
 
-/// Victory Day. See https://en.wikipedia.org/wiki/Victory_Day
-/// Set on 2nd Monday of August.  It is a state holiday in RI.
-class VictoryDay implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.victoryDay;
+class VictoryDay extends Holiday {
+  /// Victory Day. See https://en.wikipedia.org/wiki/Victory_Day
+  /// Set on 2nd Monday of August.  It is a state holiday in RI.
+  VictoryDay() {
+    holidayType = HolidayType.victoryDay;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

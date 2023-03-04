@@ -3,11 +3,12 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 import '../holiday_utils.dart';
 
-/// Martin Luther King's birthday is a Federal holiday (not a NERC holiday).
-/// Falls on the 3rd Monday in Jan.
-class MlkBirthday implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.mlkBirthday;
+class MlkBirthday extends Holiday {
+  /// Martin Luther King's birthday is a Federal holiday (not a NERC holiday).
+  /// Falls on the 3rd Monday in Jan.
+  MlkBirthday() {
+    holidayType = HolidayType.mlkBirthday;
+  }
 
   @override
   Date forYear(int year, {required Location location}) {

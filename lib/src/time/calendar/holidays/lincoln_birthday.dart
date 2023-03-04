@@ -2,12 +2,13 @@ import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import '../holiday.dart';
 
-/// Lincoln's Birthday.  It's a state holiday in CT.  If it falls on Sun
-/// it gets observed on the following Monday.
-/// For example it was observed on Mon 2/13/2017.
-class LincolnBirthday implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.lincolnBirthday;
+class LincolnBirthday extends Holiday {
+  /// Lincoln's Birthday.  It's a state holiday in CT.  If it falls on Sun
+  /// it gets observed on the following Monday.
+  /// For example it was observed on Mon 2/13/2017.
+  LincolnBirthday() {
+    holidayType = HolidayType.lincolnBirthday;
+  }
 
   /// Get Lincoln's birthday for this year
   @override

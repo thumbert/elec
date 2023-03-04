@@ -3,10 +3,12 @@ import 'package:date/date.dart';
 import '../holiday.dart';
 
 
-/// Good Friday is a state holiday in CT.
-class GoodFriday implements Holiday {
-  @override
-  HolidayType holidayType = HolidayType.goodFriday;
+class GoodFriday extends Holiday {
+  /// Good Friday is a state holiday in CT.
+  GoodFriday() {
+    holidayType = HolidayType.goodFriday;
+  }
+
   /// https://en.wikipedia.org/wiki/Good_Friday#Calculating_the_date
   final Map<int,Date> _goodFriday = {
     2008:  Date.utc(2008, 3, 21),
@@ -35,7 +37,6 @@ class GoodFriday implements Holiday {
   };
   @override
   Date forYear(int year, {required Location location}) {
-
     var candidate = _goodFriday[year]!;
     candidate =  Date(candidate.year, candidate.month,
         candidate.day, location: location);
