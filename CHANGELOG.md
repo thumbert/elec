@@ -3,6 +3,9 @@
 ## TODO
 -
 
+## Release 2023-03-04
+- Export functionality in the `time.dart` library
+
 ## Release 2023-01-12
 - Really minor cleanups
 
