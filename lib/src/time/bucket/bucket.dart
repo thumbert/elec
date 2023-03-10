@@ -53,6 +53,7 @@ abstract class Bucket {
   static final peakCaiso = BucketPeakCaiso();
   static final peakErcot = BucketPeakErcot();
   static final offpeak = BucketOffpeak();
+  static final offpeakAeco = BucketOffpeakAeco();
   static final offpeakCaiso = BucketOffpeakCaiso();
   static final offpeakErcot = BucketOffpeakErcot();
 
