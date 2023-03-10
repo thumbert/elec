@@ -64,6 +64,7 @@ abstract class Bucket {
     'PEAK ERCOT': Bucket.peakErcot,
     'ONPEAK': Bucket.b5x16,
     'OFFPEAK': Bucket.offpeak,
+    'OFFPEAK AECO': Bucket.offpeakAeco,
     'OFFPEAK CAISO': Bucket.offpeakCaiso,
     'OFFPEAK ERCOT': Bucket.offpeakErcot,
     'WRAP': Bucket.offpeak,
@@ -506,6 +507,26 @@ class BucketOffpeak extends Bucket {
       return true;
     } else {
       if (hour.start.hour < 7 || hour.start.hour == 23) return true;
+      if (calendar.isHoliday(hour.currentDate)) return true;
+    }
+    return false;
+  }
+}
+
+class BucketOffpeakAeco extends Bucket {
+  final calendar = NercCalendar();
+
+  BucketOffpeakAeco() {
+    name = 'Offpeak Aeco';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.weekday == 7) {
+      return true;
+    } else {
+      if (hour.start.hour < 7 || hour.start.hour > 22) return true;
       if (calendar.isHoliday(hour.currentDate)) return true;
     }
     return false;
