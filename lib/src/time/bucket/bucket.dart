@@ -20,6 +20,8 @@ abstract class Bucket {
   final Map<Interval, int> _hoursCache = {};
 
   static final atc = Bucket7x24();
+  static final b1x16H = Bucket1x16H();
+  static final b1x16HCaiso = Bucket1x16HCaiso();
   static final b2x8 = Bucket2x8();
   static final b2x16 = Bucket2x16();
   static final b2x16H = Bucket2x16H();
@@ -44,22 +46,29 @@ abstract class Bucket {
   static final b5x16_22 = Bucket5x16_22();
   static final b6x16 = Bucket6x16();
   static final b7x8 = Bucket7x8();
+  static final b7x8Caiso = Bucket7x8Caiso();
   static final b7x8Ercot = Bucket7x8Ercot();
   static final b7x16 = Bucket7x16();
   static final b7x16Ercot = Bucket7x16Ercot();
   static final peakCaiso = BucketPeakCaiso();
   static final peakErcot = BucketPeakErcot();
   static final offpeak = BucketOffpeak();
+  static final offpeakCaiso = BucketOffpeakCaiso();
   static final offpeakErcot = BucketOffpeakErcot();
 
   static final Map<String, Bucket> buckets = {
     'ATC': Bucket.atc,
+    'FLAT': Bucket.atc,
     'PEAK': Bucket.b5x16,
     'PEAK CAISO': Bucket.peakCaiso,
     'PEAK ERCOT': Bucket.peakErcot,
     'ONPEAK': Bucket.b5x16,
     'OFFPEAK': Bucket.offpeak,
+    'OFFPEAK CAISO': Bucket.offpeakCaiso,
     'OFFPEAK ERCOT': Bucket.offpeakErcot,
+    'WRAP': Bucket.offpeak,
+    '1x16H': Bucket.b1x16H,
+    '1x16H CAISO': Bucket.b1x16HCaiso,
     '2X16': Bucket.b2x16,
     '2X16H': Bucket.b2x16H,
     '2X16H ERCOT': Bucket.b2x16HErcot,
@@ -81,10 +90,9 @@ abstract class Bucket {
     '5X16_20': Bucket.b5x16_20,
     '5X16_21': Bucket.b5x16_21,
     '5X16_22': Bucket.b5x16_22,
-    'WRAP': Bucket.offpeak,
-    'FLAT': Bucket.atc,
     '6X16': Bucket.b6x16,
     '7X8': Bucket.b7x8,
+    '7X8 CAISO': Bucket.b7x8Caiso,
     '7X8 ERCOT': Bucket.b7x8Ercot,
     '7X16': Bucket.b7x16,
     '7X16 ERCOT': Bucket.b7x16Ercot,
@@ -172,6 +180,19 @@ class Bucket7x8 extends Bucket {
   @override
   bool containsHour(Hour hour) {
     if (hour.start.hour <= 6 || hour.start.hour == 23) return true;
+    return false;
+  }
+}
+
+class Bucket7x8Caiso extends Bucket {
+  /// Overnight hours for all days of the year
+  Bucket7x8Caiso() {
+    name = '7x8 Caiso';
+    hourBeginning = [0, 1, 2, 3, 4, 5, 22, 23];
+  }
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour < 6 || hour.start.hour > 21) return true;
     return false;
   }
 }
@@ -298,20 +319,22 @@ class Bucket5x16 extends Bucket {
 class BucketPeakCaiso extends Bucket {
   final calendar = NercCalendar();
 
+  /// Peak hours are defined as Monday through Saturday, excluding NERC
+  /// holidays, from HE 7 to HE 22 (6:00 AM to 10:00 PM).
+  /// All other hours are off-peak hours.
   BucketPeakCaiso() {
-    name = 'Caiso Peak';
-    hourBeginning = List.generate(17, (i) => i + 6, growable: false);
+    name = 'Peak Caiso';
+    hourBeginning = List.generate(16, (i) => i + 6, growable: false);
   }
 
   @override
   bool containsHour(Hour hour) {
     final hs = hour.start;
-    var dayOfWeek = hs.weekday;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
+    if (hs.weekday == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hs.hour < 6 || hs.hour == 23) {
+      if (hs.hour < 6 || hs.hour > 21) {
         /// not at the right hour of the day
         return false;
       } else {
@@ -352,6 +375,182 @@ class BucketPeakErcot extends Bucket {
         }
       }
     }
+  }
+}
+
+class Bucket1x16H extends Bucket {
+  final calendar = NercCalendar();
+
+  Bucket1x16H() {
+    name = '1x16H';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour < 7 || hour.start.hour > 22) return false;
+    if (hour.start.weekday == 7) {
+      return true;
+    } else {
+      if (calendar.isHoliday(hour.currentDate)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+}
+
+class Bucket1x16HCaiso extends Bucket {
+  final calendar = NercCalendar();
+
+  Bucket1x16HCaiso() {
+    name = '1x16H Caiso';
+    hourBeginning = List.generate(16, (i) => i + 6, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour < 6 || hour.start.hour > 21) return false;
+    if (hour.start.weekday == 7) {
+      return true;
+    } else {
+      if (calendar.isHoliday(hour.currentDate)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+}
+
+class Bucket2x16H extends Bucket {
+  final calendar = NercCalendar();
+
+  Bucket2x16H() {
+    name = '2x16H';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
+    var dayOfWeek = hour.start.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      return true;
+    } else {
+      if (calendar.isHoliday(hour.currentDate)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+}
+
+class Bucket2x16HErcot extends Bucket {
+  final calendar = NercCalendar();
+
+  Bucket2x16HErcot() {
+    name = '2x16H Ercot';
+    hourBeginning = List.generate(16, (i) => i + 6, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour < 6 || hour.start.hour >= 22) return false;
+    var dayOfWeek = hour.start.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      return true;
+    } else {
+      if (calendar.isHoliday(hour.currentDate)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+}
+
+class Bucket2x16 extends Bucket {
+  /// Peak hours, weekends only (no weekday holidays included)
+  Bucket2x16() {
+    name = '2x16';
+    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    var dayOfWeek = hour.currentDate.weekday;
+    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+class BucketOffpeak extends Bucket {
+  final calendar = NercCalendar();
+
+  BucketOffpeak() {
+    name = 'Offpeak';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    var dayOfWeek = hour.start.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      return true;
+    } else {
+      if (hour.start.hour < 7 || hour.start.hour == 23) return true;
+      if (calendar.isHoliday(hour.currentDate)) return true;
+    }
+    return false;
+  }
+}
+
+class BucketOffpeakCaiso extends Bucket {
+  final calendar = NercCalendar();
+
+  BucketOffpeakCaiso() {
+    name = 'Offpeak Caiso';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    var dayOfWeek = hour.start.weekday;
+    if (dayOfWeek == 7) {
+      return true;
+    } else {
+      if (hour.start.hour < 6 || hour.start.hour > 21) return true;
+      if (calendar.isHoliday(hour.currentDate)) return true;
+    }
+    return false;
+  }
+}
+
+class BucketOffpeakErcot extends Bucket {
+  final calendar = NercCalendar();
+
+  BucketOffpeakErcot() {
+    name = 'Offpeak Ercot';
+    hourBeginning = List.generate(24, (i) => i, growable: false);
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    var dayOfWeek = hour.start.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      return true;
+    } else {
+      if (hour.start.hour < 6 || hour.start.hour >= 22) return true;
+      if (calendar.isHoliday(hour.currentDate)) return true;
+    }
+    return false;
   }
 }
 
@@ -768,111 +967,3 @@ class Bucket5x16_22 extends Bucket {
   }
 }
 
-class Bucket2x16H extends Bucket {
-  final calendar = NercCalendar();
-
-  Bucket2x16H() {
-    name = '2x16H';
-    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
-  }
-
-  @override
-  bool containsHour(Hour hour) {
-    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
-    var dayOfWeek = hour.start.weekday;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
-      return true;
-    } else {
-      if (calendar.isHoliday(hour.currentDate)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
-}
-
-class Bucket2x16HErcot extends Bucket {
-  final calendar = NercCalendar();
-
-  Bucket2x16HErcot() {
-    name = '2x16H Ercot';
-    hourBeginning = List.generate(16, (i) => i + 6, growable: false);
-  }
-
-  @override
-  bool containsHour(Hour hour) {
-    if (hour.start.hour < 6 || hour.start.hour >= 22) return false;
-    var dayOfWeek = hour.start.weekday;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
-      return true;
-    } else {
-      if (calendar.isHoliday(hour.currentDate)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
-}
-
-class Bucket2x16 extends Bucket {
-  /// Peak hours, weekends only (no weekday holidays included)
-  Bucket2x16() {
-    name = '2x16';
-    hourBeginning = List.generate(16, (i) => i + 7, growable: false);
-  }
-
-  @override
-  bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
-    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
-
-class BucketOffpeak extends Bucket {
-  final calendar = NercCalendar();
-
-  BucketOffpeak() {
-    name = 'Offpeak';
-    hourBeginning = List.generate(24, (i) => i, growable: false);
-  }
-
-  @override
-  bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
-      return true;
-    } else {
-      if (hour.start.hour < 7 || hour.start.hour == 23) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
-    }
-    return false;
-  }
-}
-
-class BucketOffpeakErcot extends Bucket {
-  final calendar = NercCalendar();
-
-  BucketOffpeakErcot() {
-    name = 'Offpeak Ercot';
-    hourBeginning = List.generate(24, (i) => i, growable: false);
-  }
-
-  @override
-  bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
-    if (dayOfWeek == 6 || dayOfWeek == 7) {
-      return true;
-    } else {
-      if (hour.start.hour < 6 || hour.start.hour >= 22) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
-    }
-    return false;
-  }
-}
