@@ -53,7 +53,7 @@ abstract class Bucket {
   static final peakCaiso = BucketPeakCaiso();
   static final peakErcot = BucketPeakErcot();
   static final offpeak = BucketOffpeak();
-  static final offpeakAeco = BucketOffpeakAeco();
+  static final offpeakAeso = BucketOffpeakAeso();
   static final offpeakCaiso = BucketOffpeakCaiso();
   static final offpeakErcot = BucketOffpeakErcot();
 
@@ -65,7 +65,7 @@ abstract class Bucket {
     'PEAK ERCOT': Bucket.peakErcot,
     'ONPEAK': Bucket.b5x16,
     'OFFPEAK': Bucket.offpeak,
-    'OFFPEAK AECO': Bucket.offpeakAeco,
+    'OFFPEAK AESO': Bucket.offpeakAeso,
     'OFFPEAK CAISO': Bucket.offpeakCaiso,
     'OFFPEAK ERCOT': Bucket.offpeakErcot,
     'WRAP': Bucket.offpeak,
@@ -514,11 +514,11 @@ class BucketOffpeak extends Bucket {
   }
 }
 
-class BucketOffpeakAeco extends Bucket {
+class BucketOffpeakAeso extends Bucket {
   final calendar = NercCalendar();
 
-  BucketOffpeakAeco() {
-    name = 'Offpeak Aeco';
+  BucketOffpeakAeso() {
+    name = 'Offpeak Aeso';
     hourBeginning = List.generate(24, (i) => i, growable: false);
   }
 
