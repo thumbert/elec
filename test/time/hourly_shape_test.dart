@@ -15,14 +15,14 @@ import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 
 void tests(String rootUrl) async {
-  var client = DaLmp(Client(), rootUrl: rootUrl, iso: Iso.newEngland);
+  var client = DaLmp(Client(), rootUrl: rootUrl);
   var buckets = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
   var location = getLocation('America/New_York');
   late TimeSeries<num> ts;
 
   group('HourlyShape tests:', () {
     setUp(() async {
-      ts = await client.getHourlyLmp(
+      ts = await client.getHourlyLmp(Iso.newEngland,
           4000, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 12, 31));
     });
     test('from timeseries', () {

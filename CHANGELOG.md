@@ -1,7 +1,9 @@
 # Changelog
 
 ## TODO
--
+
+## Release 2023-03-29
+- Remove iso argument from DaLmp client constructor
 
 ## Release 2023-03-08
 - Add more buckets

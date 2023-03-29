@@ -32,7 +32,7 @@ class FtrPath {
       Client? client}) {
     client ??= Client();
 
-    _daLmpClient = DaLmp(client, rootUrl: rootUrl, iso: iso);
+    _daLmpClient = DaLmp(client, rootUrl: rootUrl);
     _ftrClearingPricesClient =
         FtrClearingPrices(client, iso: iso, rootUrl: rootUrl);
 
@@ -59,6 +59,7 @@ class FtrPath {
   static final settlePriceCache =
       Cache.lru(loader: (Tuple3<Iso, Bucket, int> tuple3) {
     return _daLmpClient.getDailyLmpBucket(
+        tuple3.item1, // iso
         tuple3.item3, // ptid
         LmpComponent.congestion,
         tuple3.item2, // bucket
@@ -69,8 +70,8 @@ class FtrPath {
   /// an hourly settle price cache
   static final hourlySettlePriceCache =
       Cache.lru(loader: (Tuple2<Iso, int> tuple2) {
-    return _daLmpClient.getHourlyLmp(tuple2.item2, LmpComponent.congestion,
-        _term!.startDate, _term!.endDate);
+    return _daLmpClient.getHourlyLmp(tuple2.item1, tuple2.item2,
+        LmpComponent.congestion, _term!.startDate, _term!.endDate);
     ;
   });
 

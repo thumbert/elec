@@ -23,7 +23,7 @@ class CacheProvider extends CacheProviderBase {
     client ??= Client();
     var curveIdClient = CurveIdClient(client, rootUrl: rootUrl);
     var forwardMarksClient = ForwardMarks(client, rootUrl: rootUrl);
-    var daLmpClient = DaLmp(client, rootUrl: rootUrl, iso: Iso.newEngland);
+    var daLmpClient = DaLmp(client, rootUrl: rootUrl);
 
     /// Populate fwdMarksCache given the asOfDate and the curveId.
     Future<TimeSeries<num>> _fwdMarksLoader(Tuple2<Date, String> tuple) async {
@@ -42,7 +42,7 @@ class CacheProvider extends CacheProviderBase {
       var ptid = curveDetails['ptid'] as int;
       var start = tuple.item1.startDate;
       var end = tuple.item1.endDate;
-      return await daLmpClient.getHourlyLmp(ptid, LmpComponent.lmp, start, end);
+      return await daLmpClient.getHourlyLmp(Iso.newEngland, ptid, LmpComponent.lmp, start, end);
     }
 
     /// Cache the HourlySchedule associated with this hourly shape.
