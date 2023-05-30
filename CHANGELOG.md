@@ -2,6 +2,9 @@
 
 ## TODO
 
+## Release 2023-05-29
+- Bump sdk upper limit to 4.0.0
+
 ## Release 2023-03-29
 - Remove iso argument from DaLmp client constructor
 
