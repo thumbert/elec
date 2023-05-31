@@ -2,6 +2,11 @@
 
 ## TODO
 
+## Release 2023-05-31
+- Bump lower version of sdk to 3.0.2
+- Bump up packages
+
+
 ## Release 2023-05-29
 - Bump sdk upper limit to 4.0.0
 

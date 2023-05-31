@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart';
 
 /// Store hourly shapes by month for a set of complete buckets,
 /// e.g. 5x16, 2x16H, 7x8.
-class HourlyShape extends MarksCurve {
+class HourlyShape extends Object with MarksCurve {
   /// the covering buckets
   @override
   late Set<Bucket> buckets;
