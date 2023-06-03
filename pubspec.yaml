@@ -7,7 +7,7 @@ environment:
   sdk: ^3.0.2
 
 dependencies:
-  collection: ^1.17.2
+  collection: ^1.17.1
   csv: ^5.0.0
   date:
     git: https://github.com/thumbert/date.git
