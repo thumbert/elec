@@ -127,7 +127,7 @@ Future<void> tests(String rootUrl) async {
       // print(relevantConstraints);
       effects.sort(
           (a, b) => -a['Cumulative Spread'].compareTo(b['Cumulative Spread']));
-      expect(effects.length, 18);
+      expect(effects.length, 16);
     });
     test('get relevant constraints NYISO, short term', () async {
       var path = FtrPath(

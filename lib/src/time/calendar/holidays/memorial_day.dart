@@ -18,4 +18,11 @@ class MemorialDay extends Holiday {
   @override
   bool isDate(Date date) =>
       forYear(date.year, location: date.location) == date;
+
+  bool isDate3(int year, int month, int day) {
+    if (month != 5 || day < 25) return false;
+    var weekday = DateTime(year, 5, 31).weekday;
+    if (DateTime(year, 5, 32 - weekday).day == day) return true;
+    return false;
+  }
 }

@@ -17,7 +17,18 @@ class Christmas extends Holiday {
     return candidate;
   }
 
+  @Deprecated('Replace with isDate3')
   @override
   bool isDate(Date date) =>
       date == forYear(date.year, location: date.location);
+  
+  bool isDate3(int year, int month, int day) {
+    if (month != 12) return false;
+    if (day != 25 && day != 26) return false;
+    var weekday = DateTime(year, 12, 25).weekday;
+    if (weekday == 7 && day == 26) return true;
+    if (weekday != 7 && day == 25) return true;
+    return false;
+  }
+
 }

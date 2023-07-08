@@ -15,7 +15,6 @@ import 'nerc_calendar.dart';
 /// In 2021, Jun 19th was added as a Federal holiday by president Biden.
 ///
 class FederalHolidaysCalendar extends Calendar {
-  static final _nercCalendar = NercCalendar();
   static final Holiday _juneteenth = Juneteenth();
   static final Holiday _mlk = MlkBirthday();
   static final Holiday _washingtonBirthday = WashingtonBirthday();
@@ -35,8 +34,8 @@ class FederalHolidaysCalendar extends Calendar {
   @override
   bool isHoliday(Date date) {
     var res = false;
-    if (_nercCalendar.isHoliday(date)) {
-      _holidayType = _nercCalendar.getHolidayType(date);
+    if (Calendar.nerc.isHoliday3(date.year, date.month, date.day)) {
+      _holidayType = Calendar.nerc.getHolidayType(date);
       return true;
     }
     switch (date.month) {
@@ -74,5 +73,11 @@ class FederalHolidaysCalendar extends Calendar {
         return false;
     }
     return res;
+  }
+
+  @override
+  bool isHoliday3(int year, int month, int day) {
+    // TODO: implement isHoliday3
+    throw UnimplementedError();
   }
 }

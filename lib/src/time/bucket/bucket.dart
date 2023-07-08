@@ -1,8 +1,8 @@
 library elec.bucket;
 
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
+import 'package:elec/time.dart';
 
 abstract class Bucket {
   late final String name;
@@ -289,7 +289,7 @@ class Bucket7x16Ercot extends Bucket {
 }
 
 class Bucket5x16 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   Bucket5x16() {
     name = '5x16';
@@ -308,7 +308,7 @@ class Bucket5x16 extends Bucket {
         /// not at the right hour of the day
         return false;
       } else {
-        if (calendar.isHoliday(hour.currentDate)) {
+        if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
           return false;
         } else {
           return true;
@@ -340,7 +340,7 @@ class BucketPeakCaiso extends Bucket {
         /// not at the right hour of the day
         return false;
       } else {
-        if (calendar.isHoliday(hour.currentDate)) {
+        if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
           return false;
         } else {
           return true;
@@ -370,7 +370,7 @@ class BucketPeakErcot extends Bucket {
         /// not at the right hour of the day
         return false;
       } else {
-        if (calendar.isHoliday(hour.currentDate)) {
+        if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
           return false;
         } else {
           return true;
@@ -390,11 +390,12 @@ class Bucket1x16H extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.hour < 7 || hour.start.hour > 22) return false;
-    if (hour.start.weekday == 7) {
+    final hs = hour.start;
+    if (hs.hour < 7 || hs.hour > 22) return false;
+    if (hs.weekday == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(hour.currentDate)) {
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -413,11 +414,12 @@ class Bucket1x16HCaiso extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.hour < 6 || hour.start.hour > 21) return false;
-    if (hour.start.weekday == 7) {
+    final hs = hour.start;
+    if (hs.hour < 6 || hs.hour > 21) return false;
+    if (hs.weekday == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(hour.currentDate)) {
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -436,12 +438,13 @@ class Bucket2x16H extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    if (hs.hour < 7 || hs.hour == 23) return false;
+    var dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(hour.currentDate)) {
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -460,12 +463,13 @@ class Bucket2x16HErcot extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.hour < 6 || hour.start.hour >= 22) return false;
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    if (hs.hour < 6 || hs.hour >= 22) return false;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (calendar.isHoliday(hour.currentDate)) {
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -483,8 +487,9 @@ class Bucket2x16 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
-    if (hour.start.hour < 7 || hour.start.hour == 23) return false;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
+    if (hs.hour < 7 || hs.hour == 23) return false;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
@@ -503,12 +508,13 @@ class BucketOffpeak extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (hour.start.hour < 7 || hour.start.hour == 23) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
+      if (hs.hour < 7 || hs.hour == 23) return true;
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) return true;
     }
     return false;
   }
@@ -524,11 +530,12 @@ class BucketOffpeakAeso extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    if (hour.start.weekday == 7) {
+    final hs = hour.start;
+    if (hs.weekday == 7) {
       return true;
     } else {
-      if (hour.start.hour < 7 || hour.start.hour > 22) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
+      if (hs.hour < 7 || hs.hour > 22) return true;
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) return true;
     }
     return false;
   }
@@ -544,12 +551,13 @@ class BucketOffpeakCaiso extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 7) {
       return true;
     } else {
-      if (hour.start.hour < 6 || hour.start.hour > 21) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
+      if (hs.hour < 6 || hs.hour > 21) return true;
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) return true;
     }
     return false;
   }
@@ -565,12 +573,13 @@ class BucketOffpeakErcot extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.start.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       return true;
     } else {
-      if (hour.start.hour < 6 || hour.start.hour >= 22) return true;
-      if (calendar.isHoliday(hour.currentDate)) return true;
+      if (hs.hour < 6 || hs.hour >= 22) return true;
+      if (calendar.isHoliday3(hs.year, hs.month, hs.day)) return true;
     }
     return false;
   }
@@ -586,12 +595,13 @@ class Bucket5x16_7 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 7 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 7 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -602,7 +612,7 @@ class Bucket5x16_7 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_8 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   Bucket5x16_8() {
     name = '5x16_8';
@@ -611,12 +621,13 @@ class Bucket5x16_8 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 8 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 8 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -627,7 +638,7 @@ class Bucket5x16_8 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_9 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 9 bucket
   Bucket5x16_9() {
@@ -637,12 +648,13 @@ class Bucket5x16_9 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 9 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 9 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -653,7 +665,7 @@ class Bucket5x16_9 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_10 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 10 bucket
   Bucket5x16_10() {
@@ -663,12 +675,13 @@ class Bucket5x16_10 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 10 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 10 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -679,7 +692,7 @@ class Bucket5x16_10 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_11 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 11 bucket
   Bucket5x16_11() {
@@ -689,12 +702,13 @@ class Bucket5x16_11 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 11 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 11 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -705,7 +719,7 @@ class Bucket5x16_11 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_12 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 12 bucket
   Bucket5x16_12() {
@@ -715,12 +729,13 @@ class Bucket5x16_12 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 12 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 12 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -731,7 +746,7 @@ class Bucket5x16_12 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_13 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 13 bucket
   Bucket5x16_13() {
@@ -741,12 +756,13 @@ class Bucket5x16_13 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 13 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 13 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -757,7 +773,7 @@ class Bucket5x16_13 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_14 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 14 bucket
   Bucket5x16_14() {
@@ -767,12 +783,13 @@ class Bucket5x16_14 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 14 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 14 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -783,7 +800,7 @@ class Bucket5x16_14 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_15 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 15 bucket
   Bucket5x16_15() {
@@ -793,12 +810,13 @@ class Bucket5x16_15 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 15 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 15 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -809,7 +827,7 @@ class Bucket5x16_15 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_16 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 16 bucket
   Bucket5x16_16() {
@@ -819,12 +837,13 @@ class Bucket5x16_16 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 16 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 16 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -835,7 +854,7 @@ class Bucket5x16_16 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_17 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 17 bucket
   Bucket5x16_17() {
@@ -845,12 +864,13 @@ class Bucket5x16_17 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 17 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 17 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -861,7 +881,7 @@ class Bucket5x16_17 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_18 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 18 bucket
   Bucket5x16_18() {
@@ -871,12 +891,13 @@ class Bucket5x16_18 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 18 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 18 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -887,7 +908,7 @@ class Bucket5x16_18 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_19 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 19 bucket
   Bucket5x16_19() {
@@ -897,12 +918,13 @@ class Bucket5x16_19 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 19 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 19 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -913,7 +935,7 @@ class Bucket5x16_19 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_20 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 20 bucket
   Bucket5x16_20() {
@@ -923,12 +945,13 @@ class Bucket5x16_20 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 20 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 20 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -939,7 +962,7 @@ class Bucket5x16_20 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_21 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 21 bucket
   Bucket5x16_21() {
@@ -949,12 +972,13 @@ class Bucket5x16_21 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 21 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 21 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;
@@ -965,7 +989,7 @@ class Bucket5x16_21 extends Bucket {
 
 // ignore: camel_case_types
 class Bucket5x16_22 extends Bucket {
-  final calendar = NercCalendar();
+  final calendar = Calendar.nerc;
 
   /// The 5x16 hour beginning 22 bucket
   Bucket5x16_22() {
@@ -975,12 +999,13 @@ class Bucket5x16_22 extends Bucket {
 
   @override
   bool containsHour(Hour hour) {
-    var dayOfWeek = hour.currentDate.weekday;
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
     if (dayOfWeek == 6 || dayOfWeek == 7) {
       /// not the right day of the week
       return false;
     } else {
-      if (hour.start.hour == 22 && !calendar.isHoliday(hour.currentDate)) {
+      if (hs.hour == 22 && !calendar.isHoliday3(hs.year, hs.month, hs.day)) {
         return true;
       } else {
         return false;

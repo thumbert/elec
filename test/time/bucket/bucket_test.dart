@@ -268,11 +268,12 @@ void tests() {
   });
 }
 
-/// As of 2021-11-28, desktop Intel i7-6700 CPU @ 3.40GHz x 8, Ubuntu 16.04
-/// 100 ms to count the number of onpeak hours in 10 years
-/// - 24 ms is just to construct the hours List, 87648 elements
+/// As of 2023-07-07, desktop Intel i7-6700 CPU @ 3.40GHz x 8, Ubuntu 22.04
+/// Dart 3.0.5
+/// 65 ms to count the number of onpeak hours in 10 years
+/// - 31 ms is just to construct the hours List, 87648 elements
 /// -  2 ms to iterate over the list
-/// - 75 ms to test if the hour is in onpeak bucket
+/// - 30 ms to test if the hour is in onpeak bucket
 ///
 void speedTest() {
   var location = getLocation('America/New_York');
@@ -288,7 +289,7 @@ void speedTest() {
   }
   sw.stop();
   print(sw.elapsedMilliseconds);
-  print(count);
+  assert(count == 40848);
 }
 
 void calculateBucketHoursByMonth() {
@@ -318,12 +319,12 @@ void calculateBucketHoursByMonth() {
   print(Table.from(aux));
 }
 
-void main() async {
+void main() {
   initializeTimeZones();
-  tests();
+  // tests();
 
   // aggregateByBucketMonth();
 
-  // speedTest();
+  speedTest();
   // calculateBucketHoursByMonth();
 }

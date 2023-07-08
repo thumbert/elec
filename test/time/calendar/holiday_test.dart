@@ -1,5 +1,6 @@
 library test_holiday;
 
+import 'package:elec/src/time/calendar/holidays/christmas.dart';
 import 'package:elec/src/time/calendar/holidays/juneteenth.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
@@ -22,6 +23,11 @@ void tests() {
     test('parse', () {
       expect(Holiday.parse('New Year'), Holiday.newYear);
       expect(Holiday.parse('Christmas'), Holiday.christmas);
+    });
+
+    test('Christmas', () {
+      expect(Christmas().isDate3(2022, 12, 26), true);
+      expect(Christmas().isDate(Date.utc(2022, 12, 26)), true);
     });
 
     test('Columbus day ', () {
@@ -111,11 +117,18 @@ void tests() {
     test('Thanksgiving ', () {
       expect(
           '2012-11-22', Thanksgiving().forYear(2012, location: UTC).toString());
+      expect(Thanksgiving().isDate3(2018, 11, 22), true);
+      expect(Thanksgiving().isDate3(2019, 11, 28), true);
+      expect(Thanksgiving().isDate3(2020, 11, 26), true);
+      expect(Thanksgiving().isDate3(2021, 11, 25), true);
+      expect(Thanksgiving().isDate3(2022, 11, 24), true);
+      expect(Thanksgiving().isDate3(2023, 11, 23), true);
       expect(
           '2013-11-28', Thanksgiving().forYear(2013, location: UTC).toString());
       expect(
           '2014-11-27', Thanksgiving().forYear(2014, location: UTC).toString());
       expect(Thanksgiving().isDate(Date(2012, 11, 22, location: UTC)), true);
+      expect(Thanksgiving().isDate(Date(2018, 11, 22, location: UTC)), true);
     });
 
     test('Veterans Day ', () {

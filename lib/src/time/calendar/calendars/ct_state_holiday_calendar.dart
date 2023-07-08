@@ -46,6 +46,12 @@ class CtStateHolidayCalendar extends Calendar {
     return res;
   }
 
+  @override
+  bool isHoliday3(int year, int month, int day) {
+    // TODO: implement isHoliday3
+    throw UnimplementedError();
+  }
+
 }
 
 

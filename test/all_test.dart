@@ -34,7 +34,7 @@ import 'risk_system/reporting/trade_aggregator_test.dart' as trade_aggregator;
 import 'weather/leap_year_policy_test.dart' as leap_year_policy;
 import 'weather/lib_weather_utils.dart' as weather_utils;
 
-void main() async {
+Future<void> main() async {
   initializeTimeZones();
 
   var rootUrl = 'http://localhost:8080';
@@ -62,7 +62,7 @@ void main() async {
   volatility_surface.tests();
   elec_swap.tests(rootUrl);
   elec_daily_option.tests(rootUrl);
-  all_weather.tests(rootUrl);
+  await all_weather.tests(rootUrl);
   seasonal_format.tests();
   shape_cost.tests();
   time_aggregation.tests();

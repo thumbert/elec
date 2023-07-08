@@ -28,4 +28,13 @@ class IndependenceDay extends Holiday {
 
   @override
   bool isDate(Date date) => date == forYear(date.year, location: date.location);
+
+  bool isDate3(int year, int month, int day) {
+    if (month != 7) return false;
+    if (day != 4 && day != 5) return false;
+    var weekday = DateTime(year, 7, 4).weekday;
+    if (weekday == 7 && day == 5) return true;
+    if (weekday != 7 && day == 4) return true;
+    return false;
+  }
 }

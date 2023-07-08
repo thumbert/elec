@@ -49,6 +49,8 @@ abstract class Holiday {
   /// Needs to be nullable because sometimes holidays are added or retired.
   /// For example Juneteenth.
   Date? forYear(int year, {required Location location});
+
+  @Deprecated('Replace with isDate3')
   bool isDate(Date date);
 
   static Holiday parse(String name) {

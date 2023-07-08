@@ -18,4 +18,11 @@ class LaborDay extends Holiday {
   @override
   bool isDate(Date date) =>
       forYear(date.year, location: date.location) == date;
+
+  bool isDate3(int year, int month, int day) {
+    if (month != 9 || day > 7) return false;
+    var dayOfMonth = dayOfMonthHoliday(year, 9, 1, DateTime.monday);
+    if (dayOfMonth == day) return true;
+    return false;
+  }
 }
