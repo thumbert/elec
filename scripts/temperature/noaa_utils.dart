@@ -46,7 +46,7 @@ insertTemperatureDataMongo(List<Map> data) async {
     'date': 1,
   });
   var coll = db.collection('daily');
-  await coll.insertAll(data as List<Map<String, dynamic>>, writeConcern: WriteConcern.ACKNOWLEDGED);
+  await coll.insertAll(data as List<Map<String, dynamic>>, writeConcern: WriteConcern.acknowledged);
   await db.close();
 }
 

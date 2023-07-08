@@ -72,7 +72,6 @@ class FtrPath {
       Cache.lru(loader: (Tuple2<Iso, int> tuple2) {
     return _daLmpClient.getHourlyLmp(tuple2.item1, tuple2.item2,
         LmpComponent.congestion, _term!.startDate, _term!.endDate);
-    ;
   });
 
   /// A clearing price cache

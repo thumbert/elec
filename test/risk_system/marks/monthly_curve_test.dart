@@ -15,7 +15,7 @@ void tests() {
     var location = getLocation('America/New_York');
     test('monthly curve indexing', (){
       var months = parseTerm('Q1,2013', tzLocation: location)!
-        .splitLeft((dt) => Month.fromTZDateTime(dt))
+        .splitLeft((dt) => Month.containing(dt))
         .cast<Month>();
       var curve = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
@@ -28,7 +28,7 @@ void tests() {
       var interval =
           Interval(TZDateTime(location, 2013), TZDateTime(location, 2013, 3));
       var months =
-          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+          interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
       var ts = TimeSeries.from(months, [100, 95]);
       var curve = MonthlyCurve(IsoNewEngland.bucket2x16H, ts);
       expect(curve.startMonth, months[0]);
@@ -39,7 +39,7 @@ void tests() {
     test('aggregate two buckets', () {
       var interval = parseTerm('Q1,2013', tzLocation: location)!;
       var months =
-          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+          interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
       var peak = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
       var offpeak = MonthlyCurve(
@@ -52,7 +52,7 @@ void tests() {
     test('add two curves', () {
       var interval = parseTerm('Q1,2013', tzLocation: location)!;
       var months =
-          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+          interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
       var c1 = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
       var c2 = MonthlyCurve(
@@ -63,7 +63,7 @@ void tests() {
     test('multiply two curves', () {
       var interval = parseTerm('Q1,2013', tzLocation: location)!;
       var months =
-          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+          interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
       var c1 = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
       var c2 = MonthlyCurve(
@@ -74,7 +74,7 @@ void tests() {
     test('multiply a curve by 2', () {
       var interval = parseTerm('Q1,2013', tzLocation: location)!;
       var months =
-          interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+          interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
       var c1 = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 90, 80]));
       var c3 = c1.apply((x) => 2 * x);

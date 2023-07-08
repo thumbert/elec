@@ -72,14 +72,14 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
       throw ArgumentError('Json input is missing the quantity/value key');
     }
     if (qValue is num) {
-      var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      var months = term.interval.splitLeft((dt) => Month.containing(dt));
       quantity = TimeSeries.fill(months, qValue);
     } else if (qValue is List) {
       quantity = parseSeries(qValue.cast<Map<String, dynamic>>(), tzLocation);
     }
 
     /// get the fixPrice
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
     if (x.containsKey('fixPrice')) {
       var pValue = x['fixPrice']['value'];
       if (pValue is num) {
@@ -147,21 +147,21 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
 
   /// if custom fixPrice, what to show on the screen in the UI
   num showFixPrice() {
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
     var hours = months.map((month) => bucket.countHours(month));
     return dama.weightedMean(fixPrice.values, hours);
   }
 
   /// if custom quantities, what to show on the screen in the UI
   num showQuantity() {
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
     var hours = months.map((month) => bucket.countHours(month));
     return dama.weightedMean(quantity.values, hours);
   }
 
   /// what to show on the screen in the UI for the underlying price
   num showUnderlyingPrice() {
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
     var hours = months.map((month) => bucket.countHours(month));
     return dama.weightedMean(underlyingPrice.values, hours);
   }

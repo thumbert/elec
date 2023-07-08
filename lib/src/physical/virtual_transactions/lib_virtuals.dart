@@ -30,8 +30,8 @@ class Virtual {
         throw ArgumentError('Not an hourly schedule!');
       }
     }
-    date = Date.fromTZDateTime(schedule.first.interval.start);
-    var end = Date.fromTZDateTime(schedule.last.interval.start);
+    date = Date.containing(schedule.first.interval.start);
+    var end = Date.containing(schedule.last.interval.start);
     if (date != end) {
       throw ArgumentError(
           'Virtual schedule extends more than one calendar day.');
@@ -94,5 +94,5 @@ String emktDateTime(TZDateTime dt) {
   var y = x.substring(0, 19) + x.substring(23);
 
   /// add a column between the timezone hour and minute offset
-  return y.substring(0, 22) + ':' + y.substring(22);
+  return '${y.substring(0, 22)}:${y.substring(22)}';
 }

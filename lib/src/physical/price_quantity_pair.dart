@@ -7,10 +7,10 @@ class PriceQuantityPair {
   final num quantity;
 
   PriceQuantityPair(this.price, this.quantity) {
-    if (price == null || !price.isFinite) {
+    if (!price.isFinite) {
       throw ArgumentError('Invalid price input $price');
     }
-    if (quantity == null || !quantity.isFinite) {
+    if (!quantity.isFinite) {
       throw ArgumentError('Invalid quantity input $quantity');
     }
   }

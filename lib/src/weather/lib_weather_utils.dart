@@ -36,11 +36,11 @@ List<Interval> makeHistoricalTerm(int startMonth, int endMonth, {int n = 30}) {
   }
 
   /// check that the last term is not in the future/incomplete
-  if (!Date.today(location: UTC).isAfter(Date.fromTZDateTime(out.last.end))) {
+  if (!Date.today(location: UTC).isAfter(Date.containing(out.last.end))) {
     out.removeLast();
   }
   // have to do it twice, if you are in Jan19 and want last 10 Dec-Feb periods.
-  if (!Date.today(location: UTC).isAfter(Date.fromTZDateTime(out.last.end))) {
+  if (!Date.today(location: UTC).isAfter(Date.containing(out.last.end))) {
     out.removeLast();
   }
 

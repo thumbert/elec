@@ -55,7 +55,7 @@ class SimpleTradeAggregator {
           .map(((e) => e['buy/sell'].sign * e['mw'] * e['hours'] * e['price']))));
 
     var months = aggregationTerm
-        .splitLeft((dt) => Month.fromTZDateTime(dt))
+        .splitLeft((dt) => Month.containing(dt))
         .cast<Month>();
     // add a zero mw flat trades for each month to get completeness
     trades.insertAll(
@@ -89,7 +89,7 @@ class SimpleTradeAggregator {
         var mw = aux['mw'];
         var price = aux['price'];
         var _months =
-            term!.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+            term!.splitLeft((dt) => Month.containing(dt)).cast<Month>();
         for (var month in _months) {
           if (!_hours.containsKey(Tuple2(bucket, month))) {
             _hours[Tuple2(bucket, month)] = _calculateHours(bucket, month);

@@ -189,10 +189,10 @@ class MonthlyCurve {
     }
 
     var months =
-        interval.splitLeft((dt) => Month.fromTZDateTime(dt)).cast<Month>();
+        interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
     var hours = months.map((month) => bucket.countHours(month));
     var xs = timeseries.window(interval).map((e) => e.value);
-    return dama.weightedMean(xs as Iterable<num>, hours);
+    return dama.weightedMean(xs, hours);
   }
 
   /// Get the curve value for this month.

@@ -59,17 +59,17 @@ mixin IndexSwap on WeatherInstrument {
     Map<Interval?, TimeSeries<num>> grp;
     if (strike.length > 1) {
       grp = dIndex
-          .splitByIndex((interval) => Month.fromTZDateTime(interval.start));
+          .splitByIndex((interval) => Month.containing(interval.start));
     } else {
       grp = {term: dIndex};
     }
     var out = TimeSeries<num>();
     for (var entry in grp.entries) {
-      var days = entry.key!.splitLeft((dt) => Date.fromTZDateTime(dt)).length;
+      var days = entry.key!.splitLeft((dt) => Date.containing(dt)).length;
       var multiplier = 1 / days;
-      var _strike = multiplier * strike.observationContains(entry.key!).value;
+      var strike0 = multiplier * strike.observationContains(entry.key!).value;
       out.addAll(entry.value.map((obs) => IntervalTuple(
-          obs.interval, buySell.sign * quantity * (obs.value - _strike))));
+          obs.interval, buySell.sign * quantity * (obs.value - strike0))));
     }
     return out;
   }

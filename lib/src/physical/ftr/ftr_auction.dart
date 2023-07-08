@@ -107,7 +107,7 @@ mixin FtrAuction implements Comparable<FtrAuction> {
   }
 
   /// the last day of the auction period
-  Date get end => Date.fromTZDateTime(interval.end).previous;
+  Date get end => Date.containing(interval.end).previous;
 
   /// A compare functions for sorting FTR Auctions.
   /// First you sort the annual auctions, then you sort by rounds, then the
@@ -185,7 +185,7 @@ class TwoYearFtrAuction extends Object with FtrAuction, AuctionWithRound {
     }
     var yy = startMonth.year - 2000;
     _season = 'Spring$yy';
-    name = formatMYY(startMonth) + '-2Y-R$round' + _season;
+    name = '${formatMYY(startMonth)}-2Y-R$round$_season';
   }
 
   String get season => _season;
@@ -219,14 +219,14 @@ class AnnualFtrAuction extends Object with FtrAuction, AuctionWithRound {
           _season = 'Spring$yy';
         }
       }
-      name = formatMYY(startMonth) + '-1Y-R$round' + _season;
+      name = '${formatMYY(startMonth)}-1Y-R$round$_season';
       //
       //
     } else if (iso == Iso.newEngland) {
       if (round == 0) {
-        name = formatMYY(startMonth) + '-1Y';
+        name = '${formatMYY(startMonth)}-1Y';
       } else {
-        name = formatMYY(startMonth) + '-1Y-R$round';
+        name = '${formatMYY(startMonth)}-1Y-R$round';
       }
       //
       //
@@ -262,7 +262,7 @@ class SixMonthFtrAuction extends Object with FtrAuction, AuctionWithRound {
     } else {
       _season = 'Spring$yy';
     }
-    name = formatMYY(startMonth) + '-6M-R$round' + _season;
+    name = '${formatMYY(startMonth)}-6M-R$round$_season';
     // Only in Autumn you have 6M-R4AutumnYY, in the Spring 6M-R5SpringYY
     if (round < 4 || (round == 4 && !_season.startsWith('Autumn'))) {
       throw StateError('Invalid round $round for auction $name');
@@ -295,6 +295,6 @@ class MonthlyBoppFtrAuction extends Object with FtrAuction {
     start = startMonth.startDate;
     monthCount = 1;
     interval = Interval(start.start, startMonth.end);
-    name = formatMYY(startMonth) + '-bopp' + formatMYY(boppMonth);
+    name = '${formatMYY(startMonth)}-bopp${formatMYY(boppMonth)}';
   }
 }

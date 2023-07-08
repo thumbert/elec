@@ -13,7 +13,7 @@ List<Map<String,dynamic>> weekdayWeekendShapeByMonth(Iterable<IntervalTuple<num>
     {Calendar? calendar}) {
   calendar ??= Calendar.nerc;
 
-  var groups = groupBy(xs, (e) => Month.contains(e.interval.start));
+  var groups = groupBy(xs, (e) => Month.containing(e.interval.start));
   var mData = <Map<String, dynamic>>[];
   for (var month in groups.keys) {
     var ts = groups[month]!.groupListsBy((e) {

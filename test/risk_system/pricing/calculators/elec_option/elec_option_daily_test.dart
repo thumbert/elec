@@ -146,7 +146,7 @@ void tests(String rootUrl) async {
     });
     test('change strike and reprice option', () async {
       var months =
-          c0.legs[0].term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+          c0.legs[0].term.interval.splitLeft((dt) => Month.containing(dt));
       c0.legs[0].strike = TimeSeries.fill(months, 125);
       await c0.build();
       var legs = c0.legs;
@@ -180,7 +180,7 @@ void tests(String rootUrl) async {
     test('add another leg and reprice', () async {
       var calc = c0;
       var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+          .splitLeft((dt) => Month.containing(dt));
       var leg1 = calc.legs[0].copyWith(
         callPut: CallPut.put,
         strike: TimeSeries.fill(months, 50),
@@ -192,7 +192,7 @@ void tests(String rootUrl) async {
     test('delta calculation for put is off', () async {
       var calc = c0;
       var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+          .splitLeft((dt) => Month.containing(dt));
       var leg0 = calc.legs[0];
       leg0
         ..callPut = CallPut.put
@@ -251,7 +251,7 @@ total                         13,705       ''';
     test('monthly position report, multiple legs', () async {
       var calc = c0;
       var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+          .splitLeft((dt) => Month.containing(dt));
       var leg0 = calc.legs[0]
         ..quantity = TimeSeries.fill(months, 100)
         ..strike = TimeSeries.fill(months, 60);

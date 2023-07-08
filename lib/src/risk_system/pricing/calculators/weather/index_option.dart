@@ -87,16 +87,16 @@ mixin IndexOption on WeatherInstrument {
     var out = TimeSeries<num>();
     for (var entry in grp.entries) {
       var dayCount =
-          entry.key.splitLeft((dt) => Date.fromTZDateTime(dt)).length;
+          entry.key.splitLeft((dt) => Date.containing(dt)).length;
       var multiplier = 1 / dayCount;
-      var _strike = multiplier * strike.observationContains(entry.key).value;
+      var strike0 = multiplier * strike.observationContains(entry.key).value;
       var index = entry.value.sum();
       var n = entry.value.length;
       num value;
       if (callPut == CallPut.call) {
-        value = buySell.sign * quantity * math.max(index - _strike * n, 0);
+        value = buySell.sign * quantity * math.max(index - strike0 * n, 0);
       } else if (callPut == CallPut.put) {
-        value = buySell.sign * quantity * math.max(_strike * n - index, 0);
+        value = buySell.sign * quantity * math.max(strike0 * n - index, 0);
       } else {
         throw ArgumentError('Unimplemented $callPut');
       }

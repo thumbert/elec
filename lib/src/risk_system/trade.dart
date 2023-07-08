@@ -6,8 +6,8 @@ mixin BaseTrade {
   Interval? tradeTerm;
   late BuySell buySell;
 
-  Date get startDate => Date.fromTZDateTime(tradeTerm!.start);
-  Date get endDate => Date.fromTZDateTime(tradeTerm!.end).subtract(1);
+  Date get startDate => Date.containing(tradeTerm!.start);
+  Date get endDate => Date.containing(tradeTerm!.end).subtract(1);
 }
 
 

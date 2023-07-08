@@ -25,7 +25,7 @@ class OmniCurve {
       if (!domain.containsInterval(hour)) return null;
       for (var curve in curves) {
         if (curve.bucket.containsHour(hour)) {
-          var month = Month.fromTZDateTime(hour.start);
+          var month = Month.containing(hour.start);
           return curve.valueAt(month);
         }
       }

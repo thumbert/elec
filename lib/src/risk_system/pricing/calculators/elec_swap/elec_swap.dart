@@ -146,7 +146,7 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
     }
 
     /// Check if you need to add settlement prices
-    var startDate = Date.fromTZDateTime(fwdMarks.first.interval.start);
+    var startDate = Date.containing(fwdMarks.first.interval.start);
     if (term.startDate.isBefore(startDate)) {
       /// need to get settlement data, return all hours of the term
       var settlementData =

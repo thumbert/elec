@@ -84,7 +84,7 @@ void tests(String rootUrl) async {
         ..data = TimeSeries.from(
             Term.parse('Jan20-Dec21', location)
                 .interval
-                .splitLeft((dt) => Month.fromTZDateTime(dt)),
+                .splitLeft((dt) => Month.containing(dt)),
             [
               ...hs.data.values,
               ...hs.data.values,
@@ -134,7 +134,7 @@ void speedTests(String rootUrl) async {
   print('From HourlySchedule.byBucket: ${sw.elapsedMilliseconds}');
 
   sw.reset();
-  var months = interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+  var months = interval.splitLeft((dt) => Month.containing(dt));
   var tss2 = TimeSeries.from(months, List.filled(months.length, 10));
   var hSchedule6 = HourlySchedule.fromTimeSeries(tss2);
   sw.start();

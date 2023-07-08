@@ -2,6 +2,9 @@
 
 ## TODO
 
+## Release 2023-07-08
+- Minor lint cleanups.  Still so many more to go!
+
 ## 2.1.0, release 2023-07-07
 - Made NercCalendar isHoliday about 30% faster.  Removed the use of a cache (no speed 
   improvement).

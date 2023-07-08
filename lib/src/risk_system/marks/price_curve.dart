@@ -438,10 +438,10 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       PriceCurve other) {
     // align their domains first
     var domainY = Interval(
-        Month.fromTZDateTime(other.domain.start).start, other.domain.end);
+        Month.containing(other.domain.start).start, other.domain.end);
     var x = PriceCurve.fromIterable(window(domainY));
     var domainX =
-        Interval(Month.fromTZDateTime(domain.start).start, domain.end);
+        Interval(Month.containing(domain.start).start, domain.end);
     var y = PriceCurve.fromIterable(other.window(domainX));
 
     // expand to daily marks as needed

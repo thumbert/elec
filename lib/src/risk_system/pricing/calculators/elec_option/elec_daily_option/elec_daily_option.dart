@@ -72,7 +72,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
         leg.term =
             Term.fromInterval(term.interval.withTimeZone(leg.tzLocation));
         var months =
-            leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+            leg.term.interval.splitLeft((dt) => Month.containing(dt));
         leg.quantity = TimeSeries.fill(months, leg.quantity.values.first);
         leg.strike = TimeSeries.fill(months, leg.strike.values.first);
         leg.fixPrice = TimeSeries.fill(months, 0);
@@ -169,7 +169,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
         .get(Tuple2(asOfDate, volatilityCurveId));
     var location = vSurface.terms.first.location;
     var _term = term.interval.withTimeZone(location);
-    var months = _term.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = _term.splitLeft((dt) => Month.containing(dt));
 
     var xs = TimeSeries<num>();
     for (var i = 0; i < months.length; i++) {
@@ -182,7 +182,7 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   /// Get the interest rate/discount factor as of the given [asOfDate].
   /// Return a monthly time-series.
   Future<TimeSeries<num>> getInterestRate() async {
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
     // TODO:  FIXME
     return TimeSeries.fill(months, 0);
   }

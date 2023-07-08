@@ -25,7 +25,7 @@ void aggregateByBucketMonth() {
   var lmp = hourlyHubPrices();
 
   var nest = Nest()
-    ..key((e) => Month.fromTZDateTime(e['hourBeginning']))
+    ..key((e) => Month.containing(e['hourBeginning']))
     ..key((e) => buckets.firstWhere(
         (bucket) => bucket.containsHour(Hour.beginning(e['hourBeginning']))))
     ..rollup((Iterable x) =>
@@ -44,7 +44,7 @@ List<int> countByMonth(int year, Bucket bucket) {
   var tzLocation = getLocation('America/New_York');
   var months =
       Interval(TZDateTime(tzLocation, year), TZDateTime(tzLocation, year + 1))
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+          .splitLeft((dt) => Month.containing(dt));
   return months.map((m) {
     var hours = m.splitLeft((dt) => Hour.beginning(dt));
     return hours.where((hour) => bucket.containsHour(hour)).length;
@@ -259,7 +259,7 @@ void tests() {
     test('calculation', () {
       var year =
           Interval(TZDateTime(location, 2013), TZDateTime(location, 2014));
-      var months = year.splitLeft((dt) => Month.fromTZDateTime(dt));
+      var months = year.splitLeft((dt) => Month.containing(dt));
       var b2x16H = IsoNewEngland.bucket2x16H;
       var count = months.map((month) => b2x16H.countHours(month)).toList();
       expect(

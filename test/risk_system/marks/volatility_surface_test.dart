@@ -77,7 +77,7 @@ Map<String, dynamic> _getJson() {
 Map<Tuple2<Bucket, num>, TimeSeries<num>> _getTimeSeries() {
   var months = Term.parse('Aug20-Jul21', UTC)
       .interval
-      .splitLeft((dt) => Month.fromTZDateTime(dt));
+      .splitLeft((dt) => Month.containing(dt));
   return {
     Tuple2(Bucket.b5x16, 1): TimeSeries.from(months, [
       0.55,

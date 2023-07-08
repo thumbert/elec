@@ -142,10 +142,10 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   /// Get the leg quantity as a timeseries at the period of the leg (monthly,
   /// daily, hourly.)
   TimeSeries<num> quantity() {
-    var _term = term.interval.withTimeZone(tzLocation);
+    var termL = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
       /// TODO: maybe I can do better here and not expand to hourly first
-      var aux = quantitySchedule.toHourly(_term) as TimeSeries<num>;
+      var aux = quantitySchedule.toHourly(termL);
       return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented $timePeriod');
@@ -154,16 +154,16 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
 
   /// Get the leg quantity as an hourly timeseries.
   TimeSeries<num?> hourlyQuantity() {
-    var _term = term.interval.withTimeZone(tzLocation);
-    return quantitySchedule.toHourly(_term);
+    var termL = term.interval.withTimeZone(tzLocation);
+    return quantitySchedule.toHourly(termL);
   }
 
   /// Get the leg fixPrice as a timeseries
   TimeSeries<num> fixPrice() {
-    var _term = term.interval.withTimeZone(tzLocation);
+    var termL = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
       /// TODO: maybe I can do better here and not expand to hourly first
-      var aux = fixPriceSchedule!.toHourly(_term) as TimeSeries<num>;
+      var aux = fixPriceSchedule!.toHourly(termL);
       return toMonthly(aux, mean);
     } else {
       throw UnimplementedError('Not implemented $timePeriod');
@@ -199,7 +199,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     if (timePeriod == TimePeriod.month) {
       var months = term.interval
           .withTimeZone(tzLocation)
-          .splitLeft((dt) => Month.fromTZDateTime(dt));
+          .splitLeft((dt) => Month.containing(dt));
       var _quantityM = toMonthly(hourlyQuantity() as TimeSeries<num>, mean);
       var _fixPriceM = toMonthly(hourlyFixPrice() as TimeSeries<num>, mean);
       var _floatingPriceM = toMonthly(hourlyFloatingPrice, mean);

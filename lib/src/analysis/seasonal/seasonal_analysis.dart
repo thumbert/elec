@@ -57,7 +57,7 @@ class SeasonalAnalysis {
   /// a daily time series of 365/366 values.
   SeasonalAnalysis.dayOfYear(this.xs) {
     _seasonality = Seasonality.dayOfYear;
-    groups = _groupByIndex(xs, (e) => Date.fromTZDateTime(e.start).dayOfYear());
+    groups = _groupByIndex(xs, (e) => Date.containing(e.start).dayOfYear());
     _paths = _toPath(xs, (e) {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
@@ -87,7 +87,7 @@ class SeasonalAnalysis {
     _seasonality = Seasonality.hourOfDay;
     groups = _groupByIndex(xs, (e) => e.start.hour);
     _paths =
-        _toPath(xs, (e) => Tuple2(Date.fromTZDateTime(e.interval.start), e));
+        _toPath(xs, (e) => Tuple2(Date.containing(e.interval.start), e));
   }
 
   /// Input time series must be daily.

@@ -171,7 +171,7 @@ void tests(String rootUrl) async {
       expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));
       expect(c1.term, Term.parse('Jan21-Mar21', UTC));
       var _term = Term.parse('Jan21-Mar21', location);
-      var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      var _months = _term.interval.splitLeft((dt) => Month.containing(dt));
       expect(c1.legs.length, 1);
       var leg = c1.legs.first;
       expect(leg.curveId, 'isone_energy_4000_da_lmp');
@@ -185,7 +185,7 @@ void tests(String rootUrl) async {
     test('fromJson, custom quantities', () async {
       var leg = c2.legs.first;
       var _months =
-          leg.term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+          leg.term.interval.splitLeft((dt) => Month.containing(dt));
       expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 60, 70]));
       expect(leg.fixPrice(), TimeSeries<num>.from(_months, [70.5, 68.5, 48.5]));
       expect(leg.hasCustomQuantity, true);
@@ -410,7 +410,7 @@ total                         50,400        ''';
       expect(c2.asOfDate, Date(2020, 5, 29, location: UTC));
       expect(c2.term, Term.parse('Jan21-Mar21', UTC));
       var _term = Term.parse('Jan21-Mar21', location);
-      var _months = _term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+      var _months = _term.interval.splitLeft((dt) => Month.containing(dt));
       expect(c2.legs.length, 2);
       var leg1 = c2.legs.first;
       expect(leg1.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));

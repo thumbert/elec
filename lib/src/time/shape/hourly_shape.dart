@@ -2,7 +2,6 @@ library time.bucket.hourly_shape;
 
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/bucket/bucket_utils.dart';
-import 'package:intl/intl.dart';
 import 'package:table/table.dart';
 import 'package:date/date.dart';
 import 'package:dama/dama.dart' as dama;
@@ -13,10 +12,6 @@ import 'package:timezone/timezone.dart';
 /// Store hourly shapes by month for a set of complete buckets,
 /// e.g. 5x16, 2x16H, 7x8.
 class HourlyShape extends Object with MarksCurve {
-  /// the covering buckets
-  @override
-  late Set<Bucket> buckets;
-
   /// Monthly timeseries.  The values for the bucket keys are the shaping
   /// factors for the hours in that bucket (sorted by hour beginning).  Note
   /// that for most buckets the sum of the List elements will add up to the
@@ -27,12 +22,13 @@ class HourlyShape extends Object with MarksCurve {
   HourlyShape();
 
   /// Construct the shaping factors from an hourly timeseries.
-  HourlyShape.fromTimeSeries(TimeSeries<num> ts, this.buckets) {
+  HourlyShape.fromTimeSeries(TimeSeries<num> ts, Set<Bucket> buckets) {
+    this.buckets = buckets;
     // calculate the average by month/bucket/hourBeginning
-    var _buckets = buckets.toList();
+    var bucketsL = buckets.toList();
     var nest = Nest()
-      ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
-      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
+      ..key((IntervalTuple e) => Month.containing(e.interval.start))
+      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, bucketsL))
       ..key((IntervalTuple e) => e.interval.start.hour)
       ..rollup((List xs) => dama.mean(xs.map(((e) => e.value as num))));
     var aux = nest.map(ts);
@@ -41,13 +37,13 @@ class HourlyShape extends Object with MarksCurve {
 
     // calculate the average price by month/bucket
     var nestB = Nest()
-      ..key((IntervalTuple e) => Month.fromTZDateTime(e.interval.start))
-      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, _buckets))
+      ..key((IntervalTuple e) => Month.containing(e.interval.start))
+      ..key((IntervalTuple e) => assignBucket(e.interval as Hour, bucketsL))
       ..rollup((List xs) {
         return dama.mean(xs.map(((e) => e.value as num)));
       });
-    var _avgPrice = nestB.map(ts);
-    var avgPrice = flattenMap(_avgPrice, ['month', 'bucket', 'averageValue'])!;
+    var avgPrice0 = nestB.map(ts);
+    var avgPrice = flattenMap(avgPrice0, ['month', 'bucket', 'averageValue'])!;
 
     // join them (by bucket/month) to calculate the shaping factor
     var xs = join(avg, avgPrice);
@@ -89,16 +85,16 @@ class HourlyShape extends Object with MarksCurve {
     if (!x.keys.toSet().containsAll({'terms', 'buckets'})) {
       throw ArgumentError('Missing one of keys: terms, buckets.');
     }
-    var _buckets = (x['buckets'] as Map).keys;
+    var bucketsS = (x['buckets'] as Map).keys;
     var months = (x['terms'] as List).cast<String>();
     var aux = x['buckets'] as Map;
-    buckets = _buckets.map((e) => Bucket.parse(e)).toSet();
+    buckets = bucketsS.map((e) => Bucket.parse(e)).toSet();
     data = TimeSeries<Map<Bucket, List<num>>>();
     for (var i = 0; i < months.length; i++) {
       var month = Month.parse(months[i], location: location);
       var value = <Bucket, List<num>>{};
-      for (var _bucket in _buckets) {
-        value[Bucket.parse(_bucket)] = (aux[_bucket][i] as List).cast<num>();
+      for (var bucket in bucketsS) {
+        value[Bucket.parse(bucket)] = (aux[bucket][i] as List).cast<num>();
       }
       data.add(IntervalTuple(month, value));
     }
@@ -108,8 +104,8 @@ class HourlyShape extends Object with MarksCurve {
     interval ??= data.domain;
     var ts = TimeSeries<num>();
     // need to extend the interval to make sure it matches the data boundaries
-    var extInterval = Interval(Month.fromTZDateTime(interval.start).start,
-        Month.fromTZDateTime(interval.end.subtract(Duration(seconds: 1))).end);
+    var extInterval = Interval(Month.containing(interval.start).start,
+        Month.containing(interval.end.subtract(Duration(seconds: 1))).end);
     var xs = data.window(extInterval);
     // assume same buckets for all observations
     // keep buckets in the order below for faster containsHour test

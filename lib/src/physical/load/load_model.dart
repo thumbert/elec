@@ -85,7 +85,7 @@
 //   Map<Interval, List> grp = {};
 //   int N = x.length;
 //   for (int i = 0; i < N; i++) {
-//     Date group = new Date.fromTZDateTime(x[i].interval.start);
+//     Date group = new Date.containing(x[i].interval.start);
 //     grp.putIfAbsent(group, () => []).add(x[i].value);
 //   }
 //   return new Map.fromIterables(grp.keys as Iterable<Date>, grp.values as Iterable<TimeSeries<dynamic>>);

@@ -17,7 +17,7 @@ void tests() {
 
     test('analysis by dayOfYear', () {
       var term = parseTerm('Jan10-Dec20')!;
-      var days = term.splitLeft((dt) => Date.fromTZDateTime(dt));
+      var days = term.splitLeft((dt) => Date.containing(dt));
       var xs = TimeSeries.fromIterable(days
           .map((date) => IntervalTuple(date, date.year + date.dayOfYear())));
       var sa = SeasonalAnalysis.dayOfYear(xs);
@@ -62,7 +62,7 @@ void tests() {
 
     test('day of year centered', () {
       var term = parseTerm('Jan10-Dec20')!;
-      var days = term.splitLeft((dt) => Date.fromTZDateTime(dt));
+      var days = term.splitLeft((dt) => Date.containing(dt));
       var xs = TimeSeries.fromIterable(days
           .map((date) => IntervalTuple(date, 1)));
       var sa = SeasonalAnalysis.dayOfYearCentered(xs, 2);

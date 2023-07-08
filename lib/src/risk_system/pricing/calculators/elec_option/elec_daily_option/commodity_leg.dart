@@ -73,7 +73,7 @@ class CommodityLeg extends CommodityLegMonthly {
     }
     callPut = CallPut.parse(x['call/put']);
 
-    var months = term.interval.splitLeft((dt) => Month.fromTZDateTime(dt));
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
 
     // read the strike info
     var vStrike = x['strike']['value'];
@@ -120,7 +120,7 @@ class CommodityLeg extends CommodityLegMonthly {
     leaves = <LeafElecOption>[];
     var months = term.interval
         .withTimeZone(tzLocation)
-        .splitLeft((dt) => Month.fromTZDateTime(dt));
+        .splitLeft((dt) => Month.containing(dt));
     for (var i = 0; i < months.length; i++) {
       var _uPrice = underlyingPrice[i].value + priceAdjustment[i].value;
       var _volatility = volatility[i].value + volatilityAdjustment[i].value;

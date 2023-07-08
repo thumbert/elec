@@ -153,7 +153,7 @@ void tests() {
 /// See how fast isHoliday(date) is.
 /// For 10 years repeated 25 times it takes:
 ///  - 33 ms without caching.
-/// FWIW: A Rust implementation takes 0.7 ms (no caching).
+/// FWIW: A Rust implementation takes 4 ms.
 void speedTest() {
   var location = getLocation('America/New_York');
   var term = Term.parse('Jan21-Dec30', location);
