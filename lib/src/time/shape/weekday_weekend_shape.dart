@@ -3,7 +3,6 @@ library time.shape.weekday_weekend_shape;
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
-import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/time.dart';
 import 'package:timeseries/timeseries.dart';
 

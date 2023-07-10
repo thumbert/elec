@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:async';
 import 'package:csv/csv.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:elec/elec.dart';
 
 /// Data available for download at
 /// https://www.ncei.noaa.gov/orders/cdo/926924.csv

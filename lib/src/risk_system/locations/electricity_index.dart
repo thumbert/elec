@@ -15,7 +15,7 @@ class ElectricityIndex extends Object with Location {
 
   ElectricityIndex(this.iso, this.ptid, this.market, this.lmpComponent);
 
-  ElectricityIndex.IsoNewEngland(this.ptid, this.market, this.lmpComponent) {
+  ElectricityIndex.isoNewEngland(this.ptid, this.market, this.lmpComponent) {
     iso = IsoNewEngland();
     tzLocation = tz.getLocation('America/New_York');
   }

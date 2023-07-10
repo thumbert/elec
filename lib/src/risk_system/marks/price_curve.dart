@@ -1,8 +1,6 @@
 part of elec.risk_system;
 
 class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
-  static final DateFormat _isoFmt = DateFormat('yyyy-MM');
-
   /// A simple forward curve model for daily and monthly values extending
   /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
   PriceCurve();
@@ -53,7 +51,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       if ((x['term'] as String).length == 10) {
         term = Date.parse(x['term'], location: location);
       } else if ((x['term'] as String).length == 7) {
-        term = Month.parse(x['term'], fmt: _isoFmt, location: location);
+        term = Month.parse(x['term'], location: location);
       } else {
         throw ArgumentError('Unsupported term format ${x['term']}');
       }

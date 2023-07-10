@@ -1,14 +1,5 @@
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
-import 'package:quiver/collection.dart';
-import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
-import '../holidays/new_year.dart';
-import '../holidays/memorial_day.dart';
-import '../holidays/independence_day.dart';
-import '../holidays/labor_day.dart';
-import '../holidays/thanksgiving.dart';
-import '../holidays/christmas.dart';
 import '../calendar.dart';
 
 /// NERC Calendar
@@ -44,12 +35,9 @@ class NercCalendar extends Calendar {
     return _holidayType;
   }
 
-  @Deprecated('Use isHoliday3.')
   @override
   bool isHoliday(Date date) => isHoliday3(date.year, date.month, date.day);
 
-  /// Note: the implementation of [isHoliday3] is about 30% faster than
-  /// [isHoliday].
   @override
   bool isHoliday3(int year, int month, int day) {
     return switch (month) {

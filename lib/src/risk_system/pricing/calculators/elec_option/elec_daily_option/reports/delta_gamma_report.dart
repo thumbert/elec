@@ -10,8 +10,7 @@ import 'package:table/table_base.dart';
 class DeltaGammaReportElecDailyOption implements Report {
   ///
   DeltaGammaReportElecDailyOption(this.calculator, {List<num>? shocks}) {
-    shocks ??= defaultShocks;
-    this.shocks = shocks;
+    this.shocks = shocks ??defaultShocks;
   }
 
   ElecDailyOption calculator;

@@ -1,6 +1,11 @@
 # Changelog
 
 ## TODO
+- 
+
+## Release 2023-07-10
+- Implement calendar methods firstBusinessDayFrom and lastBusinessDayBefore.
+- Clean up more lints.  Less than 100 left!
 
 ## Release 2023-07-08
 - Minor lint cleanups.  Still so many more to go!

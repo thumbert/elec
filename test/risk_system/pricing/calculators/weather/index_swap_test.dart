@@ -3,7 +3,6 @@ library test.risk_system.pricing.calculators.weather.index_swap_test;
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/index_swap.dart';
-import 'package:elec/src/weather/lib_weather_utils.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:timeseries/timeseries.dart';

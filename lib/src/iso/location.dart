@@ -3,7 +3,6 @@ library iso.location;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/elec.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:elec/src/time/bucket/bucket.dart';
 
 
 abstract class Location {

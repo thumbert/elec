@@ -12,8 +12,6 @@ import 'package:timezone/timezone.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:intl/intl.dart';
 import 'package:quiver/core.dart' show hash2;
-import 'package:elec/src/time/shape/hourly_shape.dart';
-import 'package:elec_server/utils.dart';
 
 part 'src/risk_system/buy_sell.dart';
 part 'src/risk_system/call_put.dart';

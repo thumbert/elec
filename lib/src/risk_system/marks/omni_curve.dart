@@ -1,9 +1,7 @@
 library risk_system.marks.omni_curve;
 
 import 'package:date/date.dart';
-import 'package:elec/elec.dart';
 import 'package:elec/src/risk_system/marks/monthly_curve.dart';
-import 'package:timeseries/timeseries.dart';
 
 /// An omnipotent curve providing a complete hourly covering of an interval.
 /// No missing values allowed for any hour in the domain where the curve is

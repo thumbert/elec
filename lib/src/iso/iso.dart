@@ -3,7 +3,6 @@ library elec.iso;
 import 'package:elec/src/iso/load_zone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/time/bucket/bucket.dart';
-import 'package:elec/src/iso/location.dart';
 
 abstract class Iso {
   String get name;

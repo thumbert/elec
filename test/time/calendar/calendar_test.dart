@@ -1,10 +1,8 @@
 library calendar_test;
 
-import 'package:elec/elec.dart';
 import 'package:elec/time.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
-import 'package:elec/src/time/calendar/holiday.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/federal_holidays_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/ct_state_holiday_calendar.dart';
@@ -14,18 +12,33 @@ import 'package:timezone/timezone.dart';
 
 void tests() {
   group('Test calendar', () {
-    test('first business day of the month', () {
+    test('first business day from', () {
       var calendar = Calendar.nerc;
       expect(
-          calendar.firstBusinessDate(Month.utc(2019, 9)), Date.utc(2019, 9, 3));
+          calendar.firstBusinessDateFrom(Date.utc(2019, 9, 1)), Date.utc(2019, 9, 3));
       expect(
-          calendar.firstBusinessDate(Month.utc(2020, 1)), Date.utc(2020, 1, 2));
+          calendar.firstBusinessDateFrom(Date.utc(2020, 1, 1)), Date.utc(2020, 1, 2));
       expect(
-          calendar.firstBusinessDate(Month.utc(2020, 2)), Date.utc(2020, 2, 3));
+          calendar.firstBusinessDateFrom(Date.utc(2020, 2, 1)), Date.utc(2020, 2, 3));
+      expect(
+          calendar.firstBusinessDateFrom(Date.utc(2023, 7, 10)), Date.utc(2023, 7, 11));
+
+    });
+    test('last business day from', () {
+      var calendar = Calendar.nerc;
+      expect(
+          calendar.lastBusinessDateFrom(Date.utc(2023, 7, 1)), Date.utc(2023, 6, 30));
+      expect(
+          calendar.lastBusinessDateFrom(Date.utc(2023, 7, 5)), Date.utc(2023, 7, 3));
+    });
+    test('is business day', () {
+      var calendar = Calendar.nerc;
+      expect(calendar.isBusinessDate(Date.utc(2023, 7, 1)), false);
+      expect(calendar.isBusinessDate(Date.utc(2023, 7, 4)), false);
+      expect(calendar.isBusinessDate(Date.utc(2023, 7, 3)), true);
     });
 
     test('NERC Calendar', () {
-
       var days = [
         //
         (year: 2018, month: 1, day: 1),
@@ -66,7 +79,6 @@ void tests() {
       expect(Calendar.nerc.isHoliday3(2023, 1, 1), false);
       for (var date in days) {
         expect(Calendar.nerc.isHoliday3(date.year, date.month, date.day), true);
-        // expect(Calendar.nerc.isHoliday(Date.utc(date.year, date.month, date.day)), true);
       }
     });
 
@@ -178,6 +190,6 @@ void speedTest() {
 
 void main() {
   initializeTimeZones();
-  // tests();
-  speedTest();
+  tests();
+  // speedTest();
 }

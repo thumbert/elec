@@ -15,11 +15,9 @@ class Thanksgiving extends Holiday {
     return makeHoliday(year, 11, 4, DateTime.thursday, location: location);
   }
 
-  @Deprecated('Replace with isDate3')
-  @override
-  bool isDate(Date date) =>
-      forYear(date.year, location: date.location) == date;
 
+  @override
+  bool isDate(Date date) => isDate3(date.year, date.month, date.day);
 
   bool isDate3(int year, int month, int day) {
     if (month != 11) return false;

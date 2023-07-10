@@ -11,7 +11,6 @@ import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 
 void tests() {
   group('Forward curve tests: ', () {
@@ -420,7 +419,7 @@ void speedTest() {
   }
   sw.stop();
   print(sw.elapsedMilliseconds);
-  print(v3);
+  print([v1, v2, v3]);
 }
 
 void main() async {

@@ -15,7 +15,7 @@ abstract class Calendar {
   HolidayType getHolidayType(Date date);
 
   /// Get the first business day of this month for this calendar.
-  /// TODO: replace this with firstBusinessDateFrom(Date date)
+  @Deprecated('Use firstBusinessDateFrom instead')
   Date firstBusinessDate(Month month) {
     var candidate = month.startDate;
     while (candidate.isWeekend() || isHoliday(candidate)) {
@@ -24,5 +24,23 @@ abstract class Calendar {
     return candidate;
   }
 
-  /// TODO: add lastBusinessDateBefore(Date date)
+  bool isBusinessDate(Date date) => !date.isWeekend() && !isHoliday(date);
+  
+  /// Return the first business date that comes *after* [date].
+  Date firstBusinessDateFrom(Date date) {
+    var candidate = date.next;
+    while (candidate.isWeekend() || isHoliday(candidate)) {
+      candidate = candidate.next;
+    }
+    return candidate;
+  }
+
+  /// Return the last business date that comes *before* [date]
+  Date lastBusinessDateFrom(Date date) {
+    var candidate = date.previous;
+    while (candidate.isWeekend() || isHoliday(candidate)) {
+      candidate = candidate.previous;
+    }
+    return candidate;
+  }
 }

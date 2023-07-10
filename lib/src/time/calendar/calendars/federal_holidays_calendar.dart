@@ -8,7 +8,6 @@ import '../holidays/washington_birthday.dart';
 import '../holidays/columbus_day.dart';
 import '../holidays/veterans_day.dart';
 import '../calendar.dart';
-import 'nerc_calendar.dart';
 
 /// Federal holidays calendar (10 holidays).  NERC calendar + another 4 ones.
 /// http://en.wikipedia.org/wiki/Federal_holidays_in_the_United_States

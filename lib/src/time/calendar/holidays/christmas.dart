@@ -17,10 +17,8 @@ class Christmas extends Holiday {
     return candidate;
   }
 
-  @Deprecated('Replace with isDate3')
   @override
-  bool isDate(Date date) =>
-      date == forYear(date.year, location: date.location);
+  bool isDate(Date date) => isDate3(date.year, date.month, date.day);
   
   bool isDate3(int year, int month, int day) {
     if (month != 12) return false;

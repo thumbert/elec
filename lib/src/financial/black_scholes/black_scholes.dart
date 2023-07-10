@@ -177,12 +177,12 @@ class BlackScholes {
 
   /// Calculate the implied volatility of this option given an option price
   num impliedVolatility(num price) {
-    var f = (num v) {
+    f(num v) {
       var opt = BlackScholes(
           type: type, strike: strike, expirationDate: expirationDate,
           asOfDate: _asOfDate, volatility: v, riskFreeRate: riskFreeRate, underlyingPrice: underlyingPrice);
       return opt.value() - price;
-    };
+    }
     return bisectionSolver(f, 0.00001, 1000);
   }
 

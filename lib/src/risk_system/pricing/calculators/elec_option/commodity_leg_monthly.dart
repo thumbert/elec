@@ -1,13 +1,11 @@
 import 'package:dama/dama.dart' as dama;
 import 'package:date/date.dart';
-import 'package:elec/calculators/elec_daily_option.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/base/commodity_leg.dart';
 import 'package:elec/src/risk_system/pricing/calculators/elec_option/leaf.dart';
 import 'package:timezone/timezone.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:elec/src/risk_system/pricing/calculators/base/time_period.dart';
 
 /// TODO:  this commodity leg monthly shouldn't have LeafElecOption as a type!
 /// but LeafElecMonthly.
