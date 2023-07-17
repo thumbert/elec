@@ -5,6 +5,7 @@
 
 ## Release 2023-07-17
 - Export more files
+- Remove the ISONE load zones from iso/load_zone.dart
 
 ## Release 2023-07-10
 - Implement calendar methods firstBusinessDayFrom and lastBusinessDayBefore.
