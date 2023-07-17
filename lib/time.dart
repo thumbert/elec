@@ -4,6 +4,7 @@
 library time;
 
 export 'src/time/bucket/bucket.dart';
+export 'src/time/bucket/bucket_utils.dart';
 export 'src/time/calendar/calendar.dart';
 export 'src/time/calendar/holiday.dart';
 export 'src/time/hour_filter.dart';
