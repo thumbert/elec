@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2023-09-27
+- Expose a finance library
+
 ## Release 2023-07-17
 - Export more files
 - Remove the ISONE load zones from iso/load_zone.dart

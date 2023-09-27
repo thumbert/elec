@@ -7,17 +7,6 @@ import 'package:elec/risk_system.dart';
 import 'package:dama/special/erf.dart';
 
 class BlackScholes {
-  // instrument info
-  final CallPut type;
-  final Date expirationDate;
-  final num strike;
-
-  // market info
-  late Date _asOfDate;
-  num riskFreeRate;
-  num underlyingPrice;
-  late num _volatility;
-  late num _tExp;
 
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({
@@ -33,6 +22,19 @@ class BlackScholes {
     this.asOfDate = asOfDate;
     _tExp = _timeToExpiration(asOfDate, expirationDate);
   }
+
+  // instrument info
+  final CallPut type;
+  final Date expirationDate;
+  final num strike;
+
+  // market info
+  late Date _asOfDate;
+  num riskFreeRate;
+  num underlyingPrice;
+  late num _volatility;
+  late num _tExp;
+
 
   Date get asOfDate => _asOfDate;
   set asOfDate(Date value) {

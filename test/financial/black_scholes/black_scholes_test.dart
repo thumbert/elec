@@ -56,7 +56,7 @@ void tests() {
     });
 
     test('Put', () {
-      var c1 = BlackScholes(
+      var p1 = BlackScholes(
           type: CallPut.put,
           strike: 100,
           expirationDate: Date.utc(2015, 1, 31),
@@ -64,13 +64,35 @@ void tests() {
           asOfDate: Date.utc(2015, 1, 1),
           volatility: 0.25,
           riskFreeRate: 0.03);
-      expect(c1.value().toStringAsFixed(4), '2.7329');
-      expect(c1.delta().toStringAsFixed(4), '-0.4720');
-      expect(c1.gamma().toStringAsFixed(4), '0.0555');
-      expect(c1.vega().toStringAsFixed(4), '0.1141');
-      expect(c1.theta().toStringAsFixed(4), '-0.0434');
-      expect((c1.rho() * 10000).toStringAsFixed(3), '-4.101');
-      expect(c1.impliedVolatility(2.7329).toStringAsFixed(4), '0.2500');
+      expect(p1.value().toStringAsFixed(4), '2.7329');
+      expect(p1.delta().toStringAsFixed(4), '-0.4720');
+      expect(p1.gamma().toStringAsFixed(4), '0.0555');
+      expect(p1.vega().toStringAsFixed(4), '0.1141');
+      expect(p1.theta().toStringAsFixed(4), '-0.0434');
+      expect((p1.rho() * 10000).toStringAsFixed(3), '-4.101');
+      expect(p1.impliedVolatility(2.7329).toStringAsFixed(4), '0.2500');
+    });
+    test('An itm Call close to expiration has delta ~ 1', () {
+      var c1 = BlackScholes(
+          type: CallPut.call,
+          strike: 100,
+          expirationDate: Date.utc(2015, 1, 31),
+          underlyingPrice: 105,
+          asOfDate: Date.utc(2015, 1, 28),
+          volatility: 0.25,
+          riskFreeRate: 0.03);
+      expect(c1.delta().toStringAsFixed(2), '0.99');
+    });
+    test('An itm Put close to expiration has delta ~ -1', () {
+      var p1 = BlackScholes(
+          type: CallPut.put,
+          strike: 100,
+          expirationDate: Date.utc(2015, 1, 31),
+          underlyingPrice: 95,
+          asOfDate: Date.utc(2015, 1, 28),
+          volatility: 0.25,
+          riskFreeRate: 0.03);
+      expect(p1.delta().toStringAsFixed(2), '-0.99');
     });
   });
 }
