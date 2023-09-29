@@ -4,6 +4,7 @@
 - 
 ## Release 2023-09-29
 - Move IESO to America/Cancun timezone.  Oof.
+- Add IESO load zones
 
 ## Release 2023-09-27
 - Expose a finance library

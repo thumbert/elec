@@ -11,7 +11,6 @@ abstract class Iso {
 
   late tz.Location preferredTimeZoneLocation;
 
-
   static final Iso ercot = Ercot();
   static final Iso ieso = Ieso();
   static final Iso newEngland = IsoNewEngland();
@@ -49,6 +48,16 @@ class IsoNewEngland implements Iso {
   static final Bucket bucket7x24 = Bucket.atc;
   static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak = bucket5x16;
+
+  /// the load zones
+  static final maine = LoadZone('MAINE', 4001);
+  static final newHampshire = LoadZone('NH', 4002);
+  static final vermont = LoadZone('VT', 4003);
+  static final connecticut = LoadZone('CT', 4004);
+  static final rhodeIsland = LoadZone('RI', 4005);
+  static final sema = LoadZone('SEMA', 4006);
+  static final wcma = LoadZone('WCMA', 4007);
+  static final nema = LoadZone('NEMA', 4008);
 
   /// A convenient location, should be used.
   @override
@@ -148,6 +157,10 @@ class NewYorkIso implements Iso {
   static final zoneK = LoadZone('LONGIL', 61762);
 }
 
+///
+///
+///
+///
 class Pjm implements Iso {
   @override
   final String name = 'PJM';
@@ -202,6 +215,7 @@ class Pjm implements Iso {
 class Ieso implements Iso {
   @override
   final String name = 'IESO';
+
   /// Yes, you read it right.  Ontario publishes all their data in EST time
   /// that is, no daylight savings (no 23 hours in Mar, 25 in Nov).  It's -0500
   /// all year long.  Wikipedia recommends using America/Cancun as the
@@ -218,6 +232,33 @@ class Ieso implements Iso {
   static final Bucket bucketOffpeak = Bucket.offpeak;
   static final Bucket bucketPeak = bucket5x16;
 
+  /// load zones
+  static final ontario = LoadZone('Ontario', 0); // all of the pool
+  static final northwest = LoadZone('Northwest', 0);
+  static final northeast = LoadZone('Northeast', 0);
+  static final ottawa = LoadZone('Ottawa', 0);
+  static final east = LoadZone('East', 0);
+  static final toronto = LoadZone('Toronto', 0);
+  static final essa = LoadZone('Essa', 0);
+  static final bruce = LoadZone('Bruce', 0);
+  static final southwest = LoadZone('Southwest', 0);
+  static final niagara = LoadZone('Niagara', 0);
+  static final west = LoadZone('West', 0);
+
+  @override
+  final loadZones = <String, int>{
+    'Northwest': 0,
+    'NorthEast': 0,
+    'Ottawa': 0,
+    'East': 0,
+    'Toronto': 0,
+    'Essa': 0,
+    'Bruce': 0,
+    'Southwest': 0,
+    'Niagara': 0,
+    'West': 0,
+  };
+
   /// Allowed service types in this ISO
   @override
   final serviceTypes = <String>{
@@ -231,10 +272,6 @@ class Ieso implements Iso {
   /// timezone that respects that year long.
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/Cancun');
-
-  @override
-  // TODO: implement loadZones
-  Map<String, int> get loadZones => throw UnimplementedError();
 }
 
 //class Caiso extends Iso {
@@ -258,18 +295,18 @@ class Ercot implements Iso {
   static final Bucket bucketPeak = bucket5x16;
 
   @override
+
   /// I made up some ptids because Ercot doesn't have them as of 11/11/2022
   Map<String, int> get loadZones => {
-    'LZ AEN': 1000,
-    'LZ CPS': 1001,
-    'LZ HOUSTON': 1002,
-    'LZ LCRA': 1003,
-    'LZ NORTH': 1004,
-    'LZ RAYBN': 1005,
-    'LZ SOUTH': 1006,
-    'LZ WEST': 1007,
-
-  };
+        'LZ AEN': 1000,
+        'LZ CPS': 1001,
+        'LZ HOUSTON': 1002,
+        'LZ LCRA': 1003,
+        'LZ NORTH': 1004,
+        'LZ RAYBN': 1005,
+        'LZ SOUTH': 1006,
+        'LZ WEST': 1007,
+      };
 
   static const List<String> hubNames = [
     'HB_BUSAVG',
@@ -280,7 +317,6 @@ class Ercot implements Iso {
     'HB_SOUTH',
     'HB_WEST',
   ];
-
 
   @override
   // TODO: implement serviceTypes

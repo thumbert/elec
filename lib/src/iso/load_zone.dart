@@ -16,11 +16,3 @@ class LoadZone {
   int get hashCode => ptid;
 }
 
-// final maine = LoadZone('MAINE', 4001);
-// final newHampshire = LoadZone('NH', 4002);
-// final vermont = LoadZone('VT', 4003);
-// final connecticut = LoadZone('CT', 4004);
-// final rhodeIsland = LoadZone('RI', 4005);
-// final sema = LoadZone('SEMA', 4006);
-// final wcma = LoadZone('WCMA', 4007);
-// final nema = LoadZone('NEMA', 4008);
