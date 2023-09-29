@@ -233,17 +233,17 @@ class Ieso implements Iso {
   static final Bucket bucketPeak = bucket5x16;
 
   /// load zones
-  static final ontario = LoadZone('Ontario', 0); // all of the pool
-  static final northwest = LoadZone('Northwest', 0);
-  static final northeast = LoadZone('Northeast', 0);
-  static final ottawa = LoadZone('Ottawa', 0);
-  static final east = LoadZone('East', 0);
-  static final toronto = LoadZone('Toronto', 0);
-  static final essa = LoadZone('Essa', 0);
-  static final bruce = LoadZone('Bruce', 0);
-  static final southwest = LoadZone('Southwest', 0);
-  static final niagara = LoadZone('Niagara', 0);
-  static final west = LoadZone('West', 0);
+  static final ontario = IesoLoadZone.ontario; // all of the pool
+  static final northwest = IesoLoadZone.northwest;
+  static final northeast = IesoLoadZone.northeast;
+  static final ottawa = IesoLoadZone.ottawa;
+  static final east = IesoLoadZone.east;
+  static final toronto = IesoLoadZone.toronto;
+  static final essa = IesoLoadZone.essa;
+  static final bruce = IesoLoadZone.bruce;
+  static final southwest = IesoLoadZone.southwest;
+  static final niagara = IesoLoadZone.niagara;
+  static final west = IesoLoadZone.west;
 
   @override
   final loadZones = <String, int>{
