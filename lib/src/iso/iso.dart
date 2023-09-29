@@ -202,7 +202,11 @@ class Pjm implements Iso {
 class Ieso implements Iso {
   @override
   final String name = 'IESO';
-  static tz.Location location = tz.getLocation('America/New_York');
+  /// Yes, you read it right.  Ontario publishes all their data in EST time
+  /// that is, no daylight savings (no 23 hours in Mar, 25 in Nov).  It's -0500
+  /// all year long.  Wikipedia recommends using America/Cancun as the
+  /// timezone that respects that year long.
+  static tz.Location location = tz.getLocation('America/Cancun');
   static final Bucket bucket5x8 = Bucket.b5x8;
   static final Bucket bucket5x16 = Bucket.b5x16;
   static final Bucket bucket7x16 = Bucket.b7x16;
@@ -221,8 +225,12 @@ class Ieso implements Iso {
     // Maybe others, eh?
   };
 
+  /// Yes, you read it right.  Ontario publishes all their data in EST time
+  /// that is, no daylight savings (no 23 hours in Mar, 25 in Nov).  It's -0500
+  /// all year long.  Wikipedia recommends using America/Cancun as the
+  /// timezone that respects that year long.
   @override
-  tz.Location preferredTimeZoneLocation = tz.getLocation('America/New_York');
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/Cancun');
 
   @override
   // TODO: implement loadZones

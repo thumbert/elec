@@ -2,6 +2,8 @@
 
 ## TODO
 - 
+## Release 2023-09-29
+- Move IESO to America/Cancun timezone.  Oof.
 
 ## Release 2023-09-27
 - Expose a finance library
