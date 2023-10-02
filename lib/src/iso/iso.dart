@@ -216,11 +216,9 @@ class Ieso implements Iso {
   @override
   final String name = 'IESO';
 
-  /// Yes, you read it right.  Ontario publishes all their data in EST time
-  /// that is, no daylight savings (no 23 hours in Mar, 25 in Nov).  It's -0500
-  /// all year long.  Wikipedia recommends using America/Cancun as the
-  /// timezone that respects that year long.
-  static tz.Location location = tz.getLocation('America/Cancun');
+  /// Ontario publishes all their data in EST time which is UTC-05:00.
+  static tz.Location location = tz.Location('EST', [], [],
+      [tz.TimeZone(-5 * 3600 * 1000, isDst: false, abbreviation: 'EST')]);
   static final Bucket bucket5x8 = Bucket.b5x8;
   static final Bucket bucket5x16 = Bucket.b5x16;
   static final Bucket bucket7x16 = Bucket.b7x16;

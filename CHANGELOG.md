@@ -2,6 +2,10 @@
 
 ## TODO
 - 
+
+## Release 2023-10-02
+- Move IESO to UTC-0500 as America/Cancun was respecting DST in 2003, etc.
+
 ## Release 2023-09-29
 - Move IESO to America/Cancun timezone.  Oof.
 - Add IESO load zones
