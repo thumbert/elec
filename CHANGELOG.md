@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2023-10-31
+- Add ISONE zonePtidToName constant map
+
 ## Release 2023-10-02
 - Move IESO to UTC-0500 as America/Cancun was respecting DST in 2003, etc.
 

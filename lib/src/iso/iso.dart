@@ -72,6 +72,17 @@ class IsoNewEngland implements Iso {
     'NEMA': 4008,
   };
 
+  static const zonePtidToName = <int,String> {
+    4001: 'Maine',
+    4002: 'NH',
+    4003: 'VT',
+    4004: 'CT',
+    4005: 'RI',
+    4006: 'SEMA',
+    4007: 'WCMA',
+    4008: 'NEMA',
+  };
+
   /// Allowed service types in this ISO
   @override
   final serviceTypes = <String>{
