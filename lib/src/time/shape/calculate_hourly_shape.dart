@@ -24,9 +24,9 @@ List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
   // calculate the average value by month [1..12] and bucket
   var bucketPrice = <Tuple2<int, Bucket>, num>{};
   for (var bucket in buckets) {
-    var _grp = groupBy(x.where((e) => bucket.containsHour(e.interval as Hour)),
+    var group = groupBy(x.where((e) => bucket.containsHour(e.interval as Hour)),
         (IntervalTuple e) => Tuple2(e.interval.start.month, bucket));
-    for (var e in _grp.entries) {
+    for (var e in group.entries) {
       bucketPrice[e.key] = mean(e.value.map((e) => e.value));
     }
   }
@@ -34,11 +34,11 @@ List<Map<Bucket, HourlyBucketWeights>> calculateHourlyShape(TimeSeries<num> x,
   // calculate the weights by month [1..12], bucket, hour of bucket
   var weights = <Tuple3<int, Bucket, int>, num>{};
   for (var bucket in buckets) {
-    var _grpHour = groupBy(
+    var groupHour = groupBy(
         x.where((e) => bucket.containsHour(e.interval as Hour)),
         (IntervalTuple e) =>
             Tuple3(e.interval.start.month, bucket, e.interval.start.hour));
-    for (var e in _grpHour.entries) {
+    for (var e in groupHour.entries) {
       var month = e.key.item1;
       var bucket = e.key.item2;
       weights[e.key] = mean(e.value.map((e) => e.value)) /

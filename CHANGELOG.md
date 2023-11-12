@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2023-11-12
+- Bump up dependencies
+
 ## Release 2023-10-31
 - Add ISONE zonePtidToName constant map
 
