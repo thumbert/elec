@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-01-06
+- Clean up some more stuff in the calendar and holidays.  Use more static variables. 
+
 ## Release 2023-11-12
 - Bump up dependencies
 

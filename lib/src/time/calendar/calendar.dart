@@ -10,8 +10,13 @@ abstract class Calendar {
   static final federalHolidays = FederalHolidaysCalendar();
   static final nerc = NercCalendar();
 
-  bool isHoliday3(int year, int month, int day);
   bool isHoliday(Date date);
+
+  /// Override for speed as needed 
+  bool isHoliday3(int year, int month, int day) =>
+      isHoliday(Date.utc(year, month, day));
+
+  /// throws if date is not a holiday for this calendar
   HolidayType getHolidayType(Date date);
 
   /// Get the first business day of this month for this calendar.
@@ -25,7 +30,7 @@ abstract class Calendar {
   }
 
   bool isBusinessDate(Date date) => !date.isWeekend() && !isHoliday(date);
-  
+
   /// Return the first business date that comes *after* [date].
   Date firstBusinessDateFrom(Date date) {
     var candidate = date.next;

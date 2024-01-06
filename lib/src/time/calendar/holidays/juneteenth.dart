@@ -4,12 +4,12 @@ import '../holiday.dart';
 
 /// Independence day is a federal holiday.
 class Juneteenth extends Holiday {
-
   Juneteenth() {
     holidayType = HolidayType.juneteenth;
   }
 
   @override
+
   /// Before 2021-06-19, this function will return null as the holiday
   /// didn't exist
   Date? forYear(int year, {required Location location}) {

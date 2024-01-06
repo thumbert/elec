@@ -1,18 +1,11 @@
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
-import '../holidays/victory_day.dart';
-import '../holidays/election_day.dart';
-import 'federal_holidays_calendar.dart';
 
 
 /// RI has Victory Day and Election Day in addition to the
 /// 10 Federal holidays.
 class RiStateHolidayCalendar extends Calendar {
-  static final _federalCalendar = FederalHolidaysCalendar();
-  static final Holiday _victoryDay = VictoryDay();
-  static final Holiday _electionDay = ElectionDay();
-
   late HolidayType _holidayType;
 
   @override
@@ -26,33 +19,26 @@ class RiStateHolidayCalendar extends Calendar {
   @override
   bool isHoliday(Date date) {
     var res = false;
-    if (_federalCalendar.isHoliday(date)) {
-      _holidayType = _federalCalendar.getHolidayType(date);
+    if (Calendar.federalHolidays.isHoliday(date)) {
+      _holidayType = Calendar.federalHolidays.getHolidayType(date);
       return true;
     }
 
     if (date.month == 8) {
-      if (_victoryDay.isDate(date)) {
+      if (Holiday.victoryDay.isDate(date)) {
         res = true;
         _holidayType = HolidayType.victoryDay;
       }
     /// Election Day on even years only!
     } else if (date.month == 11 && date.year % 2 == 0) {
 
-      if (_electionDay.isDate(date)) {
+      if (Holiday.electionDay.isDate(date)) {
         res = true;
         _holidayType = HolidayType.electionDay;
       }
     }
     return res;
   }
-
-  @override
-  bool isHoliday3(int year, int month, int day) {
-    // TODO: implement isHoliday3
-    throw UnimplementedError();
-  }
-
 }
 
 

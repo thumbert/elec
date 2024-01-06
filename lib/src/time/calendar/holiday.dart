@@ -22,7 +22,7 @@ import 'package:timezone/timezone.dart';
 
 enum HolidayType {
   christmas('Christmas'),
-  columbusDay('Columbus Day'),
+  columbusDay('Columbus Day'), // Indigenous People's Day
   dayAfterThanksgiving('Day-After Thanksgiving'),
   electionDay('Election Day'),
   goodFriday('Good Friday'),
@@ -46,12 +46,21 @@ enum HolidayType {
 
 abstract class Holiday {
   late HolidayType holidayType;
+
   /// Needs to be nullable because sometimes holidays are added or retired.
   /// For example Juneteenth.
   Date? forYear(int year, {required Location location});
 
+  /// Check if this [date] is a holiday
   @Deprecated('Replace with isDate3')
   bool isDate(Date date);
+
+  /// Check if this triplet of (year, month, day) is a holiday
+  bool isDate3(int year, int month, int day) {
+    var candidate = forYear(year, location: UTC);
+    if (candidate == null) return false;
+    return candidate.month == month && candidate.day == day;
+  }
 
   static Holiday parse(String name) {
     var out = holidays[name];
@@ -79,7 +88,7 @@ abstract class Holiday {
   static final victoryDay = VictoryDay();
   static final washingtonBirthday = WashingtonBirthday();
 
-  static final Map<String,Holiday> holidays = {
+  static final Map<String, Holiday> holidays = {
     'Christmas': Holiday.christmas,
     'Columbus Day': Holiday.columbusDay,
     'Day-After Thanksgiving': Holiday.dayAfterThanksgiving,
@@ -98,5 +107,4 @@ abstract class Holiday {
     'Veterans Day': Holiday.veteransDay,
     'Victory Day': Holiday.victoryDay,
   };
-
 }

@@ -29,6 +29,7 @@ class IndependenceDay extends Holiday {
   @override
   bool isDate(Date date) => date == forYear(date.year, location: date.location);
 
+  @override
   bool isDate3(int year, int month, int day) {
     if (month != 7) return false;
     if (day != 4 && day != 5) return false;

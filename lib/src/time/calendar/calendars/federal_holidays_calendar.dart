@@ -2,11 +2,6 @@ library time.calendar.calendars.federal_holiday_calendar;
 
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
-import 'package:elec/src/time/calendar/holidays/juneteenth.dart';
-import '../holidays/mlk_birthday.dart';
-import '../holidays/washington_birthday.dart';
-import '../holidays/columbus_day.dart';
-import '../holidays/veterans_day.dart';
 import '../calendar.dart';
 
 /// Federal holidays calendar (10 holidays).  NERC calendar + another 4 ones.
@@ -14,69 +9,58 @@ import '../calendar.dart';
 /// In 2021, Jun 19th was added as a Federal holiday by president Biden.
 ///
 class FederalHolidaysCalendar extends Calendar {
-  static final Holiday _juneteenth = Juneteenth();
-  static final Holiday _mlk = MlkBirthday();
-  static final Holiday _washingtonBirthday = WashingtonBirthday();
-  static final Holiday _columbus = ColumbusDay();
-  static final Holiday _veterans = VeteransDay();
-
-  late HolidayType _holidayType;
 
   @override
   HolidayType getHolidayType(Date date) {
-    if (!isHoliday(date)) {
-      throw ArgumentError('$date is not a Federal holiday');
-    }
-    return _holidayType;
-  }
-
-  @override
-  bool isHoliday(Date date) {
-    var res = false;
     if (Calendar.nerc.isHoliday3(date.year, date.month, date.day)) {
-      _holidayType = Calendar.nerc.getHolidayType(date);
-      return true;
+      return Calendar.nerc.getHolidayType(date);
     }
+
     switch (date.month) {
       case 1:
-        if (_mlk.isDate(date)) {
-          res = true;
-          _holidayType = HolidayType.mlkBirthday;
+        if (Holiday.mlkBirthday.isDate(date)) {
+          return HolidayType.mlkBirthday;
         }
         break;
       case 2:
-        if (_washingtonBirthday.isDate(date)) {
-          res = true;
-          _holidayType = HolidayType.washingtonBirthday;
+        if (Holiday.washingtonBirthday.isDate(date)) {
+          return HolidayType.washingtonBirthday;
         }
         break;
       case 6:
-        if (date.year >= 2021 && _juneteenth.isDate(date)) {
-          res = true;
-          _holidayType = HolidayType.juneteenth;
+        if (date.year >= 2021 && Holiday.juneteenth.isDate(date)) {
+          return HolidayType.juneteenth;
         }
         break;
       case 10:
-        if (_columbus.isDate(date)) {
-          res = true;
-          _holidayType = HolidayType.columbusDay;
+        if (Holiday.columbusDay.isDate(date)) {
+          return HolidayType.columbusDay;
         }
         break;
       case 11:
-        if (_veterans.isDate(date)) {
-          res = true;
-          _holidayType = HolidayType.veteransDay;
+        if (Holiday.veteransDay.isDate(date)) {
+          return HolidayType.veteransDay;
         }
         break;
-      default:
-        return false;
     }
-    return res;
+    return throw ArgumentError('$date is not a Federal holiday');
   }
 
   @override
+  bool isHoliday(Date date) => isHoliday3(date.year, date.month, date.day);
+
+  @override
   bool isHoliday3(int year, int month, int day) {
-    // TODO: implement isHoliday3
-    throw UnimplementedError();
+    if (Calendar.nerc.isHoliday3(year, month, day)) {
+      return true;
+    }
+    return switch (month) {
+      1 => Holiday.mlkBirthday.isDate3(year, month, day) ? true : false,
+      2 => Holiday.washingtonBirthday.isDate3(year, month, day) ? true : false,
+      6 => Holiday.juneteenth.isDate3(year, month, day) ? true : false,
+      10 => Holiday.columbusDay.isDate3(year, month, day) ? true : false,
+      11 => Holiday.veteransDay.isDate3(year, month, day) ? true : false,
+      _ => false,
+    };
   }
 }

@@ -105,8 +105,8 @@ class SeasonalAnalysis {
       if (ts.isEmpty) continue;
       var startDate = ts.first.interval as Date;
       for (var e in ts) {
-        var _dayOfTerm = (e.interval as Date).value - startDate.value + 1;
-        groups.putIfAbsent(_dayOfTerm, () => TimeSeries<num>()).add(e);
+        var dayOfTerm = (e.interval as Date).value - startDate.value + 1;
+        groups.putIfAbsent(dayOfTerm, () => TimeSeries<num>()).add(e);
         _paths[term.interval] = TimeSeries.fromIterable(ts);
       }
     }
@@ -120,9 +120,9 @@ class SeasonalAnalysis {
   /// [days] is the number of days you use before and after the given day of
   /// year to form the group.
   static SeasonalAnalysis dayOfYearCentered(TimeSeries<num> xs, int days) {
-    var _daysOfYear = List.generate(366, (i) => i + 1);
-    var _grps = <int, TimeSeries<num>>{};
-    for (var d in _daysOfYear) {
+    var daysOfYear = List.generate(366, (i) => i + 1);
+    var grps = <int, TimeSeries<num>>{};
+    for (var d in daysOfYear) {
       var res = TimeSeries<num>();
       var obs = xs.where((e) => (e.interval as Date).dayOfYear() == d);
       for (var e in obs) {
@@ -130,10 +130,10 @@ class SeasonalAnalysis {
         var interval = Interval(date.subtract(days).start, date.add(days).end);
         res.addAll(xs.window(interval));
       }
-      _grps[d] = res;
+      grps[d] = res;
     }
 
-    var sa = SeasonalAnalysis.dayOfYear(xs)..groups = _grps;
+    var sa = SeasonalAnalysis.dayOfYear(xs)..groups = grps;
     return sa;
   }
 
