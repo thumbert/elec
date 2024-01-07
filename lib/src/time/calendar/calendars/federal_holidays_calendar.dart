@@ -1,7 +1,6 @@
 library time.calendar.calendars.federal_holiday_calendar;
 
 import 'package:date/date.dart';
-import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
 import '../calendar.dart';
 
@@ -11,8 +10,8 @@ import '../calendar.dart';
 ///
 class FederalHolidaysCalendar extends Calendar {
   // All Federal holidays
-  static final holidays = <Holiday>{
-    ...NercCalendar.holidays,
+  final holidays = <Holiday>{
+    ...Calendar.nerc.holidays,
     Holiday.mlkBirthday,
     Holiday.washingtonBirthday,
     Holiday.juneteenth,

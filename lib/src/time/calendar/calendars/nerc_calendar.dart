@@ -6,7 +6,7 @@ import '../calendar.dart';
 class NercCalendar extends Calendar {
 
   // All NERC holidays
-  static final holidays = <Holiday>{
+  final holidays = <Holiday>{
     Holiday.newYear,
     Holiday.memorialDay,
     Holiday.independenceDay,
