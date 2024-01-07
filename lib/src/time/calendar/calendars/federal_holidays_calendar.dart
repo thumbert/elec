@@ -1,6 +1,7 @@
 library time.calendar.calendars.federal_holiday_calendar;
 
 import 'package:date/date.dart';
+import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
 import '../calendar.dart';
 
@@ -9,6 +10,15 @@ import '../calendar.dart';
 /// In 2021, Jun 19th was added as a Federal holiday by president Biden.
 ///
 class FederalHolidaysCalendar extends Calendar {
+  // All Federal holidays
+  static final holidays = <Holiday>{
+    ...NercCalendar.holidays,
+    Holiday.mlkBirthday,
+    Holiday.washingtonBirthday,
+    Holiday.juneteenth,
+    Holiday.columbusDay,
+    Holiday.veteransDay,
+  };
 
   @override
   HolidayType getHolidayType(Date date) {
