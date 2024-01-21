@@ -5,6 +5,7 @@
 .project
 .settings
 .pub/
+.env/
 build/
 packages
 pubspec.lock

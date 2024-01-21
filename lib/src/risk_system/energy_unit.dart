@@ -1,4 +1,4 @@
-part of elec.risk_system;
+part of '../../risk_system.dart';
 
 
 class Unit {

@@ -13,6 +13,7 @@ dependencies:
     git: https://github.com/thumbert/date.git
   dama:
     git: https://github.com/thumbert/dama.git
+  dotenv: ^3.0.0
   elec_server:
       git: https://github.com/thumbert/elec-server.git
   http: ^0.13.6
