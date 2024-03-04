@@ -2,7 +2,6 @@ library scripts.presentations.hourly_shape;
 
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';

@@ -3,6 +3,10 @@
 ## TODO
 - 
 
+## Release 2024-03-04
+- Add an IceCalendar for US energy.
+- Add lastTradingDayForMonthlyElecOptions().  Long overdue, tested until Dec29.  
+
 ## Release 2024-01-06
 - Clean up some more stuff in the calendar and holidays.  Use more static variables. 
 

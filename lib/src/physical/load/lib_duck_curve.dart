@@ -1,6 +1,5 @@
 library physical.load.lib_duck_curve;
 
-import 'package:dama/analysis/interpolation/multi_linear_interpolator.dart';
 import 'package:dama/dama.dart';
 
 /// Calculate the strength of the duck curve for one day.

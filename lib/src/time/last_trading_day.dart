@@ -2,6 +2,7 @@ library time.last_trading_day;
 
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
+import 'package:elec/src/time/calendar/calendars/ice_us_energy_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:tuple/tuple.dart';
 
@@ -24,6 +25,41 @@ Date lastBusinessDayPrior(Month month, {Calendar? calendar}) {
     }
   }
   _cache[t2] = candidate;
+  return candidate;
+}
+
+const _exceptionsOptionsExp = <(int, int), (int, int, int)>{
+  (2024, 12): (2024, 11, 26),
+  (2025, 12): (2025, 11, 25),
+  (2026, 12): (2026, 11, 25),
+  (2027, 6):  (2027, 5, 27),
+};
+
+
+/// Monthly electricity options expire at At 2:30pm EPT on the second
+/// Business Day prior to the first calendar day of the Contract Period.
+/// Use this function to calculate the last trading date.
+///
+/// See https://www.ice.com/products/6590526/Option-on-PJM-Western-Hub-Real-Time-Peak-1-MW-Fixed-Price-Future/expiry
+Date lastTradingDayForMonthlyElecOptions(Month month) {
+  if (_exceptionsOptionsExp.containsKey((month.year, month.month))) {
+    final (y, m, d) = _exceptionsOptionsExp[(month.year, month.month)]!;
+    return Date(y, m, d, location: month.location);
+  } else {
+    return twoBusinessDaysPrior(month);
+  }
+}
+
+Date twoBusinessDaysPrior(Month month, {Calendar? calendar}) {
+  calendar ??= IceUsEnergyHolidaysCalendar();
+  var i = 0;
+  var candidate = month.startDate;
+  while (i < 2) {
+    candidate = candidate.subtract(1);
+    if (candidate.weekday < 6 && !calendar.isHoliday(candidate)) {
+      i++;
+    }
+  }
   return candidate;
 }
 
