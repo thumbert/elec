@@ -27,7 +27,18 @@ void tests() {
           threeBusinessDaysPrior(Month.utc(2021, 12)), Date.utc(2021, 11, 26));
     });
 
-    test('Monthly electricity options expiration', () {
+    test('Calendar 1x option expiration', () {
+      expect(lastTradingDayForCalendar1xOptions(Month.utc(2025, 1)),
+          Date.utc(2024, 12, 20));
+      expect(lastTradingDayForCalendar1xOptions(Month.utc(2026, 1)),
+          Date.utc(2025, 12, 19));
+      expect(lastTradingDayForCalendar1xOptions(Month.utc(2027, 1)),
+          Date.utc(2026, 12, 18));
+      expect(lastTradingDayForCalendar1xOptions(Month.utc(2028, 1)),
+          Date.utc(2027, 12, 23));
+    });
+
+    test('Monthly electricity option expiration', () {
       // should be 2024-03-28, but Fri 3/29 is Good Friday an ICE holiday
       expect(lastTradingDayForMonthlyElecOptions(Month.utc(2024, 4)),
           Date.utc(2024, 3, 27));

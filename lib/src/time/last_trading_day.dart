@@ -32,9 +32,8 @@ const _exceptionsOptionsExp = <(int, int), (int, int, int)>{
   (2024, 12): (2024, 11, 26),
   (2025, 12): (2025, 11, 25),
   (2026, 12): (2026, 11, 25),
-  (2027, 6):  (2027, 5, 27),
+  (2027, 6): (2027, 5, 27),
 };
-
 
 /// Monthly electricity options expire at At 2:30pm EPT on the second
 /// Business Day prior to the first calendar day of the Contract Period.
@@ -48,6 +47,38 @@ Date lastTradingDayForMonthlyElecOptions(Month month) {
   } else {
     return twoBusinessDaysPrior(month);
   }
+}
+
+const _exceptionsCal1xExp = <int, (int, int, int)>{
+  2028: (2027, 12, 23),
+};
+
+/// An Option on a basket of yearly Contract Periods, January-December,
+/// of the Underlying Future Contract. For purposes of this Exchange Option,
+/// the term “One Time Option” shall mean that the Option will exercise into
+/// each of the Contract Periods of the Underlying Futures Contract in the
+/// basket using a single reference price, as defined in Reference Price A
+///
+/// Expiration is at 2:30pm EPT on the second Friday prior to the first calendar
+/// day of the first Contract Period in the basket.
+///
+/// See https://www.ice.com/products/64286936/Option-on-PJM-Western-Hub-Real-Time-Peak-Calendar-Year-One-Time-Fixed-Price-Future/expiry
+///
+Date lastTradingDayForCalendar1xOptions(Month month) {
+  assert(month.month == 1);
+  if (_exceptionsCal1xExp.containsKey(month.year)) {
+    final (y, m, d) = _exceptionsCal1xExp[month.year]!;
+    return Date(y, m, d, location: month.location);
+  }
+  var i = 0;
+  var candidate = month.startDate;
+  while (i < 2) {
+    candidate = candidate.subtract(1);
+    if (candidate.weekday == 5) {
+      i++;
+    }
+  }
+  return candidate;
 }
 
 Date twoBusinessDaysPrior(Month month, {Calendar? calendar}) {

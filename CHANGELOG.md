@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-03-05
+- Add Cal 1x option expiration date, in lastTradingDayForCalendar1xOptions()
+
 ## Release 2024-03-04
 - Add an IceCalendar for US energy.
 - Add lastTradingDayForMonthlyElecOptions().  Long overdue, tested until Dec29.  
