@@ -6,25 +6,25 @@ import 'package:elec/src/time/calendar/calendars/ice_us_energy_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:tuple/tuple.dart';
 
-var _cache = <Tuple2<String, Month>, Date>{};
+final _cache = <Tuple2<String, Month>, Date>{};
 
 /// The last business day before the beginning of the month.
 /// Last trading day for the ICE daily options on ISONE,
 /// NY Harbor USLD contract, etc.
 ///
-Date lastBusinessDayPrior(Month month, {Calendar? calendar}) {
+Date lastBusinessDayPrior(Date date, {Calendar? calendar}) {
   calendar ??= NercCalendar();
-  var t2 = Tuple2('-1b', month);
-  if (_cache.containsKey(t2)) return _cache[t2]!;
+  // var t2 = Tuple2('-1b', month);
+  // if (_cache.containsKey(t2)) return _cache[t2]!;
   var i = 0;
-  var candidate = month.startDate;
+  var candidate = date;
   while (i < 1) {
     candidate = candidate.subtract(1);
     if (candidate.weekday < 6 && !calendar.isHoliday(candidate)) {
       i++;
     }
   }
-  _cache[t2] = candidate;
+  // _cache[t2] = candidate;
   return candidate;
 }
 
