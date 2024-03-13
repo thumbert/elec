@@ -161,6 +161,37 @@ void tests() {
     });
   });
 
+  group('Test Solar peak buckets', () {
+    test('5x16_HE10-17', () {
+      final month = Month(2024, 1, location: IsoNewEngland.location);
+      final hours = month.splitLeft((dt) => Hour.containing(dt));
+      final count =
+          hours.where((hour) => Bucket.b5xHE1017.containsHour(hour)).length;
+      expect(count, 176);
+    });
+    test('5x16_HE18-22', () {
+      final month = Month(2024, 1, location: IsoNewEngland.location);
+      final hours = month.splitLeft((dt) => Hour.containing(dt));
+      final count =
+          hours.where((hour) => Bucket.b5xHE1822.containsHour(hour)).length;
+      expect(count, 110);
+    });
+    test('7xHE10-17', () {
+      final month = Month(2024, 1, location: IsoNewEngland.location);
+      final hours = month.splitLeft((dt) => Hour.containing(dt));
+      final count =
+          hours.where((hour) => Bucket.b7xHE1017.containsHour(hour)).length;
+      expect(count, 248);
+    });
+    test('7xHE18-22', () {
+      final month = Month(2024, 1, location: IsoNewEngland.location);
+      final hours = month.splitLeft((dt) => Hour.containing(dt));
+      final count =
+          hours.where((hour) => Bucket.b7xHE1822.containsHour(hour)).length;
+      expect(count, 155);
+    });
+  });
+
   group('Test ERCOT buckets', () {
     var months = Month(2024, 1, location: Ercot.location)
         .upTo(Month(2024, 12, location: Ercot.location));
@@ -321,10 +352,10 @@ void calculateBucketHoursByMonth() {
 
 void main() {
   initializeTimeZones();
-  // tests();
+  tests();
 
   // aggregateByBucketMonth();
 
-  speedTest();
+  // speedTest();
   // calculateBucketHoursByMonth();
 }

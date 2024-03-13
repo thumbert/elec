@@ -8,9 +8,12 @@ import 'package:test/test.dart';
 void tests() {
   group('Last trading day tests:', () {
     test('Last business day', () {
-      expect(lastBusinessDayPrior(Month.utc(2021, 1).startDate), Date.utc(2020, 12, 31));
-      expect(lastBusinessDayPrior(Month.utc(2021, 2).startDate), Date.utc(2021, 1, 29));
-      expect(lastBusinessDayPrior(Month.utc(2021, 3).startDate), Date.utc(2021, 2, 26));
+      expect(lastBusinessDayBefore(Month.utc(2021, 1).startDate),
+          Date.utc(2020, 12, 31));
+      expect(lastBusinessDayBefore(Month.utc(2021, 2).startDate),
+          Date.utc(2021, 1, 29));
+      expect(lastBusinessDayBefore(Month.utc(2021, 3).startDate),
+          Date.utc(2021, 2, 26));
     });
 
     test('NG futures expiration', () {

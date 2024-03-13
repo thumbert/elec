@@ -48,7 +48,7 @@ class MonthBucketValue {
   
   
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! MonthBucketValue) return false;
     MonthBucketValue x = other;
     return x.value == value && x.bucket == bucket && x.month == month;

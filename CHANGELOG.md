@@ -3,6 +3,11 @@
 ## TODO
 - 
 
+## Release 2024-03-13
+- Rename lastBusinessDayPrior() to lastBusinessDayBefore()
+- Added solar buckets 5xHE10-17, 5xHE18-22, 7xHE10-17, 7xHE18-22, 
+  to match the Nodal Solar Peak power contracts
+
 ## Release 2024-03-05
 - Add Cal 1x option expiration date, in lastTradingDayForCalendar1xOptions()
 - Refactor lastBusinessDayPrior() to take a date not a month argument.  

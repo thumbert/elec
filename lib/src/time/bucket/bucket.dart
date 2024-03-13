@@ -28,6 +28,8 @@ abstract class Bucket {
   static final b2x16HErcot = Bucket2x16HErcot();
   static final b5x8 = Bucket5x8();
   static final b5x16 = Bucket5x16();
+  static final b5xHE1017 = Bucket5xHE1017();
+  static final b5xHE1822 = Bucket5xHE1822();
   static final b5x16_7 = Bucket5x16_7();
   static final b5x16_8 = Bucket5x16_8();
   static final b5x16_9 = Bucket5x16_9();
@@ -49,6 +51,8 @@ abstract class Bucket {
   static final b7x8Caiso = Bucket7x8Caiso();
   static final b7x8Ercot = Bucket7x8Ercot();
   static final b7x16 = Bucket7x16();
+  static final b7xHE1017 = Bucket7xHE1017();
+  static final b7xHE1822 = Bucket7xHE1822();
   static final b7x16Ercot = Bucket7x16Ercot();
   static final peakCaiso = BucketPeakCaiso();
   static final peakErcot = BucketPeakErcot();
@@ -80,6 +84,8 @@ abstract class Bucket {
     '5X16_8': Bucket.b5x16_8,
     '5X16_9': Bucket.b5x16_9,
     '5X16_10': Bucket.b5x16_10,
+    '5X16_HE10-17': Bucket.b5xHE1017,
+    '5X16_HE18-22': Bucket.b5xHE1822,
     '5X16_11': Bucket.b5x16_11,
     '5X16_12': Bucket.b5x16_12,
     '5X16_13': Bucket.b5x16_13,
@@ -97,6 +103,8 @@ abstract class Bucket {
     '7X8 CAISO': Bucket.b7x8Caiso,
     '7X8 ERCOT': Bucket.b7x8Ercot,
     '7X16': Bucket.b7x16,
+    '7X16_HE10-17': Bucket.b7xHE1017,
+    '7X16_HE18-22': Bucket.b7xHE1822,
     '7X16 ERCOT': Bucket.b7x16Ercot,
     '7X24': Bucket.atc,
   };
@@ -274,6 +282,38 @@ class Bucket7x16 extends Bucket {
   }
 }
 
+// ignore: camel_case_types
+class Bucket7xHE1017 extends Bucket {
+  /// Solar peak hours (HE 10-15) for all days of the week.
+  Bucket7xHE1017() {
+    name = '7x_HE10-17';
+    hourBeginning = <int>[9, 10, 11, 12, 13, 14, 15, 16];
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour > 8 && hour.start.hour < 17) return true;
+    return false;
+  }
+}
+
+// ignore: camel_case_types
+class Bucket7xHE1822 extends Bucket {
+  /// Evening peak hours (HE 18-22) for all days of the week.
+  Bucket7xHE1822() {
+    name = '7x_HE18-22';
+    hourBeginning = <int>[17, 18, 19, 20, 21];
+  }
+
+  @override
+  bool containsHour(Hour hour) {
+    if (hour.start.hour > 16 && hour.start.hour < 22) return true;
+    return false;
+  }
+}
+
+
+
 class Bucket7x16Ercot extends Bucket {
   /// Peak hours for all days of the week.
   Bucket7x16Ercot() {
@@ -289,12 +329,12 @@ class Bucket7x16Ercot extends Bucket {
 }
 
 class Bucket5x16 extends Bucket {
-  final calendar = Calendar.nerc;
-
   Bucket5x16() {
     name = '5x16';
     hourBeginning = List.generate(16, (i) => i + 7, growable: false);
   }
+
+  final calendar = Calendar.nerc;
 
   @override
   bool containsHour(Hour hour) {
@@ -689,6 +729,72 @@ class Bucket5x16_10 extends Bucket {
     }
   }
 }
+
+// ignore: camel_case_types
+class Bucket5xHE1017 extends Bucket {
+  /// The 5x16 hour ending 10-17 (solar peak)
+  Bucket5xHE1017() {
+    name = '5xHE10-17';
+    hourBeginning = <int>[9, 10, 11, 12, 13, 14, 15, 16];
+  }
+  final calendar = Calendar.nerc;
+
+  @override
+  bool containsHour(Hour hour) {
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      /// not the right day of the week
+      return false;
+    } else {
+      if (hs.hour < 9 || hs.hour > 16) {
+        /// not at the right hour of the day
+        return false;
+      } else {
+        if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+}
+
+
+// ignore: camel_case_types
+class Bucket5xHE1822 extends Bucket {
+  /// The 5x16 hour ending 10-17 (solar peak)
+  Bucket5xHE1822() {
+    name = '5xHE18-22';
+    hourBeginning = <int>[17, 18, 19, 20, 21];
+  }
+  final calendar = Calendar.nerc;
+
+  @override
+  bool containsHour(Hour hour) {
+    final hs = hour.start;
+    final dayOfWeek = hs.weekday;
+    if (dayOfWeek == 6 || dayOfWeek == 7) {
+      /// not the right day of the week
+      return false;
+    } else {
+      if (hs.hour < 17 || hs.hour > 21) {
+        /// not at the right hour of the day
+        return false;
+      } else {
+        if (calendar.isHoliday3(hs.year, hs.month, hs.day)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+}
+
+
+
 
 // ignore: camel_case_types
 class Bucket5x16_11 extends Bucket {

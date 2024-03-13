@@ -18,7 +18,7 @@ class LeafElecOption extends LeafBase {
     required this.underlyingPrice,
     required this.volatility,
     required this.fixPrice,
-  }) : expirationDate = lastBusinessDayPrior(month.startDate) {
+  }) : expirationDate = lastBusinessDayBefore(month.startDate) {
     _bs = BlackScholes(
         type: callPut,
         strike: strike,

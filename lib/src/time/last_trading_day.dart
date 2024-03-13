@@ -12,10 +12,8 @@ final _cache = <Tuple2<String, Month>, Date>{};
 /// Last trading day for the ICE daily options on ISONE,
 /// NY Harbor USLD contract, etc.
 ///
-Date lastBusinessDayPrior(Date date, {Calendar? calendar}) {
-  calendar ??= NercCalendar();
-  // var t2 = Tuple2('-1b', month);
-  // if (_cache.containsKey(t2)) return _cache[t2]!;
+Date lastBusinessDayBefore(Date date, {Calendar? calendar}) {
+  calendar ??= Calendar.nerc;
   var i = 0;
   var candidate = date;
   while (i < 1) {
@@ -24,9 +22,12 @@ Date lastBusinessDayPrior(Date date, {Calendar? calendar}) {
       i++;
     }
   }
-  // _cache[t2] = candidate;
   return candidate;
 }
+
+@Deprecated('Use lastBusinessDayBefore')
+Date lastBusinessDayPrior(Date date, {Calendar? calendar}) =>
+    lastBusinessDayBefore(date, calendar: calendar);
 
 const _exceptionsOptionsExp = <(int, int), (int, int, int)>{
   (2024, 12): (2024, 11, 26),
