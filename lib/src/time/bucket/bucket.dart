@@ -84,8 +84,8 @@ abstract class Bucket {
     '5X16_8': Bucket.b5x16_8,
     '5X16_9': Bucket.b5x16_9,
     '5X16_10': Bucket.b5x16_10,
-    '5X16_HE10-17': Bucket.b5xHE1017,
-    '5X16_HE18-22': Bucket.b5xHE1822,
+    '5XHE10-17': Bucket.b5xHE1017,
+    '5XHE18-22': Bucket.b5xHE1822,
     '5X16_11': Bucket.b5x16_11,
     '5X16_12': Bucket.b5x16_12,
     '5X16_13': Bucket.b5x16_13,
@@ -103,8 +103,8 @@ abstract class Bucket {
     '7X8 CAISO': Bucket.b7x8Caiso,
     '7X8 ERCOT': Bucket.b7x8Ercot,
     '7X16': Bucket.b7x16,
-    '7X16_HE10-17': Bucket.b7xHE1017,
-    '7X16_HE18-22': Bucket.b7xHE1822,
+    '7XHE10-17': Bucket.b7xHE1017,
+    '7XHE18-22': Bucket.b7xHE1822,
     '7X16 ERCOT': Bucket.b7x16Ercot,
     '7X24': Bucket.atc,
   };
@@ -286,7 +286,7 @@ class Bucket7x16 extends Bucket {
 class Bucket7xHE1017 extends Bucket {
   /// Solar peak hours (HE 10-15) for all days of the week.
   Bucket7xHE1017() {
-    name = '7x_HE10-17';
+    name = '7xHE10-17';
     hourBeginning = <int>[9, 10, 11, 12, 13, 14, 15, 16];
   }
 
@@ -301,7 +301,7 @@ class Bucket7xHE1017 extends Bucket {
 class Bucket7xHE1822 extends Bucket {
   /// Evening peak hours (HE 18-22) for all days of the week.
   Bucket7xHE1822() {
-    name = '7x_HE18-22';
+    name = '7xHE18-22';
     hourBeginning = <int>[17, 18, 19, 20, 21];
   }
 
