@@ -158,7 +158,7 @@ mixin FtrAuction implements Comparable<FtrAuction> {
   int get hashCode => name.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! FtrAuction) return false;
     FtrAuction auction = other;
     return auction.name == name;

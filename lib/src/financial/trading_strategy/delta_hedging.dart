@@ -15,13 +15,13 @@ class DeltaHedging extends TradingStrategy {
   final num tresholdDelta;
 
   ///
-  void run(List<Date> days) {
-    for (var day in days) {
-      // calculate portfolio delta
-      // var delta = 
-    }
+  // void run(List<Date> days) {
+  //   for (var day in days) {
+  //     // calculate portfolio delta
+  //     // var delta = 
+  //   }
 
-  }
+  // }
 
   /// When net portfolio delta
   // Portfolio

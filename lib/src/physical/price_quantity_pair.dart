@@ -19,8 +19,8 @@ class PriceQuantityPair {
   int get hashCode => hash2(price, quantity);
 
   @override
-  bool operator ==(dynamic other) {
-    if (other != PriceQuantityPair) return false;
+  bool operator ==(Object other) {
+    if (other is! PriceQuantityPair) return false;
     PriceQuantityPair pq = other;
     return pq.price == price && pq.quantity == quantity;
   }

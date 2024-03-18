@@ -19,7 +19,7 @@ class Market implements Comparable<Market> {
   String toString() => name;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! Market) return false;
     return name == other.name;
   }

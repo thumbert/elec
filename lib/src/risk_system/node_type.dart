@@ -1,4 +1,4 @@
-part of elec.risk_system;
+part of '../../risk_system.dart';
 
 class NodeType {
   final String _name;
@@ -32,7 +32,7 @@ class NodeType {
   String toString() => _name;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! NodeType) return false;
     return other._name == _name;
   }

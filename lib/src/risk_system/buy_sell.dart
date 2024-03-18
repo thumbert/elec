@@ -1,4 +1,4 @@
-part of elec.risk_system;
+part of '../../risk_system.dart';
 
 class BuySell implements Comparable<BuySell> {
   final int sign;
@@ -25,7 +25,7 @@ class BuySell implements Comparable<BuySell> {
   String toString() => sign == 1 ? 'Buy' : 'Sell';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! BuySell) return false;
     return other.sign == sign;
   }

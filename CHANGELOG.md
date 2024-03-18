@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-03-18
+- Add BidAsk enum in risk_system.
+
 ## Release 2024-03-15
 - Fix name of the 7xHE10-17, 7xHE18-22 buckets
 

@@ -6,7 +6,7 @@ class Mw {
   @override
   String toString() => '$value MW';
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! Mw) return false;
     Mw x = other;
     return x.value == value;
@@ -21,7 +21,7 @@ class Mwh {
   @override
   String toString() => '$value MWh';
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! Mwh) return false;
     Mwh x = other;
     return x.value == value;

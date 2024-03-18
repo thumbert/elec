@@ -1,5 +1,5 @@
 
-part of elec.risk_system;
+part of '../../risk_system.dart';
 
 class Quantity {
   num value;
@@ -11,7 +11,7 @@ class Quantity {
   String toString() => '$value ${unit.name}';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! Quantity) return false;
     Quantity q = other;
     return q.value == value && q.unit == unit;

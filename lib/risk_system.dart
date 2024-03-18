@@ -13,6 +13,7 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:intl/intl.dart';
 import 'package:quiver/core.dart' show hash2;
 
+part 'src/risk_system/bid_ask.dart';
 part 'src/risk_system/buy_sell.dart';
 part 'src/risk_system/call_put.dart';
 part 'src/risk_system/commodity.dart';
