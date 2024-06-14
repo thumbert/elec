@@ -72,7 +72,7 @@ class IsoNewEngland implements Iso {
     'NEMA': 4008,
   };
 
-  static const zonePtidToName = <int,String> {
+  static const zonePtidToName = <int, String>{
     4001: 'Maine',
     4002: 'NH',
     4003: 'VT',
@@ -330,4 +330,19 @@ class Ercot implements Iso {
   @override
   // TODO: implement serviceTypes
   Set<String> get serviceTypes => throw UnimplementedError();
+}
+
+class Spp implements Iso {
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/Chicago');
+
+  @override
+  // TODO: implement loadZones
+  Map<String, int> get loadZones => throw UnimplementedError();
+
+  @override
+  String get name => 'SPP';
+
+  @override
+  Set<String> get serviceTypes => {'Energy'};
 }

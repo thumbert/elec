@@ -14,6 +14,7 @@ dependencies:
   dama:
     git: https://github.com/thumbert/dama.git
   dotenv: ^3.0.0
+  duckdb_dart: ^0.2.2
   elec_server:
       git: https://github.com/thumbert/elec-server.git
   http: ^0.13.6

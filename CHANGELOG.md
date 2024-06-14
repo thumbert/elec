@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-06-14
+- Add lib_gen_stack.dart
+
 ## Release 2024-03-18
 - Add BidAsk enum in risk_system.
 
