@@ -13,6 +13,7 @@ import 'time/bucket/bucket_test.dart' as bucket;
 import 'time/hourly_schedule_test.dart' as hourly_schedule;
 import 'time/hourly_shape_test.dart' as hourly_shape;
 import 'time/hour_filter_test.dart' as hour_filter;
+import 'time/day_filter_test.dart' as day_filter;
 import 'time/monthly_bucket_value_test.dart' as monthly_bucket_value;
 import 'time/shape/shape_cost_test.dart' as shape_cost;
 import 'time/calendar/holiday_test.dart' as holiday;
@@ -50,6 +51,7 @@ Future<void> main() async {
   bucket.tests();
   bucket.aggregateByBucketMonth();
 
+  day_filter.tests();
   hour_filter.tests();
   hourly_schedule.tests();
   hourly_shape.tests(rootUrl);

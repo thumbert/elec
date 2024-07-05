@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-07-05
+- Move DayFilter class to time/day_filter.dart
+
 ## Release 2024-06-14
 - Add lib_gen_stack.dart
 
