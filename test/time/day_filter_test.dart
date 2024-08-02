@@ -1,7 +1,6 @@
 library test.time.day_filter_test;
 
 import 'package:date/date.dart';
-import 'package:elec/src/time/day_filter.dart';
 import 'package:elec/time.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
@@ -36,6 +35,8 @@ void tests() {
       final res = filter.getDays(term);
       expect(res.length, 3);
     });
+
+    
   });
 }
 

@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-08-02
+- Bump dependencies
+
 ## Release 2024-07-05
 - Move DayFilter class to time/day_filter.dart
 
