@@ -1,6 +1,7 @@
 library physical.gas.timeseries_aggregation;
 
 import 'package:date/date.dart';
+import 'package:elec/src/iso/iso.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 
@@ -11,23 +12,29 @@ final _location = getLocation('America/New_York');
 /// The timezone of the output series will be in the [tz] location.
 ///
 /// See NAESB timely gas nomination cycle.
-/// 
+///
 TimeSeries<K> hourlyInterpolateGasSeries<K>(TimeSeries<K> dailySeries,
     {required Location tz}) {
   var out = TimeSeries<K>();
   if (dailySeries.isEmpty) return out;
   for (var e in dailySeries) {
-    var day = (e.interval as Date).withTimeZone(tz);
-    var start = day.start.add(Duration(hours: 10));
-    var end = start.add(Duration(days: 1));
+    var day = e.interval as Date;
+    var start0 =
+        TZDateTime(IsoNewEngland.location, day.year, day.month, day.day, 10);
+    var start = TZDateTime.fromMillisecondsSinceEpoch(
+        tz, start0.millisecondsSinceEpoch);
+    var end0 = TZDateTime(
+        IsoNewEngland.location, day.year, day.month, day.day + 1, 10);
+    var end =
+        TZDateTime.fromMillisecondsSinceEpoch(tz, end0.millisecondsSinceEpoch);
     while (start.isBefore(end)) {
-      out.add(IntervalTuple(Hour.beginning(start), e.value));
+      var hour = Hour.beginning(start);
+      out.add(IntervalTuple(hour, e.value));
       start = start.add(Duration(hours: 1));
     }
   }
   return out;
 }
-
 
 /// Calculate the NAESB gas day interval corresponding to an input TZDateTime.
 Interval gasDay(TZDateTime datetime) {

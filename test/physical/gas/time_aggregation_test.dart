@@ -12,19 +12,47 @@ import 'package:timezone/timezone.dart';
 void tests() async {
   group('Physical gas functionality', () {
     test('interpolate a daily gas price series to hourly', () {
-    final ds = TimeSeries.fromIterable([
-      IntervalTuple(Date.utc(2024, 1, 1), 8.01),
-      IntervalTuple(Date.utc(2024, 1, 2), 9.02),
-      IntervalTuple(Date.utc(2024, 1, 3), 10.03),
-    ]);
-    final hs = hourlyInterpolateGasSeries(ds, tz: IsoNewEngland.location);
-    expect(hs.length, 24 * 3);
-    expect(
-        hs.first,
-        IntervalTuple(
-            Hour.beginning(TZDateTime(IsoNewEngland.location, 2024, 1, 1, 10)),
-            8.01));
+      final ds = TimeSeries.fromIterable([
+        IntervalTuple(Date.utc(2024, 1, 1), 8.01),
+        IntervalTuple(Date.utc(2024, 1, 2), 9.02),
+        IntervalTuple(Date.utc(2024, 1, 3), 10.03),
+      ]);
+      final hs = hourlyInterpolateGasSeries(ds, tz: IsoNewEngland.location);
+      expect(hs.length, 24 * 3);
+      expect(
+          hs.first,
+          IntervalTuple(
+              Hour.beginning(
+                  TZDateTime(IsoNewEngland.location, 2024, 1, 1, 10)),
+              8.01));
+    });
+    test('interpolate a daily gas price series to hourly in different tz', () {
+      final tz = getLocation('America/Chicago');
+      final ds = TimeSeries.fromIterable([
+        IntervalTuple(Date.utc(2024, 1, 1), 8.01),
+        IntervalTuple(Date.utc(2024, 1, 2), 9.02),
+        IntervalTuple(Date.utc(2024, 1, 3), 10.03),
+      ]);
+      final hs = hourlyInterpolateGasSeries(ds, tz: tz);
+      expect(hs.length, 24 * 3);
+      expect(hs.first,
+          IntervalTuple(Hour.beginning(TZDateTime(tz, 2024, 1, 1, 9)), 8.01));
+    });
 
+    test('interpolate a daily gas price series to hourly - around DST', () {
+      final ds = TimeSeries.fromIterable([
+        IntervalTuple(Date.utc(2024, 3, 9), 8.01),
+        IntervalTuple(Date.utc(2024, 3, 10), 9.02),
+        IntervalTuple(Date.utc(2024, 3, 11), 10.03),
+      ]);
+      final hs = hourlyInterpolateGasSeries(ds, tz: IsoNewEngland.location);
+      expect(hs.length, 24 * 3 - 1);
+      expect(
+          hs.first,
+          IntervalTuple(
+              Hour.beginning(
+                  TZDateTime(IsoNewEngland.location, 2024, 3, 9, 10)),
+              8.01));
     });
   });
 
