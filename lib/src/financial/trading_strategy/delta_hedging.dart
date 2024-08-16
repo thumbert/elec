@@ -1,6 +1,5 @@
 library financial.trading_strategy.delta_hedging;
 
-import 'package:date/date.dart';
 import 'package:elec/src/financial/trading_strategy/portfolio.dart';
 import 'package:elec/src/financial/trading_strategy/trading_strategy.dart';
 
