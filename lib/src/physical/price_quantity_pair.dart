@@ -1,7 +1,5 @@
 library physical.price_quantity_pair;
 
-import 'package:quiver/core.dart';
-
 class PriceQuantityPair {
   final num price;
   final num quantity;
@@ -16,7 +14,7 @@ class PriceQuantityPair {
   }
 
   @override
-  int get hashCode => hash2(price, quantity);
+  int get hashCode => Object.hash(price, quantity);
 
   @override
   bool operator ==(Object other) {
