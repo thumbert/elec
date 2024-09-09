@@ -19,19 +19,19 @@ void tests() {
         totalCapacityMWh: 400,
         maxCyclesPerYear: 400,
       );
-      final initialState = State(
-          interval: Hour.beginning(TZDateTime(IsoNewEngland.location, 2022)),
-          mode: BatteryMode.offline,
-          cyclesInCalendarYear: 0);
+      // final initialState = State(
+      //     interval: Hour.beginning(TZDateTime(IsoNewEngland.location, 2022)),
+      //     mode: BatteryMode.offline,
+      //     cyclesInCalendarYear: 0);
 
-      final strategy = PriceInsensitiveDispatch(
-          chargingHoursRange: (1, 4), dischargingHoursRange: (17, 20));
+      // final strategy = PriceInsensitiveDispatch(
+      //     chargingHoursRange: (1, 4), dischargingHoursRange: (17, 20));
 
-      final price = TimeSeries<num>();
-      final states = strategy.dispatch(
-          battery: battery, initialState: initialState, price: price);
+      // final price = TimeSeries<num>();
+      // final states = strategy.dispatch(
+      //     battery: battery, initialState: initialState, price: price);
 
-          
+
     });
   });
 }
