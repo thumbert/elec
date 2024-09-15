@@ -22,4 +22,9 @@ class PriceQuantityPair {
     PriceQuantityPair pq = other;
     return pq.price == price && pq.quantity == quantity;
   }
+
+  @override
+  String toString() {
+    return '(p: $price, q: $quantity)';
+  }
 }
