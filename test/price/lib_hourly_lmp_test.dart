@@ -1,7 +1,7 @@
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:elec/src/price/lib_lmp.dart';
+import 'package:elec/src/price/lib_hourly_lmp.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';
 

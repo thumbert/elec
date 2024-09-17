@@ -168,7 +168,7 @@ void tests() {
           daPrice: getDaPrice(),
           rtPrice: getRtPrice(),
           bidsOffers: getBidsOffers());
-      final res = opt.dispatch(initialState: initialState);
+      final res = opt.dispatchDa(initialState: initialState);
       expect(res.every((e) => e is EmptyState), true);
     });
 
@@ -195,7 +195,7 @@ void tests() {
           daPrice: getDaPrice(),
           rtPrice: getRtPrice(),
           bidsOffers: bidsOffers);
-      final res = opt.dispatch(initialState: initialState);
+      final res = opt.dispatchDa(initialState: initialState);
       res.forEach(print);
       // expect(res.every((e) => e is EmptyState), true);
     });
