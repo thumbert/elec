@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-09-18
+- Battery work
+
 ## Release 2024-08-16
 - Add function to interpolate a daily gas price series to an hourly series.
 

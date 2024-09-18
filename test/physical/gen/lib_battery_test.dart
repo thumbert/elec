@@ -2,12 +2,13 @@ library test.physical.gen.lib_battery_test;
 
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
+import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/gen/battery.dart';
+import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/physical/price_quantity_pair.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/timezone.dart';
 
 TimeSeries<num> getDaPrice() {
   return TimeSeries.from(
@@ -71,80 +72,12 @@ TimeSeries<num> getRtPrice() {
 
 TimeSeries<BidsOffers> getBidsOffers() {
   return TimeSeries.from(
-      Term.parse('13Sep24', IsoNewEngland.location).hours(), [
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-    BidsOffers(
-        bids: [PriceQuantityPair(10, 100)],
-        offers: [PriceQuantityPair(100, 100)]),
-  ]);
+      Term.parse('13Sep24', IsoNewEngland.location).hours(),
+      List.generate(
+          24,
+          (i) => BidsOffers(
+              bids: BidCurve.fromIterable([PriceQuantityPair(10, 100)]),
+              offers: OfferCurve.fromIterable([PriceQuantityPair(100, 100)]))));
 }
 
 void tests() {
@@ -157,10 +90,7 @@ void tests() {
     );
     // print(getBidsOffers());
 
-    final initialState = EmptyState(
-        interval:
-            Hour.beginning(TZDateTime(IsoNewEngland.location, 2024, 9, 12, 23)),
-        cyclesInCalendarYear: 0);
+    final initialState = EmptyState(cyclesInCalendarYear: 0);
 
     test('a battery with no favorable conditions to dispatch', () {
       final opt = BatteryOptimization(
@@ -169,23 +99,25 @@ void tests() {
           rtPrice: getRtPrice(),
           bidsOffers: getBidsOffers());
       final res = opt.dispatchDa(initialState: initialState);
-      expect(res.every((e) => e is EmptyState), true);
+      expect(res.every((e) => e.value is EmptyState), true);
     });
 
-    test('a battery charging/discharging on a fixed schedule', () {
+    test('a battery charging/discharging on a fixed schedule, one day', () {
       var bidsOffers = getBidsOffers();
       var values = bidsOffers.values.toList();
       // demand bid the battery at very high prices to make battery charge
       for (var i in [1, 2, 3, 4]) {
         values[i] = BidsOffers(
-            bids: [PriceQuantityPair(500, battery.maxLoadMw)],
+            bids: BidCurve.fromIterable(
+                [PriceQuantityPair(500, battery.maxLoadMw)]),
             offers: values[i].offers);
       }
       // offer battery at very low prices to make battery discharge
       for (var i in [17, 18, 19, 20]) {
         values[i] = BidsOffers(
             bids: values[i].bids,
-            offers: [PriceQuantityPair(0, battery.ecoMaxMw)]);
+            offers: OfferCurve.fromIterable(
+                [PriceQuantityPair(0, battery.ecoMaxMw)]));
       }
       bidsOffers = TimeSeries.from(bidsOffers.intervals, values);
       // print(bidsOffers);
@@ -195,9 +127,19 @@ void tests() {
           daPrice: getDaPrice(),
           rtPrice: getRtPrice(),
           bidsOffers: bidsOffers);
-      final res = opt.dispatchDa(initialState: initialState);
-      res.forEach(print);
-      // expect(res.every((e) => e is EmptyState), true);
+      final dispatchDa = opt.dispatchDa(initialState: initialState);
+      dispatchDa.forEach(print);
+      expect(dispatchDa.where((e) => e.value is ChargingState).length, 4);
+      expect(dispatchDa.where((e) => e.value is DischargingState).length, 4);
+      expect(dispatchDa[1].value is ChargingState, true);
+      expect(dispatchDa[1].value.batteryLevelMwh, 125);
+      expect(dispatchDa[17].value is DischargingState, true);
+      expect(dispatchDa[17].value.batteryLevelMwh, 300);
+
+      // calcualte PnL
+      final pnl = opt.calculatePnlDa(dispatchDa, initialState);
+      print('PnL:');
+      print(pnl);
     });
   });
 }
@@ -205,4 +147,7 @@ void tests() {
 void main() async {
   initializeTimeZones();
   tests();
+
+  // TODO: generalize battery dispatch to work with more than one segment in the
+  // bid/offer curves!
 }

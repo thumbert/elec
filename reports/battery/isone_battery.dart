@@ -1,39 +1,34 @@
+import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
+import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/gen/battery.dart';
+import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/price/lib_hourly_lmp.dart';
 import 'package:timeseries/timeseries.dart';
-import 'package:timezone/timezone.dart';
+import 'package:timezone/data/latest.dart';
 
 TimeSeries<BidsOffers> makeBidsOffers({
   required Term term,
-  required ({int min, int max}) chargeHours,
-  required ({int min, int max}) dischargeHours,
+  required Set<int> chargeHours,
+  required Set<int> dischargeHours,
   required num hourlyQuantity,
   required num maxPrice,
   required num minPrice,
 }) {
   var hours = term.hours();
-  var bidHours = <int>{};
-  for (var i = chargeHours.min; i < chargeHours.max; i++) {
-    bidHours.add(i);
-  }
-  var offerHours = <int>{};
-  for (var i = dischargeHours.min; i < dischargeHours.max; i++) {
-    offerHours.add(i);
-  }
   var out = TimeSeries<BidsOffers>();
   for (var hour in hours) {
-    var bids = <PriceQuantityPair>[];
-    if (bidHours.contains(hour.start.hour)) {
+    var bids = BidCurve();
+    if (chargeHours.contains(hour.start.hour)) {
       bids.add(PriceQuantityPair(
           maxPrice, hourlyQuantity)); // charge if price is < 500
     } else {
       bids.add(PriceQuantityPair(minPrice, hourlyQuantity));
     }
-    var offers = <PriceQuantityPair>[];
-    if (offerHours.contains(hour.start.hour)) {
+    var offers = OfferCurve();
+    if (dischargeHours.contains(hour.start.hour)) {
       offers.add(PriceQuantityPair(
           minPrice, hourlyQuantity)); // charge if price is > 0
     } else {
@@ -56,10 +51,7 @@ void analyze() {
   );
   // print(getBidsOffers());
 
-  final initialState = EmptyState(
-      interval:
-          Hour.beginning(TZDateTime(IsoNewEngland.location, 2023, 12, 31, 23)),
-      cyclesInCalendarYear: 0);
+  final initialState = EmptyState(cyclesInCalendarYear: 0);
 
   final daPrice = getHourlyLmpIsone(
       ptids: [4000],
@@ -73,13 +65,25 @@ void analyze() {
     rtPrice: daPrice,
     bidsOffers: makeBidsOffers(
         term: term,
-        chargeHours: (min: 1, max: 4),
-        dischargeHours: (min: 17, max: 20),
+        chargeHours: {1, 2, 3, 4},
+        dischargeHours: {17, 18, 19, 20},
         hourlyQuantity: 100,
         maxPrice: 400,
         minPrice: 1),
   );
-  final res = opt.dispatchDa(initialState: initialState);
+  final dispatchDa = opt.dispatchDa(initialState: initialState);
+  // print(res);
+
+  // calcualte PnL
+  final pnl = opt.calculatePnlDa(dispatchDa, initialState);
+  print('PnL:');
+  // print(pnl);
+
+  print('Daily PnL:');
+  print(pnl.toDaily(sum));
 }
 
-void main(List<String> args) {}
+void main(List<String> args) {
+  initializeTimeZones();
+  analyze();
+}
