@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## Release 2024-09-20
+- More battery work, incorporate RT market
+
 ## Release 2024-09-18
 - Battery work
 

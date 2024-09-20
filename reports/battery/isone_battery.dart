@@ -3,7 +3,8 @@ import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/physical/bid_curve.dart';
-import 'package:elec/src/physical/gen/battery.dart';
+import 'package:elec/src/physical/gen/battery/battery.dart';
+import 'package:elec/src/physical/gen/battery/battery_optimization.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/price/lib_hourly_lmp.dart';
 import 'package:timeseries/timeseries.dart';
@@ -49,9 +50,8 @@ void analyze() {
     totalCapacityMWh: 400,
     maxCyclesPerYear: 400,
   );
-  // print(getBidsOffers());
 
-  final initialState = EmptyState(cyclesInCalendarYear: 0);
+  final initialState = EmptyState(cycleNumber: 0, cyclesInCalendarYear: 0);
 
   final daPrice = getHourlyLmpIsone(
       ptids: [4000],
@@ -63,7 +63,14 @@ void analyze() {
     battery: battery,
     daPrice: daPrice,
     rtPrice: daPrice,
-    bidsOffers: makeBidsOffers(
+    daBidsOffers: makeBidsOffers(
+        term: term,
+        chargeHours: {1, 2, 3, 4},
+        dischargeHours: {17, 18, 19, 20},
+        hourlyQuantity: 100,
+        maxPrice: 400,
+        minPrice: 1),
+    rtBidsOffers: makeBidsOffers(
         term: term,
         chargeHours: {1, 2, 3, 4},
         dischargeHours: {17, 18, 19, 20},
@@ -71,16 +78,15 @@ void analyze() {
         maxPrice: 400,
         minPrice: 1),
   );
-  final dispatchDa = opt.dispatchDa(initialState: initialState);
-  // print(res);
+  opt.run(initialState);
+  print(opt.dispatchDa);
 
-  // calcualte PnL
-  final pnl = opt.calculatePnlDa(dispatchDa, initialState);
-  print('PnL:');
-  // print(pnl);
+  // // calcualte PnL
+  // print('PnL DAM:');
+  // print(opt.pnlDa);
 
-  print('Daily PnL:');
-  print(pnl.toDaily(sum));
+  // print('Daily PnL:');
+  // print(opt.pnlDa.toDaily(sum));
 }
 
 void main(List<String> args) {

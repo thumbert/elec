@@ -3,7 +3,8 @@ library test.physical.gen.lib_battery_test;
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/physical/bid_curve.dart';
-import 'package:elec/src/physical/gen/battery.dart';
+import 'package:elec/src/physical/gen/battery/battery.dart';
+import 'package:elec/src/physical/gen/battery/battery_optimization.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/physical/price_quantity_pair.dart';
 import 'package:test/test.dart';
@@ -90,15 +91,18 @@ void tests() {
     );
     // print(getBidsOffers());
 
-    final initialState = EmptyState(cyclesInCalendarYear: 0);
+    final initialState = EmptyState(cyclesInCalendarYear: 0, cycleNumber: 0);
 
     test('a battery with no favorable conditions to dispatch', () {
       final opt = BatteryOptimization(
-          battery: battery,
-          daPrice: getDaPrice(),
-          rtPrice: getRtPrice(),
-          bidsOffers: getBidsOffers());
-      final res = opt.dispatchDa(initialState: initialState);
+        battery: battery,
+        daPrice: getDaPrice(),
+        rtPrice: getRtPrice(),
+        daBidsOffers: getBidsOffers(),
+        rtBidsOffers: getBidsOffers(),
+      );
+      opt.run(initialState);
+      final res = opt.dispatchDa;
       expect(res.every((e) => e.value is EmptyState), true);
     });
 
@@ -123,11 +127,15 @@ void tests() {
       // print(bidsOffers);
 
       final opt = BatteryOptimization(
-          battery: battery,
-          daPrice: getDaPrice(),
-          rtPrice: getRtPrice(),
-          bidsOffers: bidsOffers);
-      final dispatchDa = opt.dispatchDa(initialState: initialState);
+        battery: battery,
+        daPrice: getDaPrice(),
+        rtPrice: getRtPrice(),
+        daBidsOffers: bidsOffers,
+        rtBidsOffers: bidsOffers,
+      );
+      opt.run(initialState);
+
+      final dispatchDa = opt.dispatchDa;
       dispatchDa.forEach(print);
       expect(dispatchDa.where((e) => e.value is ChargingState).length, 4);
       expect(dispatchDa.where((e) => e.value is DischargingState).length, 4);
@@ -137,9 +145,16 @@ void tests() {
       expect(dispatchDa[17].value.batteryLevelMwh, 300);
 
       // calcualte PnL
-      final pnl = opt.calculatePnlDa(dispatchDa, initialState);
+      final pnl = opt.pnlDa;
       print('PnL:');
       print(pnl);
+
+      // get daily stats
+      final dailyStats = opt.cycleStats;
+      print('Daily stats:');
+      for (var e in dailyStats) {
+        print(e.toJson());
+      }
     });
   });
 }
