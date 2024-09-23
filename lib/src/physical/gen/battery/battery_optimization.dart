@@ -1,10 +1,12 @@
 library physical.gen.battery.battery_optimization;
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart' hide IterableNumberExtension;
-import 'package:dama/basic/num_iterable_extensions.dart';
+import 'package:dama/dama.dart';
 import 'package:date/date.dart';
+import 'package:more/collection.dart';
+import 'package:table/table.dart';
 import 'package:timeseries/timeseries.dart';
 import 'battery.dart';
 
@@ -107,17 +109,10 @@ class BatteryOptimization {
   /// Summary of battery performance over each charging/discharging cycle.
   late List<CycleStats> cycleStats;
 
-  /// Prepare data for Plotly chart of daily DA operations and PnL.
-  List<Map<String, dynamic>> makeTracesDailyOperationsDa() {
-    var traces = <Map<String, dynamic>>[];
-
-    return traces;
-  }
-
   List<CycleStats> _calculateCycleStats() {
     var data = dispatchDa
         .merge(daPrice, f: (x, y) => (x!, y!))
-        .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x.$2, daPnl: y!));
+        .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x!.$2, daPnl: y!));
 
     /// split the data into cycles
     var groups =
@@ -241,6 +236,7 @@ class BatteryOptimization {
       }
       final interval = price[i].interval;
       final priceMkt = price[i].value;
+      // FIXME Assumes that bids/offers have only one element
       final bidPrice = bidsOffers[i].value.bids.first.price;
       final offerPrice = bidsOffers[i].value.offers.first.price;
       if (offerPrice <= priceMkt && priceMkt <= bidPrice) {
@@ -263,7 +259,7 @@ class BatteryOptimization {
             break;
           }
           var newLevel = (priceMkt <= bidPrice)
-              ? min(
+              ? math.min(
                   batteryLevelMwh + battery.maxLoadMw, battery.totalCapacityMWh)
               : batteryLevelMwh;
           // Note that the level may not change on some intervals when the
@@ -278,7 +274,7 @@ class BatteryOptimization {
         case FullyChargedState():
           if (priceMkt >= offerPrice) {
             // battery is discharging
-            var newLevel = max(batteryLevelMwh - battery.ecoMaxMw, 0);
+            var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
             state = DischargingState(
                 batteryLevelMwh: newLevel,
                 cycleNumber: cycleNumber,
@@ -292,7 +288,7 @@ class BatteryOptimization {
             break;
           }
           var newLevel = (priceMkt >= offerPrice)
-              ? max(batteryLevelMwh - battery.ecoMaxMw, 0)
+              ? math.max(batteryLevelMwh - battery.ecoMaxMw, 0)
               : batteryLevelMwh;
           // Note that the level may not change on some intervals when the
           // battery is discharging.  It only means that the prices were not
@@ -315,7 +311,7 @@ class BatteryOptimization {
             // battery begins a new charging cycle
             cycleNumber += 1;
             cycles += 1;
-            var newLevel = min(
+            var newLevel = math.min(
                 batteryLevelMwh + battery.maxLoadMw, battery.totalCapacityMWh);
             if (newLevel <= battery.totalCapacityMWh &&
                 batteryLevelMwh < battery.totalCapacityMWh) {
@@ -342,4 +338,116 @@ class BatteryOptimization {
     out.removeAt(0); // remove the spurious initial state
     return out;
   }
+}
+
+/// For each day of the hourly timeseries [ts] calculate the best blocks
+/// of [n] continuous hours to charge and discharge the battery.
+///
+/// When selecting the blocks with the lowest/highest price, make sure that
+/// the blocks are not overlapping and that the min price block (charging)
+/// comes before the max price block (discharging)
+///
+/// [n] is the number of consecutive hours
+/// [minIndex] is the index of the hours when prices are the lowest
+/// [maxIndex] is the index of the hours when prices are the highest
+///
+TimeSeries<({int minIndex, num minPrice, int maxIndex, num maxPrice})>
+    minMaxDailyPriceForBlock(TimeSeries<num> ts, int n) {
+  var dailyTs = ts.groupByIndex((e) => Date.containing(e.start));
+  return TimeSeries<
+      ({
+        int minIndex,
+        num minPrice,
+        int maxIndex,
+        num maxPrice
+      })>.fromIterable(dailyTs.map((obs) {
+    var chunks = obs.value
+        .window(n)
+        .mapIndexed((i, es) => (index: i, price: es.mean()))
+        .toList();
+    // check all possible pairs of charging/discharging blocks and
+    // keep the one with the largest spread
+    num maxDiff = -999.99;
+    var iMinBest = -1;
+    var iMaxBest = -1;
+    for (var iMin = 0; iMin < (chunks.length - n); iMin++) {
+      for (var iMax = iMin + n - 1; iMax < chunks.length; iMax++) {
+        var diff = chunks[iMax].price - chunks[iMin].price;
+        if (diff > maxDiff) {
+          maxDiff = diff;
+          iMinBest = chunks[iMin].index;
+          iMaxBest = chunks[iMax].index;
+        }
+      }
+    }
+    return IntervalTuple<
+        ({
+          int minIndex,
+          num minPrice,
+          int maxIndex,
+          num maxPrice
+        })>(obs.interval, (
+      minIndex: chunks[iMinBest].index,
+      minPrice: chunks[iMinBest].price,
+      maxIndex: chunks[iMaxBest].index,
+      maxPrice: chunks[iMaxBest].price
+    ));
+  }));
+}
+
+class BestBlocks {
+  BestBlocks(
+      {required this.term,
+      required this.chargeStartIndex,
+      required this.dischargeStartIndex,
+      required this.count,
+      required this.averageSpread});
+
+  /// Term for the results
+  final Term term;
+
+  /// Index of hour of the day when charging should start.
+  /// Note that this is not equal with the hour of the day in
+  /// DST days.
+  final int chargeStartIndex;
+
+  /// Index of hour of the day when discharging should start
+  /// Note that this is not equal with the hour of the day in
+  /// DST days.
+  final int dischargeStartIndex;
+
+  /// Number of days in the term with these starting hours for
+  /// the charging/discharging block.
+  final int count;
+
+  /// The average spread for the days in the term with these
+  /// starting hours for the charging/discharging block.
+  /// Spread for one day is the average price during discharge
+  /// hours minus the average price during charging hours,
+  /// in $/MWh
+  final num averageSpread;
+}
+
+List<Map<String,dynamic>> tabulateBestBlocks(
+    {required TimeSeries<num> hourlyPrices, required int n}) {
+  var dailyBlocks = minMaxDailyPriceForBlock(hourlyPrices, n);
+
+  var nest = Nest()
+    ..key((e) => e.minIndex)
+    ..key((e) => e.maxIndex)
+    ..rollup((List es) => {
+          'count': es.length,
+          'averageSpread': mean(es.map((e) => e.maxPrice - e.minPrice))
+        });
+  var res = nest.map(dailyBlocks.values.toList());
+  var aux = flattenMap(res, ['minIndex','maxIndex'])!;
+
+  // var out = <Map<String,dynamic>>[];
+  // for (var e in aux) {
+  //   out.add({'minIndex': aux['minMax']})
+  // }
+  // print(aux);
+
+
+  return aux;
 }

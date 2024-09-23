@@ -1,12 +1,16 @@
 library test.physical.gen.lib_battery_test;
 
+import 'package:dama/basic/count.dart';
 import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/gen/battery/battery.dart';
 import 'package:elec/src/physical/gen/battery/battery_optimization.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/physical/price_quantity_pair.dart';
+import 'package:elec/src/price/lib_hourly_lmp.dart';
+import 'package:table/table_base.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
@@ -82,6 +86,76 @@ TimeSeries<BidsOffers> getBidsOffers() {
 }
 
 void tests() {
+  group('Best hours to charge/discharge', () {
+    var ts = getHourlyLmpIsone(
+        ptids: [4000],
+        market: Market.da,
+        component: LmpComponent.lmp,
+        term: Term.parse('Jan22-Dec22', IsoNewEngland.location))[4000]!;
+    test('min/max price blocks for 1Jan22', () {
+      // simple case, min block before max, non-overlapping
+      var ts1Jan = ts
+          .window(Term.parse('1Jan22', IsoNewEngland.location).interval)
+          .toTimeSeries();
+      var res = minMaxDailyPriceForBlock(ts1Jan, 4);
+      expect(res.values.first,
+          (maxIndex: 16, maxPrice: 40.0625, minIndex: 3, minPrice: 30.43));
+
+      // max block before min block
+      print(res);
+    });
+
+    test('min/max price blocks for 4Jan22', () {
+      // inverted case, max block before min, non-overlapping
+      var ts4Jan = ts
+          .window(Term.parse('4Jan22', IsoNewEngland.location).interval)
+          .toTimeSeries();
+      // print(ts4Jan);
+      var res = minMaxDailyPriceForBlock(ts4Jan, 4);
+      expect(res.values.first, (
+        maxIndex: 16,
+        maxPrice: 107.64750000000001,
+        minIndex: 12,
+        minPrice: 72.57499999999999
+      ));
+    });
+
+    test('min/max price blocks for Jan22', () {
+      var res = minMaxDailyPriceForBlock(ts, 4);
+      print(res);
+      expect(res[3].value, (
+        maxIndex: 16,
+        maxPrice: 107.64750000000001,
+        minIndex: 12,
+        minPrice: 72.57499999999999
+      ));
+    });
+
+    test('tabulate blocks for Jan22-Feb22', () {
+      var xs = ts
+          .window(Term.parse('Jan22-Feb22', IsoNewEngland.location).interval)
+          .toTimeSeries();
+      var res = tabulateBestBlocks(hourlyPrices: xs, n: 4);
+      // print(res);
+      // print(res.length);
+
+      var maxD = count<int>(
+          res.expand((e) => List<int>.filled(e['count'], e['maxIndex'])));
+      var minD = count<int>(
+          res.expand((e) => List<int>.filled(e['count'], e['minIndex'])));
+      var tbl = [
+        ...maxD.entries.map<Map<String, dynamic>>((e) =>
+            {'action': 'discharge', 'hourIndex': e.key, 'count': e.value}),
+        ...minD.entries.map<Map<String, dynamic>>(
+            (e) => {'action': 'charge', 'hourIndex': e.key, 'count': e.value})
+      ];
+      tbl.sort((a, b) => -a['count'].compareTo(b['count']));
+
+      ///
+      print(Table.from(tbl));
+    });
+  });
+
   group('Lib battery tests: ', () {
     final battery = Battery(
       ecoMaxMw: 100,
@@ -96,12 +170,13 @@ void tests() {
     test('a battery with no favorable conditions to dispatch', () {
       final opt = BatteryOptimization(
         battery: battery,
+        initialBatteryState: initialState,
         daPrice: getDaPrice(),
         rtPrice: getRtPrice(),
         daBidsOffers: getBidsOffers(),
         rtBidsOffers: getBidsOffers(),
       );
-      opt.run(initialState);
+      opt.run();
       final res = opt.dispatchDa;
       expect(res.every((e) => e.value is EmptyState), true);
     });
@@ -128,12 +203,13 @@ void tests() {
 
       final opt = BatteryOptimization(
         battery: battery,
+        initialBatteryState: initialState,
         daPrice: getDaPrice(),
         rtPrice: getRtPrice(),
         daBidsOffers: bidsOffers,
         rtBidsOffers: bidsOffers,
       );
-      opt.run(initialState);
+      opt.run();
 
       final dispatchDa = opt.dispatchDa;
       dispatchDa.forEach(print);

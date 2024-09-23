@@ -61,6 +61,7 @@ void analyze() {
 
   final opt = BatteryOptimization(
     battery: battery,
+    initialBatteryState: initialState,
     daPrice: daPrice,
     rtPrice: daPrice,
     daBidsOffers: makeBidsOffers(
@@ -78,7 +79,7 @@ void analyze() {
         maxPrice: 400,
         minPrice: 1),
   );
-  opt.run(initialState);
+  opt.run();
   print(opt.dispatchDa);
 
   // // calcualte PnL
@@ -89,7 +90,27 @@ void analyze() {
   // print(opt.pnlDa.toDaily(sum));
 }
 
+void priceStats() {
+  final term = Term.parse('Jan22', IsoNewEngland.location);
+
+  final daPrice = getHourlyLmpIsone(
+      ptids: [4000],
+      market: Market.da,
+      component: LmpComponent.lmp,
+      term: term)[4000]!;
+  // final rtPrice = getHourlyLmpIsone(
+  //     ptids: [4000],
+  //     market: Market.rt,
+  //     component: LmpComponent.lmp,
+  //     term: term)[4000]!;
+
+  // var hourlyStats = SummaryStats(daPrice);
+  // final statsDa = hourlyStats.minMaxDailyPriceForBlock(4);
+  // print(statsDa);
+}
+
 void main(List<String> args) {
   initializeTimeZones();
-  analyze();
+  // analyze();
+  priceStats();
 }
