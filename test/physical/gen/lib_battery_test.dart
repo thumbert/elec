@@ -7,6 +7,7 @@ import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/gen/battery/battery.dart';
 import 'package:elec/src/physical/gen/battery/battery_optimization.dart';
+import 'package:elec/src/physical/gen/battery/battery_price_stats.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/physical/price_quantity_pair.dart';
 import 'package:elec/src/price/lib_hourly_lmp.dart';
@@ -136,8 +137,6 @@ void tests() {
           .window(Term.parse('Jan22-Feb22', IsoNewEngland.location).interval)
           .toTimeSeries();
       var res = tabulateBestBlocks(hourlyPrices: xs, n: 4);
-      // print(res);
-      // print(res.length);
 
       var maxD = count<int>(
           res.expand((e) => List<int>.filled(e['count'], e['maxIndex'])));
