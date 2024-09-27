@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dama/basic/count.dart';
+import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/battery.dart';
 import 'package:elec/elec.dart';
@@ -8,92 +9,258 @@ import 'package:elec/risk_system.dart';
 import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:elec/src/price/lib_hourly_lmp.dart';
+import 'package:elec_server/utils.dart';
 import 'package:table/table_base.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 
-TimeSeries<BidsOffers> makeBidsOffers({
-  required Term term,
-  required Set<int> chargeHours,
-  required Set<int> dischargeHours,
-  required num hourlyQuantity,
-  required num maxPrice,
-  required num minPrice,
-}) {
-  var hours = term.hours();
-  var out = TimeSeries<BidsOffers>();
-  for (var hour in hours) {
-    var bids = BidCurve();
-    if (chargeHours.contains(hour.start.hour)) {
-      bids.add(PriceQuantityPair(
-          maxPrice, hourlyQuantity)); // charge if price is < 500
-    } else {
-      bids.add(PriceQuantityPair(minPrice, hourlyQuantity));
-    }
-    var offers = OfferCurve();
-    if (dischargeHours.contains(hour.start.hour)) {
-      offers.add(PriceQuantityPair(
-          minPrice, hourlyQuantity)); // charge if price is > 0
-    } else {
-      offers.add(PriceQuantityPair(maxPrice, hourlyQuantity));
-    }
+class ReportDriver {
+  ReportDriver(
+      {required this.battery,
+      required this.initialState,
+      required this.daPrices,
+      required this.rtPrices});
 
-    out.add(IntervalTuple(hour, BidsOffers(bids: bids, offers: offers)));
+  final Battery battery;
+  final BatteryState initialState;
+  final TimeSeries<num> daPrices;
+  final TimeSeries<num> rtPrices;
+
+  static late Directory outDir;
+
+  /// Run the whole thing to generate the mdbook assets
+  void run() {
+    // oneDayAnalysis(
+    //     day: Date(2024, 1, 1, location: IsoNewEngland.location), report: this);
+    // dailyPnlPlot(Term.parse('Jan21-Dec21', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan22-Dec22', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan23-Dec23', IsoNewEngland.location));
+    dailyPnlPlot(Term.parse('Jan24-Aug24', IsoNewEngland.location));
+    monthlyPnl(Term.parse('Jan21-Aug24', IsoNewEngland.location));
   }
 
-  return out;
+  ///
+  void dailyPnlPlot(Term term) {
+    assert(term.isMonthRange() || term.isOneMonth());
+    var daPrice = daPrices.window(term.interval).toTimeSeries();
+    var rtPrice = rtPrices.window(term.interval).toTimeSeries();
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
+
+    /// Run the DA schedule
+    var daBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    for (var month in months) {
+      daBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(800, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+    }
+    var opt = BatteryOptimization(
+      battery: battery,
+      initialBatteryState: initialState,
+      daPrice: daPrice,
+      rtPrice: rtPrice,
+      daBidsOffers: daBidsOffers,
+      rtBidsOffers: daBidsOffers,
+    );
+    opt.run();
+    var dailyPnl1 = opt.pnlDa.toDaily(sum);
+
+    /// Run in the RT only, no DA dispatch
+    daBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    var rtBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    for (var month in months) {
+      daBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+      rtBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(800, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+    }
+    opt = BatteryOptimization(
+      battery: battery,
+      initialBatteryState: initialState,
+      daPrice: daPrice,
+      rtPrice: rtPrice,
+      daBidsOffers: daBidsOffers,
+      rtBidsOffers: rtBidsOffers,
+    );
+    opt.run();
+    var dailyPnlDa2 = opt.pnlDa.toDaily(sum);
+    var dailyPnlRt2 = opt.pnlRt.toDaily(sum);
+    var dailyPnl2 = dailyPnlDa2 + dailyPnlRt2;
+
+    /// make plot with dispatch & prices
+    var traces = <Map<String, dynamic>>[];
+    traces.add({
+      'x': dailyPnl1.intervals
+          .map((e) => e.start.toIso8601String().substring(0, 10))
+          .toList(),
+      'y': dailyPnl1.values.toList(),
+      'name': 'DA only',
+      'line': {
+        'color': '#2ca02c',
+        // 'color': '#9494b8',
+      }
+    });
+    traces.add({
+      'x': dailyPnl2.intervals
+          .map((e) => e.start.toIso8601String().substring(0, 10))
+          .toList(),
+      'y': dailyPnl2.values.toList(),
+      'name': 'RT only',
+      'line': {
+        'color': '#d62728',
+      }
+    });
+    var layout = <String, dynamic>{
+      'title': '$term',
+      'width': 800,
+      'height': 650,
+      'yaxis': {
+        'title': 'Daily PnL, \$',
+      },
+    };
+    var label =
+        term.toString().replaceAll('-', '').replaceAll(' ', '').toLowerCase();
+    final file = File('${ReportDriver.outDir.path}/daily_pnl_$label.html');
+    Plotly.now(traces, layout, file: file);
+  }
+
+  ///
+  void monthlyPnl(Term term) {
+    assert(term.isMonthRange() || term.isOneMonth());
+    var daPrice = daPrices.window(term.interval).toTimeSeries();
+    var rtPrice = rtPrices.window(term.interval).toTimeSeries();
+    var months = term.interval.splitLeft((dt) => Month.containing(dt));
+
+    /// Run the DA schedule
+    var daBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    for (var month in months) {
+      daBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(800, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+    }
+    var opt = BatteryOptimization(
+      battery: battery,
+      initialBatteryState: initialState,
+      daPrice: daPrice,
+      rtPrice: rtPrice,
+      daBidsOffers: daBidsOffers,
+      rtBidsOffers: daBidsOffers,
+    );
+    opt.run();
+    // in $/kW-month
+    var pnl1 = opt.pnlDa
+        .toMonthly(sum)
+        .map((e) =>
+            IntervalTuple(e.interval, e.value / (battery.ecoMaxMw * 1000)))
+        .toTimeSeries();
+
+    /// Run in the RT only, no DA dispatch
+    daBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    var rtBidsOffers = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+    for (var month in months) {
+      daBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+      rtBidsOffers.addAll(makeBidsOffers(
+        term: Term.fromInterval(month),
+        chargeHours: getChargeHours(month, 0),
+        dischargeHours: getDischargeHours(month, 0),
+        chargingBids: [PriceQuantityPair(800, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      ));
+    }
+    opt = BatteryOptimization(
+      battery: battery,
+      initialBatteryState: initialState,
+      daPrice: daPrice,
+      rtPrice: rtPrice,
+      daBidsOffers: daBidsOffers,
+      rtBidsOffers: rtBidsOffers,
+    );
+    opt.run();
+    var pnlDa2 = opt.pnlDa.toMonthly(sum);
+    var pnlRt2 = opt.pnlRt.toMonthly(sum);
+    // in $/kW-month
+    var pnl2 = (pnlDa2 + pnlRt2)
+        .map((e) =>
+            IntervalTuple(e.interval, e.value / (battery.ecoMaxMw * 1000)))
+        .toTimeSeries();
+
+    /// make plot with dispatch & prices
+    var traces = <Map<String, dynamic>>[];
+    traces.add({
+      'x': pnl1.intervals
+          .map((e) => e.start.toIso8601String().substring(0, 10))
+          .toList(),
+      'y': pnl1.values.toList(),
+      'name': 'DA only',
+      'line': {
+        'color': '#2ca02c',
+        // 'color': '#9494b8',
+      }
+    });
+    traces.add({
+      'x': pnl2.intervals
+          .map((e) => e.start.toIso8601String().substring(0, 10))
+          .toList(),
+      'y': pnl2.values.toList(),
+      'name': 'RT only',
+      'line': {
+        'color': '#d62728',
+      }
+    });
+    var layout = <String, dynamic>{
+      'title': '$term',
+      'width': 800,
+      'height': 650,
+      'yaxis': {
+        'title': 'Monthly PnL, \$/kW-month',
+      },
+    };
+    var label =
+        term.toString().replaceAll('-', '').replaceAll(' ', '').toLowerCase();
+    final file = File('${ReportDriver.outDir.path}/monthly_pnl_$label.html');
+    Plotly.now(traces, layout, file: file);
+  }
 }
 
-void analyze() {
-  final term = Term.parse('Jan22', IsoNewEngland.location);
-  final battery = Battery(
-    ecoMaxMw: 100,
-    maxLoadMw: 125,
-    totalCapacityMWh: 400,
-    maxCyclesPerYear: 400,
-  );
-
-  final initialState = EmptyState(cycleNumber: 0, cyclesInCalendarYear: 0);
-
-  final daPrice = getHourlyLmpIsone(
-      ptids: [4000],
-      market: Market.da,
-      component: LmpComponent.lmp,
-      term: term)[4000]!;
-
-  final opt = BatteryOptimization(
-    battery: battery,
-    initialBatteryState: initialState,
-    daPrice: daPrice,
-    rtPrice: daPrice,
-    daBidsOffers: makeBidsOffers(
-        term: term,
-        chargeHours: {1, 2, 3, 4},
-        dischargeHours: {17, 18, 19, 20},
-        hourlyQuantity: 100,
-        maxPrice: 400,
-        minPrice: 1),
-    rtBidsOffers: makeBidsOffers(
-        term: term,
-        chargeHours: {1, 2, 3, 4},
-        dischargeHours: {17, 18, 19, 20},
-        hourlyQuantity: 100,
-        maxPrice: 400,
-        minPrice: 1),
-  );
-  opt.run();
-  print(opt.dispatchDa);
-
-  // // calcualte PnL
-  // print('PnL DAM:');
-  // print(opt.pnlDa);
-
-  // print('Daily PnL:');
-  // print(opt.pnlDa.toDaily(sum));
-}
-
-void makeHtmlTableBestBlocks(
-    List<Term> terms, TimeSeries<num> hourlyPrices, int n) {
+/// Create a table with the best charging/discharging blocks.
+///
+void makeHtmlTableBestBlocks(List<Term> terms, TimeSeries<num> hourlyPrices,
+    {required int n, required Directory outDir}) {
   // Keep only the topK blocks for each term to simplify the table
   var topK = 3;
   var rows = <Map<String, dynamic>>[];
@@ -154,20 +321,7 @@ void makeHtmlTableBestBlocks(
   File('${outDir.path}/table.html').writeAsStringSync(str);
 }
 
-void priceStats() {
-  final term = Term.parse('Dec20-Aug24', IsoNewEngland.location);
-  final n = 4; // 4 hour battery
-  final daPrice = getHourlyLmpIsone(
-      ptids: [4000],
-      market: Market.da,
-      component: LmpComponent.lmp,
-      term: term)[4000]!;
-  // final rtPrice = getHourlyLmpIsone(
-  //     ptids: [4000],
-  //     market: Market.rt,
-  //     component: LmpComponent.lmp,
-  //     term: term)[4000]!;
-
+void priceStats(TimeSeries<num> daPrice) {
   final terms = [
     Term.parse('Dec20-Feb21', IsoNewEngland.location),
     Term.parse('Mar21-May21', IsoNewEngland.location),
@@ -190,19 +344,171 @@ void priceStats() {
     // Term.parse('Oct24-Nov23', IsoNewEngland.location),
   ];
 
-  makeHtmlTableBestBlocks(terms, daPrice, n);
-
-  // var hourlyStats = SummaryStats(daPrice);
-  // final statsDa = hourlyStats.minMaxDailyPriceForBlock(4);
-  // print(statsDa);
+  makeHtmlTableBestBlocks(
+    terms,
+    daPrice,
+    n: 4,
+    outDir: ReportDriver.outDir!,
+  );
 }
 
-final outDir = Directory(
-    '${Platform.environment['HOME']}/Documents/repos/git/thumbert/rascal/presentations/energy/battery/assets/isone');
+///
+void oneDayAnalysis({
+  required Date day,
+  required ReportDriver report,
+}) {
+  var term = Term(day, day);
+  var daPrices = report.daPrices.window(term.interval).toTimeSeries();
+  var rtPrices = report.rtPrices.window(term.interval).toTimeSeries();
+
+  final opt = BatteryOptimization(
+    battery: report.battery,
+    initialBatteryState: report.initialState,
+    daPrice: daPrices,
+    rtPrice: rtPrices,
+    daBidsOffers: makeBidsOffers(
+      term: term,
+      chargeHours: getChargeHours(Month.containing(day.start), 0),
+      dischargeHours: getDischargeHours(Month.containing(day.start), 0),
+      chargingBids: [PriceQuantityPair(100, report.battery.maxLoadMw)],
+      nonChargingBids: [PriceQuantityPair(0, report.battery.maxLoadMw)],
+      dischargingOffers: [PriceQuantityPair(0, report.battery.ecoMaxMw)],
+      nonDischargingOffers: [PriceQuantityPair(100, report.battery.ecoMaxMw)],
+    ),
+    rtBidsOffers: makeBidsOffers(
+      term: term,
+      chargeHours: getChargeHours(Month.containing(day.start), 0),
+      dischargeHours: getDischargeHours(Month.containing(day.start), 0),
+      chargingBids: [PriceQuantityPair(100, report.battery.maxLoadMw)],
+      nonChargingBids: [PriceQuantityPair(0, report.battery.maxLoadMw)],
+      dischargingOffers: [PriceQuantityPair(0, report.battery.ecoMaxMw)],
+      nonDischargingOffers: [PriceQuantityPair(100, report.battery.ecoMaxMw)],
+    ),
+  );
+  opt.run();
+  // print(opt.dispatchDa);
+
+  /// make plot with dispatch & prices
+  var traces = <Map<String, dynamic>>[];
+  traces.add({
+    'x': [day.start.toIso8601String(), day.end.toIso8601String()],
+    'y': [opt.battery.totalCapacityMWh, opt.battery.totalCapacityMWh],
+    'name': 'Max Capacity',
+    'line': {
+      'color': 'black',
+    },
+    'mode': 'lines',
+    'type': 'scatter',
+  });
+  traces.add({
+    'x':
+        opt.dispatchRt.intervals.map((e) => e.start.toIso8601String()).toList(),
+    'y': opt.dispatchRt.values.map((e) => e.batteryLevelMwh).toList(),
+    'name': 'Battery level',
+    'line': {
+      'color': '#9494b8',
+    }
+  });
+  traces.add({
+    'x': daPrices.map((e) => e.interval.start.toIso8601String()).toList(),
+    'y': daPrices.map((e) => e.value).toList(),
+    'name': 'DA price',
+    'yaxis': 'y2',
+  });
+  traces.add({
+    'x': rtPrices.map((e) => e.interval.start.toIso8601String()).toList(),
+    'y': rtPrices.map((e) => e.value).toList(),
+    'name': 'RT price',
+    'yaxis': 'y2',
+  });
+
+  var layout = <String, dynamic>{
+    'title': '$day',
+    'width': 800,
+    'height': 650,
+    'yaxis': {
+      'title': 'Battery level, MWh',
+      'showgrid': false,
+    },
+    'yaxis2': {
+      // 'showgrid': false,
+      'title': 'Price, \$/MWh',
+      'overlaying': 'y',
+      'side': 'right',
+    },
+  };
+  final yyyymmdd =
+      day.start.toIso8601String().substring(0, 10).replaceAll('-', '');
+  final file = File('${ReportDriver.outDir.path}/one_day_$yyyymmdd.html');
+  Plotly.now(traces, layout, file: file);
+}
+
+/// Historical ISONE best hours
+Set<int> getChargeHours(Month month, int rank) {
+  return switch (rank) {
+    0 => switch (month.month) {
+        6 || 7 || 8 || 9 => {2, 3, 4, 5},
+        _ => {1, 2, 3, 4}
+      },
+    1 => switch (month.month) {
+        6 || 7 || 8 || 9 || 10 || 11 => {1, 2, 3, 4},
+        12 || 1 || 2 => {0, 1, 2, 3},
+        _ => {12, 13, 14, 15},
+      },
+    _ => throw StateError('Rank $rank not implemented'),
+  };
+}
+
+/// Historical ISONE best hours
+Set<int> getDischargeHours(Month month, int rank) {
+  return switch (rank) {
+    0 => switch (month.month) {
+        1 || 2 || 12 => {16, 17, 18, 19},
+        10 || 11 => {17, 18, 19, 20},
+        _ => {18, 19, 20, 21},
+      },
+    _ => throw StateError('Rank $rank not implemented'),
+  };
+}
 
 void main(List<String> args) {
   initializeTimeZones();
+  ReportDriver.outDir = Directory(
+      '${Platform.environment['HOME']}/Documents/repos/git/thumbert/rascal/presentations/energy/battery/assets/isone');
+  final historicalTerm = Term.parse('Dec20-Aug24', IsoNewEngland.location);
 
-  // analyze();
-  priceStats();
+  /// get prices
+  final daPrice = getHourlyLmpIsone(
+      ptids: [4000],
+      market: Market.da,
+      component: LmpComponent.lmp,
+      term: historicalTerm)[4000]!;
+  final rtPrice = getHourlyLmpIsone(
+      ptids: [4000],
+      market: Market.rt,
+      component: LmpComponent.lmp,
+      term: historicalTerm)[4000]!;
+
+  /// define 4 hour battery
+  final battery = Battery(
+    ecoMaxMw: 100,
+    // maxLoadMw: 100 / 0.85,
+    efficiencyRating: 0.85,
+    totalCapacityMWh: 4 * 100,
+    maxCyclesPerYear: 365,
+    degradationFactor: TimeSeries<num>(),
+  );
+
+  /// set up the report
+  final report = ReportDriver(
+    battery: battery,
+    initialState: EmptyState(cycleNumber: 0, cyclesInCalendarYear: 0),
+    daPrices: daPrice,
+    rtPrices: rtPrice,
+  );
+
+  ///
+  report.run();
+
+  // priceStats(daPrice);
 }

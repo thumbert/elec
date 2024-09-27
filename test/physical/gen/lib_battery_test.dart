@@ -15,6 +15,7 @@ import 'package:table/table_base.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart';
 
 TimeSeries<num> getDaPrice() {
   return TimeSeries.from(
@@ -76,14 +77,15 @@ TimeSeries<num> getRtPrice() {
   ]);
 }
 
-TimeSeries<BidsOffers> getBidsOffers() {
+TimeSeries<({BidCurve bids, OfferCurve offers})> getBidsOffers() {
   return TimeSeries.from(
       Term.parse('13Sep24', IsoNewEngland.location).hours(),
       List.generate(
           24,
-          (i) => BidsOffers(
-              bids: BidCurve.fromIterable([PriceQuantityPair(10, 100)]),
-              offers: OfferCurve.fromIterable([PriceQuantityPair(100, 100)]))));
+          (i) => (
+                bids: BidCurve.fromIterable([PriceQuantityPair(10, 100)]),
+                offers: OfferCurve.fromIterable([PriceQuantityPair(100, 100)])
+              )));
 }
 
 void tests() {
@@ -158,9 +160,10 @@ void tests() {
   group('Lib battery tests: ', () {
     final battery = Battery(
       ecoMaxMw: 100,
-      maxLoadMw: 125,
+      efficiencyRating: 0.85,
       totalCapacityMWh: 400,
-      maxCyclesPerYear: 400,
+      maxCyclesPerYear: 365,
+      degradationFactor: TimeSeries<num>(),
     );
     // print(getBidsOffers());
 
@@ -180,22 +183,63 @@ void tests() {
       expect(res.every((e) => e.value is EmptyState), true);
     });
 
+    test('Cycle counter rests on new calendar year', () {
+      final initialState =
+          Unavailable(cyclesInCalendarYear: 365, cycleNumber: 500);
+      final term = Term.parse('31Dec22-3Jan23', IsoNewEngland.location);
+      var daBidsOffers = makeBidsOffers(
+        term: term,
+        chargeHours: {1, 2, 3, 4},
+        dischargeHours: {17, 18, 19, 20},
+        chargingBids: [PriceQuantityPair(800, battery.maxLoadMw)],
+        nonChargingBids: [PriceQuantityPair(0, battery.maxLoadMw)],
+        dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
+        nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
+      );
+      final opt = BatteryOptimization(
+        battery: battery,
+        initialBatteryState: initialState,
+        daPrice: TimeSeries.fill(term.hours(), 15),
+        rtPrice: TimeSeries.fill(term.hours(), 17),
+        daBidsOffers: daBidsOffers,
+        rtBidsOffers: daBidsOffers,
+      );
+      opt.run();
+      final res = opt.dispatchDa;
+      // opt.dispatchDa.forEach(print);
+      expect(
+          res
+              .observationAt(
+                  Hour.beginning(TZDateTime(IsoNewEngland.location, 2023)))
+              .value is EmptyState,
+          true);
+      expect(
+          res
+              .observationAt(
+                  Hour.beginning(TZDateTime(IsoNewEngland.location, 2023)))
+              .value
+              .cyclesInCalendarYear,
+          0);
+    });
+
     test('a battery charging/discharging on a fixed schedule, one day', () {
       var bidsOffers = getBidsOffers();
       var values = bidsOffers.values.toList();
       // demand bid the battery at very high prices to make battery charge
       for (var i in [1, 2, 3, 4]) {
-        values[i] = BidsOffers(
-            bids: BidCurve.fromIterable(
-                [PriceQuantityPair(500, battery.maxLoadMw)]),
-            offers: values[i].offers);
+        values[i] = (
+          bids: BidCurve.fromIterable(
+              [PriceQuantityPair(500, battery.maxLoadMw)]),
+          offers: values[i].offers
+        );
       }
       // offer battery at very low prices to make battery discharge
       for (var i in [17, 18, 19, 20]) {
-        values[i] = BidsOffers(
-            bids: values[i].bids,
-            offers: OfferCurve.fromIterable(
-                [PriceQuantityPair(0, battery.ecoMaxMw)]));
+        values[i] = (
+          bids: values[i].bids,
+          offers:
+              OfferCurve.fromIterable([PriceQuantityPair(0, battery.ecoMaxMw)])
+        );
       }
       bidsOffers = TimeSeries.from(bidsOffers.intervals, values);
       // print(bidsOffers);
@@ -215,14 +259,14 @@ void tests() {
       expect(dispatchDa.where((e) => e.value is ChargingState).length, 4);
       expect(dispatchDa.where((e) => e.value is DischargingState).length, 4);
       expect(dispatchDa[1].value is ChargingState, true);
-      expect(dispatchDa[1].value.batteryLevelMwh, 125);
+      expect(dispatchDa[1].value.batteryLevelMwh, 100);
       expect(dispatchDa[17].value is DischargingState, true);
       expect(dispatchDa[17].value.batteryLevelMwh, 300);
 
       // calcualte PnL
       final pnl = opt.pnlDa;
-      print('PnL:');
-      print(pnl);
+      // print('PnL:');
+      // print(pnl);
 
       // get daily stats
       final dailyStats = opt.cycleStats;

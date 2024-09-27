@@ -130,7 +130,7 @@ Map<Ptid, TimeSeries<num>> getHourlyLmpIsone(
   };
   final query = """
 SELECT ptid, date, hour, extraDstHour, $cname
-FROM da_lmp
+FROM ${market.name.toLowerCase()}_lmp
 WHERE date >= '${term.startDate}'
 AND date <= '${term.endDate}'
 AND ptid in (${ptids.join(", ")})

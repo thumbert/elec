@@ -1,7 +1,10 @@
 library src.physical.gen.battery;
 
+import 'package:date/date.dart';
 import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/offer_curve.dart';
+import 'package:elec/src/physical/price_quantity_pair.dart';
+import 'package:timeseries/timeseries.dart';
 
 final class BidsOffers {
   BidsOffers({required this.bids, required this.offers});
@@ -46,7 +49,7 @@ sealed class BatteryState {
   @override
   String toString() {
     return 'batteryLevelMWh: $batteryLevelMwh, '
-        'cycles: $cyclesInCalendarYear';
+        'cyclesInCalendarYear: $cyclesInCalendarYear';
   }
 
   Map<String, dynamic> toMap() {
@@ -169,38 +172,78 @@ class Unavailable extends BatteryState {
 class Battery {
   Battery({
     required this.ecoMaxMw,
-    required this.maxLoadMw,
+    required this.efficiencyRating,
     required this.totalCapacityMWh,
     required this.maxCyclesPerYear,
-  });
+    required this.degradationFactor,
+  }) {
+    maxLoadMw = ecoMaxMw / efficiencyRating;
+  }
 
   /// Maximum amount of power to discharge
   final num ecoMaxMw;
 
-  /// Maximum amount of power to charge
-  final num maxLoadMw;
+  /// Round trip efficiency rating, typically a value around 0.85
+  final num efficiencyRating;
 
-  /// How much energy can the battery hold in MWh
+  /// How much energy can the battery hold in MWh when fully charged.
+  ///
   final num totalCapacityMWh;
 
-  /// Max charge/discharge cycles in a calendar year
+  /// Max charge/discharge cycles in a **calendar** year
   final int maxCyclesPerYear;
+
+  /// Can be a value by calendar year, e.g 2026 -> 0.95, 2027 -> 0.92, ...
+  /// Or even monthly frequency if needed.
+  /// NOT IMPLEMENTED YET!
+  final TimeSeries<num> degradationFactor;
+
+  /// Maximum amount of power to charge.  Only needed as a convenience 
+  /// when the charging bids are constructed!  
+  late final num maxLoadMw;
 }
 
-/// Split a timeseries of battery states into cycles.  Each cycle is a timeseries
-/// of battery states.  If there are no cycles, return an empty list.
-// List<TimeSeries<BatteryState>> splitIntoCycles(
-//     TimeSeries<BatteryState> states) {
-//   var out = <TimeSeries<BatteryState>>[];
-//   var count = 0;
-//   for (var obs in states) {
-//     if (obs.value is ChargingState) {
+/// Construct hourly bids/offers to use in the dispatch.
+/// Various strategies can be represented this way.
+///
+/// * [chargingBids] high prices
+/// * [nonChargingBids] low prices
+/// * [dischargingOffers] low prices
+/// * [nonDischargingOffers] high prices
+///
+TimeSeries<({BidCurve bids, OfferCurve offers})> makeBidsOffers({
+  required Term term,
+  required Set<int> chargeHours,
+  required Set<int> dischargeHours,
+  required List<PriceQuantityPair> chargingBids, // high prices
+  required List<PriceQuantityPair> nonChargingBids, // low prices
+  required List<PriceQuantityPair> dischargingOffers, // low prices
+  required List<PriceQuantityPair> nonDischargingOffers, // high prices
+}) {
+  var hours = term.hours();
+  var out = TimeSeries<({BidCurve bids, OfferCurve offers})>();
+  for (var hour in hours) {
+    var bidsC = BidCurve();
+    if (chargeHours.contains(hour.start.hour)) {
+      bidsC.addAll(chargingBids);
+    } else {
+      bidsC.addAll(nonChargingBids);
+    }
+    var offerC = OfferCurve();
+    if (dischargeHours.contains(hour.start.hour)) {
+      offerC.addAll(dischargingOffers);
+    } else {
+      offerC.addAll(nonDischargingOffers);
+    }
 
-//     }
-//   }
+    out.add(IntervalTuple(hour, (bids: bidsC, offers: offerC)));
+  }
 
-//   return out;
-// }
+  return out;
+}
+
+
+
 
 /// A battery mode is associated with a time interval, be it 5 min, 15 min or
 /// an hour.

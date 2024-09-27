@@ -5,6 +5,8 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' hide IterableNumberExtension;
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
+import 'package:elec/src/physical/bid_curve.dart';
+import 'package:elec/src/physical/offer_curve.dart';
 import 'package:timeseries/timeseries.dart';
 import 'battery.dart';
 
@@ -77,10 +79,10 @@ class BatteryOptimization {
   final TimeSeries<num> rtPrice;
 
   /// Hourly timeseries of DA bids and offers
-  final TimeSeries<BidsOffers> daBidsOffers;
+  final TimeSeries<({BidCurve bids, OfferCurve offers})> daBidsOffers;
 
   /// Hourly timeseries of RT bids and offers
-  final TimeSeries<BidsOffers> rtBidsOffers;
+  final TimeSeries<({BidCurve bids, OfferCurve offers})> rtBidsOffers;
 
   void run() {
     dispatchDa = _runDispatch(price: daPrice, bidsOffers: daBidsOffers);
@@ -112,9 +114,12 @@ class BatteryOptimization {
         .merge(daPrice, f: (x, y) => (x!, y!))
         .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x!.$2, daPnl: y!));
 
+    var cycles = groupBy(data, (e) => e.value.state.cycleNumber);
+    cycles.remove(cycles.keys.first);
+    if (cycles.isEmpty) return <CycleStats>[];
+
     /// split the data into cycles
-    var groups =
-        groupBy(data, (e) => e.value.state.cycleNumber).values.map((xs) {
+    var groups = cycles.values.map((xs) {
       var meanChargingDaPrice = xs
           .where((e) => e.value.state is ChargingState)
           .map((e) => e.value.daPrice)
@@ -164,7 +169,8 @@ class BatteryOptimization {
       switch (state) {
         case ChargingState():
           value = -priceDa *
-              (state.batteryLevelMwh - previousState.batteryLevelMwh);
+              (state.batteryLevelMwh - previousState.batteryLevelMwh) /
+              battery.efficiencyRating;
         case DischargingState():
           value =
               priceDa * (previousState.batteryLevelMwh - state.batteryLevelMwh);
@@ -200,12 +206,13 @@ class BatteryOptimization {
               stateDa.batteryLevelMwh - previousStateDa.batteryLevelMwh;
           num rtQuantity =
               stateRt.batteryLevelMwh - previousStateRt.batteryLevelMwh;
-          value = -priceRt * (rtQuantity - daQuantity);
+          value =
+              -priceRt * (rtQuantity - daQuantity) / battery.efficiencyRating;
         case DischargingState():
           num daQuantity =
-              stateDa.batteryLevelMwh - previousStateDa.batteryLevelMwh;
+              previousStateDa.batteryLevelMwh - stateDa.batteryLevelMwh;
           num rtQuantity =
-              stateRt.batteryLevelMwh - previousStateRt.batteryLevelMwh;
+              previousStateRt.batteryLevelMwh - stateRt.batteryLevelMwh;
           value = priceRt * (rtQuantity - daQuantity);
         case FullyChargedState() || EmptyState() || Unavailable():
           value = 0;
@@ -220,7 +227,7 @@ class BatteryOptimization {
   ///   if the transition matrix allows it.
   TimeSeries<BatteryState> _runDispatch({
     required TimeSeries<num> price,
-    required TimeSeries<BidsOffers> bidsOffers,
+    required TimeSeries<({BidCurve bids, OfferCurve offers})> bidsOffers,
   }) {
     final out = TimeSeries<BatteryState>.fromIterable([
       IntervalTuple(
@@ -244,8 +251,13 @@ class BatteryOptimization {
 
       var state = out.last.value;
       var cycleNumber = state.cycleNumber;
-      var cycles = state.cyclesInCalendarYear;
+      var cyclesInCalendarYear = state.cyclesInCalendarYear;
       final batteryLevelMwh = out.last.value.batteryLevelMwh;
+
+      /// reset the counter of cycles in calendar year
+      if (interval.start.year == out.last.interval.start.year + 1) {
+        cyclesInCalendarYear = 0;
+      }
 
       switch (state) {
         case ChargingState():
@@ -253,12 +265,12 @@ class BatteryOptimization {
             state = FullyChargedState(
                 batteryLevelMwh: battery.totalCapacityMWh,
                 cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cycles);
+                cyclesInCalendarYear: cyclesInCalendarYear);
             break;
           }
           var newLevel = (priceMkt <= bidPrice)
               ? math.min(
-                  batteryLevelMwh + battery.maxLoadMw, battery.totalCapacityMWh)
+                  batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh)
               : batteryLevelMwh;
           // Note that the level may not change on some intervals when the
           // battery is charging.  It only means that the prices were not
@@ -267,7 +279,7 @@ class BatteryOptimization {
           state = ChargingState(
               batteryLevelMwh: newLevel,
               cycleNumber: cycleNumber,
-              cyclesInCalendarYear: cycles);
+              cyclesInCalendarYear: cyclesInCalendarYear);
 
         case FullyChargedState():
           if (priceMkt >= offerPrice) {
@@ -276,13 +288,14 @@ class BatteryOptimization {
             state = DischargingState(
                 batteryLevelMwh: newLevel,
                 cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cycles);
+                cyclesInCalendarYear: cyclesInCalendarYear);
           }
 
         case DischargingState():
           if (batteryLevelMwh == 0) {
             state = EmptyState(
-                cycleNumber: cycleNumber, cyclesInCalendarYear: cycles);
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
             break;
           }
           var newLevel = (priceMkt >= offerPrice)
@@ -295,36 +308,43 @@ class BatteryOptimization {
           state = DischargingState(
               batteryLevelMwh: newLevel,
               cycleNumber: cycleNumber,
-              cyclesInCalendarYear: cycles);
+              cyclesInCalendarYear: cyclesInCalendarYear);
 
         case EmptyState():
-          if (cycles > battery.maxCyclesPerYear) {
+          if (cyclesInCalendarYear == battery.maxCyclesPerYear) {
             // battery becomes unavailable
             state = Unavailable(
-                cycleNumber: cycleNumber, cyclesInCalendarYear: cycles);
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
             break;
           }
-          // Introduce OUTAGES here!
           if (priceMkt <= bidPrice) {
             // battery begins a new charging cycle
             cycleNumber += 1;
-            cycles += 1;
+            cyclesInCalendarYear += 1;
             var newLevel = math.min(
-                batteryLevelMwh + battery.maxLoadMw, battery.totalCapacityMWh);
+                batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
             if (newLevel <= battery.totalCapacityMWh &&
                 batteryLevelMwh < battery.totalCapacityMWh) {
               state = ChargingState(
                   batteryLevelMwh: newLevel,
                   cycleNumber: cycleNumber,
-                  cyclesInCalendarYear: cycles);
+                  cyclesInCalendarYear: cyclesInCalendarYear);
             }
+          } else {
+            // remains empty
+            state = EmptyState(
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
           }
 
         case Unavailable():
-          if (interval.start.year == out.last.interval.start.year + 1) {
-            // reset cycles to 0 on new year and move to empty
-            out.add(IntervalTuple(interval,
-                EmptyState(cycleNumber: cycleNumber, cyclesInCalendarYear: 0)));
+          //
+          // Introduce OUTAGES here!
+          //
+          if (cyclesInCalendarYear < battery.maxCyclesPerYear) {
+            state =
+                EmptyState(cycleNumber: cycleNumber, cyclesInCalendarYear: 0);
             break;
           }
       }
@@ -337,4 +357,3 @@ class BatteryOptimization {
     return out;
   }
 }
-
