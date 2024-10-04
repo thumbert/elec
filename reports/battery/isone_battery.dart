@@ -59,7 +59,7 @@ class ReportDriver {
         nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
       ));
     }
-    var opt = BatteryOptimization(
+    var opt = BatteryOptimizationSimple(
       battery: battery,
       initialBatteryState: initialState,
       daPrice: daPrice,
@@ -93,7 +93,7 @@ class ReportDriver {
         nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
       ));
     }
-    opt = BatteryOptimization(
+    opt = BatteryOptimizationSimple(
       battery: battery,
       initialBatteryState: initialState,
       daPrice: daPrice,
@@ -163,7 +163,7 @@ class ReportDriver {
         nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
       ));
     }
-    var opt = BatteryOptimization(
+    var opt = BatteryOptimizationSimple(
       battery: battery,
       initialBatteryState: initialState,
       daPrice: daPrice,
@@ -202,7 +202,7 @@ class ReportDriver {
         nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
       ));
     }
-    opt = BatteryOptimization(
+    opt = BatteryOptimizationSimple(
       battery: battery,
       initialBatteryState: initialState,
       daPrice: daPrice,
@@ -361,7 +361,7 @@ void oneDayAnalysis({
   var daPrices = report.daPrices.window(term.interval).toTimeSeries();
   var rtPrices = report.rtPrices.window(term.interval).toTimeSeries();
 
-  final opt = BatteryOptimization(
+  final opt = BatteryOptimizationSimple(
     battery: report.battery,
     initialBatteryState: report.initialState,
     daPrice: daPrices,

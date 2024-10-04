@@ -10,7 +10,7 @@ import 'package:timeseries/timeseries.dart';
 class BatteryReport {
   BatteryReport({required this.opt});
 
-  final BatteryOptimization opt;
+  final BatteryOptimizationSimple opt;
 
   List<Map<String, dynamic>> makeTracesDispatchHourly() {
     var domain = Interval(

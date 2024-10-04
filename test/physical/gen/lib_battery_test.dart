@@ -165,12 +165,10 @@ void tests() {
       maxCyclesPerYear: 365,
       degradationFactor: TimeSeries<num>(),
     );
-    // print(getBidsOffers());
-
     final initialState = EmptyState(cyclesInCalendarYear: 0, cycleNumber: 0);
 
     test('a battery with no favorable conditions to dispatch', () {
-      final opt = BatteryOptimization(
+      final opt = BatteryOptimizationSimple(
         battery: battery,
         initialBatteryState: initialState,
         daPrice: getDaPrice(),
@@ -196,7 +194,7 @@ void tests() {
         dischargingOffers: [PriceQuantityPair(0, battery.ecoMaxMw)],
         nonDischargingOffers: [PriceQuantityPair(800, battery.ecoMaxMw)],
       );
-      final opt = BatteryOptimization(
+      final opt = BatteryOptimizationSimple(
         battery: battery,
         initialBatteryState: initialState,
         daPrice: TimeSeries.fill(term.hours(), 15),
@@ -244,7 +242,7 @@ void tests() {
       bidsOffers = TimeSeries.from(bidsOffers.intervals, values);
       // print(bidsOffers);
 
-      final opt = BatteryOptimization(
+      final opt = BatteryOptimizationSimple(
         battery: battery,
         initialBatteryState: initialState,
         daPrice: getDaPrice(),
@@ -274,6 +272,20 @@ void tests() {
       for (var e in dailyStats) {
         print(e.toJson());
       }
+    });
+
+    test('a battery with flex optimization', () {
+      final opt = BatteryOptimizationSimple(
+        battery: battery,
+        initialBatteryState: initialState,
+        daPrice: getDaPrice(),
+        rtPrice: getRtPrice(),
+        daBidsOffers: getBidsOffers(),
+        rtBidsOffers: getBidsOffers(),
+      );
+      opt.run();
+      final res = opt.dispatchDa;
+      expect(res.every((e) => e.value is EmptyState), true);
     });
   });
 }

@@ -3,12 +3,11 @@ library price.lib_hourly_lmp.dart;
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:duckdb_dart/duckdb_dart.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';
-import 'package:more/more.dart' hide IndexedIterableExtension;
+// import 'package:more/more.dart' hide IndexedIterableExtension;
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 
@@ -103,9 +102,7 @@ class SummaryStats {
 //     }));
 //   }
 // }
-
 }
-
 
 Map<Ptid, TimeSeries<num>> getHourlyLmpIsone(
     {required List<Ptid> ptids,
@@ -136,7 +133,6 @@ AND date <= '${term.endDate}'
 AND ptid in (${ptids.join(", ")})
 ORDER BY ptid, date, hour, extraDstHour;
 """;
-  // print(query);
   var data = con.fetchRows(query, (List row) {
     final date = Date.fromJulianDay(row[1]);
     var interval = Hour.beginning(TZDateTime(
@@ -145,6 +141,50 @@ ORDER BY ptid, date, hour, extraDstHour;
       interval = interval.next;
     }
     return (row[0] as int, IntervalTuple<num>(interval, row[4].toDouble()));
+  });
+  con.close();
+
+  var res = <int, TimeSeries<num>>{};
+  var groups = groupBy(data, (e) => e.$1);
+  for (var ptid in groups.keys) {
+    res[ptid] = TimeSeries.fromIterable(groups[ptid]!.map((e) => e.$2));
+  }
+  return res;
+}
+
+/// Only selected ptids are stored.  And limited history starting Jan23 for Hub.
+/// 
+Map<Ptid, TimeSeries<num>> get5MinRtLmpIsone({
+  required List<Ptid> ptids,
+  required LmpComponent component,
+  required Term term,
+  required ReportType reportType,
+}) {
+  assert(term.location == IsoNewEngland.location);
+  final m5 = Duration(minutes: 5);
+  final con = Connection(
+      '${Platform.environment['HOME']}/Downloads/Archive/IsoExpress/rt_lmp5min.duckdb',
+      Config(accessMode: AccessMode.readOnly));
+  var cname = switch (component.name) {
+    'lmp' => 'lmp',
+    'congestion' => 'mcc',
+    'loss' => 'mlc',
+    _ => throw StateError('Invalid component $component'),
+  };
+  final query = """
+SELECT ptid, date, minuteOfDay, $cname
+FROM rt_lmp5min
+WHERE report = '${reportType.toString()}'
+AND date >= '${term.startDate}'
+AND date <= '${term.endDate}'
+AND ptid in (${ptids.join(", ")})
+ORDER BY ptid, date, minuteOfDay;
+""";
+  var data = con.fetchRows(query, (List row) {
+    final date = Date.fromJulianDay(row[1], location: IsoNewEngland.location);
+    final start = date.start.add(Duration(minutes: row[2]));
+    var interval = Interval.beginning(start, m5);
+    return (row[0] as int, IntervalTuple<num>(interval, row[3].toDouble()));
   });
   con.close();
 

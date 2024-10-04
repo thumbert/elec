@@ -8,6 +8,36 @@ import 'package:more/collection.dart';
 import 'package:table/table.dart';
 import 'package:timeseries/timeseries.dart';
 
+///
+/// Input
+///  * [ts] is a timeseries with hourly prices for one day
+///  * [n] is the number of hours to charge and discharge, e.g. 4
+///  * [endChargingBeforeHour] when shoudl the charging end, end the discharging
+///    begin.  For example, if [endChargingBeforeHour] = 15, the DAM model
+/// will pick the best 4 hours to charge before 15:00 and best 4 hours to
+/// discharge from 15:00.
+///
+/// Return a set of best charging hours and best discharging hours.  Best is
+/// in the sense that it has the best spread between average price during
+/// discharging and charging.
+///
+({List<IntervalTuple<num>> charging, List<IntervalTuple<num>> discharging})
+    bestHoursChargeDischarge(
+        TimeSeries<num> ts, int n, int endChargingBeforeHour) {
+  var aux = ts.observations
+      .partition((e) => e.interval.start.hour < endChargingBeforeHour);
+  var charging = aux.truthy;
+  charging.sort((a, b) => a.value.compareTo(b.value));
+  final bestCharging = charging.take(n).toList();
+
+  //
+  var discharging = aux.falsey;
+  discharging.sort((a, b) => -a.value.compareTo(b.value));
+  final bestDischarging = discharging.take(n).toList();
+
+  return (charging: bestCharging, discharging: bestDischarging);
+}
+
 /// For each day of the hourly timeseries [ts] calculate the best blocks
 /// of [n] continuous hours to charge and discharge the battery.
 ///
@@ -19,6 +49,7 @@ import 'package:timeseries/timeseries.dart';
 ///  * [minIndex] is the index of the hours when prices are the lowest
 ///  * [maxIndex] is the index of the hours when prices are the highest
 ///
+/// Return a daily timeseries.
 TimeSeries<({int minIndex, num minPrice, int maxIndex, num maxPrice})>
     minMaxDailyPriceForBlock(TimeSeries<num> ts, int n) {
   var dailyTs = ts.groupByIndex((e) => Date.containing(e.start));
@@ -85,8 +116,6 @@ List<Map<String, dynamic>> tabulateBestBlocks(
   return aux;
 }
 
-
-
 // class BestBlocks {
 //   BestBlocks(
 //       {required this.term,
@@ -119,4 +148,3 @@ List<Map<String, dynamic>> tabulateBestBlocks(
 //   /// in $/MWh
 //   final num averageSpread;
 // }
-
