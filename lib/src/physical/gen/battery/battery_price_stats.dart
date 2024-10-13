@@ -19,21 +19,22 @@ import 'package:timeseries/timeseries.dart';
 ///
 /// Return a set of best charging hours and best discharging hours.  Best is
 /// in the sense that it has the best spread between average price during
-/// discharging and charging.
+/// discharging and charging.  The returned lists are time sorted for
+/// convenience.
 ///
 ({List<IntervalTuple<num>> charging, List<IntervalTuple<num>> discharging})
-    bestHoursChargeDischarge(
-        TimeSeries<num> ts, int n, int endChargingBeforeHour) {
-  var aux = ts.observations
-      .partition((e) => e.interval.start.hour < endChargingBeforeHour);
+    bestHoursChargeDischarge(List<IntervalTuple<num>> ts, int n,
+        {required int endChargingBeforeHour}) {
+  var aux = ts.partition((e) => e.interval.start.hour < endChargingBeforeHour);
   var charging = aux.truthy;
   charging.sort((a, b) => a.value.compareTo(b.value));
   final bestCharging = charging.take(n).toList();
+  bestCharging.sort((a, b) => a.interval.compareTo(b.interval));
 
-  //
   var discharging = aux.falsey;
   discharging.sort((a, b) => -a.value.compareTo(b.value));
   final bestDischarging = discharging.take(n).toList();
+  bestDischarging.sort((a, b) => a.interval.compareTo(b.interval));
 
   return (charging: bestCharging, discharging: bestDischarging);
 }

@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## 2024-10-13
+- More battery work
+
 ## 2024-09-27
 - More battery work.  Fix bugs.
 

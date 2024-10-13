@@ -6,6 +6,7 @@ import 'package:collection/collection.dart' hide IterableNumberExtension;
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/physical/bid_curve.dart';
+import 'package:elec/src/physical/gen/battery/battery_price_stats.dart';
 import 'package:elec/src/physical/offer_curve.dart';
 import 'package:timeseries/timeseries.dart';
 import 'battery.dart';
@@ -64,11 +65,19 @@ abstract class BatteryOptimization {
 
   /// Hourly timeseries of battery states for all the hours in the window.
   /// Financial dispatch.
-  late TimeSeries<BatteryState> dispatchDa;
+  ///
+  /// * [endState] is the battery state at the end of the interval.
+  /// * [action] is what the battery did during the interval.
+  ///
+  late TimeSeries<({BatteryState endState, Action action})> dispatchDa;
 
   /// Hourly timeseries of battery states for all the hours in the window.
   /// Physical dispatch.
-  late TimeSeries<BatteryState> dispatchRt;
+  ///
+  /// * [endState] is the battery state at the end of the interval.
+  /// * [action] is what the battery did during the interval.
+  ///
+  late TimeSeries<({BatteryState endState, Action action})> dispatchRt;
 
   /// PnL from the DA schedule, an hourly timeseries.
   late TimeSeries<num> pnlDa;
@@ -81,37 +90,37 @@ abstract class BatteryOptimization {
 
   void run();
 
-  List<CycleStats> _calculateCycleStats() {
+  List<CycleStats> _calculateDaCycleStats() {
     var data = dispatchDa
         .merge(daPrice, f: (x, y) => (x!, y!))
         .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x!.$2, daPnl: y!));
 
-    var cycles = groupBy(data, (e) => e.value.state.cycleNumber);
+    var cycles = groupBy(data, (e) => e.value.state.endState.cycleNumber);
     cycles.remove(cycles.keys.first);
     if (cycles.isEmpty) return <CycleStats>[];
 
     /// split the data into cycles
     var groups = cycles.values.map((xs) {
       var meanChargingDaPrice = xs
-          .where((e) => e.value.state is ChargingState)
+          .where((e) => e.value.state.action == Action.charge)
           .map((e) => e.value.daPrice)
           .mean();
       var meanDischargingDaPrice = xs
-          .where((e) => e.value.state is DischargingState)
+          .where((e) => e.value.state.action == Action.discharge)
           .map((e) => e.value.daPrice)
           .mean();
       var costChargingDa = xs
-          .where((e) => e.value.state is ChargingState)
+          .where((e) => e.value.state.action == Action.charge)
           .map((e) => e.value.daPnl)
           .sum();
       var revenueDischargingDa = xs
-          .where((e) => e.value.state is DischargingState)
+          .where((e) => e.value.state.action == Action.discharge)
           .map((e) => e.value.daPnl)
           .sum();
       var end = xs
           .firstWhere((e) =>
-              e.value.state.batteryLevelMwh == 0 &&
-              e.value.state is DischargingState)
+              e.value.state.endState.batteryLevelMwh == 0 &&
+              e.value.state.action == Action.discharge)
           .interval
           .end;
       var interval = Interval(xs.first.interval.start, end);
@@ -135,18 +144,19 @@ abstract class BatteryOptimization {
       }
       final interval = daPrice[i].interval;
       final priceDa = daPrice[i].value;
-      final state = dispatchDa[i].value;
-      if (i > 0) previousState = dispatchDa[i - 1].value;
+      final (endState: state, action: action) = dispatchDa[i].value;
+
+      if (i > 0) previousState = dispatchDa[i - 1].value.endState;
       num value;
-      switch (state) {
-        case ChargingState():
+      switch (action) {
+        case Action.charge:
           value = -priceDa *
               (state.batteryLevelMwh - previousState.batteryLevelMwh) /
               battery.efficiencyRating;
-        case DischargingState():
+        case Action.discharge:
           value =
               priceDa * (previousState.batteryLevelMwh - state.batteryLevelMwh);
-        case FullyChargedState() || EmptyState() || Unavailable():
+        case _:
           value = 0;
       }
       out.add(IntervalTuple(interval, value));
@@ -165,32 +175,141 @@ abstract class BatteryOptimization {
       }
       final interval = rtPrice[i].interval;
       final priceRt = rtPrice[i].value;
-      final stateDa = dispatchDa[i].value;
-      final stateRt = dispatchRt[i].value;
+      final stateDa = dispatchDa[i].value.endState;
+      final (endState: stateRt, action: action) = dispatchRt[i].value;
       if (i > 0) {
-        previousStateDa = dispatchDa[i - 1].value;
-        previousStateRt = dispatchRt[i - 1].value;
+        previousStateDa = dispatchDa[i - 1].value.endState;
+        previousStateRt = dispatchRt[i - 1].value.endState;
       }
       num value;
-      switch (stateRt) {
-        case ChargingState():
+      switch (action) {
+        case Action.charge:
           num daQuantity =
               stateDa.batteryLevelMwh - previousStateDa.batteryLevelMwh;
           num rtQuantity =
               stateRt.batteryLevelMwh - previousStateRt.batteryLevelMwh;
           value =
               -priceRt * (rtQuantity - daQuantity) / battery.efficiencyRating;
-        case DischargingState():
+        case Action.discharge:
           num daQuantity =
               previousStateDa.batteryLevelMwh - stateDa.batteryLevelMwh;
           num rtQuantity =
               previousStateRt.batteryLevelMwh - stateRt.batteryLevelMwh;
           value = priceRt * (rtQuantity - daQuantity);
-        case FullyChargedState() || EmptyState() || Unavailable():
+        case _:
           value = 0;
       }
       out.add(IntervalTuple(interval, value));
     }
+    return out;
+  }
+
+  /// In the DAM, let the model pick out the best 'n' hours to charge before
+  /// this hour.  For example, if [endChargingBeforeHour] = 15, the DAM model
+  /// will pick the best 'n' hours to charge before 15:00 and best 'n' hours to
+  /// discharge from 15:00.
+  TimeSeries<({BatteryState endState, Action action})> _runDaDispatchIsoOptim(
+      int endChargingBeforeHour) {
+    final out =
+        TimeSeries<({BatteryState endState, Action action})>.fromIterable([
+      IntervalTuple((daPrice.first.interval as Hour).previous,
+          (endState: initialBatteryState, action: Action.none)),
+    ]);
+
+    // group by day
+    var groups = groupBy(daPrice, (e) => Date.containing(e.interval.start));
+    var days = groups.keys.toList();
+
+    for (var day in days) {
+      var prices = groups[day]!;
+      final hours = day.hours();
+      // get the best 'n' hours to charge and discharge
+      var bestHours = bestHoursChargeDischarge(prices, battery.hours(),
+          endChargingBeforeHour: endChargingBeforeHour);
+      var chargingHours = bestHours.charging.map((e) => e.interval).toSet();
+      var dischargingHours =
+          bestHours.discharging.map((e) => e.interval).toSet();
+
+      for (var i = 0; i < hours.length; i++) {
+        var state = out.last.value.endState;
+        var cycleNumber = state.cycleNumber;
+        var cyclesInCalendarYear = state.cyclesInCalendarYear;
+        final batteryLevelMwh = out.last.value.endState.batteryLevelMwh;
+
+        // reset the counter of cycles in calendar year
+        if (hours[i].start.year == out.last.interval.start.year + 1) {
+          cyclesInCalendarYear = 0;
+          state = Empty(
+              cycleNumber: cycleNumber,
+              cyclesInCalendarYear: cyclesInCalendarYear);
+          out.add(IntervalTuple(
+              hours[i], (endState: state, action: Action.toEmpty)));
+          continue;
+        }
+        //
+        // Introduce OUTAGES here!
+        //
+        if (cyclesInCalendarYear > battery.maxCyclesPerYear) {
+          // battery becomes unavailable
+          state = Unavailable(
+              cycleNumber: cycleNumber,
+              cyclesInCalendarYear: cyclesInCalendarYear);
+          out.add(IntervalTuple(
+              hours[i], (endState: state, action: Action.toUnavailable)));
+          continue;
+        }
+
+        // in charging hours
+        if (chargingHours.contains(hours[i])) {
+          var newLevel = math.min(
+              batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
+          if (state is Empty) {
+            // battery begins a new charging cycle
+            cycleNumber += 1;
+            cyclesInCalendarYear += 1;
+          }
+          if (newLevel == battery.totalCapacityMWh) {
+            // get to full
+            state = FullyCharged(
+                batteryLevelMwh: battery.totalCapacityMWh,
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
+          } else {
+            state = PartiallyCharged(
+                batteryLevelMwh: newLevel,
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
+          }
+          out.add(IntervalTuple(
+              hours[i], (endState: state, action: Action.charge)));
+          continue;
+        }
+
+        // in discharging hours
+        if (dischargingHours.contains(hours[i])) {
+          var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
+          if (newLevel == 0) {
+            state = Empty(
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
+          } else {
+            state = PartiallyCharged(
+                batteryLevelMwh: newLevel,
+                cycleNumber: cycleNumber,
+                cyclesInCalendarYear: cyclesInCalendarYear);
+          }
+          out.add(IntervalTuple(
+              hours[i], (endState: state, action: Action.discharge)));
+          continue;
+        }
+
+        // continue with the current state
+        out.add(
+            IntervalTuple(hours[i], (endState: state, action: Action.none)));
+      }
+    }
+
+    out.removeAt(0); // remove the spurious initial state
     return out;
   }
 }
@@ -237,7 +356,7 @@ class BatteryOptimizationSimple extends BatteryOptimization {
     //
     dispatchRt = _runDispatchSimple(price: rtPrice, bidsOffers: rtBidsOffers);
     pnlRt = _calculateHourlyPnlRt();
-    cycleStats = _calculateCycleStats();
+    cycleStats = _calculateDaCycleStats();
   }
 
   /// Use a greedy algorith for dispatch:
@@ -247,13 +366,14 @@ class BatteryOptimizationSimple extends BatteryOptimization {
   /// The hours to charge and discharge are preset in the [bidsOffers].  No
   /// attempt is made to select the best hours.
   ///
-  TimeSeries<BatteryState> _runDispatchSimple({
+  TimeSeries<({BatteryState endState, Action action})> _runDispatchSimple({
     required TimeSeries<num> price,
     required TimeSeries<({BidCurve bids, OfferCurve offers})> bidsOffers,
   }) {
-    final out = TimeSeries<BatteryState>.fromIterable([
-      IntervalTuple(
-          (price.first.interval as Hour).previous, initialBatteryState),
+    final out =
+        TimeSeries<({BatteryState endState, Action action})>.fromIterable([
+      IntervalTuple((price.first.interval as Hour).previous,
+          (endState: initialBatteryState, action: Action.none)),
     ]);
 
     for (var i = 0; i < bidsOffers.length; i++) {
@@ -271,73 +391,98 @@ class BatteryOptimizationSimple extends BatteryOptimization {
             'Offer price of $offerPrice <= price $priceMkt <= bid price $bidPrice');
       }
 
-      var state = out.last.value;
+      var state = out.last.value.endState;
+      // what happens in this interval (hour)
+      late Action action;
       var cycleNumber = state.cycleNumber;
       var cyclesInCalendarYear = state.cyclesInCalendarYear;
-      final batteryLevelMwh = out.last.value.batteryLevelMwh;
+      final batteryLevelMwh = out.last.value.endState.batteryLevelMwh;
 
       /// reset the counter of cycles in calendar year
       if (interval.start.year == out.last.interval.start.year + 1) {
         cyclesInCalendarYear = 0;
       }
 
+      // Note that the level may not change on some intervals when the
+      // battery is charging.  It only means that the prices were not
+      // favorable and charging has been paused.  Battery is still on it's
+      // way to fully charged, before starting to discharge.
       switch (state) {
-        case ChargingState():
-          if (batteryLevelMwh == battery.totalCapacityMWh) {
-            state = FullyChargedState(
-                batteryLevelMwh: battery.totalCapacityMWh,
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-            break;
+        case PartiallyCharged():
+          if (priceMkt <= bidPrice) {
+            // charge
+            action = Action.charge;
+            var newLevel = math.min(
+                batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
+            if (newLevel == battery.totalCapacityMWh) {
+              // get to full
+              state = FullyCharged(
+                  batteryLevelMwh: battery.totalCapacityMWh,
+                  cycleNumber: cycleNumber,
+                  cyclesInCalendarYear: cyclesInCalendarYear);
+              break;
+            } else {
+              // remain partially charged
+              state = PartiallyCharged(
+                  batteryLevelMwh: newLevel,
+                  cycleNumber: cycleNumber,
+                  cyclesInCalendarYear: cyclesInCalendarYear);
+              break;
+            }
           }
-          var newLevel = (priceMkt <= bidPrice)
-              ? math.min(
-                  batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh)
-              : batteryLevelMwh;
-          // Note that the level may not change on some intervals when the
-          // battery is charging.  It only means that the prices were not
-          // favorable and charging has been paused.  Battery is still on it's
-          // way to fully charged, before starting to discharge.
-          state = ChargingState(
-              batteryLevelMwh: newLevel,
+
+          if (priceMkt >= offerPrice) {
+            // discharge
+            action = Action.discharge;
+            var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
+            if (newLevel == 0) {
+              // get to empty
+              state = Empty(
+                  cycleNumber: cycleNumber,
+                  cyclesInCalendarYear: cyclesInCalendarYear);
+              break;
+            } else {
+              // remain partially charged
+              state = PartiallyCharged(
+                  batteryLevelMwh: newLevel,
+                  cycleNumber: cycleNumber,
+                  cyclesInCalendarYear: cyclesInCalendarYear);
+              break;
+            }
+          }
+
+          // do nothing, keep the same battery level
+          state = PartiallyCharged(
+              batteryLevelMwh: batteryLevelMwh,
               cycleNumber: cycleNumber,
               cyclesInCalendarYear: cyclesInCalendarYear);
+          action = Action.none;
 
-        case FullyChargedState():
+        case FullyCharged():
           if (priceMkt >= offerPrice) {
-            // battery is discharging
+            // battery starts to discharge
             var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
-            state = DischargingState(
+            state = PartiallyCharged(
                 batteryLevelMwh: newLevel,
                 cycleNumber: cycleNumber,
                 cyclesInCalendarYear: cyclesInCalendarYear);
-          }
-
-        case DischargingState():
-          if (batteryLevelMwh == 0) {
-            state = EmptyState(
+            action = Action.discharge;
+          } else {
+            // battery does nothing, remains fully charged
+            state = FullyCharged(
+                batteryLevelMwh: battery.totalCapacityMWh,
                 cycleNumber: cycleNumber,
                 cyclesInCalendarYear: cyclesInCalendarYear);
-            break;
+            action = Action.none;
           }
-          var newLevel = (priceMkt >= offerPrice)
-              ? math.max(batteryLevelMwh - battery.ecoMaxMw, 0)
-              : batteryLevelMwh;
-          // Note that the level may not change on some intervals when the
-          // battery is discharging.  It only means that the prices were not
-          // favorable and discharging has been paused.  Battery is still on
-          // it's way to the empty state, before starting a new charging cycle.
-          state = DischargingState(
-              batteryLevelMwh: newLevel,
-              cycleNumber: cycleNumber,
-              cyclesInCalendarYear: cyclesInCalendarYear);
 
-        case EmptyState():
+        case Empty():
           if (cyclesInCalendarYear == battery.maxCyclesPerYear) {
             // battery becomes unavailable
             state = Unavailable(
                 cycleNumber: cycleNumber,
                 cyclesInCalendarYear: cyclesInCalendarYear);
+            action = Action.toUnavailable;
             break;
           }
           if (priceMkt <= bidPrice) {
@@ -348,16 +493,18 @@ class BatteryOptimizationSimple extends BatteryOptimization {
                 batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
             if (newLevel <= battery.totalCapacityMWh &&
                 batteryLevelMwh < battery.totalCapacityMWh) {
-              state = ChargingState(
+              state = PartiallyCharged(
                   batteryLevelMwh: newLevel,
                   cycleNumber: cycleNumber,
                   cyclesInCalendarYear: cyclesInCalendarYear);
+              action = Action.charge;
             }
           } else {
             // remains empty
-            state = EmptyState(
+            state = Empty(
                 cycleNumber: cycleNumber,
                 cyclesInCalendarYear: cyclesInCalendarYear);
+            action = Action.none;
           }
 
         case Unavailable():
@@ -365,14 +512,17 @@ class BatteryOptimizationSimple extends BatteryOptimization {
           // Introduce OUTAGES here!
           //
           if (cyclesInCalendarYear < battery.maxCyclesPerYear) {
-            state =
-                EmptyState(cycleNumber: cycleNumber, cyclesInCalendarYear: 0);
+            state = Empty(cycleNumber: cycleNumber, cyclesInCalendarYear: 0);
+            action = Action.toEmpty;
+            break;
+          } else {
+            action = Action.none;
             break;
           }
       }
 
       // record the current state
-      out.add(IntervalTuple(interval, state));
+      out.add(IntervalTuple(interval, (endState: state, action: action)));
     }
 
     out.removeAt(0); // remove the spurious initial state
@@ -393,161 +543,28 @@ class BatteryOptimizationIso extends BatteryOptimization {
     this.battery = battery;
     this.initialBatteryState = initialBatteryState;
     this.daPrice = daPrice;
+    rtPrice = daPrice;
   }
 
-  /// In the DAM, let the model pick out the best 4 hours to charge before
+  /// In the DAM, let the model pick out the best 'n' hours to charge before
   /// this hour.  For example, if [endChargingBeforeHour] = 15, the DAM model
-  /// will pick the best 4 hours to charge before 15:00 and best 4 hours to
+  /// will pick the best 'n' hours to charge before 15:00 and best 'n' hours to
   /// discharge from 15:00.
   final int endChargingBeforeHour;
 
   @override
   void run() {
     // DA dispatch, ISO optimizes revenue
-    dispatchDa = _runDaDispatch(price: daPrice);
+    dispatchDa = _runDaDispatchIsoOptim(endChargingBeforeHour);
     pnlDa = _calculateHourlyPnlDa();
     // run to the DA schedule in the RT market
     dispatchRt = TimeSeries.fromIterable(dispatchDa);
     pnlRt = _calculateHourlyPnlRt();
-    cycleStats = _calculateCycleStats();
-  }
-
-  TimeSeries<BatteryState> _runDaDispatch({
-    required TimeSeries<num> price,
-  }) {
-    final out = TimeSeries<BatteryState>.fromIterable([
-      IntervalTuple(
-          (price.first.interval as Hour).previous, initialBatteryState),
-    ]);
-
-    /// group by day
-    var groups = groupBy(price, (e) => Date.containing(e.interval.start));
-    var days = groups.keys.toList();
-
-    for (var i = 0; i < days.length; i++) {
-      var ps = groups[days[i]]!;
-      ps.sort((a, b) => a.value.compareTo(b.value));
-
-      final interval = price[i].interval;
-      final priceMkt = price[i].value;
-      // // FIXME Assumes that bids/offers have only one element
-      // final bidPrice = bidsOffers[i].value.bids.first.price;
-      // final offerPrice = bidsOffers[i].value.offers.first.price;
-      // if (offerPrice <= priceMkt && priceMkt <= bidPrice) {
-      //   throw StateError('Inconsistent state for ${price[i].interval}.  '
-      //       'Offer price of $offerPrice <= price $priceMkt <= bid price $bidPrice');
-      // }
-
-      var state = out.last.value;
-      var cycleNumber = state.cycleNumber;
-      var cyclesInCalendarYear = state.cyclesInCalendarYear;
-      final batteryLevelMwh = out.last.value.batteryLevelMwh;
-
-      /// reset the counter of cycles in calendar year
-      if (interval.start.year == out.last.interval.start.year + 1) {
-        cyclesInCalendarYear = 0;
-      }
-
-      // switch (state) {
-      //   case ChargingState():
-      //     if (batteryLevelMwh == battery.totalCapacityMWh) {
-      //       state = FullyChargedState(
-      //           batteryLevelMwh: battery.totalCapacityMWh,
-      //           cycleNumber: cycleNumber,
-      //           cyclesInCalendarYear: cyclesInCalendarYear);
-      //       break;
-      //     }
-      //     var newLevel = (priceMkt <= bidPrice)
-      //         ? math.min(
-      //             batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh)
-      //         : batteryLevelMwh;
-      //     // Note that the level may not change on some intervals when the
-      //     // battery is charging.  It only means that the prices were not
-      //     // favorable and charging has been paused.  Battery is still on it's
-      //     // way to fully charged, before starting to discharge.
-      //     state = ChargingState(
-      //         batteryLevelMwh: newLevel,
-      //         cycleNumber: cycleNumber,
-      //         cyclesInCalendarYear: cyclesInCalendarYear);
-
-      //   case FullyChargedState():
-      //     if (priceMkt >= offerPrice) {
-      //       // battery is discharging
-      //       var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
-      //       state = DischargingState(
-      //           batteryLevelMwh: newLevel,
-      //           cycleNumber: cycleNumber,
-      //           cyclesInCalendarYear: cyclesInCalendarYear);
-      //     }
-
-      //   case DischargingState():
-      //     if (batteryLevelMwh == 0) {
-      //       state = EmptyState(
-      //           cycleNumber: cycleNumber,
-      //           cyclesInCalendarYear: cyclesInCalendarYear);
-      //       break;
-      //     }
-      //     var newLevel = (priceMkt >= offerPrice)
-      //         ? math.max(batteryLevelMwh - battery.ecoMaxMw, 0)
-      //         : batteryLevelMwh;
-      //     // Note that the level may not change on some intervals when the
-      //     // battery is discharging.  It only means that the prices were not
-      //     // favorable and discharging has been paused.  Battery is still on
-      //     // it's way to the empty state, before starting a new charging cycle.
-      //     state = DischargingState(
-      //         batteryLevelMwh: newLevel,
-      //         cycleNumber: cycleNumber,
-      //         cyclesInCalendarYear: cyclesInCalendarYear);
-
-      //   case EmptyState():
-      //     if (cyclesInCalendarYear == battery.maxCyclesPerYear) {
-      //       // battery becomes unavailable
-      //       state = Unavailable(
-      //           cycleNumber: cycleNumber,
-      //           cyclesInCalendarYear: cyclesInCalendarYear);
-      //       break;
-      //     }
-      //     if (priceMkt <= bidPrice) {
-      //       // battery begins a new charging cycle
-      //       cycleNumber += 1;
-      //       cyclesInCalendarYear += 1;
-      //       var newLevel = math.min(
-      //           batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
-      //       if (newLevel <= battery.totalCapacityMWh &&
-      //           batteryLevelMwh < battery.totalCapacityMWh) {
-      //         state = ChargingState(
-      //             batteryLevelMwh: newLevel,
-      //             cycleNumber: cycleNumber,
-      //             cyclesInCalendarYear: cyclesInCalendarYear);
-      //       }
-      //     } else {
-      //       // remains empty
-      //       state = EmptyState(
-      //           cycleNumber: cycleNumber,
-      //           cyclesInCalendarYear: cyclesInCalendarYear);
-      //     }
-
-      //   case Unavailable():
-      //     //
-      //     // Introduce OUTAGES here!
-      //     //
-      //     if (cyclesInCalendarYear < battery.maxCyclesPerYear) {
-      //       state =
-      //           EmptyState(cycleNumber: cycleNumber, cyclesInCalendarYear: 0);
-      //       break;
-      //     }
-      // }
-
-      // record the current state
-      out.add(IntervalTuple(interval, state));
-    }
-
-    out.removeAt(0); // remove the spurious initial state
-    return out;
+    // cycleStats = _calculateCycleStats();
   }
 }
 
-class BatteryOptimizationFlex2 extends BatteryOptimization {
+class BatteryOptimizationFlex extends BatteryOptimization {
   /// This algorithm tries to take advantage of price volatility in non-commited
   /// hours.  For example,
   ///  * If P_{RT} > \overline{P}_{DA}^d (1 + f)
@@ -555,7 +572,7 @@ class BatteryOptimizationFlex2 extends BatteryOptimization {
   ///
   /// RT prices are 5min intervals
   ///
-  BatteryOptimizationFlex2({
+  BatteryOptimizationFlex({
     required Battery battery,
     required BatteryState initialBatteryState,
     required TimeSeries<num> daPrice,
@@ -568,7 +585,11 @@ class BatteryOptimizationFlex2 extends BatteryOptimization {
     this.initialBatteryState = initialBatteryState;
     this.daPrice = daPrice;
     this.rtPrice = rtPrice;
+    assert(chargeDiscount < 1 && chargeDiscount > 0);
+    assert(dischargeMultiplier > 1);
   }
+
+  // final TimeSeries<num> rt5MinPrice;
 
   /// Battery starts discharging outside of DA schedule if
   /// RT price > [dischargeMultiplier] * average discharge price in the DAM
@@ -586,150 +607,196 @@ class BatteryOptimizationFlex2 extends BatteryOptimization {
 
   @override
   void run() {
-    // DA dispatch is the
-    // dispatchDa = _runDaDispatchFlex(price: daPrice, bidsOffers: daBidsOffers);
-    // pnlDa = _calculateHourlyPnlDa();
-    // //
-    // dispatchRt = _runRtDispatchFlex(price: rtPrice, bidsOffers: rtBidsOffers);
-    // pnlRt = _calculateHourlyPnlRt();
+    // DA dispatch is the ISO optimization
+    dispatchDa = _runDaDispatchIsoOptim(endChargingBeforeHour);
+    pnlDa = _calculateHourlyPnlDa();
+    //
+    dispatchRt = _runRtDispatchFlex();
+    pnlRt = _calculateHourlyPnlRt();
     // cycleStats = _calculateCycleStats();
   }
 
+  /// RT dispatch is also hourly.  It could be based on the 5Min interval,
+  /// but here it's implemented with the ourly grain
   ///
-  // TimeSeries<BatteryState> _runDaDispatchFlex({
-  //   required TimeSeries<num> price,
-  //   required TimeSeries<({BidCurve bids, OfferCurve offers})> bidsOffers,
-  // }) {}
-
-  /// Use a more flexible algorithm for dispatch:
-  ///   If an interval is in the money relative to charging/discharging do it
-  ///   if the transition matrix allows it.
-  TimeSeries<BatteryState> _runRtDispatchFlex({
-    required TimeSeries<num> price,
-    required TimeSeries<({BidCurve bids, OfferCurve offers})> bidsOffers,
-  }) {
-    final out = TimeSeries<BatteryState>.fromIterable([
+  TimeSeries<({BatteryState endState, Action action})> _runRtDispatchFlex() {
+    var start =
+        Interval.ending(rtPrice.first.interval.start, Duration(hours: 1));
+    final out =
+        TimeSeries<({BatteryState endState, Action action})>.fromIterable([
       IntervalTuple(
-          (price.first.interval as Hour).previous, initialBatteryState),
+          start, (endState: initialBatteryState, action: Action.none)),
     ]);
 
-    for (var i = 0; i < bidsOffers.length; i++) {
-      if (price[i].interval != bidsOffers[i].interval) {
-        throw StateError(
-            'Missaligned DA prices and bids/offers, ${price[i].interval}');
-      }
-      final interval = price[i].interval;
-      final priceMkt = price[i].value;
-      // FIXME Assumes that bids/offers have only one element
-      final bidPrice = bidsOffers[i].value.bids.first.price;
-      final offerPrice = bidsOffers[i].value.offers.first.price;
-      if (offerPrice <= priceMkt && priceMkt <= bidPrice) {
-        throw StateError('Inconsistent state for ${price[i].interval}.  '
-            'Offer price of $offerPrice <= price $priceMkt <= bid price $bidPrice');
-      }
+    final daPriceByDay =
+        groupBy(daPrice, (e) => Date.containing(e.interval.start));
+    final daDispatchByDay =
+        groupBy(dispatchDa, (e) => Date.containing(e.interval.start));
+    final rtPriceByDay =
+        groupBy(rtPrice, (e) => Date.containing(e.interval.start));
 
-      var state = out.last.value;
-      var cycleNumber = state.cycleNumber;
-      var cyclesInCalendarYear = state.cyclesInCalendarYear;
-      final batteryLevelMwh = out.last.value.batteryLevelMwh;
+    // loop over the days
+    for (var day in rtPriceByDay.keys) {
+      var priceDa = daPriceByDay[day]!;
+      var priceRt = rtPriceByDay[day]!;
+      var daDispatch = daDispatchByDay[day]!;
+      // calculate the average charging price
+      var avgChargingPriceDa = daDispatch.indexed
+          .where((e) => e.$2.value.action == Action.charge)
+          .map((e) => e.$1)
+          .map((i) => priceDa[i].value)
+          .mean();
+      // calculate the average discharging price
+      var avgDischargingPriceDa = daDispatch.indexed
+          .where((e) => e.$2.value.action == Action.discharge)
+          .map((e) => e.$1)
+          .map((i) => priceDa[i].value)
+          .mean();
 
-      /// reset the counter of cycles in calendar year
-      if (interval.start.year == out.last.interval.start.year + 1) {
-        cyclesInCalendarYear = 0;
-      }
+      var startedEarlyDischarge = false;
 
-      switch (state) {
-        case ChargingState():
-          if (batteryLevelMwh == battery.totalCapacityMWh) {
-            state = FullyChargedState(
-                batteryLevelMwh: battery.totalCapacityMWh,
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-            break;
-          }
-          var newLevel = (priceMkt <= bidPrice)
-              ? math.min(
-                  batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh)
-              : batteryLevelMwh;
-          // Note that the level may not change on some intervals when the
-          // battery is charging.  It only means that the prices were not
-          // favorable and charging has been paused.  Battery is still on it's
-          // way to fully charged, before starting to discharge.
-          state = ChargingState(
-              batteryLevelMwh: newLevel,
-              cycleNumber: cycleNumber,
-              cyclesInCalendarYear: cyclesInCalendarYear);
+      // loop over the hours of the day
+      for (var i = 0; i < priceDa.length; i++) {
+        final daAction = daDispatch[i].value.action;
+        final hour = daDispatch[i].interval as Hour;
+        var state = out.last.value.endState;
+        var action = out.last.value.action;
+        if (state.cyclesInCalendarYear > battery.maxCyclesPerYear) {
+          // battery becomes unavailable
+          state = Unavailable(
+              cycleNumber: state.cycleNumber,
+              cyclesInCalendarYear: state.cyclesInCalendarYear);
+          out.add(IntervalTuple(
+              hour, (endState: state, action: Action.toUnavailable)));
+          continue;
+        }
+        var cyclesInCalendarYear = state.cyclesInCalendarYear;
 
-        case FullyChargedState():
-          if (priceMkt >= offerPrice) {
-            // battery is discharging
-            var newLevel = math.max(batteryLevelMwh - battery.ecoMaxMw, 0);
-            state = DischargingState(
-                batteryLevelMwh: newLevel,
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-          }
+        /// reset the counter of cycles in calendar year
+        if (hour.start.year == out.last.interval.start.year + 1) {
+          cyclesInCalendarYear = 0;
+        }
 
-        case DischargingState():
-          if (batteryLevelMwh == 0) {
-            state = EmptyState(
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-            break;
-          }
-          var newLevel = (priceMkt >= offerPrice)
-              ? math.max(batteryLevelMwh - battery.ecoMaxMw, 0)
-              : batteryLevelMwh;
-          // Note that the level may not change on some intervals when the
-          // battery is discharging.  It only means that the prices were not
-          // favorable and discharging has been paused.  Battery is still on
-          // it's way to the empty state, before starting a new charging cycle.
-          state = DischargingState(
-              batteryLevelMwh: newLevel,
-              cycleNumber: cycleNumber,
-              cyclesInCalendarYear: cyclesInCalendarYear);
+        if (startedEarlyDischarge) {
+          print(hour.start);
+        }
 
-        case EmptyState():
-          if (cyclesInCalendarYear == battery.maxCyclesPerYear) {
-            // battery becomes unavailable
-            state = Unavailable(
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-            break;
-          }
-          if (priceMkt <= bidPrice) {
-            // battery begins a new charging cycle
-            cycleNumber += 1;
-            cyclesInCalendarYear += 1;
-            var newLevel = math.min(
-                batteryLevelMwh + battery.ecoMaxMw, battery.totalCapacityMWh);
-            if (newLevel <= battery.totalCapacityMWh &&
-                batteryLevelMwh < battery.totalCapacityMWh) {
-              state = ChargingState(
-                  batteryLevelMwh: newLevel,
-                  cycleNumber: cycleNumber,
-                  cyclesInCalendarYear: cyclesInCalendarYear);
+        switch (daAction) {
+          ///
+          ///
+          ///
+          case Action.charge:
+            if (state.batteryLevelMwh < battery.totalCapacityMWh &&
+                !startedEarlyDischarge) {
+              action = Action.charge;
+              var newLevel = math.min(state.batteryLevelMwh + battery.ecoMaxMw,
+                  battery.totalCapacityMWh);
+              if (newLevel == battery.totalCapacityMWh) {
+                // get to full
+                state = FullyCharged(
+                    batteryLevelMwh: battery.totalCapacityMWh,
+                    cycleNumber: state.cycleNumber,
+                    cyclesInCalendarYear: cyclesInCalendarYear);
+              } else {
+                var adder = state.batteryLevelMwh == 0 ? 1 : 0;
+                state = PartiallyCharged(
+                    batteryLevelMwh: newLevel,
+                    cycleNumber: state.cycleNumber + adder,
+                    cyclesInCalendarYear: cyclesInCalendarYear + adder);
+              }
+            } else {
+              // Battery is already full, need to sit it out
+              // state remains the same
+              action = Action.none;
             }
-          } else {
-            // remains empty
-            state = EmptyState(
-                cycleNumber: cycleNumber,
-                cyclesInCalendarYear: cyclesInCalendarYear);
-          }
 
-        case Unavailable():
-          //
-          // Introduce OUTAGES here!
-          //
-          if (cyclesInCalendarYear < battery.maxCyclesPerYear) {
-            state =
-                EmptyState(cycleNumber: cycleNumber, cyclesInCalendarYear: 0);
+          ///
+          ///
+          ///
+          case Action.discharge:
+            if (state.batteryLevelMwh > 0) {
+              action = Action.discharge;
+              var newLevel =
+                  math.max(state.batteryLevelMwh - battery.ecoMaxMw, 0);
+              if (newLevel == 0) {
+                state = Empty(
+                    cycleNumber: state.cycleNumber,
+                    cyclesInCalendarYear: cyclesInCalendarYear);
+              } else {
+                state = PartiallyCharged(
+                    batteryLevelMwh: newLevel,
+                    cycleNumber: state.cycleNumber,
+                    cyclesInCalendarYear: cyclesInCalendarYear);
+              }
+            } else {
+              // battery is already empty, need to sit it out
+              // state remains the same
+              action = Action.none;
+            }
+
+          ///
+          /// Look for RT opportunities in this hour
+          ///
+          case Action.none:
+            action = Action.none;
+            if (hour.start.hour < endChargingBeforeHour) {
+              // Maybe battery is not yet fully charged, check if it makes
+              // sense to charge ahead of DA schedule.
+              if (priceRt[i].value < avgChargingPriceDa * chargeDiscount) {
+                // charge if not already full
+                if (state.batteryLevelMwh < battery.totalCapacityMWh) {
+                  action = Action.charge;
+                  var newLevel = math.min(
+                      state.batteryLevelMwh + battery.ecoMaxMw,
+                      battery.totalCapacityMWh);
+                  if (newLevel == battery.totalCapacityMWh) {
+                    // get to full
+                    state = FullyCharged(
+                        batteryLevelMwh: battery.totalCapacityMWh,
+                        cycleNumber: state.cycleNumber,
+                        cyclesInCalendarYear: cyclesInCalendarYear);
+                  } else {
+                    state = PartiallyCharged(
+                        batteryLevelMwh: newLevel,
+                        cycleNumber: state.cycleNumber,
+                        cyclesInCalendarYear: cyclesInCalendarYear);
+                  }
+                }
+              }
+            } else {
+              // Maybe battery is not yet fully discharged, check if it
+              // makes sense to discharge ahead of DA schedule.
+              if (priceRt[i].value >
+                  avgDischargingPriceDa * dischargeMultiplier) {
+                // discharge if not already empty
+                if (state.batteryLevelMwh > 0) {
+                  action = Action.discharge;
+                  startedEarlyDischarge = true;
+                  var newLevel =
+                      math.max(state.batteryLevelMwh - battery.ecoMaxMw, 0);
+                  if (newLevel == 0) {
+                    state = Empty(
+                        cycleNumber: state.cycleNumber,
+                        cyclesInCalendarYear: cyclesInCalendarYear);
+                  } else {
+                    state = PartiallyCharged(
+                        batteryLevelMwh: newLevel,
+                        cycleNumber: state.cycleNumber,
+                        cyclesInCalendarYear: cyclesInCalendarYear);
+                  }
+                }
+              }
+            }
+
+          case Action.toEmpty:
+          case Action.toUnavailable:
+            // state and action remains the same as in the DAM
+            action = daAction;
             break;
-          }
+        }
+        // add the end state and action for this interval
+        out.add(IntervalTuple(hour, (endState: state, action: action)));
       }
-
-      // record the current state
-      out.add(IntervalTuple(interval, state));
     }
 
     out.removeAt(0); // remove the spurious initial state

@@ -1,6 +1,7 @@
 library test.physical.gen.lib_battery_test;
 
 import 'package:dama/basic/count.dart';
+import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';
@@ -95,6 +96,33 @@ void tests() {
         market: Market.da,
         component: LmpComponent.lmp,
         term: Term.parse('Jan22-Dec22', IsoNewEngland.location))[4000]!;
+    // var traces = [{
+    //   'x': ts.map((e) => e.interval.start.toIso8601String()).toList(),
+    //   'y': ts.map((e) => e.value).toList(),
+    // }];
+    // var layout = <String, dynamic>{
+    //   'title': 'Mass Hub',
+    //   'width': 1000,
+    //   'height': 650,
+    //   'yaxis': {
+    //     'title': 'Hourly DA LMP price, \$/MWh',
+    //   },
+    // };
+    // Plotly.now(traces, layout, file: File('/home/adrian/Downloads/da_lmp.html'));
+
+    test('best hours in day (non-contiguous)', () {
+      var day = Date(2022, 1, 8, location: IsoNewEngland.location).toInterval();
+      var xs = ts.window(day).toTimeSeries();
+      var res = bestHoursChargeDischarge(xs, 4, endChargingBeforeHour: 15);
+      // print(xs);
+      // print('Charging:');
+      // res.charging.forEach(print);
+      // print('Discharging:');
+      // res.discharging.forEach(print);
+      expect(res.charging.length, 4);
+      expect(res.discharging.length, 4);
+    });
+
     test('min/max price blocks for 1Jan22', () {
       // simple case, min block before max, non-overlapping
       var ts1Jan = ts
@@ -165,7 +193,11 @@ void tests() {
       maxCyclesPerYear: 365,
       degradationFactor: TimeSeries<num>(),
     );
-    final initialState = EmptyState(cyclesInCalendarYear: 0, cycleNumber: 0);
+    final initialState = Empty(cyclesInCalendarYear: 0, cycleNumber: 0);
+
+    test('hours', () {
+      expect(battery.hours(), 4);
+    });
 
     test('a battery with no favorable conditions to dispatch', () {
       final opt = BatteryOptimizationSimple(
@@ -178,10 +210,10 @@ void tests() {
       );
       opt.run();
       final res = opt.dispatchDa;
-      expect(res.every((e) => e.value is EmptyState), true);
+      expect(res.every((e) => e.value.endState is Empty), true);
     });
 
-    test('Cycle counter rests on new calendar year', () {
+    test('Cycle counter resets on new calendar year', () {
       final initialState =
           Unavailable(cyclesInCalendarYear: 365, cycleNumber: 500);
       final term = Term.parse('31Dec22-3Jan23', IsoNewEngland.location);
@@ -209,13 +241,15 @@ void tests() {
           res
               .observationAt(
                   Hour.beginning(TZDateTime(IsoNewEngland.location, 2023)))
-              .value is EmptyState,
+              .value
+              .endState is Empty,
           true);
       expect(
           res
               .observationAt(
                   Hour.beginning(TZDateTime(IsoNewEngland.location, 2023)))
               .value
+              .endState
               .cyclesInCalendarYear,
           0);
     });
@@ -250,42 +284,97 @@ void tests() {
         daBidsOffers: bidsOffers,
         rtBidsOffers: bidsOffers,
       );
+      print(getDaPrice());
       opt.run();
 
       final dispatchDa = opt.dispatchDa;
-      dispatchDa.forEach(print);
-      expect(dispatchDa.where((e) => e.value is ChargingState).length, 4);
-      expect(dispatchDa.where((e) => e.value is DischargingState).length, 4);
-      expect(dispatchDa[1].value is ChargingState, true);
-      expect(dispatchDa[1].value.batteryLevelMwh, 100);
-      expect(dispatchDa[17].value is DischargingState, true);
-      expect(dispatchDa[17].value.batteryLevelMwh, 300);
+      // dispatchDa.forEach(print);
+      expect(
+          dispatchDa.where((e) => e.value.endState is PartiallyCharged).length,
+          6);
+      expect(dispatchDa[1].value.endState is PartiallyCharged, true);
+      expect(dispatchDa[1].value.endState.batteryLevelMwh, 100);
+      expect(dispatchDa[17].value.endState is PartiallyCharged, true);
+      expect(dispatchDa[17].value.endState.batteryLevelMwh, 300);
 
-      // calcualte PnL
-      final pnl = opt.pnlDa;
-      // print('PnL:');
-      // print(pnl);
+      // calculate PnL
+      expect(opt.pnlDa.values.where((e) => e < 0).sum().round(), -12699);
+      expect(opt.pnlDa.values.where((e) => e > 0).sum().round(), 21166);
+      expect(opt.pnlDa.sum().round(), 8467);
 
       // get daily stats
-      final dailyStats = opt.cycleStats;
-      print('Daily stats:');
-      for (var e in dailyStats) {
-        print(e.toJson());
-      }
+      // final dailyStats = opt.cycleStats;
+      // print('Daily stats:');
+      // for (var e in dailyStats) {
+      //   print(e.toJson());
+      // }
     });
 
-    test('a battery with flex optimization', () {
-      final opt = BatteryOptimizationSimple(
+    test('battery optimization in DAM by ISO, one day', () {
+      final opt = BatteryOptimizationIso(
         battery: battery,
         initialBatteryState: initialState,
         daPrice: getDaPrice(),
-        rtPrice: getRtPrice(),
-        daBidsOffers: getBidsOffers(),
-        rtBidsOffers: getBidsOffers(),
+        endChargingBeforeHour: 15,
       );
       opt.run();
-      final res = opt.dispatchDa;
-      expect(res.every((e) => e.value is EmptyState), true);
+      // final dispatchDa = opt.dispatchDa;
+      // dispatchDa.forEach(print);
+
+      // calculate PnL
+      expect(opt.pnlDa.values.where((e) => e < 0).sum().round(), -12540);
+      expect(opt.pnlDa.values.where((e) => e > 0).sum().round(), 21824);
+      expect(opt.pnlDa.sum().round(), 9284);
+
+      // get daily stats
+      // final dailyStats = opt.cycleStats;
+      // print('Daily stats:');
+      // for (var e in dailyStats) {
+      //   print(e.toJson());
+      // }
+    });
+
+    test('battery optimization flex, one day', () {
+      var day = Term.parse('8Jul24', IsoNewEngland.location);
+      final daPrice = getHourlyLmpIsone(
+          ptids: [4000],
+          market: Market.da,
+          component: LmpComponent.lmp,
+          term: day)[4000]!;
+      final rtPrice = getHourlyLmpIsone(
+          ptids: [4000],
+          market: Market.rt,
+          component: LmpComponent.lmp,
+          term: day)[4000]!;
+
+      final opt = BatteryOptimizationFlex(
+        battery: battery,
+        initialBatteryState: initialState,
+        daPrice: daPrice,
+        rtPrice: rtPrice,
+        dischargeMultiplier: 1.3,
+        chargeDiscount: 0.8,
+        endChargingBeforeHour: 15,
+      );
+      opt.run();
+      final dispatchDa = opt.dispatchDa;
+      dispatchDa.forEach(print);
+      //
+      print('RT:');
+      final dispatchRt = opt.dispatchRt;
+      dispatchRt.forEach(print);
+
+      // calculate PnL
+      // expect(opt.pnlDa.values.where((e) => e < 0).sum().round(), -12540);
+      // expect(opt.pnlDa.values.where((e) => e > 0).sum().round(), 21824);
+      // expect(opt.pnlDa.sum().round(), 9284);
+
+      // get daily stats
+      // final dailyStats = opt.cycleStats;
+      // print('Daily stats:');
+      // for (var e in dailyStats) {
+      //   print(e.toJson());
+      // }
     });
   });
 }
@@ -293,6 +382,8 @@ void tests() {
 void main() async {
   initializeTimeZones();
   tests();
+
+  // print(getRtPrice());
 
   // TODO: generalize battery dispatch to work with more than one segment in the
   // bid/offer curves!

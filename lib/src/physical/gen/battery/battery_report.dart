@@ -26,11 +26,10 @@ class BatteryReport {
       'x': opt.dispatchRt.intervals
           .map((e) => e.start.toIso8601String())
           .toList(),
-      'y': opt.dispatchRt.values.map((e) => e.batteryLevelMwh).toList(),
+      'y':
+          opt.dispatchRt.values.map((e) => e.endState.batteryLevelMwh).toList(),
       'name': 'Battery level',
     });
-    var layout = <String, dynamic>{};
-
     return traces;
   }
 
