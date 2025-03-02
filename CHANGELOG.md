@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## 2025-03-01
+- Add a function to check if DAM is published for ISONE
+
 ## 2024-10-13
 - More battery work
 
