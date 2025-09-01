@@ -37,10 +37,10 @@ class ReportDriver {
   void run(Term term) {
     // oneDayAnalysis(
     //     day: Date(2024, 1, 1, location: IsoNewEngland.location), report: this);
-    dailyPnlPlot(Term.parse('Jan21-Dec21', IsoNewEngland.location));
-    dailyPnlPlot(Term.parse('Jan22-Dec22', IsoNewEngland.location));
-    dailyPnlPlot(Term.parse('Jan23-Dec23', IsoNewEngland.location));
-    dailyPnlPlot(Term.parse('Jan24-Aug24', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan21-Dec21', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan22-Dec22', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan23-Dec23', IsoNewEngland.location));
+    // dailyPnlPlot(Term.parse('Jan24-Aug24', IsoNewEngland.location));
     monthlyPnl(term);
   }
 

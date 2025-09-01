@@ -242,29 +242,26 @@ class Ieso implements Iso {
   static final Bucket bucketPeak = bucket5x16;
 
   /// load zones
-  static final ontario = IesoLoadZone.ontario; // all of the pool
   static final northwest = IesoLoadZone.northwest;
   static final northeast = IesoLoadZone.northeast;
   static final ottawa = IesoLoadZone.ottawa;
   static final east = IesoLoadZone.east;
   static final toronto = IesoLoadZone.toronto;
   static final essa = IesoLoadZone.essa;
-  static final bruce = IesoLoadZone.bruce;
   static final southwest = IesoLoadZone.southwest;
   static final niagara = IesoLoadZone.niagara;
   static final west = IesoLoadZone.west;
 
   @override
   final loadZones = <String, int>{
-    'Northwest': 0,
-    'NorthEast': 0,
-    'Ottawa': 0,
     'East': 0,
-    'Toronto': 0,
     'Essa': 0,
-    'Bruce': 0,
-    'Southwest': 0,
     'Niagara': 0,
+    'Northeast': 0,
+    'Northwest': 0,
+    'Ottawa': 0,
+    'Southwest': 0,
+    'Toronto': 0,
     'West': 0,
   };
 
@@ -275,7 +272,7 @@ class Ieso implements Iso {
     // Maybe others, eh?
   };
 
-  /// Yes, you read it right.  Ontario publishes all their data in EST time
+  /// Yes, you read it right!  Ontario publishes all their data in EST time
   /// that is, no daylight savings (no 23 hours in Mar, 25 in Nov).  It's -0500
   /// all year long.  Wikipedia recommends using America/Cancun as the
   /// timezone that respects that year long.

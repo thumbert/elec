@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## 2025-09-01
+- Clean up the IESO zone names.
+
 ## 2024-10-13
 - More battery work
 

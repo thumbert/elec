@@ -1,7 +1,23 @@
 library weather.lib_weather_utils;
 
+import 'package:dama/basic/num_iterable_extensions.dart';
 import 'package:date/date.dart';
+import 'package:elec/src/risk_system/pricing/calculators/weather/cdd_hdd.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
+
+/// Calculate the CDD or HDD index for a given [term] from the daily
+/// timeseries [ts].  
+/// 
+/// The [term] and the timeseries [ts] need to be in the same timezone.
+/// 
+num calculateIndex(
+    {required Term term,
+    required TimeSeries<num> ts,
+    required CddHdd indexType}) {
+  var xs = ts.window(term.interval);
+  return xs.map((e) => indexType.payoff(e.value)).sum();
+}
 
 /// Make historical terms for different weather instruments.
 /// To make the last complete 30 past Aug months, use startMonth = endMonth = 8.
@@ -13,6 +29,7 @@ import 'package:timezone/timezone.dart';
 /// the generated historical terms.
 ///
 /// Return a list of intervals in UTC time zone.
+@Deprecated("Use Term.generate() from date package")
 List<Interval> makeHistoricalTerm(int startMonth, int endMonth, {int n = 30}) {
   // check that the month list is increasing by 1 and has no gaps
   var yearEnd = Date.today(location: UTC).year;
@@ -46,5 +63,3 @@ List<Interval> makeHistoricalTerm(int startMonth, int endMonth, {int n = 30}) {
 
   return out.sublist(out.length - n);
 }
-
-
