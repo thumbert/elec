@@ -6,6 +6,9 @@
 ## 2025-09-01
 - Clean up the IESO zone names.
 
+## 2025-03-01
+- Add a function to check if DAM is published for ISONE
+
 ## 2024-10-13
 - More battery work
 
