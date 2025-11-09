@@ -2,6 +2,7 @@ library elec.risk_system;
 
 import 'dart:convert';
 import 'package:collection/collection.dart';
+import 'package:more/temporal.dart';
 
 import 'package:tuple/tuple.dart';
 import 'package:timeseries/timeseries.dart';

@@ -1,5 +1,4 @@
-part of elec.risk_system;
-
+part of '../../risk_system.dart';
 
 class LmpComponent {
   final String name;
@@ -17,9 +16,9 @@ class LmpComponent {
       return energy;
     } else if (y == 'lmp') {
       return lmp;
-    } else if (y == 'congestion') {
+    } else if (y == 'congestion' || y == 'mcc') {
       return congestion;
-    } else if (y == 'loss') {
+    } else if (y == 'loss' || y == 'mcl' || y == 'mlc') {
       return loss;
     } else if (y == 'loss%') {
       return lossPercent;
@@ -28,6 +27,23 @@ class LmpComponent {
     }
   }
 
+  String shortName() {
+    switch (this) {
+      case LmpComponent.energy:
+        return 'energy';
+      case LmpComponent.lmp:
+        return 'lmp';
+      case LmpComponent.congestion:
+        return 'mcc';
+      case LmpComponent.loss:
+        return 'mlc';
+      case LmpComponent.lossPercent:
+        return 'loss%';
+      case _:
+        throw StateError('Unrecognized LMP component: $this');  
+    }
+  }
+
   @override
-  String toString()  => name;
+  String toString() => name;
 }

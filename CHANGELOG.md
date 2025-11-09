@@ -3,6 +3,9 @@
 ## TODO
 - 
 
+## 2025-11-09
+- Add more parsing for lmp_component, and shortName() method
+
 ## 2025-09-01
 - Clean up the IESO zone names.
 
