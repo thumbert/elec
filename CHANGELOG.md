@@ -1,7 +1,10 @@
 # Changelog
 
 ## TODO
-- 
+- Clean the lints!
+
+## 2025-11-19
+- Add physical/load/load_ramp.dart
 
 ## 2025-11-09
 - Add more parsing for lmp_component, and shortName() method
