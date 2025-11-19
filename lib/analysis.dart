@@ -1,5 +1,3 @@
-library analysis;
-
 export 'src/analysis/filter/base_filter.dart';
 export 'src/analysis/filter/days_around_filter.dart';
 export 'src/analysis/filter/days_before_filter.dart';
