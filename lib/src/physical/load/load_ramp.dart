@@ -21,6 +21,20 @@ class Ramp {
   num slope() => (maxLoad - minLoad) / (endHourBeginning - startHourBeginning);
 
   @override
+  String toString() {
+    return toJson().toString(); 
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startHourBeginning': startHourBeginning,
+      'endHourBeginning': endHourBeginning,
+      'minLoad': minLoad,
+      'maxLoad': maxLoad,
+    };
+  } 
+
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Ramp &&
