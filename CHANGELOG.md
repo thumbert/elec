@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2025-11-26
+- Fix FTR settle price for auction.  Was doing the wrong averaging for offpeak!  Ouch.
+
 ## 2025-11-19
 - Add physical/load/load_ramp.dart
 

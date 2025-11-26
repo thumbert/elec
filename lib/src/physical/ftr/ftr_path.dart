@@ -175,7 +175,7 @@ class FtrPath {
   /// Get the settle price for an auction
   Future<num> getSettlePriceForAuction(FtrAuction auction) async {
     var aux =
-        await getDailySettlePrices(term: Term.fromInterval(auction.interval));
+        await getHourlySettlePrices(term: Term.fromInterval(auction.interval));
     if (aux.isEmpty) return double.nan;
     return mean(aux.map((e) => e.value));
   }
