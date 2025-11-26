@@ -174,8 +174,9 @@ class FtrPath {
 
   /// Get the settle price for an auction
   Future<num> getSettlePriceForAuction(FtrAuction auction) async {
-    var aux =
+    Iterable<IntervalTuple<num>> aux =
         await getHourlySettlePrices(term: Term.fromInterval(auction.interval));
+    aux = aux.where((e) => bucket.containsHour(e.interval as Hour));
     if (aux.isEmpty) return double.nan;
     return mean(aux.map((e) => e.value));
   }
