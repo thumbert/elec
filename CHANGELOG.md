@@ -3,7 +3,7 @@
 ## TODO
 - Clean the lints!
 
-## 2025-12-05 (version 2.1.0)
+## 2025-12-05 (version 2.2.0)
 - Remove dependency of tuple
 - Clean some lints
 - Upgrade sdk to 3.9.3
