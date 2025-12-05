@@ -1,20 +1,16 @@
-library load.solar.lib_solar_elevation;
-
 import 'dart:math';
 import 'package:date/date.dart';
 import 'package:timezone/timezone.dart';
 
-var coordinates = <String,Coordinates>{
+var coordinates = <String, Coordinates>{
   'BOS': Coordinates(42.34, -71.03),
 };
-
 
 class Coordinates {
   num latitude;
   num longitude;
   Coordinates(this.latitude, this.longitude);
 }
-
 
 /// Calculate the solar elevation angle in degrees.
 /// The elevation angle (used interchangeably with altitude angle) is the

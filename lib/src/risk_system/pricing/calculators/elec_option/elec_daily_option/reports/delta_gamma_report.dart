@@ -1,7 +1,5 @@
-library risk_system.pricing.calculators.elec_option.elec_daily_option.reports.delta_gamma_report;
-
 import 'package:dama/dama.dart';
-import 'package:elec/calculators/elec_daily_option.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
@@ -10,7 +8,7 @@ import 'package:table/table_base.dart';
 class DeltaGammaReportElecDailyOption implements Report {
   ///
   DeltaGammaReportElecDailyOption(this.calculator, {List<num>? shocks}) {
-    this.shocks = shocks ??defaultShocks;
+    this.shocks = shocks ?? defaultShocks;
   }
 
   ElecDailyOption calculator;
@@ -23,7 +21,7 @@ class DeltaGammaReportElecDailyOption implements Report {
   static final _fmtPct = NumberFormat.decimalPercentPattern(decimalDigits: 0);
 
   /// json output
-  var _json = <String,dynamic>{};
+  var _json = <String, dynamic>{};
 
   /// default underlying price shocks as a percent of underlying
   final List<num> defaultShocks = List.generate(11, (i) => -0.2 + i * 0.04);
@@ -60,8 +58,8 @@ class DeltaGammaReportElecDailyOption implements Report {
     var aux =
         reshape(totals, ['term', 'curveId', 'bucket'], ['shock'], 'delta');
 
-    var _tbl = Table.from(aux, options: {'columnSeparation': '  '});
-    out.write(_tbl.toString());
+    var tbl0 = Table.from(aux, options: {'columnSeparation': '  '});
+    out.write(tbl0.toString());
     return out.toString();
   }
 

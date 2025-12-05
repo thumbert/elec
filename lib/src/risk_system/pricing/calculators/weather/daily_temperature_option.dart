@@ -1,5 +1,3 @@
-library elec.temperature.products.temperature_option;
-
 import 'dart:math' show max;
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
@@ -33,12 +31,12 @@ class DailyTemperatureOption extends WeatherInstrument {
     var ts = TimeSeries<num>();
     var temps = temperature.window(term);
     for (var temp in temps) {
-      var _strike = strike.observationContains(temp.interval).value;
+      var strike0 = strike.observationContains(temp.interval).value;
       num value;
       if (callPut == CallPut.call) {
-        value = max(temp.value - _strike, 0);
+        value = max(temp.value - strike0, 0);
       } else if (callPut == CallPut.put) {
-        value = max(_strike - temp.value, 0);
+        value = max(strike0 - temp.value, 0);
       } else {
         throw ArgumentError('Unknown $callPut');
       }

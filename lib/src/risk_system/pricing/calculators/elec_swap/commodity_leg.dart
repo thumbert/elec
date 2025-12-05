@@ -1,6 +1,28 @@
-part of elec.calculators.elec_swap;
+
+import 'package:dama/stat/descriptive/summary.dart';
+import 'package:elec/calculators.dart';
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/commodity_leg.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/leaf.dart';
+import 'package:elec/time.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
+
 
 class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
+  CommodityLeg({
+    required this.curveId,
+    required this.bucket,
+    required this.timePeriod,
+    required this.quantitySchedule,
+    this.fixPriceSchedule,
+    required this.tzLocation,
+  }) {
+    fixPriceSchedule ??= HourlySchedule.filled(0);
+  }
+
+
   late String curveId;
   String? cashOrPhys;
   @override
@@ -22,16 +44,6 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   late HourlySchedule quantitySchedule;
   late HourlySchedule? fixPriceSchedule;
 
-  CommodityLeg({
-    required this.curveId,
-    required this.bucket,
-    required this.timePeriod,
-    required this.quantitySchedule,
-    this.fixPriceSchedule,
-    required this.tzLocation,
-  }) {
-    fixPriceSchedule ??= HourlySchedule.filled(0);
-  }
 
   /// Support hourly, daily and monthly quantities/fixPrices.
   /// Method is async because it uses [curveIdCache] and [forwardMarksCache].
@@ -107,7 +119,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
     }
   }
 
-  /// TODO: What to do with the quantitySchedule and the fixPriceSchedule when
+  /// What to do with the quantitySchedule and the fixPriceSchedule when
   /// you change the term on a calculator.  How to do you extend them?
   /// Ignore this for now.
   // @override
@@ -144,7 +156,6 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   TimeSeries<num> quantity() {
     var termL = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
-      /// TODO: maybe I can do better here and not expand to hourly first
       var aux = quantitySchedule.toHourly(termL);
       return toMonthly(aux, mean);
     } else {
@@ -162,7 +173,6 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   TimeSeries<num> fixPrice() {
     var termL = term.interval.withTimeZone(tzLocation);
     if (timePeriod == TimePeriod.month) {
-      /// TODO: maybe I can do better here and not expand to hourly first
       var aux = fixPriceSchedule!.toHourly(termL);
       return toMonthly(aux, mean);
     } else {
@@ -172,8 +182,8 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
 
   /// Get the leg fixPrice as an hourly timeseries.
   TimeSeries<num?> hourlyFixPrice() {
-    var _term = term.interval.withTimeZone(tzLocation);
-    return fixPriceSchedule!.toHourly(_term);
+    var term0 = term.interval.withTimeZone(tzLocation);
+    return fixPriceSchedule!.toHourly(term0);
   }
 
   /// Return [true] if the calculator has custom quantity, i.e.
@@ -200,19 +210,18 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
       var months = term.interval
           .withTimeZone(tzLocation)
           .splitLeft((dt) => Month.containing(dt));
-      var _quantityM = toMonthly(hourlyQuantity() as TimeSeries<num>, mean);
-      var _fixPriceM = toMonthly(hourlyFixPrice() as TimeSeries<num>, mean);
-      var _floatingPriceM = toMonthly(hourlyFloatingPrice, mean);
+      var quantityM = toMonthly(hourlyQuantity() as TimeSeries<num>, mean);
+      var fixPriceM = toMonthly(hourlyFixPrice() as TimeSeries<num>, mean);
+      var floatingPriceM = toMonthly(hourlyFloatingPrice, mean);
       for (var month in months) {
-        var _quantity = _quantityM.observationAt(month).value;
-        var _fixPrice = _fixPriceM.observationAt(month).value;
-        var _floatPrice = _floatingPriceM.observationAt(month).value;
+        var quantity = quantityM.observationAt(month).value;
+        var fixPrice = fixPriceM.observationAt(month).value;
+        var floatPrice = floatingPriceM.observationAt(month).value;
         var hours = bucket.countHours(month);
         leaves.add(LeafElecSwap(
-            buySell, month, _quantity, _fixPrice, _floatPrice, hours));
+            buySell, month, quantity, fixPrice, floatPrice, hours));
       }
     } else {
-      /// TODO: continue me
       throw UnimplementedError('Not implemented $timePeriod');
     }
   }
@@ -220,7 +229,7 @@ class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   /// Serialize it
   @override
   Map<String, dynamic> toJson() {
-    var q, fp;
+    late Map<String, dynamic> q, fp;
 
     if (!hasCustomQuantity) {
       q = {'value': (quantitySchedule as HourlyScheduleFilled).value};

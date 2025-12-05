@@ -1,5 +1,3 @@
-library risk_system.electricity_location;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';

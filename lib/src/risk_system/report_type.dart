@@ -1,5 +1,3 @@
-part of '../../risk_system.dart';
-
 enum ReportType {
   finalized,
   preliminary;

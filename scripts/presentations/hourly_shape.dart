@@ -1,5 +1,3 @@
-library scripts.presentations.hourly_shape;
-
 import 'dart:io';
 
 import 'package:dama/dama.dart';

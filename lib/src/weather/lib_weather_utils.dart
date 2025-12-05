@@ -1,5 +1,3 @@
-library weather.lib_weather_utils;
-
 import 'package:dama/basic/num_iterable_extensions.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/cdd_hdd.dart';
@@ -7,10 +5,10 @@ import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
 
 /// Calculate the CDD or HDD index for a given [term] from the daily
-/// timeseries [ts].  
-/// 
+/// timeseries [ts].
+///
 /// The [term] and the timeseries [ts] need to be in the same timezone.
-/// 
+///
 num calculateIndex(
     {required Term term,
     required TimeSeries<num> ts,

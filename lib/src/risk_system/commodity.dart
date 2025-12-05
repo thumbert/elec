@@ -1,5 +1,3 @@
-part of elec.risk_system;
-
 class Commodity {
   final String shortName;
   final String longName;

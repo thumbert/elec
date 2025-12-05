@@ -1,5 +1,4 @@
-
-part of '../../risk_system.dart';
+import 'package:elec/risk_system.dart';
 
 class Quantity {
   num value;
@@ -18,7 +17,7 @@ class Quantity {
   }
 
   @override
-  int get hashCode => hash2(value, unit);
+  int get hashCode => Object.hash(value, unit);
 
   Map<String,dynamic> toMap() => <String,dynamic>{
     'value': value,

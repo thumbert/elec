@@ -1,5 +1,3 @@
-library time.day_filter;
-
 import 'package:date/date.dart';
 import 'package:elec/time.dart';
 

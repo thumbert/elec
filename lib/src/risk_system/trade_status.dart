@@ -1,13 +1,8 @@
-library risk_system.trade_status;
-
-
-
 class TradeStatus {
   final String name;
   const TradeStatus._internal(this.name);
 
-  static final _allowed = <String>{}
-    ..addAll([
+  static final _allowed = <String>{}..addAll([
       'live',
       'closed',
     ]);
@@ -19,8 +14,12 @@ class TradeStatus {
     }
     late TradeStatus out;
     switch (y) {
-      case 'live': out = live; break;
-      case 'closed': out = closed; break;
+      case 'live':
+        out = live;
+        break;
+      case 'closed':
+        out = closed;
+        break;
     }
     return out;
   }
@@ -29,5 +28,5 @@ class TradeStatus {
   static const closed = TradeStatus._internal('closed');
 
   @override
-  String toString()  => name;
+  String toString() => name;
 }

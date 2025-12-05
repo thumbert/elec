@@ -1,6 +1,3 @@
-part of '../../risk_system.dart';
-
-
 class Unit {
   final String name;
   const Unit._internal(this.name);

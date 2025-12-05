@@ -1,5 +1,3 @@
-library api.temperature_noaa;
-
 import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 
@@ -39,12 +37,12 @@ class ApiTemperatureNoaa {
     pipeline.add({'\$match': match});
     pipeline.add({'\$limit': 5});
     pipeline.add({'\$project': project});
-    var res = await coll.aggregateToStream(pipeline as List<Map<String, Object>>)
+    var res = await coll
+        .aggregateToStream(pipeline as List<Map<String, Object>>)
         .map((e) => [e['date'], e['tmin'], e['tmax']])
         .toList();
 
     //return new Result()..result = res.toString();
     return res as FutureOr<List<List<String?>>>;
   }
-
 }

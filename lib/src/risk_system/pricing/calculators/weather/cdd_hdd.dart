@@ -1,5 +1,3 @@
-library risk_system.pricing.calculators.weather.cdd_hdd;
-
 import 'dart:math';
 
 class CddHdd implements Comparable<CddHdd> {

@@ -1,5 +1,3 @@
-library src.physical.gen.battery;
-
 import 'package:date/date.dart';
 import 'package:elec/src/physical/bid_curve.dart';
 import 'package:elec/src/physical/offer_curve.dart';
@@ -43,7 +41,6 @@ class Battery {
   int hours() => (totalCapacityMWh / ecoMaxMw).ceil();
 }
 
-
 sealed class BatteryState {
   /// General description of a battery state, always associated with a
   /// time interval.
@@ -59,8 +56,8 @@ sealed class BatteryState {
   /// of the [interval].
   final num batteryLevelMwh;
 
-  /// Keep track of which cycle you are currently in from the 'beginning' of 
-  /// time.  It does not reset on new calendar year. 
+  /// Keep track of which cycle you are currently in from the 'beginning' of
+  /// time.  It does not reset on new calendar year.
   ///
   /// What constitues a cycle?  A cycle is a trip from
   /// empty -> charging -> fully charged -> discharging -> empty.  Depending on
@@ -140,7 +137,6 @@ class Unavailable extends BatteryState {
   }
 }
 
-
 final class BidsOffers {
   BidsOffers({required this.bids, required this.offers});
   BidCurve bids;
@@ -151,7 +147,6 @@ final class BidsOffers {
     return 'bids: ${bids.toString()}, offers: ${offers.toString()}';
   }
 }
-
 
 /// Construct hourly bids/offers to use in the dispatch.
 /// Various strategies can be represented this way.
@@ -193,10 +188,10 @@ TimeSeries<({BidCurve bids, OfferCurve offers})> makeBidsOffers({
 }
 
 /// An action is associated with a time interval, be it 5 min, 15 min or
-/// an hour. 
-/// 
-/// An action transitions the battery from one state to another. 
-///   
+/// an hour.
+///
+/// An action transitions the battery from one state to another.
+///
 enum Action {
   charge,
   discharge,

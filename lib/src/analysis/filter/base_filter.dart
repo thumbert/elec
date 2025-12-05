@@ -1,5 +1,3 @@
-library elec.analysis.filter.base_filter;
-
 import 'package:date/date.dart';
 
 abstract class BaseFilter {

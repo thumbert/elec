@@ -2,7 +2,7 @@
 import 'package:timezone/timezone.dart';
 
 List<Map> hourlyHubPrices() {
-  var _eastern = getLocation('America/New_York');
+  var eastern = getLocation('America/New_York');
 
   var aux = {
     'hourBeginning': [
@@ -2990,7 +2990,7 @@ List<Map> hourlyHubPrices() {
   var out = <Map>[];
   for (var i=0; i<aux['hourBeginning']!.length; i++) {
     out.add({
-      'hourBeginning': TZDateTime.parse(_eastern, aux['hourBeginning']![i] as String),
+      'hourBeginning': TZDateTime.parse(eastern, aux['hourBeginning']![i] as String),
       'lmp': aux['lmp']![i]
     });
   }

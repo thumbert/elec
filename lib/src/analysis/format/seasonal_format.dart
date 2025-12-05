@@ -1,5 +1,3 @@
-library elec.format.seasonal_format;
-
 import 'package:timeseries/timeseries.dart';
 import 'package:table/table.dart';
 

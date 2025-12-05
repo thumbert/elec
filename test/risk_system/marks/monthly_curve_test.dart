@@ -1,5 +1,3 @@
-library test.risk_system.marks.monthly_curve_test;
-
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/risk_system/marks/monthly_curve.dart';
@@ -13,10 +11,10 @@ import 'package:timezone/timezone.dart';
 void tests() {
   group('Monthly curve tests:', () {
     var location = getLocation('America/New_York');
-    test('monthly curve indexing', (){
+    test('monthly curve indexing', () {
       var months = parseTerm('Q1,2013', tzLocation: location)!
-        .splitLeft((dt) => Month.containing(dt))
-        .cast<Month>();
+          .splitLeft((dt) => Month.containing(dt))
+          .cast<Month>();
       var curve = MonthlyCurve(
           IsoNewEngland.bucketPeak, TimeSeries.from(months, [100, 95, 56]));
       expect(curve[1].interval, months[1]);

@@ -1,11 +1,8 @@
-library risk_system.reporting.trade_aggregator;
-
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:table/table.dart';
-import 'package:tuple/tuple.dart';
 
 enum AggregationVariable { mw, mwh, mtm }
 
@@ -17,22 +14,27 @@ class SimpleTradeAggregator {
   // months and flat bucket trades expanded into a peak and offpeak trade)
   List<Map<String, dynamic>> _tradesX = [];
 
-  final Map<Tuple2<Bucket, Month>, int> _hours = {};
+  final Map<(Bucket, Month), int> _hours = {};
 
   late Nest _nestMw, _nestMwh, _nestMtm;
 
-  final _mustHaveColumns = <String>{'buy/sell', 'term', 'bucket', 'mw', 'price'};
+  final _mustHaveColumns = <String>{
+    'buy/sell',
+    'term',
+    'bucket',
+    'mw',
+    'price'
+  };
 
   /// A simple trade aggregator to calculate the total position usually
   /// by month and bucket.  For now only for electricity trades.
-  /// TODO: find a way to generalize this.
   /// <p> Each trade has this format:
   /// <p>
   /// {'buy/sell': 'buy', 'term': 'Jan20-Dec20', 'bucket': 'flat', 'mw': 25, 'price': 39.60}
   /// <p>
   /// <p> [aggregationTerm] indicates the range of the aggregation, in case
   /// the trades don't cover it completely.  Allows to fill with zeros.
-  /// TODO: Don't limit the split to Peak/Offpeak.  Consider (5x16, 2x16H, 7x8).
+  /// Don't limit the split to Peak/Offpeak.  Consider (5x16, 2x16H, 7x8).
   SimpleTradeAggregator(this.trades, this.aggregationTerm) {
     _nestMw = Nest()
       ..key((e) => e['bucket'])
@@ -49,12 +51,11 @@ class SimpleTradeAggregator {
     _nestMtm = Nest()
       ..key((e) => e['bucket'])
       ..key((e) => e['month'])
-      ..rollup((List trades) => sum(trades
-          .map(((e) => e['buy/sell'].sign * e['mw'] * e['hours'] * e['price']))));
+      ..rollup((List trades) => sum(trades.map(
+          ((e) => e['buy/sell'].sign * e['mw'] * e['hours'] * e['price']))));
 
-    var months = aggregationTerm
-        .splitLeft((dt) => Month.containing(dt))
-        .cast<Month>();
+    var months =
+        aggregationTerm.splitLeft((dt) => Month.containing(dt)).cast<Month>();
     // add a zero mw flat trades for each month to get completeness
     trades.insertAll(
         0,
@@ -86,11 +87,11 @@ class SimpleTradeAggregator {
       for (var bucket in buckets) {
         var mw = aux['mw'];
         var price = aux['price'];
-        var _months =
+        var months0 =
             term!.splitLeft((dt) => Month.containing(dt)).cast<Month>();
-        for (var month in _months) {
-          if (!_hours.containsKey(Tuple2(bucket, month))) {
-            _hours[Tuple2(bucket, month)] = _calculateHours(bucket, month);
+        for (var month in months0) {
+          if (!_hours.containsKey((bucket, month))) {
+            _hours[(bucket, month)] = _calculateHours(bucket, month);
           }
           _tradesX.add(<String, dynamic>{
             'buy/sell': buySell,
@@ -98,7 +99,7 @@ class SimpleTradeAggregator {
             'bucket': bucket,
             'mw': mw,
             'price': price,
-            'hours': _hours[Tuple2(bucket, month)],
+            'hours': _hours[(bucket, month)],
           });
         }
       }
@@ -108,22 +109,18 @@ class SimpleTradeAggregator {
   /// Calculate the aggregate position and aggregate cost by month/bucket.
   /// The 'Flat' bucket trades will be split into a 'Peak' and 'Offpeak' trade
   /// with the same price.
-  /// TODO: this should return a MonthlyBucketCurve object
   List<Map<String, dynamic>>? aggregate(
       AggregationVariable aggregationVariable) {
-    var out;
+    late List<Map<String, dynamic>> out;
     if (aggregationVariable == AggregationVariable.mw) {
       var res = _nestMw.map(_tradesX);
-      out = flattenMap(res, ['bucket', 'month', 'mw']);
-
+      out = flattenMap(res, ['bucket', 'month', 'mw'])!;
     } else if (aggregationVariable == AggregationVariable.mwh) {
       var res = _nestMwh.map(_tradesX);
-      out = flattenMap(res, ['bucket', 'month', 'mwh']);
-
+      out = flattenMap(res, ['bucket', 'month', 'mwh'])!;
     } else if (aggregationVariable == AggregationVariable.mtm) {
       var res = _nestMtm.map(_tradesX);
-      out = flattenMap(res, ['bucket', 'month', 'mtm']);
-
+      out = flattenMap(res, ['bucket', 'month', 'mtm'])!;
     }
     return out;
   }

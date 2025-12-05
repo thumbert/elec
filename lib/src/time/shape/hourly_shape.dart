@@ -1,5 +1,3 @@
-library time.bucket.hourly_shape;
-
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/bucket/bucket_utils.dart';
 import 'package:table/table.dart';
@@ -178,5 +176,4 @@ class HourlyShape extends Object with MarksCurve {
       ...toJson(),
     };
   }
-
 }

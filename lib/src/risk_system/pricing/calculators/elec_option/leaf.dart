@@ -1,5 +1,3 @@
-library risk_system.pricing.calculators.elec_option.leaf;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/financial/black_scholes/black_scholes.dart';
@@ -73,27 +71,16 @@ class LeafElecOption extends LeafBase {
     num? volatility,
     num? fixPrice,
   }) {
-    var _asOfDate = asOfDate ?? this.asOfDate;
-    var _buySell = buySell ?? this.buySell;
-    var _callPut = callPut ?? this.callPut;
-    var _month = month ?? this.month;
-    var _quantityTerm = quantityTerm ?? this.quantityTerm;
-    var _riskFreeRate = riskFreeRate ?? this.riskFreeRate;
-    var _strike = strike ?? this.strike;
-    var _underlyingPrice = underlyingPrice ?? this.underlyingPrice;
-    var _volatility = volatility ?? this.volatility;
-    var _fixPrice = fixPrice ?? this.fixPrice;
-
     return LeafElecOption(
-        asOfDate: _asOfDate,
-        buySell: _buySell,
-        callPut: _callPut,
-        month: _month,
-        quantityTerm: _quantityTerm,
-        riskFreeRate: _riskFreeRate,
-        strike: _strike,
-        underlyingPrice: _underlyingPrice,
-        volatility: _volatility,
-        fixPrice: _fixPrice);
+        asOfDate: asOfDate ?? this.asOfDate,
+        buySell: buySell ?? this.buySell,
+        callPut: callPut ?? this.callPut,
+        month: month ?? this.month,
+        quantityTerm: quantityTerm ?? this.quantityTerm,
+        riskFreeRate: riskFreeRate ?? this.riskFreeRate,
+        strike: strike ?? this.strike,
+        underlyingPrice: underlyingPrice ?? this.underlyingPrice,
+        volatility: volatility ?? this.volatility,
+        fixPrice: fixPrice ?? this.fixPrice);
   }
 }

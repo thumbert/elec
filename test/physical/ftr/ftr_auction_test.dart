@@ -1,5 +1,3 @@
-library test.physical.ftr.ftr_auction_test;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/physical/ftr/ftr_auction.dart';

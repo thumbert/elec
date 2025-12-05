@@ -1,5 +1,3 @@
-library test.risk_system.buy_sell_test;
-
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 

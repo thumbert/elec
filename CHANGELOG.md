@@ -3,6 +3,11 @@
 ## TODO
 - Clean the lints!
 
+## 2025-12-05 (version 2.1.0)
+- Remove dependency of tuple
+- Clean some lints
+- Upgrade sdk to 3.9.3
+
 ## 2025-11-26
 - Fix FTR settle price for auction.  Was doing the wrong averaging for offpeak!  Ouch.
 

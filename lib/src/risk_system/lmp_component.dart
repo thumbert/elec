@@ -1,5 +1,3 @@
-part of '../../risk_system.dart';
-
 class LmpComponent {
   final String name;
   const LmpComponent._internal(this.name);

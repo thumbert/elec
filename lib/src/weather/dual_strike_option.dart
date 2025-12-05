@@ -1,6 +1,3 @@
-library weather.dual_strike_option;
-
-
 class DualStrikeOption {
   Function unitPayoff;
   num quantity;
@@ -76,11 +73,10 @@ Function minMaxTempPrice1Payoff(num minTemperatureStrike, maxTemperatureStrike,
   };
 }
 
-
 /// A dual strike option payoff that pays when
 /// (T < T_min & P > P_max) or
 /// (T > T_max & P < P_min)
-/// Payoff is the product of price and temperature deviations from strike.  
+/// Payoff is the product of price and temperature deviations from strike.
 Function minMaxTempPrice2Payoff(num minTemperatureStrike, maxTemperatureStrike,
     num minPriceStrike, num maxPriceStrike) {
   return (num temperature, num price) {

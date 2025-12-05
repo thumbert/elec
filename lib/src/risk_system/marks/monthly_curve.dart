@@ -1,5 +1,3 @@
-library risk_system.marks.monthly_curve;
-
 import 'package:dama/dama.dart' as dama;
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
@@ -111,8 +109,9 @@ class MonthlyCurve {
       }
       var hrs1 = bucket.countHours(m1);
       var hrs2 = other.bucket.countHours(m1);
-      var value = (hrs1 * timeseries[i].value + hrs2 * other.timeseries[i].value) /
-          (hrs1 + hrs2);
+      var value =
+          (hrs1 * timeseries[i].value + hrs2 * other.timeseries[i].value) /
+              (hrs1 + hrs2);
       ts.add(IntervalTuple(m1, value));
     }
     return ts;
@@ -138,8 +137,9 @@ class MonthlyCurve {
         throw ArgumentError(
             'Incompatible buckets: $bucket and ${other.bucket}');
       }
-      var value = (hrs1 * timeseries[i].value - hrs2 * other.timeseries[i].value) /
-          (hrs1 - hrs2);
+      var value =
+          (hrs1 * timeseries[i].value - hrs2 * other.timeseries[i].value) /
+              (hrs1 - hrs2);
       ts.add(IntervalTuple(m1, value));
     }
     return ts;
@@ -188,8 +188,7 @@ class MonthlyCurve {
       throw ArgumentError('Input interval is not a month boundary $interval');
     }
 
-    var months =
-        interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
+    var months = interval.splitLeft((dt) => Month.containing(dt)).cast<Month>();
     var hours = months.map((month) => bucket.countHours(month));
     var xs = timeseries.window(interval).map((e) => e.value);
     return dama.weightedMean(xs, hours);

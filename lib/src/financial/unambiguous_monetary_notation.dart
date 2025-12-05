@@ -1,5 +1,3 @@
-library financial.unambiguous_monetary_notation;
-
 /// See https://docs.formance.com/stack/unambiguous-monetary-notation#specification
 /// 
 /// UMN	Human Readable	ISO-4217 code

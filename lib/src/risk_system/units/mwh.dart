@@ -1,6 +1,3 @@
-part of '../../../risk_system.dart';
-
-// typedef Mw = num;
 
 class Mw {
   num value;

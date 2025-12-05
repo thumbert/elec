@@ -1,7 +1,5 @@
-library risk_system.pricing.calculators.elec_option.elec_daily_option.reports.monthly_position_report;
-
 import 'package:dama/dama.dart';
-import 'package:elec/calculators/elec_daily_option.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/elec_daily_option.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table.dart';
@@ -65,8 +63,8 @@ class MonthlyPositionReportElecDailyOption implements Report {
     var aux = reshape(tbl, ['term'], ['curveId', 'bucket'], 'value');
 
     aux = join(aux, totalsByTerm);
-    var _tbl = Table.from(aux, options: {'columnSeparation': '  '});
-    out.write(_tbl.toString());
+    var tbl0 = Table.from(aux, options: {'columnSeparation': '  '});
+    out.write(tbl0.toString());
     return out.toString();
   }
 

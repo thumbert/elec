@@ -1,6 +1,4 @@
-library risk_system.pricing.calculators.elec_calc_cfd.flat_report;
-
-import 'package:elec/calculators/elec_swap.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/elec_swap.dart';
 import 'package:elec/src/risk_system/pricing/reports/report.dart';
 import 'package:intl/intl.dart';
 import 'package:table/table_base.dart';
@@ -29,7 +27,7 @@ class FlatReportElecCfd implements Report {
 
     // rearrange the leaves, start with the USD leaves first
     var cashRows = tbl.where((e) => e['curveId'] == 'USD').toList();
-    var _tbl = Table.from([
+    var tbl0 = Table.from([
       ...cashRows,
       ...tbl.where((e) => e['curveId'] != 'USD'),
     ], options: {
@@ -37,7 +35,7 @@ class FlatReportElecCfd implements Report {
     });
 
     // add spacing between fixed and floating commodities
-    var aux = _tbl.toString().split('\n');
+    var aux = tbl0.toString().split('\n');
     aux.insert(cashRows.length + 1, ''); // an empty row
     aux.insert(
         cashRows.length + 2, aux.first); // colnames for commmodity leaves

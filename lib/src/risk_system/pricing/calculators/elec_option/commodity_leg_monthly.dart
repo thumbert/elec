@@ -119,7 +119,7 @@ class CommodityLegMonthly extends CommodityLegBase<LeafElecOption> {
   /// Serialize it
   @override
   Map<String, dynamic> toJson() {
-    var q, fp;
+    late Map<String, dynamic> q, fp;
 
     if (!hasCustomQuantity) {
       q = {'value': quantity.first.value};

@@ -1,5 +1,3 @@
-part of '../../risk_system.dart';
-
 class Market implements Comparable<Market> {
   final String name;
   const Market._internal(this.name);

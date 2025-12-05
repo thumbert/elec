@@ -1,9 +1,6 @@
-library iso.location;
-
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/elec.dart';
 import 'package:elec/src/iso/iso.dart';
-
 
 abstract class Location {
   String? name;

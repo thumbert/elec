@@ -1,5 +1,3 @@
-library test.time.hourly_schedule_test;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';

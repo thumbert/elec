@@ -1,5 +1,3 @@
-library test.weather.leap_year_policy_test;
-
 import 'package:date/date.dart';
 import 'package:elec/src/weather/leap_year_policy.dart';
 import 'package:test/test.dart';

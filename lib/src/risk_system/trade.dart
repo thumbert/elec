@@ -1,5 +1,5 @@
-part of elec.risk_system;
-
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
 
 mixin BaseTrade {
   Date? tradeDate;

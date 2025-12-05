@@ -1,5 +1,3 @@
-library physical.gen.lib_gen_stack;
-
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';

@@ -1,5 +1,3 @@
-library test.physical.gen.lib_gen_stack_test;
-
 import 'dart:io';
 
 import 'package:date/date.dart';

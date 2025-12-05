@@ -1,5 +1,3 @@
-library test.physical.gen.lib_battery_test;
-
 import 'package:dama/basic/count.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';

@@ -1,5 +1,3 @@
-library test.risk_system.pricing.elec_calc_cdf_test;
-
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
@@ -12,10 +10,9 @@ import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 
 /// No fixPrice means fixPrice = 0 for the term.
-Map<String, dynamic> _calc0() => <String, dynamic>{
+Map<String, dynamic> calc0() => <String, dynamic>{
       'calculatorType': 'elec_swap',
       'term': 'Jan21-Mar21',
       'asOfDate': '2020-05-29',
@@ -170,13 +167,13 @@ void tests(String rootUrl) async {
     test('fromJson', () {
       expect(c1.asOfDate, Date(2020, 5, 29, location: UTC));
       expect(c1.term, Term.parse('Jan21-Mar21', UTC));
-      var _term = Term.parse('Jan21-Mar21', location);
-      var _months = _term.interval.splitLeft((dt) => Month.containing(dt));
+      var term = Term.parse('Jan21-Mar21', location);
+      var months = term.interval.splitLeft((dt) => Month.containing(dt));
       expect(c1.legs.length, 1);
       var leg = c1.legs.first;
       expect(leg.curveId, 'isone_energy_4000_da_lmp');
-      expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
-      expect(leg.fixPrice(), TimeSeries<num>.from(_months, [50.5, 50.5, 50.5]));
+      expect(leg.quantity(), TimeSeries<num>.from(months, [50, 50, 50]));
+      expect(leg.fixPrice(), TimeSeries<num>.from(months, [50.5, 50.5, 50.5]));
       expect(leg.floatingPrice().values.map((e) => e.toStringAsFixed(2)),
           ['58.25', '55.75', '40.00']);
       expect(leg.hasCustomQuantity, false);
@@ -184,10 +181,9 @@ void tests(String rootUrl) async {
     });
     test('fromJson, custom quantities', () async {
       var leg = c2.legs.first;
-      var _months =
-          leg.term.interval.splitLeft((dt) => Month.containing(dt));
-      expect(leg.quantity(), TimeSeries<num>.from(_months, [50, 60, 70]));
-      expect(leg.fixPrice(), TimeSeries<num>.from(_months, [70.5, 68.5, 48.5]));
+      var months = leg.term.interval.splitLeft((dt) => Month.containing(dt));
+      expect(leg.quantity(), TimeSeries<num>.from(months, [50, 60, 70]));
+      expect(leg.fixPrice(), TimeSeries<num>.from(months, [70.5, 68.5, 48.5]));
       expect(leg.hasCustomQuantity, true);
       expect(leg.hasCustomFixPrice, true);
       expect(leg.showQuantity(), 1.0);
@@ -219,7 +215,7 @@ void tests(String rootUrl) async {
     });
     test('test forwardMarksCache', () async {
       var doc = await c1.cacheProvider.forwardMarksCache
-          .get(Tuple2(Date.utc(2020, 5, 29), 'isone_energy_4000_da_lmp'));
+          .get((Date.utc(2020, 5, 29), 'isone_energy_4000_da_lmp'));
       expect(doc.length, 57769);
       var x0 = doc.first;
       expect(x0.interval, Hour.beginning(TZDateTime(location, 2020, 5, 30)));
@@ -409,12 +405,12 @@ total                         50,400        ''';
     test('fromJson', () {
       expect(c2.asOfDate, Date(2020, 5, 29, location: UTC));
       expect(c2.term, Term.parse('Jan21-Mar21', UTC));
-      var _term = Term.parse('Jan21-Mar21', location);
-      var _months = _term.interval.splitLeft((dt) => Month.containing(dt));
+      var term = Term.parse('Jan21-Mar21', location);
+      var months = term.interval.splitLeft((dt) => Month.containing(dt));
       expect(c2.legs.length, 2);
       var leg1 = c2.legs.first;
-      expect(leg1.quantity(), TimeSeries<num>.from(_months, [50, 50, 50]));
-      expect(leg1.fixPrice(), TimeSeries<num>.from(_months, [0, 0, 0]));
+      expect(leg1.quantity(), TimeSeries<num>.from(months, [50, 50, 50]));
+      expect(leg1.fixPrice(), TimeSeries<num>.from(months, [0, 0, 0]));
       expect(leg1.floatingPrice().values.map((e) => e.toStringAsFixed(3)),
           ['58.250', '55.750', '40.000']);
       var leg2 = c2.legs[1];

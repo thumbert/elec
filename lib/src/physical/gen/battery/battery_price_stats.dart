@@ -1,5 +1,3 @@
-library physical.gen.battery.battery_price_stats;
-
 import 'package:collection/collection.dart' hide IterableNumberExtension;
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';

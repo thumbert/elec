@@ -1,5 +1,3 @@
-library price.lib_hourly_lmp.dart;
-
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -153,7 +151,7 @@ ORDER BY ptid, date, hour, extraDstHour;
 }
 
 /// Only selected ptids are stored.  And limited history starting Jan23 for Hub.
-/// 
+///
 Map<Ptid, TimeSeries<num>> get5MinRtLmpIsone({
   required List<Ptid> ptids,
   required LmpComponent component,

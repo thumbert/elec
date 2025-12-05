@@ -1,27 +1,23 @@
-part of elec.calculators.elec_daily_option;
+
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/commodity_leg_monthly.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/leaf.dart';
+import 'package:elec/time.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
 
 class CommodityLeg extends CommodityLegMonthly {
   CommodityLeg(
-      {required String curveId,
-      required Bucket bucket,
-      required TimeSeries<num> quantity,
-      required TimeSeries<num> fixPrice,
-      required Location tzLocation,
+      {required super.curveId,
+      required super.bucket,
+      required super.quantity,
+      required super.fixPrice,
+      required super.tzLocation,
       required this.callPut,
       required this.strike,
       required this.priceAdjustment,
-      required this.volatilityAdjustment})
-      : super(
-            curveId: curveId,
-            bucket: bucket,
-            tzLocation: tzLocation,
-            quantity: quantity,
-            fixPrice: fixPrice) {
-    // this.curveId = curveId;
-    // this.bucket = bucket;
-    // this.tzLocation = tzLocation;
-    // this.quantity = quantity;
-  }
+      required this.volatilityAdjustment});
 
   late String volatilityCurveId;
 
@@ -122,8 +118,8 @@ class CommodityLeg extends CommodityLegMonthly {
         .withTimeZone(tzLocation)
         .splitLeft((dt) => Month.containing(dt));
     for (var i = 0; i < months.length; i++) {
-      var _uPrice = underlyingPrice[i].value + priceAdjustment[i].value;
-      var _volatility = volatility[i].value + volatilityAdjustment[i].value;
+      var uPrice = underlyingPrice[i].value + priceAdjustment[i].value;
+      var volatility0 = volatility[i].value + volatilityAdjustment[i].value;
       var hours = bucket.countHours(months[i]);
       leaves.add(LeafElecOption(
         asOfDate: asOfDate,
@@ -133,8 +129,8 @@ class CommodityLeg extends CommodityLegMonthly {
         quantityTerm: quantity[i].value * hours,
         riskFreeRate: interestRate[i].value,
         strike: strike[i].value,
-        underlyingPrice: _uPrice,
-        volatility: _volatility,
+        underlyingPrice: uPrice,
+        volatility: volatility0,
         fixPrice: fixPrice[i].value,
       ));
     }

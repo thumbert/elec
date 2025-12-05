@@ -1,5 +1,3 @@
-library elec.analysis.filter.days_around_filter;
-
 import 'package:date/date.dart';
 import 'base_filter.dart';
 

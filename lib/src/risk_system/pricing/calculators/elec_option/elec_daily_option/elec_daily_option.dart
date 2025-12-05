@@ -1,4 +1,19 @@
-part of elec.calculators.elec_daily_option;
+import 'package:date/date.dart';
+import 'package:elec/calculators.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/commodity_leg.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/reports/delta_gamma_report.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/reports/flat_report.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_option/elec_daily_option/reports/monthly_position_report.dart';
+import 'package:elec/time.dart';
+import 'package:intl/intl.dart';
+import 'package:table/table_base.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
+
+import '../cache_provider.dart';
+
 
 class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   ElecDailyOption(
@@ -47,8 +62,8 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
     }
 
     legs = <CommodityLeg>[];
-    var _aux = x['legs'] as List;
-    for (Map<String, dynamic> e in _aux) {
+    var aux = x['legs'] as List;
+    for (Map<String, dynamic> e in aux) {
       e['asOfDate'] = x['asOfDate'];
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
@@ -129,10 +144,10 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
         });
       }
     }
-    var _tbl = Table.from(table, options: {
+    var tbl = Table.from(table, options: {
       'columnSeparation': '  ',
     });
-    return _tbl.toString();
+    return tbl.toString();
   }
 
   @override
@@ -151,13 +166,13 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   Future<TimeSeries<num>> getUnderlyingPrice(
       Bucket bucket, String curveId) async {
     var fwdMarks =
-        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+        await cacheProvider.forwardMarksCache.get((asOfDate, curveId));
     var location = fwdMarks.first.interval.start.location;
-    var _term = term.interval.withTimeZone(location);
+    var term0 = term.interval.withTimeZone(location);
     var x = fwdMarks
         .map((e) => IntervalTuple(e.interval, e.value[bucket]!))
         .toTimeSeries();
-    return TimeSeries.fromIterable(x.window(_term));
+    return TimeSeries.fromIterable(x.window(term0));
   }
 
   /// Get the volatility curve for this strike as of the given [asOfDate].
@@ -166,10 +181,10 @@ class ElecDailyOption extends CalculatorBase<CommodityLeg, CacheProvider> {
   Future<TimeSeries<num>> getVolatility(Bucket bucket, String volatilityCurveId,
       TimeSeries<num> strikeRatio) async {
     var vSurface = await cacheProvider.volSurfaceCache
-        .get(Tuple2(asOfDate, volatilityCurveId));
+        .get((asOfDate, volatilityCurveId));
     var location = vSurface.terms.first.location;
-    var _term = term.interval.withTimeZone(location);
-    var months = _term.splitLeft((dt) => Month.containing(dt));
+    var term0 = term.interval.withTimeZone(location);
+    var months = term0.splitLeft((dt) => Month.containing(dt));
 
     var xs = TimeSeries<num>();
     for (var i = 0; i < months.length; i++) {

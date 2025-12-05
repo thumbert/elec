@@ -1,5 +1,3 @@
-library time.bucket.hourly_bucket_weights;
-
 import 'package:date/date.dart';
 
 import '../bucket/bucket.dart';
@@ -21,7 +19,8 @@ class HourlyBucketWeights {
   /// for the 7x8 bucket.
   HourlyBucketWeights(this.bucket, List<num> values) {
     if (values.length != bucket.hourBeginning.length) {
-      throw ArgumentError('Number of weights don\'t match the number of hours in bucket');
+      throw ArgumentError(
+          'Number of weights don\'t match the number of hours in bucket');
     }
     _values = Map.fromIterables(bucket.hourBeginning, values);
   }
@@ -37,4 +36,3 @@ class HourlyBucketWeights {
   @override
   String toString() => toMap().toString();
 }
-

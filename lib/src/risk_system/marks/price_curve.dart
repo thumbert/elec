@@ -1,12 +1,19 @@
-part of elec.risk_system;
+import 'package:collection/collection.dart';
+import 'package:date/date.dart';
+import 'package:elec/src/risk_system/marks/marks_curve.dart';
+import 'package:elec/time.dart';
+import 'package:intl/intl.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
+
 
 class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// A simple forward curve model for daily and monthly values extending
-  /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
+  /// a `TimeSeries<Map<Bucket,num>>`.  There are no gaps in the observations.
   PriceCurve();
 
   /// A simple forward curve model for daily and monthly values extending
-  /// a TimeSeries<Map<Bucket,num>>.  There are no gaps in the observations.
+  /// a `TimeSeries<Map<Bucket,num>>`.  There are no gaps in the observations.
   /// Support only daily and monthly observations.
   PriceCurve.fromIterable(Iterable<IntervalTuple<Map<Bucket, num>>> xs) {
     addAll(xs);
@@ -432,7 +439,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// price curve.  They now have the same terms (if possible).  For example,
   /// one may had to expand some of the monthly marks to daily, etc.  Only the
   /// overlapping terms are returned!
-  TimeSeries<Tuple2<Map<Bucket, num>, Map<Bucket, num>>> align(
+  TimeSeries<(Map<Bucket, num>, Map<Bucket, num>)> align(
       PriceCurve other) {
     // align their domains first
     var domainY = Interval(
@@ -454,7 +461,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     }
 
     // do an inner join
-    return x.merge(y, f: (a, dynamic b) => Tuple2(a!, b));
+    return x.merge(y, f: (a, dynamic b) => (a!, b));
   }
 
   /// Create a new price curve from this one using a list of intervals.  This
@@ -464,7 +471,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var aux = align(PriceCurve.fromIterable(
         intervals.map((e) => IntervalTuple(e, {Bucket.atc: 1}))));
     return PriceCurve.fromIterable(
-        aux.map(((e) => IntervalTuple(e.interval, e.value.item1))));
+        aux.map(((e) => IntervalTuple(e.interval, e.value.$1))));
   }
 
   /// Add two curves observation by observation and bucket by bucket.
@@ -476,9 +483,9 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var zs = align(other);
     var out = PriceCurve();
     for (var z in zs) {
-      var x = z.value.item1;
-      var y = z.value.item2;
-      var buckets = {...x.keys, ...y.keys};
+      var x = z.value.$1;
+      var y = z.value.$2;
+      var buckets = <Bucket>{...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
@@ -496,9 +503,9 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var zs = align(other);
     var out = PriceCurve();
     for (var z in zs) {
-      var x = z.value.item1;
-      var y = z.value.item2;
-      var buckets = {...x.keys, ...y.keys};
+      var x = z.value.$1;
+      var y = z.value.$2;
+      var buckets = <Bucket>{...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
         if (x.containsKey(bucket) && y.containsKey(bucket)) {
@@ -516,8 +523,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var zs = align(other);
     var out = PriceCurve();
     for (var z in zs) {
-      var x = z.value.item1;
-      var y = z.value.item2;
+      var x = z.value.$1;
+      var y = z.value.$2;
       var buckets = {...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {
@@ -536,8 +543,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     var zs = align(other);
     var out = PriceCurve();
     for (var z in zs) {
-      var x = z.value.item1;
-      var y = z.value.item2;
+      var x = z.value.$1;
+      var y = z.value.$2;
       var buckets = {...x.keys, ...y.keys};
       var one = <Bucket, num>{};
       for (var bucket in buckets) {

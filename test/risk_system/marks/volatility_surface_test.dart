@@ -1,14 +1,10 @@
-library test.risk_system.marks.volatility_surface_test;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 
 Map<String, dynamic> _getJson() {
   return {
@@ -74,12 +70,12 @@ Map<String, dynamic> _getJson() {
   };
 }
 
-Map<Tuple2<Bucket, num>, TimeSeries<num>> _getTimeSeries() {
+Map<(Bucket, num), TimeSeries<num>> _getTimeSeries() {
   var months = Term.parse('Aug20-Jul21', UTC)
       .interval
       .splitLeft((dt) => Month.containing(dt));
   return {
-    Tuple2(Bucket.b5x16, 1): TimeSeries.from(months, [
+    (Bucket.b5x16, 1): TimeSeries.from(months, [
       0.55,
       0.45,
       0.4,
@@ -93,7 +89,7 @@ Map<Tuple2<Bucket, num>, TimeSeries<num>> _getTimeSeries() {
       0.5,
       0.55,
     ]),
-    Tuple2(Bucket.b5x16, 2): TimeSeries.from(months, [
+    (Bucket.b5x16, 2): TimeSeries.from(months, [
       0.7,
       0.6,
       0.55,

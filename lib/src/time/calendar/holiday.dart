@@ -1,5 +1,3 @@
-library holiday;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holidays/christmas.dart';
 import 'package:elec/src/time/calendar/holidays/columbus_day.dart';
@@ -52,7 +50,7 @@ abstract class Holiday {
   Date? forYear(int year, {required Location location});
 
   /// Check if this [date] is a holiday
-  @Deprecated('Replace with isDate3')
+  @Deprecated('Replace with isDate3 which is faster')
   bool isDate(Date date);
 
   /// Check if this triplet of (year, month, day) is a holiday

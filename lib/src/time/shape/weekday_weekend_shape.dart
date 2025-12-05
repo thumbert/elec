@@ -1,5 +1,3 @@
-library time.shape.weekday_weekend_shape;
-
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
@@ -8,7 +6,8 @@ import 'package:timeseries/timeseries.dart';
 
 /// Input [xs] is a daily timeseries.
 ///
-List<Map<String,dynamic>> weekdayWeekendShapeByMonth(Iterable<IntervalTuple<num>> xs,
+List<Map<String, dynamic>> weekdayWeekendShapeByMonth(
+    Iterable<IntervalTuple<num>> xs,
     {Calendar? calendar}) {
   calendar ??= Calendar.nerc;
 
@@ -27,7 +26,6 @@ List<Map<String,dynamic>> weekdayWeekendShapeByMonth(Iterable<IntervalTuple<num>
       'ratio': weekdayValue / weekendValue,
     });
   }
-
 
   return mData;
 }

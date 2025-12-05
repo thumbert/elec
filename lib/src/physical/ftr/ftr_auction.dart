@@ -1,5 +1,3 @@
-library physical.ftr.ftr_auction;
-
 import 'package:timezone/timezone.dart';
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';

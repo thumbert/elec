@@ -1,5 +1,3 @@
-library physical.bid_curve;
-
 import 'dart:collection';
 
 import 'price_quantity_pair.dart';

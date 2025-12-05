@@ -1,5 +1,3 @@
-library iso.load_zone;
-
 class LoadZone {
   final String name;
   final int ptid;
@@ -12,6 +10,7 @@ class LoadZone {
     LoadZone loadZone = other;
     return loadZone.ptid == ptid;
   }
+
   @override
   int get hashCode => ptid;
 }

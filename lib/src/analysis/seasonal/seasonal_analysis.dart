@@ -1,5 +1,3 @@
-library analysis.seasonal_analysis;
-
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
@@ -86,8 +84,7 @@ class SeasonalAnalysis {
   SeasonalAnalysis.hourOfDay(this.xs) {
     _seasonality = Seasonality.hourOfDay;
     groups = _groupByIndex(xs, (e) => e.start.hour);
-    _paths =
-        _toPath(xs, (e) => Tuple2(Date.containing(e.interval.start), e));
+    _paths = _toPath(xs, (e) => Tuple2(Date.containing(e.interval.start), e));
   }
 
   /// Input time series must be daily.

@@ -1,5 +1,3 @@
-library test.risk_system.pricing.calculators.weather.all_weather_test;
-
 import 'package:timezone/data/latest.dart';
 import 'daily_temperature_option_test.dart' as daily_temperature;
 import 'index_option_test.dart' as index_option;

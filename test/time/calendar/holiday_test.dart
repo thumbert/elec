@@ -1,5 +1,3 @@
-library test_holiday;
-
 import 'package:elec/src/time/calendar/holidays/christmas.dart';
 import 'package:elec/src/time/calendar/holidays/juneteenth.dart';
 import 'package:test/test.dart';

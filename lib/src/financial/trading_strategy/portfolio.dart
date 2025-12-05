@@ -1,5 +1,3 @@
-library financial.trading_strategy.portfolio.dart;
-
 import 'package:collection/collection.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';

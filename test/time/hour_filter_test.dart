@@ -1,5 +1,3 @@
-library test.time.hour_filter_test;
-
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/hour_filter.dart';
@@ -19,9 +17,7 @@ void tests() {
     });
     test('with hourBeginning and weekday', () {
       var interval = parseTerm('Dec19', tzLocation: location)!;
-      var hf = HourlyFilter()
-          .withHoursBeginningIn({16, 17, 18})
-          .withWeekday(7);
+      var hf = HourlyFilter().withHoursBeginningIn({16, 17, 18}).withWeekday(7);
       var hours = hf.hours(interval).toList();
       expect(hours.length, 15);
       expect(hours.first.start, TZDateTime(location, 2019, 12, 1, 16));

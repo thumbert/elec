@@ -36,7 +36,7 @@ List<Map> getNoaaCsvData() {
 /// One document looks like this
 /// {station: GHCND:USW00014739, station name: BOSTON MA US, elevation: 6.1, latitude: 42.36667, longitude: -71.03333, date: 1980-01-01 00:00:00.000Z, tmax: 38, tmin: 26}
 ///
-insertTemperatureDataMongo(List<Map> data) async {
+Future<void> insertTemperatureDataMongo(List<Map> data) async {
   Db db = Db("mongodb://localhost:27017/weather");
   await db.open();
   await db.ensureIndex('daily', keys: {
@@ -50,12 +50,12 @@ insertTemperatureDataMongo(List<Map> data) async {
 
 /// Parse a date in the yyyymmdd format.
 /// Return a UTC DateTime object.
-DateTime _parseDate(num yyyymmdd) {
-  int year = (yyyymmdd / 10000).truncate();
-  int month = ((yyyymmdd - 10000 * year) / 100).truncate();
-  int day = yyyymmdd - 10000 * year - 100 * month as int;
-  return DateTime.utc(year, month, day);
-}
+// DateTime _parseDate(num yyyymmdd) {
+//   int year = (yyyymmdd / 10000).truncate();
+//   int month = ((yyyymmdd - 10000 * year) / 100).truncate();
+//   int day = yyyymmdd - 10000 * year - 100 * month as int;
+//   return DateTime.utc(year, month, day);
+// }
 
 /// Test the contents of the database.
 //Future<List<Map>> getTemperatureMongo() async{
@@ -70,7 +70,7 @@ DateTime _parseDate(num yyyymmdd) {
 //  return res.result;
 //}
 
-main() async {
+Future<void> main() async {
 //  List data = getNoaaCsvData();
 //  data.take(3).forEach(print);
 //  await insertTemperatureDataMongo(data);

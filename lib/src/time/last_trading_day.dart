@@ -1,12 +1,9 @@
-library time.last_trading_day;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendar.dart';
 import 'package:elec/src/time/calendar/calendars/ice_us_energy_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
-import 'package:tuple/tuple.dart';
 
-final _cache = <Tuple2<String, Month>, Date>{};
+final _cache = <(String, Month), Date>{};
 
 /// The last business day before the beginning of the month.
 /// Last trading day for the ICE daily options on ISONE,
@@ -101,7 +98,7 @@ Date twoBusinessDaysPrior(Month month, {Calendar? calendar}) {
 /// See https://www.energygps.com/HomeTools/ExpiryCalendar
 Date threeBusinessDaysPrior(Month month, {Calendar? calendar}) {
   calendar ??= NercCalendar();
-  var t2 = Tuple2('-3b', month);
+  var t2 = ('-3b', month);
   if (_cache.containsKey(t2)) return _cache[t2]!;
   var i = 0;
   var candidate = month.startDate;
@@ -126,7 +123,7 @@ Date threeBusinessDaysPrior(Month month, {Calendar? calendar}) {
 /// See https://www.energygps.com/HomeTools/ExpiryCalendar
 Date fourBusinessDaysPriorTo25thPreceding(Month month, {Calendar? calendar}) {
   calendar ??= NercCalendar();
-  var t2 = Tuple2('-1m+25d-4b', month);
+  var t2 = ('-1m+25d-4b', month);
   if (_cache.containsKey(t2)) return _cache[t2]!;
   var candidate = month.previous.startDate.add(24); // the 25th calendar day
   if (candidate.weekday > 5 || calendar.isHoliday(candidate)) {

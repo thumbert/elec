@@ -1,5 +1,3 @@
-library time.calendar;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/federal_holidays_calendar.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
@@ -12,7 +10,7 @@ abstract class Calendar {
 
   bool isHoliday(Date date);
 
-  /// Override for speed as needed 
+  /// Override for speed as needed
   bool isHoliday3(int year, int month, int day) =>
       isHoliday(Date.utc(year, month, day));
 

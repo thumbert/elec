@@ -1,4 +1,18 @@
-part of elec.calculators.elec_swap;
+import 'package:date/date.dart';
+import 'package:elec/calculators.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/calculator_base.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/cache_provider.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/commodity_leg.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/flat_report.dart';
+import 'package:elec/src/risk_system/pricing/calculators/elec_swap/reports/monthly_position_report.dart';
+import 'package:elec/time.dart';
+import 'package:intl/intl.dart';
+import 'package:table/table_base.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
+
+
 
 class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
   ElecSwapCalculator(
@@ -47,8 +61,8 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
     }
 
     legs = <CommodityLeg>[];
-    var _aux = x['legs'] as List;
-    for (Map<String, dynamic> e in _aux) {
+    var aux = x['legs'] as List;
+    for (Map<String, dynamic> e in aux) {
       e['asOfDate'] = x['asOfDate'];
       e['term'] = x['term'];
       e['buy/sell'] = x['buy/sell'];
@@ -93,13 +107,11 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
         });
       }
     }
-    var _tbl = Table.from(table, options: {
+    var tbl0 = Table.from(table, options: {
       'columnSeparation': '  ',
     });
-    return _tbl.toString();
+    return tbl0.toString();
   }
-
-  /// TODO: implement a copyWith() method.
 
   /// Serialize it.  Don't serialize 'asOfDate' or 'floatingPrice' info.
   @override
@@ -122,12 +134,12 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
       Bucket bucket, String curveId) async {
     var curveDetails = await cacheProvider.curveDetailsCache.get(curveId);
     var fwdMarks =
-        await cacheProvider.forwardMarksCache.get(Tuple2(asOfDate, curveId));
+        await cacheProvider.forwardMarksCache.get((asOfDate, curveId));
 
     var location = fwdMarks.first.interval.start.location;
-    var _term = term.interval.withTimeZone(location);
+    var term0 = term.interval.withTimeZone(location);
     var res = TimeSeries.fromIterable(fwdMarks
-        .window(_term)
+        .window(term0)
         .where((obs) => bucket.containsHour(obs.interval as Hour)));
 
     error = res.isEmpty
@@ -137,7 +149,7 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
     if (curveDetails.containsKey('hourlyShapeCurveId')) {
       /// get the hourly shaping curve if needed
       var hSchedule = await cacheProvider.hourlyShapeCache
-          .get(Tuple2(asOfDate, curveDetails['hourlyShapeCurveId']));
+          .get((asOfDate, curveDetails['hourlyShapeCurveId']));
       var hShapeMultiplier = TimeSeries.fromIterable(
           hSchedule.window(term.interval.withTimeZone(location)));
 
@@ -150,13 +162,13 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
     if (term.startDate.isBefore(startDate)) {
       /// need to get settlement data, return all hours of the term
       var settlementData =
-          await cacheProvider.settlementPricesCache.get(Tuple2(term, curveId));
+          await cacheProvider.settlementPricesCache.get((term, curveId));
       if (term.interval.start.isBefore(settlementData.first.interval.start)) {
         // Clear the settlement cache if term start is earlier than existing
         // term.  This only gets executed once, for the first leg.
         await cacheProvider.settlementPricesCache.invalidateAll();
         settlementData = await cacheProvider.settlementPricesCache
-            .get(Tuple2(term, curveId));
+            .get((term, curveId));
       }
 
       /// select only the bucket you need
@@ -166,7 +178,7 @@ class ElecSwapCalculator extends CalculatorBase<CommodityLeg, CacheProvider> {
       res = TimeSeries<num>()
         ..addAll([
           ...sData,
-          ...res.window(Interval(sData.last.interval.end, _term.end)),
+          ...res.window(Interval(sData.last.interval.end, term0.end)),
         ]);
     }
 

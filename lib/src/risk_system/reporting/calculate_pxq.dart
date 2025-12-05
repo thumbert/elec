@@ -7,45 +7,45 @@ List<Map<String, dynamic>> calculatePxQ(
     List<Map<String, dynamic>> p2,
     List<Map<String, dynamic>> q2) {
   /// rename 'value' key to 'p1'
-  var _p1 = <Map<String, dynamic>>[];
+  var p1s = <Map<String, dynamic>>[];
   for (var e in p1) {
     e['p1'] = e['value'];
     e.remove('value');
-    _p1.add(e);
+    p1s.add(e);
   }
 
   /// rename 'value' key to 'p2'
-  var _p2 = <Map<String, dynamic>>[];
+  var p2s = <Map<String, dynamic>>[];
   for (var e in p2) {
     e['p2'] = e['value'];
     e.remove('value');
-    _p2.add(e);
+    p2s.add(e);
   }
 
   /// merge the prices together
-  var _p12 = join(_p1, _p2);
+  var p12 = join(p1s, p2s);
 
   /// rename 'value' key to 'q1'
-  var _q1 = <Map<String, dynamic>>[];
+  var q1s = <Map<String, dynamic>>[];
   for (var e in q1) {
     e['q1'] = e['value'];
     e.remove('value');
-    _q1.add(e);
+    q1s.add(e);
   }
 
   /// rename 'value' key to 'p2'
-  var _q2 = <Map<String, dynamic>>[];
+  var q2s = <Map<String, dynamic>>[];
   for (var e in q2) {
     e['q2'] = e['value'];
     e.remove('value');
-    _q2.add(e);
+    q2s .add(e);
   }
 
   /// merge the prices together
-  var _q12 = join(_q1, _q2);
+  var q12 = join(q1s, q2s);
 
   /// merge prices and quantities together
-  var data = join(_p12, _q12);
+  var data = join(p12, q12);
   for (var e in data) {
     e['dP PnL'] = e['q1'] * (e['p2'] - e['p1']);
     e['dQ PnL'] = e['p2'] * (e['q2'] - e['q1']);

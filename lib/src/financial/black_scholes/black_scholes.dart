@@ -1,5 +1,3 @@
-library financial.black_scholes.black_scholes;
-
 import 'dart:math';
 import 'package:dama/analysis/solver/bisection_solver.dart';
 import 'package:date/date.dart';
@@ -7,7 +5,6 @@ import 'package:elec/risk_system.dart';
 import 'package:dama/special/erf.dart';
 
 class BlackScholes {
-
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({
     required this.type,
@@ -34,7 +31,6 @@ class BlackScholes {
   num underlyingPrice;
   late num _volatility;
   late num _tExp;
-
 
   Date get asOfDate => _asOfDate;
   set asOfDate(Date value) {
@@ -86,7 +82,8 @@ class BlackScholes {
                           riskFreeRate));
         }
         break;
-      default: throw StateError('Option type $type not supported');
+      default:
+        throw StateError('Option type $type not supported');
     }
     return res;
   }
@@ -104,7 +101,8 @@ class BlackScholes {
         res =
             _nd1(_tExp, _volatility, underlyingPrice, strike, riskFreeRate) - 1;
         break;
-      default: throw StateError('Option type $type not supported');
+      default:
+        throw StateError('Option type $type not supported');
     }
     return res;
   }
@@ -181,10 +179,16 @@ class BlackScholes {
   num impliedVolatility(num price) {
     f(num v) {
       var opt = BlackScholes(
-          type: type, strike: strike, expirationDate: expirationDate,
-          asOfDate: _asOfDate, volatility: v, riskFreeRate: riskFreeRate, underlyingPrice: underlyingPrice);
+          type: type,
+          strike: strike,
+          expirationDate: expirationDate,
+          asOfDate: _asOfDate,
+          volatility: v,
+          riskFreeRate: riskFreeRate,
+          underlyingPrice: underlyingPrice);
       return opt.value() - price;
     }
+
     return bisectionSolver(f, 0.00001, 1000);
   }
 

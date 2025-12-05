@@ -1,5 +1,3 @@
-library risk_system.pricing.calculators.weather.index_option;
-
 import 'dart:math' as math;
 
 import 'package:date/date.dart';
@@ -86,8 +84,7 @@ mixin IndexOption on WeatherInstrument {
 
     var out = TimeSeries<num>();
     for (var entry in grp.entries) {
-      var dayCount =
-          entry.key.splitLeft((dt) => Date.containing(dt)).length;
+      var dayCount = entry.key.splitLeft((dt) => Date.containing(dt)).length;
       var multiplier = 1 / dayCount;
       var strike0 = multiplier * strike.observationContains(entry.key).value;
       var index = entry.value.sum();

@@ -469,7 +469,7 @@ void priceStats(TimeSeries<num> daPrice) {
     terms,
     daPrice,
     n: 4,
-    outDir: ReportDriver.outDir!,
+    outDir: ReportDriver.outDir,
   );
 }
 

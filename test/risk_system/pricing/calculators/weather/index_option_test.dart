@@ -1,5 +1,3 @@
-library test.risk_system.pricing.calculators.weather.index_swap_test;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/index_option.dart';

@@ -1,5 +1,3 @@
-library elec.temperature.products.weather_instrument;
-
 import 'dart:math' show min, max;
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';

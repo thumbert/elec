@@ -1,5 +1,3 @@
-library time.bucket.month_bucket_value;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/time/bucket/bucket.dart';
@@ -26,7 +24,7 @@ class MonthBucketValue {
     var hrs = bucket.countHours(month);
     var hrsOther = other.bucket.countHours(other.month);
 
-    return (value*hrs + other.value*hrsOther)/(hrs + hrsOther);
+    return (value * hrs + other.value * hrsOther) / (hrs + hrsOther);
   }
 
   /// Subract another MonthBucketValue from this.
@@ -43,10 +41,9 @@ class MonthBucketValue {
       throw ArgumentError('Can\'t subtract $bucket from ${other.bucket}');
     }
 
-    return (value*hrs - other.value*hrsOther)/(hrs - hrsOther);
+    return (value * hrs - other.value * hrsOther) / (hrs - hrsOther);
   }
-  
-  
+
   @override
   bool operator ==(Object other) {
     if (other is! MonthBucketValue) return false;
@@ -65,6 +62,4 @@ class MonthBucketValue {
     }
     return out;
   }
-
 }
-

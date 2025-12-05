@@ -1,5 +1,3 @@
-library test.time.last_trading_day_test;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/last_trading_day.dart';
 import 'package:elec/time.dart';

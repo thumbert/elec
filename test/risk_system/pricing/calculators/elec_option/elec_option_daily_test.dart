@@ -1,5 +1,3 @@
-library test.risk_system.pricing.elec_option_daily_test;
-
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/calculators/elec_daily_option.dart';
@@ -9,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 
 Map<String, dynamic> _calc0() => <String, dynamic>{
       'calculatorType': 'elec_daily_option',
@@ -124,9 +121,9 @@ void tests(String rootUrl) async {
       var curveDetails =
           await cacheProvider.curveDetailsCache.get('isone_energy_4000_da_lmp');
       var mh = await cacheProvider.forwardMarksCache
-          .get(Tuple2(asOfDate, 'isone_energy_4000_da_lmp'));
+          .get((asOfDate, 'isone_energy_4000_da_lmp'));
       var vs = await cacheProvider.volSurfaceCache
-          .get(Tuple2(asOfDate, curveDetails['volatilityCurveId']['daily']));
+          .get((asOfDate, curveDetails['volatilityCurveId']['daily']));
       expect(vs.strikeRatios, [0.5, 1, 2.0]);
       expect(mh.length, 65); // just the monthly component
     });
@@ -179,8 +176,8 @@ void tests(String rootUrl) async {
     });
     test('add another leg and reprice', () async {
       var calc = c0;
-      var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.containing(dt));
+      var months =
+          calc.legs[0].term.interval.splitLeft((dt) => Month.containing(dt));
       var leg1 = calc.legs[0].copyWith(
         callPut: CallPut.put,
         strike: TimeSeries.fill(months, 50),
@@ -191,8 +188,8 @@ void tests(String rootUrl) async {
     });
     test('delta calculation for put is off', () async {
       var calc = c0;
-      var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.containing(dt));
+      var months =
+          calc.legs[0].term.interval.splitLeft((dt) => Month.containing(dt));
       var leg0 = calc.legs[0];
       leg0
         ..callPut = CallPut.put
@@ -250,8 +247,8 @@ total                         13,705       ''';
     });
     test('monthly position report, multiple legs', () async {
       var calc = c0;
-      var months = calc.legs[0].term.interval
-          .splitLeft((dt) => Month.containing(dt));
+      var months =
+          calc.legs[0].term.interval.splitLeft((dt) => Month.containing(dt));
       var leg0 = calc.legs[0]
         ..quantity = TimeSeries.fill(months, 100)
         ..strike = TimeSeries.fill(months, 60);

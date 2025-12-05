@@ -1,4 +1,6 @@
-part of elec.calculators.elec_swap;
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/src/risk_system/pricing/calculators/base/leaf.dart';
 
 /// One leaf per period (month or day).
 class LeafElecSwap extends LeafBase {

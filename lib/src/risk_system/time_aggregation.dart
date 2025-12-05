@@ -1,5 +1,3 @@
-part of elec.risk_system;
-
 class TimeAggregation {
   final String name;
   const TimeAggregation._internal(this.name);

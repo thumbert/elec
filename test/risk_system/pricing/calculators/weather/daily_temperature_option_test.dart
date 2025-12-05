@@ -1,5 +1,3 @@
-library test.risk_system.pricing.calculators.weather.daily_temperature_option_test;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/daily_temperature_option.dart';

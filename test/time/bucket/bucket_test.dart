@@ -1,5 +1,3 @@
-library test_bucket;
-
 import 'dart:math' show pow;
 import 'package:table/table_base.dart';
 import 'package:timezone/data/latest.dart';

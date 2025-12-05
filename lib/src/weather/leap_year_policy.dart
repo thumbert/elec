@@ -1,5 +1,3 @@
-library weather.lib_leap_year;
-
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 

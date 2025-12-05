@@ -1,6 +1,3 @@
-library analysis.seasonality;
-
-
 /// Define commonly encountered types of seasonality.  There are two components:
 /// a grouping (fast) and a path (slow) component.  For a [monthOfYear]
 /// seasonality, the groups are the months of the year (1:12) and the paths
@@ -10,7 +7,7 @@ class Seasonality {
 
   Seasonality._internal(this.name);
 
-  static Seasonality parse(String x){
+  static Seasonality parse(String x) {
     if (x.toLowerCase() == 'monthofyear') {
       return Seasonality.monthOfYear;
     } else if (x.toLowerCase() == 'weekofyear') {
@@ -38,5 +35,3 @@ class Seasonality {
   @override
   String toString() => name;
 }
-
-

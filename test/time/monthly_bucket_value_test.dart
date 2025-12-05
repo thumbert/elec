@@ -1,5 +1,3 @@
-library test.time.monthly_bucket_value;
-
 import 'package:elec/src/iso/iso.dart';
 import 'package:elec/src/time/bucket/month_bucket_value.dart';
 import 'package:test/test.dart';
@@ -28,7 +26,6 @@ void tests() {
     });
   });
 }
-
 
 void main() async {
   initializeTimeZones();

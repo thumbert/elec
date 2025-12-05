@@ -22,6 +22,7 @@ class NewYear extends Holiday {
   bool isDate(Date date) =>
       date == forYear(date.year, location: date.location);
 
+  @override
   bool isDate3(int year, int month, int day) {
     if (month != 1 || day > 2) return false;
     var weekday = DateTime(year).weekday;

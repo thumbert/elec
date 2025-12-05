@@ -1,5 +1,3 @@
-library test.physical.gas.time_aggregation_test;
-
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';

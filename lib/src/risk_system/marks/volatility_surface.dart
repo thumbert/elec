@@ -1,21 +1,28 @@
-part of elec.risk_system;
+
+import 'dart:convert';
+
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/time.dart';
+import 'package:timeseries/timeseries.dart';
+import 'package:timezone/timezone.dart';
 
 class VolatilitySurface extends Object with MarksCurve {
   /// The [xs] keys are strike ratios.  No checks are made to guarantee that
   /// all [TimeSeries] have the same domain.
   VolatilitySurface.fromTimeSeries(
-      Map<Tuple2<Bucket, num>, TimeSeries<num>> xs) {
-    _strikeRatios = xs.keys.map((e) => e.item2).toList();
+      Map<(Bucket, num), TimeSeries<num>> xs) {
+    _strikeRatios = xs.keys.map((e) => e.$2).toList();
     _strikeRatios.sort();
     _terms = xs.values.first.intervals.toList().cast<Month>();
 
     _data = <Bucket, Map<num, TimeSeries<num>>>{};
     for (var key in xs.keys) {
-      var bucket = key.item1;
+      var bucket = key.$1;
       if (!_data.containsKey(bucket)) {
         _data[bucket] = <num, TimeSeries<num>>{};
       }
-      var strikeRatio = key.item2;
+      var strikeRatio = key.$2;
       _data[bucket]![strikeRatio] = xs[key]!;
     }
   }
@@ -71,9 +78,9 @@ class VolatilitySurface extends Object with MarksCurve {
         .toList();
     var keys = (x['buckets'] as Map).keys;
     _data = <Bucket, Map<num, TimeSeries<num>>>{};
-    for (String _bucket in keys) {
-      var y = (x['buckets'][_bucket] as List).cast<List>();
-      var bucket = Bucket.parse(_bucket);
+    for (String bucket0 in keys) {
+      var y = (x['buckets'][bucket0] as List).cast<List>();
+      var bucket = Bucket.parse(bucket0);
       _data[bucket] = <num, TimeSeries<num>>{};
       for (var j = 0; j < _strikeRatios.length; j++) {
         var ts = TimeSeries<num>();
@@ -155,14 +162,14 @@ class VolatilitySurface extends Object with MarksCurve {
       'buckets': {for (var bucket in buckets) bucket.toString(): <List<num>>[]},
     };
     for (var bucket in _data.keys) {
-      var _bucket = bucket.toString();
+      var bucket0 = bucket.toString();
       for (var j = 0; j < terms.length; j++) {
         var one = <num>[];
         for (var strikeRatio in strikeRatios) {
           var xs = _data[bucket]![strikeRatio]!;
           one.add(xs[j].value);
         }
-        out['buckets'][_bucket].add(one);
+        out['buckets'][bucket0].add(one);
       }
     }
     return out;
@@ -215,3 +222,4 @@ class VolatilitySurface extends Object with MarksCurve {
     };
   }
 }
+

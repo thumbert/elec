@@ -1,4 +1,7 @@
-part of elec.risk_system;
+
+import 'package:elec/elec.dart';
+import 'package:elec/risk_system.dart';
+import 'package:timezone/timezone.dart';
 
 abstract class BaseHub {
   Commodity? commodity;
@@ -14,10 +17,10 @@ class EnergyHub implements BaseHub {
   Iso? iso;
   Location? tzLocation;
 
-  static final _cacheHubs = <Tuple4, EnergyHub>{};
+  static final _cacheHubs = <(String,Market,Iso,Location), EnergyHub>{};
 
   factory EnergyHub(String hub, Market market, Iso iso, Location tzLocation) {
-    var t4 = Tuple4(hub, market, iso, tzLocation);
+    var t4 = (hub, market, iso, tzLocation);
     if (!_cacheHubs.containsKey(t4)) {
       _cacheHubs[t4] = EnergyHub._internal(hub, market, iso, tzLocation);
     }
@@ -57,7 +60,7 @@ class EnergyHub implements BaseHub {
   }
 
   static final massHubDa =
-      EnergyHub('MassHub', Market.da, IsoNewEngland(), _eastern);
+      EnergyHub('MassHub', Market.da, IsoNewEngland(), IsoNewEngland.location);
 
   @override
   String toString() => '${iso!.name} $hub $market';

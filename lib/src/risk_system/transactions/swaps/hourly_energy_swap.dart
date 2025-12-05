@@ -1,5 +1,3 @@
-library risk_system.transactions.swaps.hourly_energy_swap;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/locations/electricity_index.dart';
@@ -7,9 +5,11 @@ import 'package:timeseries/timeseries.dart';
 
 class HourlyEnergySwap {
   ElectricityIndex energyIndex;
+
   /// Hourly quantity timeseries. Gaps in the timeseries are allowed and
   /// should not be filled with zeros.
   TimeSeries<num> quantity;
+
   /// Hourly fixedPrice timeseries. Gaps in the timeseries are allowed.
   TimeSeries<num> fixedPrice;
 
@@ -42,16 +42,14 @@ class HourlyEnergySwap {
   /// Calculate the realized value for an [interval].
   TimeSeries<num> realizedValue(Interval interval) {
     var qty = TimeSeries.fromIterable(quantity.window(interval));
-    var pq = qty.merge(fixedPrice, f: (x,dynamic y) {
-      return <String,num?>{
+    var pq = qty.merge(fixedPrice, f: (x, dynamic y) {
+      return <String, num?>{
         'quantity': x,
         'fixedPrice': y,
       };
     });
-    return pq.merge(floatingPrice, f: (x,dynamic y) {
+    return pq.merge(floatingPrice, f: (x, dynamic y) {
       return buySell.sign * x!['quantity']! * (y - x['fixedPrice']);
     });
   }
-
-
 }

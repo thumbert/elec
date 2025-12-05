@@ -1,5 +1,3 @@
-library time.calendar.calendars.federal_holiday_calendar;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/holiday.dart';
 import '../calendar.dart';

@@ -1,5 +1,3 @@
-library test.analysis.seasonal_analysis_test;
-
 import 'package:date/date.dart';
 import 'package:elec/src/analysis/seasonal/seasonal_analysis.dart';
 import 'package:elec/src/analysis/seasonal/seasonality.dart';
@@ -36,7 +34,7 @@ void tests() {
           .map((date) => IntervalTuple(date, date.year + date.dayOfYear())));
       var years = List.generate(7, (i) => 2010 + i);
       var startTerm = Term.parse('Nov10-Mar11', UTC);
-      var terms = [ for (var year in years) startTerm.withStartYear(year) ];
+      var terms = [for (var year in years) startTerm.withStartYear(year)];
       var sa = SeasonalAnalysis.dayOfTerm(xs, terms);
       var paths = sa.paths;
       expect(sa.groups[1]!.values.first, 2315);
@@ -58,13 +56,11 @@ void tests() {
 //      expect(paths.keys.length, 7);
 //    });
 
-
-
     test('day of year centered', () {
       var term = parseTerm('Jan10-Dec20')!;
       var days = term.splitLeft((dt) => Date.containing(dt));
-      var xs = TimeSeries.fromIterable(days
-          .map((date) => IntervalTuple(date, 1)));
+      var xs =
+          TimeSeries.fromIterable(days.map((date) => IntervalTuple(date, 1)));
       var sa = SeasonalAnalysis.dayOfYearCentered(xs, 2);
       var groups = sa.groups;
       var g1 = groups[1]!;

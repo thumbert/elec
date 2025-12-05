@@ -1,5 +1,3 @@
-part of elec.risk_system;
-
 class GasIndex {
   final String _name;
   const GasIndex._internal(this._name);

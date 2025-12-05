@@ -1,5 +1,3 @@
-library elec.bucket;
-
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/time.dart';
@@ -263,7 +261,9 @@ class Bucket6x16 extends Bucket {
   bool containsHour(Hour hour) {
     if (hour.start.hour >= 7 &&
         hour.start.hour < 23 &&
-        hour.currentDate.weekday != 7) return true;
+        hour.currentDate.weekday != 7) {
+      return true;
+    }
     return false;
   }
 }
@@ -311,8 +311,6 @@ class Bucket7xHE1822 extends Bucket {
     return false;
   }
 }
-
-
 
 class Bucket7x16Ercot extends Bucket {
   /// Peak hours for all days of the week.
@@ -761,7 +759,6 @@ class Bucket5xHE1017 extends Bucket {
   }
 }
 
-
 // ignore: camel_case_types
 class Bucket5xHE1822 extends Bucket {
   /// The 5x16 hour ending 10-17 (solar peak)
@@ -792,9 +789,6 @@ class Bucket5xHE1822 extends Bucket {
     }
   }
 }
-
-
-
 
 // ignore: camel_case_types
 class Bucket5x16_11 extends Bucket {
@@ -1119,4 +1113,3 @@ class Bucket5x16_22 extends Bucket {
     }
   }
 }
-

@@ -1,5 +1,3 @@
-library io.timeseries.lib_read_timeseries;
-
 import 'dart:io';
 
 import 'package:timeseries/timeseries.dart';

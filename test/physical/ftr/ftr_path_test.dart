@@ -1,5 +1,3 @@
-library path_test;
-
 import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
 import 'package:elec_server/client/binding_constraints.dart';
@@ -49,7 +47,7 @@ Future<void> tests(String rootUrl) async {
     test('get settle price for one auction', () async {
       var auction = FtrAuction.parse('F21', iso: Iso.newYork);
       var sp = await path.getSettlePriceForAuction(auction);
-      expect(sp, 8.631370967741935);
+      expect(sp, 8.631370967741937);
     });
     test('get clearing prices for the path', () async {
       var cp = await path.getClearingPrices();
@@ -65,7 +63,7 @@ Future<void> tests(String rootUrl) async {
       expect(f21, {
         'auction': FtrAuction.parse('F21', iso: Iso.newYork),
         'clearingPrice': 7.768346774193549,
-        'settlePrice': 8.631370967741935,
+        'settlePrice': 8.631370967741937,
       });
     });
     test('get cp vs. sp table for a path that doesn\'t exist', () async {

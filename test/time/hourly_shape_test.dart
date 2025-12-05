@@ -1,5 +1,3 @@
-library test.time.hourly_shape_test;
-
 import 'package:dama/dama.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
@@ -22,8 +20,8 @@ void tests(String rootUrl) async {
 
   group('HourlyShape tests:', () {
     setUp(() async {
-      ts = await client.getHourlyLmp(Iso.newEngland,
-          4000, LmpComponent.lmp, Date.utc(2019, 1, 1), Date.utc(2019, 12, 31));
+      ts = await client.getHourlyLmp(Iso.newEngland, 4000, LmpComponent.lmp,
+          Date.utc(2019, 1, 1), Date.utc(2019, 12, 31));
     });
     test('from timeseries', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);

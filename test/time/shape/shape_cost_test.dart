@@ -1,5 +1,3 @@
-library test.time.shape.shape_cost_test;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';

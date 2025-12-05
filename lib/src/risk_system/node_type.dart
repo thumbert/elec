@@ -1,5 +1,3 @@
-part of '../../risk_system.dart';
-
 class NodeType {
   final String _name;
   const NodeType._internal(this._name);

@@ -1,5 +1,3 @@
-library test.elec.timeseries.seasonal_format_test;
-
 import 'package:test/test.dart';
 import 'package:date/date.dart';
 import 'package:timezone/data/latest.dart';

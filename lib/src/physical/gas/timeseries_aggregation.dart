@@ -1,5 +1,3 @@
-library physical.gas.timeseries_aggregation;
-
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:timeseries/timeseries.dart';

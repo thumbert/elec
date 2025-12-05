@@ -1,5 +1,3 @@
-library time.hourly_schedule;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
@@ -255,7 +253,8 @@ class _HourlyScheduleFromForwardCurve extends HourlySchedule {
       if (!forwardCurve.domain.containsInterval(hour)) {
         return null;
       } else {
-        IntervalTuple<Map<Bucket, num?>?> obs = forwardCurve.observationContains(hour);
+        IntervalTuple<Map<Bucket, num?>?> obs =
+            forwardCurve.observationContains(hour);
         for (var bucket in obs.value!.keys) {
           if (bucket.containsHour(hour)) {
             return obs.value![bucket];

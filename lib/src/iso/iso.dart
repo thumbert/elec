@@ -1,5 +1,3 @@
-library elec.iso;
-
 import 'package:elec/src/iso/load_zone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:elec/src/time/bucket/bucket.dart';

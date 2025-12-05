@@ -1,5 +1,3 @@
-library time.bucket.bucket_utils;
-
 import 'package:timeseries/timeseries.dart';
 import 'package:date/date.dart';
 import 'bucket.dart';

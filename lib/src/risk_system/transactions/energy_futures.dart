@@ -1,5 +1,8 @@
-part of elec.risk_system;
-
+import 'package:dama/stat/descriptive/summary.dart';
+import 'package:date/date.dart';
+import 'package:elec/risk_system.dart';
+import 'package:elec/time.dart';
+import 'package:timeseries/timeseries.dart';
 
 class EnergyFutures extends Object with BaseTrade {
   late final EnergyHub hub;
@@ -27,22 +30,22 @@ class EnergyFutures extends Object with BaseTrade {
   TimeSeries<num> position(Date asOfDate, TimeAggregation timeAggregation) {
     var out = TimeSeries<num>();
     if (asOfDate.start.isAfter(tradeTerm!.end)) return out;
-    var _hours = tradeTerm!
+    var hours = tradeTerm!
         .withStart(asOfDate.start)
         .splitLeft((dt) => Hour.beginning(dt))
         .where((hour) => bucket.containsHour(hour)).cast<Hour>();
-    var _hourlyQty = TimeSeries.fill(_hours, buySell.sign * mw);
+    var hourlyQty = TimeSeries.fill(hours, buySell.sign * mw);
     switch (timeAggregation) {
       case TimeAggregation.hour : {
-        out = _hourlyQty;
+        out = hourlyQty;
         break;
       }
       case TimeAggregation.day : {
-        out = toDaily(_hourlyQty, sum);
+        out = toDaily(hourlyQty, sum);
         break;
       }
       case TimeAggregation.month : {
-        out = toMonthly(_hourlyQty, sum);
+        out = toMonthly(hourlyQty, sum);
         break;
       }
     }

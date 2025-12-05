@@ -1,5 +1,3 @@
-library elec.physical.load.load_shape;
-
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
@@ -80,14 +78,14 @@ class LoadShape {
     return out;
   }
 
-/// Return a daily timeseries of hourly weights.
-/// [dates] are the set of dates you are interested in.
-/// What are you doing on Daylight savings days?
+  /// Return a daily timeseries of hourly weights.
+  /// [dates] are the set of dates you are interested in.
+  /// What are you doing on Daylight savings days?
 // TimeSeries<List<num>> calculateHourlyWeights(
 //     {required Set<Date> forDates, required Bucket bucket}) {
 //   /// keep only the dates you qre interested in
 //   var xs = {...forDates.map((date) => _dailyGroups[date])};
 // }
 
-/// Calculate stats on the weights
+  /// Calculate stats on the weights
 }

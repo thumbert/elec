@@ -19,6 +19,7 @@ class Thanksgiving extends Holiday {
   @override
   bool isDate(Date date) => isDate3(date.year, date.month, date.day);
 
+  @override
   bool isDate3(int year, int month, int day) {
     if (month != 11) return false;
     if (day < 22 || day > 28) return false;

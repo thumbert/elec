@@ -1,5 +1,3 @@
-library test_all;
-
 import 'package:timezone/data/latest.dart';
 import 'analysis/filter/filter_test.dart' as filter;
 import 'analysis/format/seasonal_format_test.dart' as seasonal_format;

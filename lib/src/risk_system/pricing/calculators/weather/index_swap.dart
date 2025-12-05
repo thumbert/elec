@@ -1,5 +1,3 @@
-library risk_system.pricing.calculators.weather.index_swap;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/risk_system/pricing/calculators/weather/cdd_hdd.dart';
@@ -58,8 +56,7 @@ mixin IndexSwap on WeatherInstrument {
     var dIndex = dailyIndex();
     Map<Interval?, TimeSeries<num>> grp;
     if (strike.length > 1) {
-      grp = dIndex
-          .splitByIndex((interval) => Month.containing(interval.start));
+      grp = dIndex.splitByIndex((interval) => Month.containing(interval.start));
     } else {
       grp = {term: dIndex};
     }

@@ -1,5 +1,3 @@
-library risk_system.marks.omni_curve;
-
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/marks/monthly_curve.dart';
 
@@ -7,7 +5,6 @@ import 'package:elec/src/risk_system/marks/monthly_curve.dart';
 /// No missing values allowed for any hour in the domain where the curve is
 /// defined.
 class OmniCurve {
-
   /// The domain of this OmniCurve.  No missing values allowed for any hour
   /// in this interval.
   late Interval domain;
@@ -36,5 +33,4 @@ class OmniCurve {
 
   /// Return the value of the schedule associated with this hour.
   num? value(Hour hour) => _f(hour);
-
 }

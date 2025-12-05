@@ -1,4 +1,5 @@
-part of elec.risk_system;
+import 'package:date/date.dart';
+import 'package:elec/time.dart';
 
 mixin MarksCurve {
   late Set<Bucket> buckets;

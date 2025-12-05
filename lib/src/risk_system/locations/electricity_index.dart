@@ -1,5 +1,3 @@
-library risk_system.locations.electricity_index;
-
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/iso/iso.dart';
 import 'package:timezone/timezone.dart' as tz;

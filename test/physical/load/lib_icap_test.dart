@@ -1,5 +1,3 @@
-library test.physical.load.lib_icap_test;
-
 import 'package:dama/analysis/interpolation/multi_linear_interpolator.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/iso/iso.dart';

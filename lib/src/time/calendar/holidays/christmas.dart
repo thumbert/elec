@@ -20,6 +20,7 @@ class Christmas extends Holiday {
   @override
   bool isDate(Date date) => isDate3(date.year, date.month, date.day);
   
+  @override
   bool isDate3(int year, int month, int day) {
     if (month != 12) return false;
     if (day != 25 && day != 26) return false;

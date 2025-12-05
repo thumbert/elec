@@ -1,5 +1,3 @@
-library physical.load.lib_duck_curve;
-
 import 'package:dama/dama.dart';
 
 /// Calculate the strength of the duck curve for one day.

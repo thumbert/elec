@@ -1,7 +1,5 @@
 //part of elec.calculators;
 
-library elec.risk_system.pricing.calculators.base.time_period;
-
 import 'package:date/date.dart';
 
 enum TimePeriod { month, day, hour }

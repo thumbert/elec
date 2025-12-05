@@ -1,5 +1,3 @@
-library test.load.solar.lib_solar_test;
-
 import 'package:elec/src/physical/gen/solar/lib_solar_elevation.dart';
 import 'package:test/test.dart';
 import 'package:timezone/data/latest.dart';

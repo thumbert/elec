@@ -1,5 +1,3 @@
-library physical.price_quantity_pair;
-
 class PriceQuantityPair {
   final num price;
   final num quantity;

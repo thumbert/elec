@@ -1,5 +1,3 @@
-library test.financial.trade_test;
-
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart' hide Trade;
 import 'package:elec/src/financial/trading_strategy/portfolio.dart';

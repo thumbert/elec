@@ -1,5 +1,3 @@
-library physical.ftr.ftr_path;
-
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';

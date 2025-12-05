@@ -1,5 +1,3 @@
-library common_enums;
-
 //enum BuySell {buy, sell}
 
 //enum CallPut {call, put}

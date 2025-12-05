@@ -1,5 +1,3 @@
-library test.risk_system.marks.forward_curve_test;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,7 +7,6 @@ import 'package:elec/risk_system.dart';
 import 'package:test/test.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
 void tests() {
@@ -283,8 +280,8 @@ void tests() {
         Month.utc(2021, 3),
         Month.utc(2021, 4),
       ]);
-      expect(out.values.first.item1, {Bucket.b5x16: 69, Bucket.b7x8: 40});
-      expect(out.values.first.item2, {Bucket.b5x16: 67.2, Bucket.b7x8: 40.2});
+      expect(out.values.first.$1, {Bucket.b5x16: 69, Bucket.b7x8: 40});
+      expect(out.values.first.$2, {Bucket.b5x16: 67.2, Bucket.b7x8: 40.2});
     });
 
     test('add two forward curves element by element', () {

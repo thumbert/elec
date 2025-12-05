@@ -1,12 +1,10 @@
-library time.hourly_filter;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 
 class HourlyFilter {
   /// Construct an hourly filter
   HourlyFilter();
-  
+
   var _f = (Hour hour) => true;
 
   HourlyFilter withBucket(Bucket bucket) {

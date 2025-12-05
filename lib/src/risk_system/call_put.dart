@@ -1,5 +1,3 @@
-part of elec.risk_system;
-
 class CallPut {
   final String _name;
   const CallPut._internal(this._name);

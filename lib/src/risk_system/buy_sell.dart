@@ -1,5 +1,3 @@
-part of '../../risk_system.dart';
-
 class BuySell implements Comparable<BuySell> {
   final int sign;
   const BuySell._internal(this.sign);

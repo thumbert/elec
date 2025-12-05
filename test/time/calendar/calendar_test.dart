@@ -1,5 +1,3 @@
-library calendar_test;
-
 import 'package:elec/time.dart';
 import 'package:test/test.dart';
 import 'package:date/date.dart';
@@ -14,22 +12,21 @@ void tests() {
   group('Test calendar', () {
     test('first business day from', () {
       var calendar = Calendar.nerc;
-      expect(
-          calendar.firstBusinessDateFrom(Date.utc(2019, 9, 1)), Date.utc(2019, 9, 3));
-      expect(
-          calendar.firstBusinessDateFrom(Date.utc(2020, 1, 1)), Date.utc(2020, 1, 2));
-      expect(
-          calendar.firstBusinessDateFrom(Date.utc(2020, 2, 1)), Date.utc(2020, 2, 3));
-      expect(
-          calendar.firstBusinessDateFrom(Date.utc(2023, 7, 10)), Date.utc(2023, 7, 11));
-
+      expect(calendar.firstBusinessDateFrom(Date.utc(2019, 9, 1)),
+          Date.utc(2019, 9, 3));
+      expect(calendar.firstBusinessDateFrom(Date.utc(2020, 1, 1)),
+          Date.utc(2020, 1, 2));
+      expect(calendar.firstBusinessDateFrom(Date.utc(2020, 2, 1)),
+          Date.utc(2020, 2, 3));
+      expect(calendar.firstBusinessDateFrom(Date.utc(2023, 7, 10)),
+          Date.utc(2023, 7, 11));
     });
     test('last business day from', () {
       var calendar = Calendar.nerc;
-      expect(
-          calendar.lastBusinessDateFrom(Date.utc(2023, 7, 1)), Date.utc(2023, 6, 30));
-      expect(
-          calendar.lastBusinessDateFrom(Date.utc(2023, 7, 5)), Date.utc(2023, 7, 3));
+      expect(calendar.lastBusinessDateFrom(Date.utc(2023, 7, 1)),
+          Date.utc(2023, 6, 30));
+      expect(calendar.lastBusinessDateFrom(Date.utc(2023, 7, 5)),
+          Date.utc(2023, 7, 3));
     });
     test('is business day', () {
       var calendar = Calendar.nerc;
@@ -177,7 +174,7 @@ void speedTest() {
     for (var date in days) {
       // if (calendar.isHoliday3(date.year, date.month, date.day)) {
       if (calendar.isHoliday(date)) {
-      //   print(date);
+        //   print(date);
         count++;
       }
     }

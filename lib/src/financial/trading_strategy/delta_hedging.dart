@@ -1,5 +1,3 @@
-library financial.trading_strategy.delta_hedging;
-
 import 'package:elec/src/financial/trading_strategy/portfolio.dart';
 import 'package:elec/src/financial/trading_strategy/trading_strategy.dart';
 
@@ -17,7 +15,7 @@ class DeltaHedging extends TradingStrategy {
   // void run(List<Date> days) {
   //   for (var day in days) {
   //     // calculate portfolio delta
-  //     // var delta = 
+  //     // var delta =
   //   }
 
   // }

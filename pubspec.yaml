@@ -1,10 +1,10 @@
 name: elec
 description: A collection of elec functionality
-version: 2.0.1
+version: 2.1.0
 publish_to: none
 
 environment:
-  sdk: ^3.0.2
+  sdk: ">=3.6.0 <4.0.0"
 
 dependencies:
   collection: ^1.17.1
@@ -21,7 +21,7 @@ dependencies:
   http: ^1.2.0
   intl: ^0.19.0
   mongo_dart: ^0.10.3
-  more: ^4.0.1
+  more: ^4.6.1
   quiver: ^3.2.1
   statemachine: ^3.3.1
   table:
@@ -29,7 +29,6 @@ dependencies:
   timeseries:
     git: https://github.com/thumbert/timeseries.git
   timezone: ^0.9.4
-  tuple: ^2.0.0
   xml: ^6.3.0
 
 dependency_overrides:

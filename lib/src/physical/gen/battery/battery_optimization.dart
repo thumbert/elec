@@ -1,5 +1,3 @@
-library physical.gen.battery.battery_optimization;
-
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart' hide IterableNumberExtension;
@@ -93,7 +91,7 @@ abstract class BatteryOptimization {
   List<CycleStats> _calculateDaCycleStats() {
     var data = dispatchDa
         .merge(daPrice, f: (x, y) => (x!, y!))
-        .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x!.$2, daPnl: y!));
+        .merge(pnlDa, f: (x, y) => (state: x!.$1, daPrice: x.$2, daPnl: y!));
 
     var cycles = groupBy(data, (e) => e.value.state.endState.cycleNumber);
     cycles.remove(cycles.keys.first);

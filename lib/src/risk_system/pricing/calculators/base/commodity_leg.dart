@@ -1,5 +1,3 @@
-library elec.risk_system.pricing.calculators.base.calculator_base;
-
 import 'package:date/date.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';

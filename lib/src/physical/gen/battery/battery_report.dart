@@ -1,5 +1,3 @@
-library src.physical.gen.battery_report;
-
 import 'dart:io';
 
 import 'package:dama/stat/descriptive/summary.dart';
