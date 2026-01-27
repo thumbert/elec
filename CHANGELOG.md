@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-01-26 
+- Write eMkt xml file with demand bids
+
 ## 2025-12-05 (version 2.2.0)
 - Remove dependency of tuple
 - Clean some lints
