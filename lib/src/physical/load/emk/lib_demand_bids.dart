@@ -58,14 +58,14 @@ class DemandBidFixed extends DemandBid {
 
   @override
   xml.XmlBuilder buildOne(xml.XmlBuilder builder) {
-    builder.element('DemandBid', nest: () {
+    builder.element('mes:DemandBid', nest: () {
       builder.attribute('bidType', 'Fixed');
       builder.attribute('day', date.toIso8601String());
       builder.attribute('ID', ptid.toString());
-      builder.element('NodeName', nest: zoneNames[ptid]!);
-      builder.element('HourlyProfile', nest: () {
+      builder.element('mes:NodeName', nest: zoneNames[ptid]!);
+      builder.element('mes:HourlyProfile', nest: () {
         for (var i = 0; i < quantity.length; i++) {
-          builder.element('HourlyBid', nest: () {
+          builder.element('mes:HourlyBid', nest: () {
             builder.attribute('time', emktDateTime(quantity[i].interval.start));
             builder.element('mes:FixedMW',
                 nest: quantity[i].value.toStringAsFixed(1));
