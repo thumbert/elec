@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-01-27
+- Add more checks and fix the price sensitive code
+
 ## 2026-01-26 
 - Write eMkt xml file with demand bids
 
