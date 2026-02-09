@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-02-09
+- Add Caiso in the ISO list
+
 ## 2026-01-27
 - Add more checks and fix the price sensitive code
 

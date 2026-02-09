@@ -9,6 +9,7 @@ abstract class Iso {
 
   late tz.Location preferredTimeZoneLocation;
 
+  static final Iso caiso = Caiso();
   static final Iso ercot = Ercot();
   static final Iso ieso = Ieso();
   static final Iso newEngland = IsoNewEngland();
@@ -19,6 +20,7 @@ abstract class Iso {
     'ercot': ercot,
     'ieso': ieso,
     'isone': newEngland,
+    'caiso': caiso,
     'nyiso': newYork,
     'pjm': pjm,
   };
@@ -278,9 +280,19 @@ class Ieso implements Iso {
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/Cancun');
 }
 
-//class Caiso extends Iso {
-//static final Location location = getLocation('America/Los_Angeles');
-//}
+class Caiso implements Iso {
+  @override
+  tz.Location preferredTimeZoneLocation = tz.getLocation('America/Los_Angeles');
+  
+  @override
+  Map<String, int> get loadZones => throw UnimplementedError();
+  
+  @override
+  String get name => 'CAISO';
+  
+  @override
+  Set<String> get serviceTypes => throw UnimplementedError();
+}
 
 class Ercot implements Iso {
   static final location = tz.getLocation('America/Chicago');
