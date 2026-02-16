@@ -281,15 +281,17 @@ class Ieso implements Iso {
 }
 
 class Caiso implements Iso {
+  static tz.Location location = tz.getLocation('America/New_York');
+
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/Los_Angeles');
-  
+
   @override
   Map<String, int> get loadZones => throw UnimplementedError();
-  
+
   @override
   String get name => 'CAISO';
-  
+
   @override
   Set<String> get serviceTypes => throw UnimplementedError();
 }
