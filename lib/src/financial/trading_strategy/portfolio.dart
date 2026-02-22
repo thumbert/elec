@@ -159,8 +159,8 @@ class Trade {
   List<(String, Month, num)> delta(Date asOfDate) {
     var out = legs.expand((leg) => leg.delta(asOfDate)).toList();
     var byInstument =
-        naturalComparable<String>.onResultOf(((String, Month, num) e) => e.$1);
-    var byMonth = naturalComparable<Interval>.onResultOf(
+        naturalComparable<String>.keyOf(((String, Month, num) e) => e.$1);
+    var byMonth = naturalComparable<Interval>.keyOf(
         ((String, Month, num) e) => e.$2);
     var ordering = byInstument.thenCompare(byMonth);
     ordering.sort(out);

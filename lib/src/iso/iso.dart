@@ -229,7 +229,7 @@ class Ieso implements Iso {
 
   /// Ontario publishes all their data in EST time which is UTC-05:00.
   static tz.Location location = tz.Location('EST', [], [],
-      [tz.TimeZone(-5 * 3600 * 1000, isDst: false, abbreviation: 'EST')]);
+      [tz.TimeZone(Duration(hours: -5), isDst: false, abbreviation: 'EST')]);
   static final Bucket bucket5x8 = Bucket.b5x8;
   static final Bucket bucket5x16 = Bucket.b5x16;
   static final Bucket bucket7x16 = Bucket.b7x16;
