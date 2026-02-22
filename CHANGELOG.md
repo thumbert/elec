@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-02-22
+- Bump up a few dependencies
+
 ## 2026-02-09
 - Add Caiso in the ISO list
 
