@@ -14,6 +14,7 @@ import 'time/hour_filter_test.dart' as hour_filter;
 import 'time/day_filter_test.dart' as day_filter;
 import 'time/monthly_bucket_value_test.dart' as monthly_bucket_value;
 import 'time/shape/shape_cost_test.dart' as shape_cost;
+import 'time/shape/tb_n_test.dart' as tb_n;
 import 'time/calendar/holiday_test.dart' as holiday;
 import 'time/calendar/calendar_test.dart' as calendar;
 import 'time/last_trading_day_test.dart' as last_trading_day;
@@ -65,6 +66,7 @@ Future<void> main() async {
   await all_weather.tests(rootUrl);
   seasonal_format.tests();
   shape_cost.tests();
+  tb_n.tests();
   time_aggregation.tests();
   trade_aggregator.tests();
   leap_year_policy.tests();

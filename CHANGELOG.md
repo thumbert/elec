@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-02-25
+- Add a tbN function to calculate the max battery storage value. 
+
 ## 2026-02-22
 - Bump up a few dependencies
 
