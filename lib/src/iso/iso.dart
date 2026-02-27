@@ -17,10 +17,10 @@ abstract class Iso {
   static final Iso pjm = Pjm();
 
   static final _map = <String, Iso>{
+    'caiso': caiso,
     'ercot': ercot,
     'ieso': ieso,
     'isone': newEngland,
-    'caiso': caiso,
     'nyiso': newYork,
     'pjm': pjm,
   };
@@ -277,11 +277,15 @@ class Ieso implements Iso {
   /// all year long.  Wikipedia recommends using America/Cancun as the
   /// timezone that respects that year long.
   @override
-  tz.Location preferredTimeZoneLocation = tz.getLocation('America/Cancun');
+  tz.Location preferredTimeZoneLocation =
+      // tz.getLocation('America/Cancun');
+      tz.Location('EST', [], [], [
+    tz.TimeZone(Duration(hours: -5), isDst: false, abbreviation: 'EST')
+  ]);
 }
 
 class Caiso implements Iso {
-  static tz.Location location = tz.getLocation('America/New_York');
+  static tz.Location location = tz.getLocation('America/Los_Angeles');
 
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/Los_Angeles');
