@@ -1,6 +1,7 @@
 import 'package:date/date.dart';
 import 'package:elec/src/time/calendar/calendars/nerc_calendar.dart';
 import 'package:elec/time.dart';
+import 'package:timezone/timezone.dart';
 
 abstract class Bucket {
   late final String name;
@@ -9,8 +10,14 @@ abstract class Bucket {
   /// weights.  Should be a sorted list.
   late final List<int> hourBeginning;
 
-  ///Is this hour in the bucket?
+  /// Is this hour in the bucket?
   bool containsHour(Hour hour);
+
+  /// There may be speed advantages to this method over containsHour if you
+  /// don't have an [Hour] object, or for sub-hourly time series. 
+  /// Should be overridden by each bucket (not yet done).  
+  bool containsZoned(TZDateTime dt) => containsHour(Hour.containing(dt));
+
   @override
   String toString() => name;
 
@@ -71,8 +78,8 @@ abstract class Bucket {
     'OFFPEAK CAISO': Bucket.offpeakCaiso,
     'OFFPEAK ERCOT': Bucket.offpeakErcot,
     'WRAP': Bucket.offpeak,
-    '1x16H': Bucket.b1x16H,
-    '1x16H CAISO': Bucket.b1x16HCaiso,
+    '1X16H': Bucket.b1x16H,
+    '1X16H CAISO': Bucket.b1x16HCaiso,
     '2X16': Bucket.b2x16,
     '2X16H': Bucket.b2x16H,
     '2X16H ERCOT': Bucket.b2x16HErcot,
@@ -97,6 +104,7 @@ abstract class Bucket {
     '5X16_21': Bucket.b5x16_21,
     '5X16_22': Bucket.b5x16_22,
     '6X16': Bucket.b6x16,
+    '6X16 CAISO': Bucket.peakCaiso,
     '7X8': Bucket.b7x8,
     '7X8 CAISO': Bucket.b7x8Caiso,
     '7X8 ERCOT': Bucket.b7x8Ercot,
@@ -177,6 +185,9 @@ class Bucket7x24 extends Bucket {
   }
   @override
   bool containsHour(Hour hour) => true;
+
+  @override
+  bool containsZoned(TZDateTime dt) => true;
 }
 
 class Bucket7x8 extends Bucket {
