@@ -5,6 +5,7 @@
 
 ## 2026-03-17
 - Add pretty names to Caiso static buckets.
+- Change the names of the Caiso buckets to match the ones in bust.
 
 ## 2026-03-13
 - Fix Caiso bucket parsing.

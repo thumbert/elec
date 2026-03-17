@@ -113,6 +113,10 @@ abstract class Bucket {
     '7XHE18-22': Bucket.b7xHE1822,
     '7X16 ERCOT': Bucket.b7x16Ercot,
     '7X24': Bucket.atc,
+    'CAISO6X16':Bucket.peakCaiso,
+    'CAISO1X16H':Bucket.b1x16HCaiso,
+    'CAISO7x8':Bucket.b7x8Caiso,
+    'CAISOOFFPEAK':Bucket.offpeakCaiso,
   };
 
   /// Return a bucket from a String.  Throw if it fails.
@@ -374,7 +378,7 @@ class BucketPeakCaiso extends Bucket {
   /// holidays, from HE 7 to HE 22 (6:00 AM to 10:00 PM).
   /// All other hours are off-peak hours.
   BucketPeakCaiso() {
-    name = 'Peak Caiso';
+    name = 'Caiso6x16';
     hourBeginning = List.generate(16, (i) => i + 6, growable: false);
   }
 
@@ -457,7 +461,7 @@ class Bucket1x16HCaiso extends Bucket {
   final calendar = NercCalendar();
 
   Bucket1x16HCaiso() {
-    name = '1x16H Caiso';
+    name = 'Caiso1x16H';
     hourBeginning = List.generate(16, (i) => i + 6, growable: false);
   }
 
@@ -594,7 +598,7 @@ class BucketOffpeakCaiso extends Bucket {
   final calendar = NercCalendar();
 
   BucketOffpeakCaiso() {
-    name = 'Offpeak Caiso';
+    name = 'CaisoOffpeak';
     hourBeginning = List.generate(24, (i) => i, growable: false);
   }
 
