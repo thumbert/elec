@@ -10,7 +10,7 @@ import 'package:elec/elec.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:more/cache.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:tuple/tuple.dart';
+// import 'package:tuple/tuple.dart';
 import 'ftr_auction.dart';
 
 /// The term used for historical settled prices
@@ -26,7 +26,8 @@ class FtrPath {
       required this.bucket,
       this.mw = 1,
       required this.iso,
-      String rootUrl = 'http://127.0.0.1:8080',
+      required String rootUrl,
+      required String rustServer,
       Client? client}) {
     client ??= Client();
 
@@ -55,29 +56,29 @@ class FtrPath {
 
   /// a daily settle price cache
   static final settlePriceCache =
-      Cache.lru(loader: (Tuple3<Iso, Bucket, int> tuple3) {
+      Cache.lru(loader: ((Iso, Bucket, int) tuple3) {
     return _daLmpClient.getDailyLmpBucket(
-        tuple3.item1, // iso
-        tuple3.item3, // ptid
+        tuple3.$1, // iso
+        tuple3.$3, // ptid
         LmpComponent.congestion,
-        tuple3.item2, // bucket
+        tuple3.$2, // bucket
         _term!.startDate,
         _term!.endDate);
   });
 
   /// an hourly settle price cache
   static final hourlySettlePriceCache =
-      Cache.lru(loader: (Tuple2<Iso, int> tuple2) {
-    return _daLmpClient.getHourlyLmp(tuple2.item1, tuple2.item2,
+      Cache.lru(loader: ((Iso, int) tuple2) {
+    return _daLmpClient.getHourlyLmp(tuple2.$1, tuple2.$2,
         LmpComponent.congestion, _term!.startDate, _term!.endDate);
   });
 
   /// A clearing price cache
   /// (Iso, ptid) -> {Bucket: {AuctionName: num}}
   static final clearingPriceCache =
-      Cache.lru(loader: (Tuple2<Iso, int> tuple2) async {
+      Cache.lru(loader: ((Iso, int) tuple2) async {
     var xs =
-        await _ftrClearingPricesClient.getClearingPricesForPtid(tuple2.item2);
+        await _ftrClearingPricesClient.getClearingPricesForPtid(tuple2.$2);
     var groups = groupBy(xs, (Map x) => x['bucket'] as String);
     return groups.map((key, values) {
       var out = {
@@ -93,8 +94,8 @@ class FtrPath {
   /// FTR/TCC auction or if there are no auctions this path cleared.
   Future<Map<FtrAuction, num>> getClearingPrices(
       {List<FtrAuction>? auctions}) async {
-    var cpSource = await clearingPriceCache.get(Tuple2(iso, sourcePtid));
-    var cpSink = await clearingPriceCache.get(Tuple2(iso, sinkPtid));
+    var cpSource = await clearingPriceCache.get((iso, sourcePtid));
+    var cpSink = await clearingPriceCache.get((iso, sinkPtid));
 
     var out = <FtrAuction, num>{};
     if (cpSource.isEmpty || cpSink.isEmpty) {
@@ -131,8 +132,8 @@ class FtrPath {
   /// (the last 5 years by default.)
   Future<TimeSeries<num>> getDailySettlePrices({Term? term}) async {
     var sourcePrices =
-        await settlePriceCache.get(Tuple3(iso, bucket, sourcePtid));
-    var sinkPrices = await settlePriceCache.get(Tuple3(iso, bucket, sinkPtid));
+        await settlePriceCache.get((iso, bucket, sourcePtid));
+    var sinkPrices = await settlePriceCache.get((iso, bucket, sinkPtid));
     late TimeSeries<num> spread;
     if (iso == Iso.newYork) {
       spread = sourcePrices - sinkPrices;
@@ -153,8 +154,8 @@ class FtrPath {
   /// (the last 5 years by default.)
   Future<TimeSeries<num>> getHourlySettlePrices({Term? term}) async {
     var sourcePrices =
-        await hourlySettlePriceCache.get(Tuple2(iso, sourcePtid));
-    var sinkPrices = await hourlySettlePriceCache.get(Tuple2(iso, sinkPtid));
+        await hourlySettlePriceCache.get((iso, sourcePtid));
+    var sinkPrices = await hourlySettlePriceCache.get((iso, sinkPtid));
     late TimeSeries<num> spread;
     if (iso == Iso.newYork) {
       spread = sourcePrices - sinkPrices;

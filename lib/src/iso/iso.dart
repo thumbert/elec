@@ -290,6 +290,13 @@ class Caiso implements Iso {
   @override
   tz.Location preferredTimeZoneLocation = tz.getLocation('America/Los_Angeles');
 
+  static final Bucket bucket6x16 = Bucket.peakCaiso;
+  static final Bucket bucket1x16H = Bucket.b1x16HCaiso;
+  static final Bucket bucket7x8 = Bucket.b7x8Caiso;
+  static final Bucket bucket7x24 = Bucket.atc;
+  static final Bucket bucketOffpeak = Bucket.offpeakCaiso;
+  static final Bucket bucketPeak = bucket6x16;
+
   @override
   Map<String, int> get loadZones => throw UnimplementedError();
 

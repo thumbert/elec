@@ -1,3 +1,4 @@
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/data/latest.dart';
 import 'analysis/filter/filter_test.dart' as filter;
 import 'analysis/format/seasonal_format_test.dart' as seasonal_format;
@@ -36,7 +37,8 @@ import 'weather/lib_weather_utils.dart' as weather_utils;
 Future<void> main() async {
   initializeTimeZones();
 
-  var rootUrl = 'http://localhost:8080';
+  dotenv.load('.env/prod.env'); 
+  final rootUrl = dotenv.env['ROOT_URL']!;
 
   filter.tests();
   buy_sell.tests();
@@ -44,7 +46,7 @@ Future<void> main() async {
   seasonal_analysis.tests();
   solar_elevation.tests();
   ftr_auction.tests();
-  ftr_path.tests(rootUrl);
+  ftr_path.tests();
   black_scholes.tests();
   bucket.tests();
   bucket.aggregateByBucketMonth();

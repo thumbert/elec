@@ -3,8 +3,11 @@
 ## TODO
 - Clean the lints!
 
+## 2026-03-17
+- Add pretty names to Caiso static buckets.
+
 ## 2026-03-13
-- Fix Caiso bucket parsing
+- Fix Caiso bucket parsing.
 
 ## 2026-02-25
 - Add a tbN function to calculate the max battery storage value. 
