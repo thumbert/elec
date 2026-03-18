@@ -183,9 +183,10 @@ class FtrPath {
 
   /// Get the settle price for an auction
   /// If the auction is in the future, return [null]
-  /// 
+  ///
   Future<num?> getSettlePriceForAuction(FtrAuction auction) async {
-    if (auction.start.isAfter(Date.today(location: iso.preferredTimeZoneLocation))) {
+    if (auction.start
+        .isAfter(Date.today(location: iso.preferredTimeZoneLocation))) {
       return null;
     }
     Iterable<IntervalTuple<num>> aux =
@@ -204,20 +205,20 @@ class FtrPath {
   ///   'settlePrice': ...,
   /// }
   /// ```
-  Future<List<Map<String, dynamic>>> makeTableCpSp(
-      {required Date fromDate}) async {
+  Future<List<({FtrAuction auction, num clearingPrice, num? settlePrice})>>
+      makeTableCpSp({required Date fromDate}) async {
     var auctions =
         await _ftrClearingPricesClient!.getAuctions(startDate: fromDate);
 
-    var out = <Map<String, dynamic>>[];
+    var out = <({FtrAuction auction, num clearingPrice, num? settlePrice})>[];
     var clearingPrices = await getClearingPrices(auctions: auctions);
     for (var auction in clearingPrices.keys) {
       var sp = await getSettlePriceForAuction(auction);
-      out.add({
-        'auction': auction,
-        'clearingPrice': clearingPrices[auction],
-        'settlePrice': sp,
-      });
+      out.add((
+        auction: auction,
+        clearingPrice: clearingPrices[auction]!,
+        settlePrice: sp
+      ));
     }
 
     return out;

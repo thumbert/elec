@@ -6,7 +6,8 @@
 ## 2026-03-18
 - Implement some temporary fixes to FtrPath.  Not the best, but start relying on 
   DuckDb for settle prices.
-- Return null for the settlement price of an FTR auction that has not started to deliver.  
+- Return null for the settlement price of an FTR auction that has not started to deliver.
+- Type strengthen the return of makeTableCpSp in ftr_path.  
 
 ## 2026-03-17
 - Add pretty names to Caiso static buckets.

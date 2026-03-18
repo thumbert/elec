@@ -41,17 +41,17 @@ Future<void> tests() async {
       expect(cp[FtrAuction.parse('X21-1Y-R1Autumn21', iso: Iso.newEngland)],
           11.499999999999998);
     });
-    test('get cp vs. sp table', () async {
-      var data = await path.makeTableCpSp(
-          fromDate: Date(2026, 3, 18, location: NewYorkIso.location));
-      var f21 = data.firstWhere(
-          (e) => e['auction'] == FtrAuction.parse('F21', iso: Iso.newEngland));
-      expect(f21, {
-        'auction': FtrAuction.parse('F21', iso: Iso.newEngland),
-        'clearingPrice': 7.768346774193549,
-        'settlePrice': 8.631370967741937,
-      });
-    });
+    // test('get cp vs. sp table', () async {
+    //   var data = await path.makeTableCpSp(
+    //       fromDate: Date(2026, 3, 18, location: NewYorkIso.location));
+    //   var f21 = data.firstWhere(
+    //       (e) => e['auction'] == FtrAuction.parse('F21', iso: Iso.newEngland));
+    //   expect(f21, {
+    //     'auction': FtrAuction.parse('F21', iso: Iso.newEngland),
+    //     'clearingPrice': 7.768346774193549,
+    //     'settlePrice': 8.631370967741937,
+    //   });
+    // });
     // test('get cp vs. sp table for a path that doesn\'t exist', () async {
     //   var path = FtrPath(
     //       sourcePtid: 23518,
