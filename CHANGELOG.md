@@ -3,6 +3,10 @@
 ## TODO
 - Clean the lints!
 
+## 2026-03-18
+- Implement some temporary fixes to FtrPath.  Not the best, but start relying on 
+  DuckDb for settle prices.
+
 ## 2026-03-17
 - Add pretty names to Caiso static buckets.
 - Change the names of the Caiso buckets to match the ones in bust.

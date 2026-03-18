@@ -1,11 +1,8 @@
 import 'package:dotenv/dotenv.dart' as dotenv;
-import 'package:http/http.dart' as http;
 import 'package:date/date.dart';
-import 'package:elec_server/client/binding_constraints.dart';
 import 'package:test/test.dart';
+import 'package:timeseries/timeseries.dart';
 import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
-import 'package:timezone/timezone.dart';
 import 'package:elec/elec.dart';
 import 'package:elec/src/physical/ftr/ftr_auction.dart';
 import 'package:elec/src/physical/ftr/ftr_path.dart';
@@ -17,19 +14,25 @@ Future<void> tests() async {
     var path = FtrPath(
         sourcePtid: 4000,
         sinkPtid: 4001,
-        bucket: Bucket.b5x16,
+        bucket: IsoNewEngland.bucket5x16,
         iso: Iso.newEngland,
+        term: Term.parse('Jan25-Mar26', IsoNewEngland.location),
         rootUrl: rootUrl,
         rustServer: rustServer);
     test('get daily settled prices', () async {
-      var sp = await path.getDailySettlePrices(
+      final sp = await path.getDailySettlePrices(
           term: Term.parse('Jan26', IsoNewEngland.location));
-      expect(sp.length, 22);
+      // print(sp);
+      expect(
+          sp.first,
+          IntervalTuple<num>(Date(2026, 1, 2, location: IsoNewEngland.location),
+              -0.4018999999999999));
+      expect(sp.length, 21);
     });
     test('get settle price for one auction', () async {
-      var auction = FtrAuction.parse('F21', iso: Iso.newEngland);
+      var auction = FtrAuction.parse('F26', iso: Iso.newEngland);
       var sp = await path.getSettlePriceForAuction(auction);
-      expect(sp, 8.631370967741937);
+      expect(sp, -4.604494047619046);
     });
     test('get clearing prices for the path', () async {
       var cp = await path.getClearingPrices();

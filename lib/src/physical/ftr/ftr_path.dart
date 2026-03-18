@@ -3,18 +3,13 @@ import 'package:collection/collection.dart';
 import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
-import 'package:elec_server/client/dalmp.dart';
 import 'package:elec_server/client/ftr_clearing_prices.dart';
+import 'package:elec_server/client/lmp.dart';
 import 'package:http/http.dart';
 import 'package:elec/elec.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:more/cache.dart';
-import 'package:timezone/timezone.dart' as tz;
-// import 'package:tuple/tuple.dart';
 import 'ftr_auction.dart';
-
-/// The term used for historical settled prices
-Term? _term;
 
 typedef AuctionName = String;
 
@@ -26,24 +21,15 @@ class FtrPath {
       required this.bucket,
       this.mw = 1,
       required this.iso,
+      required Term term,
       required String rootUrl,
       required String rustServer,
       Client? client}) {
     client ??= Client();
-
-    _daLmpClient = DaLmp(client, rootUrl: rootUrl);
-    _ftrClearingPricesClient =
+    _term ??= term;
+    _ftrClearingPricesClient ??=
         FtrClearingPrices(client, iso: iso, rootUrl: rootUrl);
-
-    if (_term == null) {
-      // set the default _term to the past 5 years
-      var now = tz.TZDateTime.now(iso.preferredTimeZoneLocation);
-      var end = tz.TZDateTime(
-              iso.preferredTimeZoneLocation, now.year, now.month, now.day)
-          .add(Duration(days: 1));
-      _term = Term.fromInterval(Interval(
-          tz.TZDateTime(iso.preferredTimeZoneLocation, now.year - 5), end));
-    }
+    _rustServer ??= rustServer;
   }
 
   final int sourcePtid, sinkPtid;
@@ -51,26 +37,60 @@ class FtrPath {
   final Bucket bucket;
   final Iso iso;
 
-  static late DaLmp _daLmpClient;
-  static late FtrClearingPrices _ftrClearingPricesClient;
+  static Term? _term;
+  static String? _rustServer;
+  static late String rootUrl;
+
+  static FtrClearingPrices? _ftrClearingPricesClient;
 
   /// a daily settle price cache
   static final settlePriceCache =
-      Cache.lru(loader: ((Iso, Bucket, int) tuple3) {
-    return _daLmpClient.getDailyLmpBucket(
-        tuple3.$1, // iso
-        tuple3.$3, // ptid
-        LmpComponent.congestion,
-        tuple3.$2, // bucket
-        _term!.startDate,
-        _term!.endDate);
+      Cache.lru(loader: ((Iso, Bucket, int, Term) tuple4) {
+    switch (tuple4.$1.name) {
+      case 'ISONE':
+        return IsoNewEngland().getDailyLmp(
+            market: Market.da,
+            ptid: tuple4.$3,
+            component: LmpComponent.congestion,
+            bucket: tuple4.$2,
+            term: tuple4.$4,
+            rustServer: _rustServer!);
+      case 'NYISO':
+        return NewYorkIso().getDailyLmp(
+            market: Market.da,
+            ptid: tuple4.$3,
+            component: LmpComponent.congestion,
+            bucket: tuple4.$2,
+            term: tuple4.$4,
+            rustServer: _rustServer!);
+      default:
+        throw UnimplementedError(
+            'Settle price cache is only implemented for ISONE and NYISO');
+    }
   });
 
   /// an hourly settle price cache
   static final hourlySettlePriceCache =
-      Cache.lru(loader: ((Iso, int) tuple2) {
-    return _daLmpClient.getHourlyLmp(tuple2.$1, tuple2.$2,
-        LmpComponent.congestion, _term!.startDate, _term!.endDate);
+      Cache.lru(loader: ((Iso, int, Term) tuple3) {
+    switch (tuple3.$1.name) {
+      case 'ISONE':
+        return IsoNewEngland().getHourlyLmp(
+            market: Market.da,
+            ptid: tuple3.$2,
+            component: LmpComponent.congestion,
+            term: tuple3.$3,
+            rustServer: _rustServer!);
+      case 'NYISO':
+        return NewYorkIso().getHourlyLmp(
+            market: Market.da,
+            ptid: tuple3.$2,
+            component: LmpComponent.congestion,
+            term: tuple3.$3,
+            rustServer: _rustServer!);
+      default:
+        throw UnimplementedError(
+            'Hourly settle price cache is only implemented for ISONE and NYISO');
+    }
   });
 
   /// A clearing price cache
@@ -78,7 +98,7 @@ class FtrPath {
   static final clearingPriceCache =
       Cache.lru(loader: ((Iso, int) tuple2) async {
     var xs =
-        await _ftrClearingPricesClient.getClearingPricesForPtid(tuple2.$2);
+        await _ftrClearingPricesClient!.getClearingPricesForPtid(tuple2.$2);
     var groups = groupBy(xs, (Map x) => x['bucket'] as String);
     return groups.map((key, values) {
       var out = {
@@ -130,10 +150,10 @@ class FtrPath {
   /// Get the daily settle prices for this path.
   /// If you don't specify the [term], return values from cache
   /// (the last 5 years by default.)
-  Future<TimeSeries<num>> getDailySettlePrices({Term? term}) async {
+  Future<TimeSeries<num>> getDailySettlePrices({required Term term}) async {
     var sourcePrices =
-        await settlePriceCache.get((iso, bucket, sourcePtid));
-    var sinkPrices = await settlePriceCache.get((iso, bucket, sinkPtid));
+        await settlePriceCache.get((iso, bucket, sourcePtid, term));
+    var sinkPrices = await settlePriceCache.get((iso, bucket, sinkPtid, term));
     late TimeSeries<num> spread;
     if (iso == Iso.newYork) {
       spread = sourcePrices - sinkPrices;
@@ -141,21 +161,16 @@ class FtrPath {
       spread = sinkPrices - sourcePrices;
     }
 
-    if (term == null) {
-      // return everything you have in cache
-      return spread;
-    } else {
-      return TimeSeries.fromIterable(spread.window(term.interval));
-    }
+    return TimeSeries.fromIterable(spread.window(term.interval));
   }
 
   /// Get the hourly settle prices for this path.
   /// If you don't specify the [term], return values from cache
   /// (the last 5 years by default.)
-  Future<TimeSeries<num>> getHourlySettlePrices({Term? term}) async {
+  Future<TimeSeries<num>> getHourlySettlePrices({required Term term}) async {
     var sourcePrices =
-        await hourlySettlePriceCache.get((iso, sourcePtid));
-    var sinkPrices = await hourlySettlePriceCache.get((iso, sinkPtid));
+        await hourlySettlePriceCache.get((iso, sourcePtid, term));
+    var sinkPrices = await hourlySettlePriceCache.get((iso, sinkPtid, term));
     late TimeSeries<num> spread;
     if (iso == Iso.newYork) {
       spread = sourcePrices - sinkPrices;
@@ -163,12 +178,7 @@ class FtrPath {
       spread = sinkPrices - sourcePrices;
     }
 
-    if (term == null) {
-      // return everything you have in cache
-      return spread;
-    } else {
-      return TimeSeries.fromIterable(spread.window(term.interval));
-    }
+    return TimeSeries.fromIterable(spread.window(term.interval));
   }
 
   /// Get the settle price for an auction
@@ -192,7 +202,7 @@ class FtrPath {
   Future<List<Map<String, dynamic>>> makeTableCpSp(
       {required Date fromDate}) async {
     var auctions =
-        await _ftrClearingPricesClient.getAuctions(startDate: fromDate);
+        await _ftrClearingPricesClient!.getAuctions(startDate: fromDate);
 
     var out = <Map<String, dynamic>>[];
     var clearingPrices = await getClearingPrices(auctions: auctions);
@@ -227,14 +237,14 @@ class FtrPath {
       num meanSpreadThreshold = 1.0}) async {
     var out = <Map<String, dynamic>>[];
 
-    var hourlySettlePrice = await getHourlySettlePrices();
-    var _settlePrice = TimeSeries.fromIterable(hourlySettlePrice
+    var hourlySettlePrice = await getHourlySettlePrices(term: term);
+    var settlePrice = TimeSeries.fromIterable(hourlySettlePrice
         .window(term.interval)
         .where((e) => bucket.containsHour(e.interval as Hour)));
     for (var constraint in bindingConstraints.keys) {
       var bc = bindingConstraints[constraint]!.window(term.interval);
       if (bc.isNotEmpty) {
-        var join = _settlePrice.merge(TimeSeries.fromIterable(bc),
+        var join = settlePrice.merge(TimeSeries.fromIterable(bc),
             f: (x, y) => [x, y], joinType: JoinType.Inner);
 
         /// need to eliminate the false positives, when the constraint binds
