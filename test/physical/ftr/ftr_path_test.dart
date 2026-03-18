@@ -43,7 +43,7 @@ Future<void> tests() async {
     });
     test('get cp vs. sp table', () async {
       var data = await path.makeTableCpSp(
-          fromDate: Date(2020, 12, 14, location: NewYorkIso.location));
+          fromDate: Date(2026, 3, 18, location: NewYorkIso.location));
       var f21 = data.firstWhere(
           (e) => e['auction'] == FtrAuction.parse('F21', iso: Iso.newEngland));
       expect(f21, {

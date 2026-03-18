@@ -182,7 +182,12 @@ class FtrPath {
   }
 
   /// Get the settle price for an auction
-  Future<num> getSettlePriceForAuction(FtrAuction auction) async {
+  /// If the auction is in the future, return [null]
+  /// 
+  Future<num?> getSettlePriceForAuction(FtrAuction auction) async {
+    if (auction.start.isAfter(Date.today(location: iso.preferredTimeZoneLocation))) {
+      return null;
+    }
     Iterable<IntervalTuple<num>> aux =
         await getHourlySettlePrices(term: Term.fromInterval(auction.interval));
     aux = aux.where((e) => bucket.containsHour(e.interval as Hour));
