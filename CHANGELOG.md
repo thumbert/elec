@@ -3,6 +3,10 @@
 ## TODO
 - Clean the lints!
 
+## 2026-04-12
+- Add argument [show] to formatYearMonth and formatMonthYear to easily format the data for 
+  a table.  Improve docs.  
+
 ## 2026-03-18
 - Implement some temporary fixes to FtrPath.  Not the best, but start relying on 
   DuckDb for settle prices.

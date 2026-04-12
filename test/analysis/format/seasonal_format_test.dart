@@ -13,6 +13,29 @@ void tests() {
       expect(out.length, 3);
       expect(out.first.length, 6);
     });
+    test('year/month with Show.all', () {
+      var months = Month.utc(2015, 7).nextN(28);
+      var ts = TimeSeries.from(months, List.filled(months.length, 1));
+      var out = seasonal.formatYearMonth(ts, show: seasonal.Show.all);
+      expect(out.length, 3);
+      expect(out.first.length, 13);
+      expect(out.first.keys.toList(), [
+        'Year',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ]);
+    });
+
     test('month/year', () {
       var months = Month.utc(2016, 3).nextN(28);
       var ts = TimeSeries.from(months, List.filled(months.length, 1));
@@ -20,6 +43,21 @@ void tests() {
       expect(out.length, 12);
       expect(out.first.length, 3);
     });
+
+    test('month/year with Show.all', () {
+      var months = Month.utc(2016, 3).nextN(28);
+      var ts = TimeSeries.from(months, List.filled(months.length, 1));
+      var out = seasonal.formatMonthYear(ts, show: seasonal.Show.all);
+      expect(out.length, 12);
+      expect(out.first.length, 4);
+      expect(out.first.keys.toList(), [
+        'Month',
+        '2016',
+        '2017',
+        '2018',
+      ]);
+    });
+
   });
 }
 
