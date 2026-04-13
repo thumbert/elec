@@ -23,7 +23,7 @@ You can easily check if an hour belongs in this bucket or not:
 Bucket.b5x16.containsHour(Hour.containing(TZDateTime(IsoNewEngland.location, 2026, 1, 1))) == false;
 ```
 
-Or calculate hours in a given interval:
+Or calculate the number of hours in a given interval:
 ```dart
 final term = Term.parse('Q2,2026', IsoNewEngland.location);
 Bucket.2x16H.countHours(term.toInterval())
@@ -47,16 +47,6 @@ final value = pc.value(interval, Bucket.atc);
 final ts7x24 = pc.points(Bucket.atc);
 ```
 
-
-
-
-A simple usage example:
-
-    import 'package:elec/elec.dart';
-
-    main() {
-      var awesome = new Awesome();
-    }
 
 ## Features and bugs
 
