@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-05-15
+- Add more years to GoodFriday hardcoded dates
+
 ## 2026-04-12
 - Add argument [show] to formatYearMonth and formatMonthYear to easily format the data for 
   a table.  Improve docs.  

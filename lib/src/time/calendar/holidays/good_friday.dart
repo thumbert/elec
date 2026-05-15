@@ -34,6 +34,10 @@ class GoodFriday extends Holiday {
     2029: Date.utc(2029, 3, 30),
     2030: Date.utc(2030, 4, 19),
     2031: Date.utc(2031, 4, 11),
+    2032: Date.utc(2032, 3, 26),
+    2033: Date.utc(2033, 4, 15),
+    2034: Date.utc(2034, 4, 7),
+    2035: Date.utc(2035, 3, 23),
   };
   @override
   Date forYear(int year, {required Location location}) {
