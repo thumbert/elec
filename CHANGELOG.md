@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-07-06
+- Add NYISO Capacity Location enum 
+
 ## 2026-05-15
 - Add more years to GoodFriday hardcoded dates
 
