@@ -3,10 +3,10 @@ import 'package:elec/src/iso/iso.dart';
 
 enum PeriodType { summer, winter }
 
-class CapacitySeason {
+class CapabilityPeriod {
   /// Construct a capacity season from a name like 'Summer 2026' or 'Winter 2026-2027'.
   /// The name should be in the format 'Summer YYYY' or 'Winter YYYY-YYYY'.
-  CapacitySeason(this.name) {
+  CapabilityPeriod(this.name) {
     final aux = name.split(' ');
     periodType = switch (aux[0]) {
       'Summer' => PeriodType.summer,
