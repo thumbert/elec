@@ -36,6 +36,23 @@ class CapabilityPeriod {
 
   late final PeriodType periodType;
 
+  /// Returns the capability period that contains the given month.
+  static CapabilityPeriod containing(Month month) {
+    if (month.month >= 5 && month.month <= 10) {
+      final monthStart = month.start;
+      final year = monthStart.year;
+      return CapabilityPeriod('Summer $year');
+    } else {
+      final monthStart = month.start;
+      final year = monthStart.year;
+      if (month.month >= 11) {
+        return CapabilityPeriod('Winter $year-${year + 1}');
+      } else {
+        return CapabilityPeriod('Winter ${year - 1}-$year');
+      }
+    }
+  }
+
   /// Returns a list of months that fall within the capability period.
   List<Month> months() => term.interval.splitLeft((dt) => Month.containing(dt));
 
