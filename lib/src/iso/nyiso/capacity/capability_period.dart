@@ -35,4 +35,20 @@ class CapabilityPeriod {
   late final Term term;
 
   late final PeriodType periodType;
+
+  /// Returns a list of months that fall within the capability period.
+  List<Month> months() => term.interval.splitLeft((dt) => Month.containing(dt));
+
+  @override
+  String toString() => name;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! CapabilityPeriod) return false;
+    CapabilityPeriod period = other;
+    return period.name == name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
 }

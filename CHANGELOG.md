@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-07-07
+- Minor additions to NYISO capability_period
+
 ## 2026-07-06
 - Add NYISO Capacity Location enum 
 
