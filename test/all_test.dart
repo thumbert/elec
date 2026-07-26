@@ -54,7 +54,7 @@ Future<void> main() async {
   day_filter.tests();
   hour_filter.tests();
   hourly_schedule.tests();
-  hourly_shape.tests(rootUrl);
+  hourly_shape.tests();
   monthly_bucket_value.tests();
   calendar.tests();
   holiday.tests();

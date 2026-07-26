@@ -1,6 +1,7 @@
+library;
 /// See https://docs.formance.com/stack/unambiguous-monetary-notation#specification
 /// 
-/// UMN	Human Readable	ISO-4217 code
+// UMN	Human Readable	ISO-4217 code
 // [USD/2 30]	$0.30	USD
 // [JPY 100]	¥100	JPY
 // [BTC/8 100000000]	1 BTC	BTC

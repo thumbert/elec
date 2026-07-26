@@ -27,7 +27,7 @@ class MonthlyCurve {
 
   IntervalTuple<num> operator [](int i) => timeseries[i];
 
-  operator []=(int i, IntervalTuple<num> obs) => timeseries[i] = obs;
+  void operator []=(int i, IntervalTuple<num> obs) => timeseries[i] = obs;
 
   /// Apply a function to each element of the curve.  For example use
   /// f = (x) => 2*x to multiply each element by 2.
@@ -201,8 +201,8 @@ class MonthlyCurve {
   /// Will throw if the [interval] has no overlap with the [domain].
   /// This [interval] should not be smaller than a month!
   MonthlyCurve window(Interval interval) {
-    var _interval = interval.overlap(domain)!;
-    var aux = timeseries.window(_interval);
+    var oInterval = interval.overlap(domain)!;
+    var aux = timeseries.window(oInterval);
     return MonthlyCurve(bucket, TimeSeries.fromIterable(aux));
   }
 }

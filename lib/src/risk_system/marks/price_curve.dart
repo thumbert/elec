@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:dama/stat/descriptive/summary.dart';
 import 'package:date/date.dart';
 import 'package:elec/src/risk_system/marks/marks_curve.dart';
 import 'package:elec/time.dart';
 import 'package:intl/intl.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
-
 
 class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// A simple forward curve model for daily and monthly values extending
@@ -170,13 +170,42 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     }
   }
 
+  /// Aggregates the daily component into a monthly curve and prepends it to
+  /// the monthly component.
+  /// 
+  /// See `expandToDaily()` if you want to do the opposite and split a monthly
+  /// observation into dailies.
+  PriceCurve toMonthly() {
+    final (daily, monthly) = splitComponents();
+
+    // aggregate the daily component into months
+    var grouped = <Interval, Map<Bucket, List<num>>>{};
+    for (var x in daily) {
+      var month = Month.containing(x.interval.start);
+      grouped.putIfAbsent(month, () => <Bucket, List<num>>{});
+      for (var bucket in x.value.keys) {
+        grouped[month]!.putIfAbsent(bucket, () => <num>[]);
+        grouped[month]![bucket]!.add(x.value[bucket]!);
+      }
+    }
+
+    var dailyAggregated = PriceCurve.fromIterable(grouped.entries.map((e) {
+      var res = <Bucket, num>{};
+      for (var bucket in e.value.keys) {
+        res[bucket] = mean(e.value[bucket]!);
+      }
+      return IntervalTuple(e.key, res);
+    }));
+    return PriceCurve.fromIterable([...dailyAggregated, ...monthly]);
+  }
+
   /// Calculate the value for this curve for any term and any bucket.
   ///
   /// If the forward curve contains only one bucket, say 2x16H, only the hours
   /// associated with that bucket will be counted in the value calculation.
   /// Not having a complete bucket covering of the interval is DISCOURAGED
-  /// because the value calculation becomes suspect.  What is the value of the
-  /// Offpeak bucket if the curve only has the 2x16H hours defined?  We could
+  /// because the value calculation can become incorrect.  What is the value of
+  /// the Offpeak bucket if the curve only has the 2x16H hours defined?  We could
   /// assume that the 7x8 hours have a value zero but it's better if this gets
   /// specified in the constructor.  This assumption has not been made,
   /// so the Offpeak bucket price == 2x16H price for this curve!
@@ -186,7 +215,8 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   num value(Interval interval, Bucket bucket) {
     var domain = Interval(first.interval.start, last.interval.end);
     if (interval.start.location != first.interval.start.location) {
-      throw StateError('Timezone location of the PriceCurve does not match the interval timezone location used for the value calculation');
+      throw StateError(
+          'Timezone location of the PriceCurve does not match the interval timezone location used for the value calculation');
     }
     if (!domain.containsInterval(interval)) {
       throw ArgumentError('Forward curve not defined for the entire $interval');
@@ -225,9 +255,9 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// Return a timeseries for the [interval] for this [bucket].
   ///
   TimeSeries<num> points(Bucket bucket, {Interval? interval}) {
-    var _domain = Interval(first.interval.start, last.interval.end);
-    interval ??= _domain;
-    if (!_domain.containsInterval(interval)) {
+    final domain = Interval(first.interval.start, last.interval.end);
+    interval ??= domain;
+    if (!domain.containsInterval(interval)) {
       throw ArgumentError('Forward curve not defined for the entire $interval');
     }
 
@@ -284,12 +314,12 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// Speed up the calculation by avoiding to go to hourly, if you just
   /// aggregate different terms.
   num _calcValueOffpeak(Interval interval) {
-    final _duo = [Bucket.b2x16H, Bucket.b7x8];
+    final duo = [Bucket.b2x16H, Bucket.b7x8];
     var xs = window(interval);
     var avg = 0.0;
     var i = 0;
     for (var x in xs) {
-      for (var bucket in _duo) {
+      for (var bucket in duo) {
         var count = bucket.countHours(x.interval);
         if (count != 0) {
           avg += x.value[bucket]! * count;
@@ -312,6 +342,21 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
     return PriceCurve.fromIterable(where((e) => e.interval is Month));
   }
 
+  /// Splits the curve into its daily and monthly components.
+  (PriceCurve, PriceCurve) splitComponents() {
+    // implement it in one pass
+    var daily = PriceCurve();
+    var monthly = PriceCurve();
+    for (var e in this) {
+      if (e.interval is Date) {
+        daily.add(e);
+      } else if (e.interval is Month) {
+        monthly.add(e);
+      }
+    }
+    return (daily, monthly);
+  }
+
   /// get the first month that is marked
   Month? get firstMonth {
     var aux = firstWhereOrNull((e) => e.interval is Month);
@@ -321,9 +366,9 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
 
   /// If there are monthly marks before and including [upTo] month, expand them
   /// into to daily marks (same buckets.)
+  /// See `toMonthly()` to go in the opposite direction.
   PriceCurve expandToDaily(Month upTo) {
-    var out = dailyComponent();
-    var mCurve = monthlyComponent();
+    var (out, mCurve) = splitComponents();
     for (var i = 0; i < mCurve.length; i++) {
       if ((mCurve[i].interval as Month).isAfter(upTo)) {
         out.add(mCurve[i]);
@@ -412,10 +457,10 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   ///```
   @override
   Map<String, dynamic> toMongoDocument(Date fromDate, String curveId) {
-    var _buckets = values.map((e) => e.keys).expand((e) => e).toSet();
+    var buckets0 = values.map((e) => e.keys).expand((e) => e).toSet();
     var terms = <String>[];
-    var buckets = Map.fromIterables(_buckets.map((e) => e.name),
-        List.generate(_buckets.length, (index) => <num?>[]));
+    var buckets = Map.fromIterables(buckets0.map((e) => e.name),
+        List.generate(buckets0.length, (index) => <num?>[]));
     for (var obs in observations) {
       if (obs.interval is Month) {
         var month = obs.interval as Month;
@@ -423,7 +468,7 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
       } else {
         terms.add(obs.interval.toString());
       }
-      for (var bucket in _buckets) {
+      for (var bucket in buckets0) {
         buckets[bucket.name]!.add(obs.value[bucket]);
       }
     }
@@ -439,14 +484,12 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   /// price curve.  They now have the same terms (if possible).  For example,
   /// one may had to expand some of the monthly marks to daily, etc.  Only the
   /// overlapping terms are returned!
-  TimeSeries<(Map<Bucket, num>, Map<Bucket, num>)> align(
-      PriceCurve other) {
+  TimeSeries<(Map<Bucket, num>, Map<Bucket, num>)> align(PriceCurve other) {
     // align their domains first
-    var domainY = Interval(
-        Month.containing(other.domain.start).start, other.domain.end);
+    var domainY =
+        Interval(Month.containing(other.domain.start).start, other.domain.end);
     var x = PriceCurve.fromIterable(window(domainY));
-    var domainX =
-        Interval(Month.containing(domain.start).start, domain.end);
+    var domainX = Interval(Month.containing(domain.start).start, domain.end);
     var y = PriceCurve.fromIterable(other.window(domainX));
 
     // expand to daily marks as needed
@@ -465,8 +508,13 @@ class PriceCurve extends TimeSeries<Map<Bucket, num>> with MarksCurve {
   }
 
   /// Create a new price curve from this one using a list of intervals.  This
-  /// is useful if the curve is needed with different granularity.
-  /// TODO: make it more efficient
+  /// is useful if you need a curve with a lower granularity, for example
+  /// to go from one monthly observation to a list of daily observations.
+  ///
+  /// If you want to go in the opposite direction, by aggregating the daily
+  /// observations into monthly ones, use the `toMonthly()` method.
+  ///
+  /// Returns a new [PriceCurve] with the specified intervals.
   PriceCurve withIntervals(List<Interval> intervals) {
     var aux = align(PriceCurve.fromIterable(
         intervals.map((e) => IntervalTuple(e, {Bucket.atc: 1}))));

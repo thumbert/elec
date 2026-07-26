@@ -1,9 +1,10 @@
 import 'package:dama/dama.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:elec/elec.dart';
 import 'package:elec/risk_system.dart';
 import 'package:elec/src/time/hourly_schedule.dart';
 import 'package:elec/src/time/shape/hourly_shape.dart';
-import 'package:elec_server/client/dalmp.dart';
+import 'package:elec_server/client/lmp.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart';
 import 'package:timezone/data/latest.dart';
@@ -12,16 +13,20 @@ import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:elec_server/client/marks/forward_marks.dart';
 
-void tests(String rootUrl) async {
-  var client = DaLmp(Client(), rootUrl: rootUrl);
+Future<void> tests() async {
   var buckets = {Bucket.b5x16, Bucket.b2x16H, Bucket.b7x8};
   var location = getLocation('America/New_York');
   late TimeSeries<num> ts;
 
   group('HourlyShape tests:', () {
     setUp(() async {
-      ts = await client.getHourlyLmp(Iso.newEngland, 4000, LmpComponent.lmp,
-          Date.utc(2019, 1, 1), Date.utc(2019, 12, 31));
+      ts = await getHourlyLmpIsone(
+        ptid: 4000,
+        component: LmpComponent.lmp,
+        market: Market.da,
+        term: Term.parse('Jan25-Dec25', location),
+        rustServer: dotenv.env['RUST_SERVER']!,
+      );
     });
     test('from timeseries', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
@@ -33,18 +38,18 @@ void tests(String rootUrl) async {
     test('check normalization of 7x8 bucket in March', () {
       /// because of DST, the sum of hourly shape factors in the
       /// 7x8 bucket does not equal 8.
-      var term = Month.parse('Mar19', location: location);
+      var term = Month.parse('Mar25', location: location);
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
       var shape7x8 = hs.data.observationAt(term).value[Bucket.b7x8]!;
       expect(shape7x8.map((e) => e.toStringAsFixed(11)).toList(), [
-        '0.98482254062',
-        '0.93316329161',
-        '0.92084042749',
-        '0.91586658561',
-        '0.94501148905',
-        '1.04732339820',
-        '1.30553653041',
-        '0.94488220241',
+        '0.97749891725',
+        '0.94486913269',
+        '0.89677704286',
+        '0.89987467982',
+        '0.93788884610',
+        '1.06854457080',
+        '1.33442807195',
+        '0.93678896572'
       ]);
       // construct the timeseries from the hourly shape
       var xs = HourlySchedule.fromHourlyShape(hs).toHourly(term);
@@ -58,12 +63,12 @@ void tests(String rootUrl) async {
 
     test('toHourly', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
-      var term = Term.parse('15Jan19-15Feb19', location);
+      var term = Term.parse('15Jan25-15Feb25', location);
       var xs = hs.toHourly(interval: term.interval);
-      expect(xs.first.interval.start, TZDateTime(location, 2019, 1, 15));
-      expect(xs.last.interval.end, TZDateTime(location, 2019, 2, 16));
-      expect(xs.first.value.toStringAsFixed(7), '0.9807817');
-      expect(xs.last.value.toStringAsFixed(7), '0.9539886');
+      expect(xs.first.interval.start, TZDateTime(location, 2025, 1, 15));
+      expect(xs.last.interval.end, TZDateTime(location, 2025, 2, 16));
+      expect(xs.first.value.toStringAsFixed(7), '0.9852628');
+      expect(xs.last.value.toStringAsFixed(7), '0.9904120');
     });
 
     test('to Json/from Json', () {
@@ -79,23 +84,19 @@ void tests(String rootUrl) async {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
       var hs1 = HourlyShape()
         ..buckets = buckets
-        ..data = TimeSeries.from(
-            Term.parse('Jan20-Dec21', location)
-                .interval
-                .splitLeft((dt) => Month.containing(dt)),
-            [
-              ...hs.data.values,
-              ...hs.data.values,
-            ]);
+        ..data = TimeSeries.from(Term.parse('Jan20-Dec21', location).months(), [
+          ...hs.data.values,
+          ...hs.data.values,
+        ]);
       expect(hs1.data.domain, Term.parse('Jan20-Dec21', location).interval);
 //      var encoder = JsonEncoder.withIndent('  ');
 //      print(encoder.convert(hs1.toJson()));
     });
     test('window', () {
       var hs = HourlyShape.fromTimeSeries(ts, buckets);
-      hs.window(Term.parse('Mar19-Oct19', location).interval);
-      expect(hs.data.first.interval, Month(2019, 3, location: location));
-      expect(hs.data.last.interval, Month(2019, 10, location: location));
+      hs.window(Term.parse('Mar25-Oct25', location).interval);
+      expect(hs.data.first.interval, Month(2025, 3, location: location));
+      expect(hs.data.last.interval, Month(2025, 10, location: location));
     });
   });
 }
@@ -172,8 +173,8 @@ void speedTests(String rootUrl) async {
 
 void main() async {
   initializeTimeZones();
-  var rootUrl = 'http://localhost:8080'; // testing
-  tests(rootUrl);
+  dotenv.load('.env/prod.env');
+  await tests();
 
   // await speedTests(rootUrl);
 }

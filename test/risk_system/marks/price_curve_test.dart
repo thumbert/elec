@@ -81,6 +81,21 @@ void tests() {
       expect(curve.first.value.length, 1);
       expect(curve.toJson(), x1);
     });
+    test('toMonthly', () {
+      var curve0m = curve0.toMonthly();
+      expect(curve0m.length, 8);
+      expect(curve0m.first.interval, Month(2020, 7, location: location));
+      var v0 = curve0m.first.value;
+      expect(v0[Bucket.b2x16H], 27.5);
+      expect(v0[Bucket.b7x8], 15.5);
+      expect(v0[Bucket.b5x16], 30.0);
+      // remove the first element to make sure it does not fail when a bucket
+      // is missing.
+      curve0m = PriceCurve.fromIterable(curve0.skip(1)).toMonthly();
+      expect(curve0m.first.interval, Month(2020, 7, location: location));
+      v0 = curve0m.first.value;
+      expect(v0.keys.length, 2);
+    });
     test('toMongoDocument', () {
       var out = curve0.toMongoDocument(
           Date.utc(2020, 10, 1), 'isone_energy_4000_da_lmp');

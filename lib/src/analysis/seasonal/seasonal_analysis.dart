@@ -2,7 +2,6 @@ import 'package:dama/dama.dart';
 import 'package:date/date.dart';
 import 'package:timeseries/timeseries.dart';
 import 'package:timezone/timezone.dart';
-import 'package:tuple/tuple.dart';
 import 'seasonality.dart';
 
 class SeasonalAnalysis {
@@ -28,7 +27,7 @@ class SeasonalAnalysis {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
           TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-      return Tuple2(year, e);
+      return (year, e);
     });
   }
 
@@ -44,7 +43,7 @@ class SeasonalAnalysis {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
           TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-      return Tuple2(year, e);
+      return (year, e);
     });
   }
 
@@ -60,7 +59,7 @@ class SeasonalAnalysis {
       var year = Interval(
           TZDateTime(e.interval.start.location, e.interval.start.year),
           TZDateTime(e.interval.start.location, e.interval.start.year + 1));
-      return Tuple2(year, e);
+      return (year, e);
     });
   }
 
@@ -73,7 +72,7 @@ class SeasonalAnalysis {
     _seasonality = Seasonality.dayOfWeek;
     groups = _groupByIndex(xs, (e) => e.start.weekday);
     _paths =
-        _toPath(xs, (e) => Tuple2(Week.fromTZDateTime(e.interval.start), e));
+        _toPath(xs, (e) => (Week.fromTZDateTime(e.interval.start), e));
   }
 
   /// Input time series needs to be hourly.
@@ -84,7 +83,7 @@ class SeasonalAnalysis {
   SeasonalAnalysis.hourOfDay(this.xs) {
     _seasonality = Seasonality.hourOfDay;
     groups = _groupByIndex(xs, (e) => e.start.hour);
-    _paths = _toPath(xs, (e) => Tuple2(Date.containing(e.interval.start), e));
+    _paths = _toPath(xs, (e) => (Date.containing(e.interval.start), e));
   }
 
   /// Input time series must be daily.
@@ -172,14 +171,14 @@ class SeasonalAnalysis {
 }
 
 Map<Interval, TimeSeries<num>> _toPath(TimeSeries<num> xs,
-    Tuple2<Interval, IntervalTuple> Function(IntervalTuple obs) f) {
+    (Interval, IntervalTuple) Function(IntervalTuple obs) f) {
   var grp = <Interval, TimeSeries<num>>{};
   var n = xs.length;
   for (var i = 0; i < n; i++) {
     var t2 = f(xs[i]);
     grp
-        .putIfAbsent(t2.item1, () => TimeSeries<num>())
-        .add(t2.item2 as IntervalTuple<num>);
+        .putIfAbsent(t2.$1, () => TimeSeries<num>())
+        .add(t2.$2 as IntervalTuple<num>);
   }
   return grp;
 }

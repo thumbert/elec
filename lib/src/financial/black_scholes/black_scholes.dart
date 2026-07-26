@@ -212,43 +212,43 @@ class BlackScholes {
   }
 }
 
-double _d1(num _tExp, num volatility, num underlyingPrice, num strike,
+double _d1(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
   double d1;
-  if (_tExp == 0.0 || volatility == 0) {
+  if (tExp == 0.0 || volatility == 0) {
     d1 = double.infinity;
   } else {
     d1 = (log(underlyingPrice / strike) +
-            (interestRate + 0.5 * volatility * volatility) * _tExp) /
-        (volatility * sqrt(_tExp));
+            (interestRate + 0.5 * volatility * volatility) * tExp) /
+        (volatility * sqrt(tExp));
   }
   return d1;
 }
 
-double _nd1(num _tExp, num volatility, num underlyingPrice, num strike,
+double _nd1(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d1(_tExp, volatility, underlyingPrice, strike, interestRate));
+    Phi(_d1(tExp, volatility, underlyingPrice, strike, interestRate));
 
-double _d2(num _tExp, num volatility, num underlyingPrice, num strike,
+double _d2(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
   double d2;
-  if (_tExp == 0 || volatility == 0) {
+  if (tExp == 0 || volatility == 0) {
     d2 = double.infinity;
   } else {
     d2 = (log(underlyingPrice / strike) +
-            (interestRate - 0.5 * volatility * volatility) * _tExp) /
-        (volatility * sqrt(_tExp));
+            (interestRate - 0.5 * volatility * volatility) * tExp) /
+        (volatility * sqrt(tExp));
   }
   return d2;
 }
 
-double _nd2(num _tExp, num volatility, num underlyingPrice, num strike,
+double _nd2(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d2(_tExp, volatility, underlyingPrice, strike, interestRate));
+    Phi(_d2(tExp, volatility, underlyingPrice, strike, interestRate));
 
-double _dNd1(num _tExp, num volatility, num underlyingPrice, num strike,
+double _dNd1(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
-  num d1 = _d1(_tExp, volatility, underlyingPrice, strike, interestRate);
+  num d1 = _d1(tExp, volatility, underlyingPrice, strike, interestRate);
   return exp(-0.5 * d1 * d1) / sqrt(2 * pi);
 }
 

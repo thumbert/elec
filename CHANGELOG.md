@@ -3,6 +3,11 @@
 ## TODO
 - Clean the lints!
 
+## 2026-07-26
+- Fix several lints
+- Add toMonthly() method to PriceCurve
+- Remove deprecated dependency on DaLmp client and replace with Rust service
+
 ## 2026-07-07
 - Minor additions to NYISO capability_period
 

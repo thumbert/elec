@@ -13,20 +13,19 @@ import 'package:timezone/timezone.dart';
 class CommodityLeg extends CommodityLegBase<LeafElecSwap> {
   CommodityLeg({
     required this.curveId,
-    required this.bucket,
+    required Bucket bucket,
     required this.timePeriod,
     required this.quantitySchedule,
     this.fixPriceSchedule,
     required this.tzLocation,
   }) {
+    this.bucket = bucket;
     fixPriceSchedule ??= HourlySchedule.filled(0);
   }
 
 
   late String curveId;
   String? cashOrPhys;
-  @override
-  late Bucket bucket;
   late Location tzLocation;
 
   /// The time period of the leg which applies to all the leaves.  It is set at
