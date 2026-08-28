@@ -7,6 +7,8 @@ import 'package:table/table.dart';
 import 'package:timeseries/timeseries.dart';
 
 /// Calculate difference between Top [n] - Bottom [n] values in a timeseries.
+/// Note: these are not the top [n] and bottom [n] continuous observations, 
+/// simply the observations with the highest and lowest [n] values.
 /// 
 /// <p>Typically, for a battery energy storage system n=4, the product is called 
 /// TB4.
@@ -133,36 +135,3 @@ List<Map<String, dynamic>> tabulateBestBlocks(
 
   return aux;
 }
-
-// class BestBlocks {
-//   BestBlocks(
-//       {required this.term,
-//       required this.chargeStartIndex,
-//       required this.dischargeStartIndex,
-//       required this.count,
-//       required this.averageSpread});
-
-//   /// Term for the results
-//   final Term term;
-
-//   /// Index of hour of the day when charging should start.
-//   /// Note that this is not equal with the hour of the day in
-//   /// DST days.
-//   final int chargeStartIndex;
-
-//   /// Index of hour of the day when discharging should start
-//   /// Note that this is not equal with the hour of the day in
-//   /// DST days.
-//   final int dischargeStartIndex;
-
-//   /// Number of days in the term with these starting hours for
-//   /// the charging/discharging block.
-//   final int count;
-
-//   /// The average spread for the days in the term with these
-//   /// starting hours for the charging/discharging block.
-//   /// Spread for one day is the average price during discharge
-//   /// hours minus the average price during charging hours,
-//   /// in $/MWh
-//   final num averageSpread;
-// }
