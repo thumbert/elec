@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-09-09
+- Fix hidden dependency on Tuple2.
+
 ## 2026-07-26
 - Fix several lints
 - Add toMonthly() method to PriceCurve

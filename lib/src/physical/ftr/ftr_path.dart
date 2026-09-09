@@ -257,15 +257,15 @@ class FtrPath {
         /// but the spread == 0.  Make an exception in case by pure chance, the
         /// spread is zero when the constraint binds in very few hours^*.
         var lr = join.partition((e) => e.value![0] == 0);
-        if (lr.item2.isNotEmpty) {
-          var effect = mean(lr.item2.map(((e) => e.value[0] as num)));
+        if (lr.$2.isNotEmpty) {
+          var effect = mean(lr.$2.map(((e) => e.value[0] as num)));
           if (effect.abs() >= meanSpreadThreshold &&
-              lr.item1.length / lr.item2.length < 0.005) {
+              lr.$1.length / lr.$2.length < 0.005) {
             out.add({
               'name': constraint,
-              'hours': lr.item2.length,
+              'hours': lr.$2.length,
               'Mean Spread': effect,
-              'Cumulative Spread': effect * lr.item2.length,
+              'Cumulative Spread': effect * lr.$2.length,
             });
           }
         }
