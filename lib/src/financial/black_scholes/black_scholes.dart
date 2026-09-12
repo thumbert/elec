@@ -135,7 +135,7 @@ class BlackScholes {
         num t2 = riskFreeRate *
             strike *
             exp(-riskFreeRate * _tExp) *
-            Phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
+            phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
         res = t1 + t2;
         break;
     }
@@ -168,7 +168,7 @@ class BlackScholes {
             strike *
             _tExp *
             exp(-riskFreeRate * _tExp) *
-            Phi(-_d2(
+            phi(-_d2(
                 _tExp, _volatility, underlyingPrice, strike, riskFreeRate));
         break;
     }
@@ -227,7 +227,7 @@ double _d1(num tExp, num volatility, num underlyingPrice, num strike,
 
 double _nd1(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d1(tExp, volatility, underlyingPrice, strike, interestRate));
+    phi(_d1(tExp, volatility, underlyingPrice, strike, interestRate));
 
 double _d2(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
@@ -244,7 +244,7 @@ double _d2(num tExp, num volatility, num underlyingPrice, num strike,
 
 double _nd2(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d2(tExp, volatility, underlyingPrice, strike, interestRate));
+    phi(_d2(tExp, volatility, underlyingPrice, strike, interestRate));
 
 double _dNd1(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
