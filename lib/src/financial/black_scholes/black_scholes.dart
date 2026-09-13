@@ -4,6 +4,44 @@ import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:dama/special/erf.dart';
 
+/// Use a geometric Brownian motion to simulate future prices of an asset.
+///
+/// [initialPrice] is the starting price of the asset.
+/// [volatility] is the annualized volatility of the asset.
+///    Use 252 trading days convention for daily steps.
+/// [riskFreeRate] is the annualized risk-free interest rate.
+/// [numSteps] is the number of time steps/days to simulate.
+///
+/// Returns a list of simulated prices at each time step.
+/// 
+/// See the tests for how to estimate back the distribution from the 
+/// simulated prices.
+/// 
+List<num> simulatePrices({
+  required num initialPrice,
+  required num volatility,
+  required num riskFreeRate,
+  int numSteps = 100,
+  int dayConvention = 252,
+}) {
+  var prices = <num>[initialPrice];
+  var dt = 1 / dayConvention;
+  var currentPrice = initialPrice;
+  var rng = Random();
+  for (var i = 0; i < numSteps; i++) {
+    // Box-Muller transform to get a standard normal N(0,1) sample.
+    var u1 = 1 - rng.nextDouble();
+    var u2 = rng.nextDouble();
+    var z = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
+    var dW = sqrt(dt) * z;
+    currentPrice = currentPrice *
+        exp((riskFreeRate - 0.5 * volatility * volatility) * dt +
+            volatility * dW);
+    prices.add(currentPrice);
+  }
+  return prices;
+}
+
 class BlackScholes {
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({

@@ -1,4 +1,8 @@
+import 'dart:math';
+
+import 'package:dama/distribution/lognormal_distribution.dart';
 import 'package:elec/src/financial/black_scholes/black_scholes.dart';
+import 'package:table/table_base.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
@@ -6,6 +10,44 @@ import 'package:test/test.dart';
 
 void tests() {
   group('Black-Scholes model tests: ', () {
+    test('simulate prices', () {
+      final steps = 100;
+      var prices = simulatePrices(
+        initialPrice: 100,
+        volatility: 0.25,
+        riskFreeRate: 0.0,
+        numSteps: steps,
+      );
+      expect(prices.length, steps + 1);
+
+      // simulate 100 paths and check terminal prices
+      var terminalPrices = List.generate(100, (i) {
+        var path = simulatePrices(
+          initialPrice: 100,
+          volatility: 0.25,
+          riskFreeRate: 0.0,
+          numSteps: steps,
+        );
+        return path.last;
+      });
+
+      // estimate the underlying parameters of the distribution
+      final ln = LogNormalDistribution.fromMaximumLikelihood(terminalPrices);
+      final tbl = Table.from([
+        {
+          '': 'Actual',
+          'Mean': '100.00',
+          'Volatility': '0.2500',
+        },
+        {
+          '': 'Estimated',
+          'Mean': ln.mean().toStringAsFixed(2),
+          'Volatility': (ln.sigma * sqrt(252 / steps)).toStringAsFixed(4),
+        },
+      ]);
+      print(tbl);
+    }, skip: true);
+
     // test('calculate daily vol', () {
     //   var timeToExpiration =
     //       (Date(2021, 1, 1).value - Date(2020, 11, 20).value) / 365;

@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-09-13
+- Add a simulatePrices function for a GMB in black_scholes.dart
+
 ## 2026-09-12
 - Renamed function in package:dama needed to be changed here too.
 
