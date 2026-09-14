@@ -12,7 +12,7 @@ void tests() {
   group('Black-Scholes model tests: ', () {
     test('simulate prices', () {
       final steps = 100;
-      var prices = simulatePrices(
+      var prices = simulatePricesGbm(
         initialPrice: 100,
         volatility: 0.25,
         riskFreeRate: 0.0,
@@ -22,7 +22,7 @@ void tests() {
 
       // simulate 100 paths and check terminal prices
       var terminalPrices = List.generate(100, (i) {
-        var path = simulatePrices(
+        var path = simulatePricesGbm(
           initialPrice: 100,
           volatility: 0.25,
           riskFreeRate: 0.0,

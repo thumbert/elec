@@ -12,12 +12,14 @@ import 'package:dama/special/erf.dart';
 /// [riskFreeRate] is the annualized risk-free interest rate.
 /// [numSteps] is the number of time steps/days to simulate.
 ///
-/// Returns a list of simulated prices at each time step.
-/// 
-/// See the tests for how to estimate back the distribution from the 
+/// Returns a list of `numSteps + 1` simulated prices at each time step.
+/// First element is the initial price. The subsequent elements are the 
+/// simulated prices at each time step.
+///
+/// See the tests for how to estimate back the distribution from the
 /// simulated prices.
-/// 
-List<num> simulatePrices({
+///
+List<num> simulatePricesGbm({
   required num initialPrice,
   required num volatility,
   required num riskFreeRate,
