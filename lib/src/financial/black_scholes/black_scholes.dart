@@ -4,6 +4,46 @@ import 'package:date/date.dart';
 import 'package:elec/risk_system.dart';
 import 'package:dama/special/erf.dart';
 
+/// Use a geometric Brownian motion to simulate future prices of an asset.
+///
+/// [initialPrice] is the starting price of the asset.
+/// [volatility] is the annualized volatility of the asset.
+///    Use 252 trading days convention for daily steps.
+/// [riskFreeRate] is the annualized risk-free interest rate.
+/// [numSteps] is the number of time steps/days to simulate.
+///
+/// Returns a list of `numSteps + 1` simulated prices at each time step.
+/// First element is the initial price. The subsequent elements are the 
+/// simulated prices at each time step.
+///
+/// See the tests for how to estimate back the distribution from the
+/// simulated prices.
+///
+List<num> simulatePricesGbm({
+  required num initialPrice,
+  required num volatility,
+  required num riskFreeRate,
+  int numSteps = 100,
+  int dayConvention = 252,
+}) {
+  var prices = <num>[initialPrice];
+  var dt = 1 / dayConvention;
+  var currentPrice = initialPrice;
+  var rng = Random();
+  for (var i = 0; i < numSteps; i++) {
+    // Box-Muller transform to get a standard normal N(0,1) sample.
+    var u1 = 1 - rng.nextDouble();
+    var u2 = rng.nextDouble();
+    var z = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
+    var dW = sqrt(dt) * z;
+    currentPrice = currentPrice *
+        exp((riskFreeRate - 0.5 * volatility * volatility) * dt +
+            volatility * dW);
+    prices.add(currentPrice);
+  }
+  return prices;
+}
+
 class BlackScholes {
   /// Implement the Black-Scholes model for European option on a stock.
   BlackScholes({
@@ -135,7 +175,7 @@ class BlackScholes {
         num t2 = riskFreeRate *
             strike *
             exp(-riskFreeRate * _tExp) *
-            Phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
+            phi(_d2(_tExp, _volatility, underlyingPrice, strike, riskFreeRate));
         res = t1 + t2;
         break;
     }
@@ -168,7 +208,7 @@ class BlackScholes {
             strike *
             _tExp *
             exp(-riskFreeRate * _tExp) *
-            Phi(-_d2(
+            phi(-_d2(
                 _tExp, _volatility, underlyingPrice, strike, riskFreeRate));
         break;
     }
@@ -227,7 +267,7 @@ double _d1(num tExp, num volatility, num underlyingPrice, num strike,
 
 double _nd1(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d1(tExp, volatility, underlyingPrice, strike, interestRate));
+    phi(_d1(tExp, volatility, underlyingPrice, strike, interestRate));
 
 double _d2(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {
@@ -244,7 +284,7 @@ double _d2(num tExp, num volatility, num underlyingPrice, num strike,
 
 double _nd2(num tExp, num volatility, num underlyingPrice, num strike,
         num interestRate) =>
-    Phi(_d2(tExp, volatility, underlyingPrice, strike, interestRate));
+    phi(_d2(tExp, volatility, underlyingPrice, strike, interestRate));
 
 double _dNd1(num tExp, num volatility, num underlyingPrice, num strike,
     num interestRate) {

@@ -6,6 +6,12 @@
 ## 2026-10-24
 - Add a gasSeason() function in time/
 
+## 2026-09-13
+- Add a simulatePrices function for a GMB in black_scholes.dart
+
+## 2026-09-12
+- Renamed function in package:dama needed to be changed here too.
+
 ## 2026-09-09
 - Fix hidden dependency on Tuple2.
 
