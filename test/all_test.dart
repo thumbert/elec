@@ -1,6 +1,7 @@
 import 'package:dotenv/dotenv.dart' as dotenv;
 import 'package:timezone/data/latest.dart';
 import 'analysis/filter/filter_test.dart' as filter;
+import 'time/gas_season_test.dart' as gas_season;
 import 'analysis/format/seasonal_format_test.dart' as seasonal_format;
 import 'analysis/seasonal/seasonal_analysis_test.dart' as seasonal_analysis;
 import 'financial/black_scholes/black_scholes_test.dart' as black_scholes;
@@ -56,6 +57,7 @@ Future<void> main() async {
   hourly_schedule.tests();
   hourly_shape.tests();
   monthly_bucket_value.tests();
+  gas_season.tests();
   calendar.tests();
   holiday.tests();
   last_trading_day.tests();

@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-10-24
+- Add a gasSeason() function in time/
+
 ## 2026-09-09
 - Fix hidden dependency on Tuple2.
 
