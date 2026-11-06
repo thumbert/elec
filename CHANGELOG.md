@@ -3,6 +3,9 @@
 ## TODO
 - Clean the lints!
 
+## 2026-11-06
+- Define ==, hashCode for FtrPath
+
 ## 2026-10-24
 - Add a gasSeason() function in time/
 

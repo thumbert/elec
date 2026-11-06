@@ -130,11 +130,11 @@ class FtrPath {
 
     for (var auction in auctions) {
       var auctionName = auction.name;
-      var _cpSink = cpSink[bucket]![auctionName];
-      var _cpSource = cpSource[bucket]![auctionName];
-      if (_cpSource != null && _cpSink != null) {
+      var cpSink2 = cpSink[bucket]![auctionName];
+      var cpSource2 = cpSource[bucket]![auctionName];
+      if (cpSource2 != null && cpSink2 != null) {
         // only if both nodes exist
-        out[auction] = _cpSink - _cpSource;
+        out[auction] = cpSink2 - cpSource2;
       }
     }
 
@@ -286,4 +286,25 @@ class FtrPath {
       return '$base $bucket';
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FtrPath &&
+        other.iso == iso &&
+        other.sourcePtid == sourcePtid &&
+        other.sinkPtid == sinkPtid &&
+        other.mw == mw &&
+        other.bucket == bucket;
+  }
+
+  @override
+  int get hashCode =>
+      iso.hashCode ^
+      sourcePtid.hashCode ^
+      sinkPtid.hashCode ^
+      mw.hashCode ^
+      bucket.hashCode;
+
+
 }
